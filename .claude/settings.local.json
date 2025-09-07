@@ -33,7 +33,9 @@
       "WebFetch(domain:commons.wikimedia.org)",
       "mcp__serena__write_memory",
       "Bash(taskkill:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "mcp__serena__find_symbol",
+      "mcp__serena__search_for_pattern"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
