@@ -26,6 +26,7 @@
     "resize-animals": "node scripts/resize-animal-images.js"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.32.0",
     "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^5.1.1",
     "@radix-ui/react-avatar": "^1.1.10",
