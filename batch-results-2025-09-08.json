@@ -1,0 +1,647 @@
+{
+  "success": [],
+  "failed": [
+    {
+      "exhibition_id": "c1a5e304-16de-42d7-b24d-58200ab7fae3",
+      "title": "1998년 이후",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "f64bf835-64a8-4627-aa9d-0821e392982c",
+      "title": "2025 아르코데이",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "a4dc0161-10ab-4db2-8839-f40e8524fdaf",
+      "title": "8월 라이브 경매 프리뷰",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "b4ac2bde-767a-48aa-97c4-b7057ef93e55",
+      "title": "8월 메이저 경매",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "c480657f-6613-4aec-b9cd-ae49b2188f4c",
+      "title": "A Chorus - Jennifer Carvalho",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "386705e5-dc71-4da1-8e67-c37d042cd05c",
+      "title": "Dust - Ruofan Chen",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "7c384c67-7e05-4c4b-9de9-8bc32f3a20bd",
+      "title": "Flesh & Love",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "57f41f8c-55fa-4648-b385-9c09e4e93bdc",
+      "title": "Frieze Seoul 2025",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "46a5dc1a-7a49-45f2-9219-87a40211e053",
+      "title": "Kiaf 서울 2025",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "36af402e-506b-4d87-a5b7-20bdd0b91460",
+      "title": "March to March",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "781233f3-6ef6-4f6a-8973-86a5518ee9ea",
+      "title": "Messengers - 김서현",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "f6643d8b-1279-4354-a6f1-16119419821b",
+      "title": "others vs others",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "19183f1b-cf52-4c5a-8f29-f3ceb5595031",
+      "title": "Pit",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "5537f804-d449-4b0e-963d-88a1f65d739d",
+      "title": "Pit Calls Wall - 김새은",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "498d83dc-ae41-42df-883d-f35d4055469c",
+      "title": "Poetic Forensic",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "5ac404b8-4f02-4824-9f66-2d563f588283",
+      "title": "Small but great",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "63cd462c-9046-4794-a476-e2899c6fe7a8",
+      "title": "Stone, Time, Touch",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "d75fb884-b225-42ca-9ecb-347a97af940f",
+      "title": "Summer Collective Exhibition",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "85e02234-2857-4980-9103-f25866ab3b0b",
+      "title": "The Garden of Forking Paths",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "49d37d62-844f-4319-862b-e13b55b7915f",
+      "title": "Troubled at his saying - 세실 렘퍼트",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "2bd7b685-fb76-49da-afdb-bc877171bab2",
+      "title": "Under One Roof",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "e7570db7-2985-408f-a789-81e27b3decc1",
+      "title": "VELVET HAMMERS",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "d037815b-4230-45d8-8da0-b59945342e27",
+      "title": "Vivid Rest",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "63e1429a-45bf-49e5-a93a-342e3f059d65",
+      "title": "갈라 포라스-김",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "18e83f2d-e3eb-41e3-90cc-51c146ff1f86",
+      "title": "거상거상 거상거 - 차연서",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "fac822c2-8223-465c-a5cd-f7a96802f178",
+      "title": "굴절된 등",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "a41f9787-e0af-4903-b488-9727ae7464e5",
+      "title": "김기정·로지은",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "176af722-6803-48a1-9652-8ac7a34b0315",
+      "title": "김민정",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "844ca0fd-6084-43ba-ab34-2f4ab61a8e21",
+      "title": "김민조·오주안·홍세진",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "cbeac977-0430-4d3d-8d4c-3a508cfd2c0f",
+      "title": "김상소",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "1ae6fe2d-856a-48cb-811d-3ba2c7cec05a",
+      "title": "김연홍",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "c6bd2668-3c3e-47df-8be9-cd9d3452039f",
+      "title": "김주리",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "781a8ebb-a756-4394-bba4-c4543a6be78c",
+      "title": "김주리",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "e3b43ce2-700d-483c-be32-29dd3e5bd5ea",
+      "title": "김진희",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "a078a396-935a-4456-b2d0-4d1695795da0",
+      "title": "김창열 회고전",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "6d76c76f-ffc8-41d4-b21a-10bb21f37114",
+      "title": "김허앵",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "818b6df4-1afb-4fb0-8008-73a4e568c8eb",
+      "title": "김형대",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "f301cd69-1051-446f-ad85-273da6c1cfc9",
+      "title": "김환기와 브라질·심상의 풍경",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "3e33e3a0-07ca-4b17-9564-0a415715b7d2",
+      "title": "나래쉬 쿠마르",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "5d4c3531-eac1-4feb-8fe9-e8abb4e568a4",
+      "title": "남춘모",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "afc692b5-17d4-4da8-9d42-f50e226396e2",
+      "title": "노노탁 스튜디오",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "d5e540fd-ddce-4dc9-8105-ca50bedec654",
+      "title": "노이진",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "70e084df-a94d-49ef-b70e-d23ac60a3c54",
+      "title": "다시, 지구",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "8cb3c6e7-b5c5-4e1d-98cc-6f57c82b238d",
+      "title": "더 퓨처 판타지",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "53e4b4df-0513-4b16-9d1f-7d10524b88f2",
+      "title": "덩었고 영원한 - 루이즈 부르주아",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "8ff53da1-556d-46b1-b228-a9d858943f88",
+      "title": "딥다이버 Deep Diver - 배윤환",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "a56b9646-1db9-4fc7-a448-48883130cd33",
+      "title": "루이즈 부르주아",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "bf0b53a4-1457-45c7-9df6-696b34eb6fb3",
+      "title": "리리리 이보배",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "f245e52b-42f4-4d4b-abcf-51eac1b7a6d7",
+      "title": "마나 모아나-신성한 바다의 예술, 오세아니아",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "e0412ddc-3503-4148-a9b0-1416e9b30d97",
+      "title": "마리우스 슈타이거",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "b885ea4a-8981-47ea-a626-e4845c4df14c",
+      "title": "멜랑콜리아 - 김다움, 김의현, 이동혁, 장진승",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "545875dc-9bc1-42ea-8257-0b27b985f70b",
+      "title": "무라카미 다카시",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "41814a9f-5fe8-4e38-9abb-ffc6a87c8f91",
+      "title": "문혜정",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "f2238842-2203-4f5a-bd64-80653c833c7d",
+      "title": "물, 쌀, 풀",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "9adeea32-6ad4-4226-814a-811476e289d4",
+      "title": "물질-실천",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "59eb709c-09d3-43cc-85ee-7725a6f2f774",
+      "title": "바자전: IN BETWEEN",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "a0532fd7-b65b-48b0-845c-b4ab017d0fe9",
+      "title": "박기웅·켄토 센가",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "69adbb8b-0286-49ad-86d9-57f8ca32edd3",
+      "title": "박신영",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "167c8cd5-8bc1-406a-b05c-35f7faa0441c",
+      "title": "박영민·유지영·이은우",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "e28cf2b1-f17b-4444-8523-a1a3562cbe43",
+      "title": "박용식",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "87124c0d-b9f8-4eeb-814b-2bfafb7f1004",
+      "title": "박지원",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "0697a684-2a4d-4a51-ad13-0a6482d92c1a",
+      "title": "백경호",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "eae62886-cf0f-489f-81ed-04e254e19e3d",
+      "title": "번승훈",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "52103c1c-dbf3-40eb-9885-83ac47fa8aeb",
+      "title": "보 킴",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "e19c9ec1-3f2c-45ee-824c-ffa00181ebd0",
+      "title": "수신미확인 - 김봉영, 김지민, 박애나 등",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "2a5a0ae8-c3cc-48fb-beb4-0bcdc93e7b97",
+      "title": "스펙트럴 크로싱스",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "41287abc-3557-43f6-aed7-9721ce660168",
+      "title": "시대전술 - 김영찬, 유이란, 요한한, 신민, 남다현",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "284f9c11-7566-4946-a9ad-53f1ae417f6b",
+      "title": "신자경·정준원",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "8b97810c-ca96-44e8-91ce-bc17cec95599",
+      "title": "쌩~휙!",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "46828a67-1d7a-4f04-90eb-28f23b67e0e3",
+      "title": "아드리안 비야르 로하스",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "934d60cb-95ef-4d94-a47a-1ac77a723b90",
+      "title": "안상수",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "a36f861f-0f86-43ba-b737-1ab2303703a7",
+      "title": "안토니 곰리",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "6e64c5b2-54e7-44a7-a179-d1ed8fb3ade1",
+      "title": "앤 베로니카 얀센스",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "f50e9fff-6ea4-444b-8f3d-9aa57556d771",
+      "title": "앨리스 달튼 브라운 회고전",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "d426a418-a5e9-437b-857b-5624425ed518",
+      "title": "얇은 도약의 나날들 - 양혜규",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "12c4394b-732b-4e98-9d15-4ec9136ee9c8",
+      "title": "언하우스",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "77a9c01d-29d6-4102-97dc-ba65e12f96d5",
+      "title": "연여인",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "ae7ee90e-91dc-4a17-ab25-876a11179049",
+      "title": "열두 개의 질문 - 안규철",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "df47f3cb-dc70-46ea-8f42-366dd1b034f7",
+      "title": "영혼의 기술",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "f25c602b-444d-4dca-b76a-d63aa19be930",
+      "title": "오랑주리-오르세 미술관 특별전",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "404c53fa-1369-47e9-b0e7-9721f278d86e",
+      "title": "오세열",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "a4b23d9c-8bdd-4816-8c28-b6f9ccdc2a42",
+      "title": "오수환",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "8c464aaf-d6a2-495a-a149-e1e225c0c60c",
+      "title": "올해의 작가상 2025",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "68ed8089-0bf7-4387-bfb5-f85c79a5b32e",
+      "title": "왕 시야오",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "c2702582-6ab6-47b3-8776-ae85f2a04364",
+      "title": "우고 론디노네",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "a592511d-672e-4fa2-9713-d34e60fe5d19",
+      "title": "우리의 몸에는 타인이 깃든다",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "be9337eb-7ab5-439e-b984-1b9662fa52d0",
+      "title": "우한나",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "e6d29334-1c05-4acb-85ea-1a9c0b206359",
+      "title": "유근택·정용국",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "e50dcbbb-6823-42d0-8195-fe453e4b4b10",
+      "title": "유희적 상태",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "4e68e19d-a6e2-482c-81cd-04af47a1fb5c",
+      "title": "윤형재",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "474470fb-dfa5-4614-a7c0-e6dcfa4be006",
+      "title": "이강승·캔디스 린",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "1c974bc4-2ff7-4535-834c-1c36842fd785",
+      "title": "이미 크뇌벨",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "933948c3-efb4-448a-bfac-b8ece331a9e7",
+      "title": "이지수",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "d3ec7b46-0e9a-4706-81d0-67c22493dcb2",
+      "title": "임현정",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "dab48290-f96a-4cf8-9b21-2413cb324ee5",
+      "title": "자아들의 양상불",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "72594414-63d2-49d2-8611-c167f8ee0267",
+      "title": "장 미셸 바스키아 기획전",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "bba48a6f-37fd-4897-928a-a2e889a21dcb",
+      "title": "장, 식탁으로 이어진 풍경",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "6336a15d-3b1a-44b3-af4c-af688bd20949",
+      "title": "적절한 소환 - 힐마 아프 클린트",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "98682518-182c-437a-871b-08ba855aa6f6",
+      "title": "전통의 재해석",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "efc81755-00fc-452b-9c6a-6ede0348bd18",
+      "title": "전현지·승지원",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "4fa7674a-4a12-4df3-9c52-6b4550894afa",
+      "title": "정진아",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "0ca2cce0-0b4e-4053-9089-5198ee8b750a",
+      "title": "정해윤",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "0a88cd53-0fa4-4f1d-a811-8325c40770fd",
+      "title": "제임스 터렐",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "9b45d135-240a-4b8b-a5c5-fdfd4fb49722",
+      "title": "조영남·조조 아나비",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "88fbe6d3-c76d-4d62-aaa1-6eee31a6ba26",
+      "title": "조주현",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "3db2ae73-8adc-4c11-aab6-d1fb52238654",
+      "title": "지미 로버트",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "a7f72a55-2ba9-44fc-8b49-417266b10f63",
+      "title": "집, 옷을 입다",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "5dee32f6-86d5-4d63-9133-8a9a9adc7e98",
+      "title": "최영욱·채싱필",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "2701718d-24d6-42d3-876c-0d33015b1175",
+      "title": "최지목",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "71f74f75-f512-49f8-9883-c3bd1c61f4c6",
+      "title": "최철웅",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "9675daf7-06f8-4729-b145-cf88d1e05c85",
+      "title": "카롤린 드네르보",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "3237bda2-05cf-4e4b-a289-22069ab08b42",
+      "title": "카를로스 블랑코 아르테로",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "e812eb03-4acb-4b60-8dcb-938db91a8aff",
+      "title": "카토 이즈미",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "91e0ea3d-d21b-4cfa-a29f-071f85bf2548",
+      "title": "쿠사마 야요이",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "0311ed62-79d8-44dd-872b-596c01b762b3",
+      "title": "테레시타 페르난데스",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "a72cddea-20ca-498f-8e15-40857c45dfbe",
+      "title": "파노라마",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "eba9ad43-7b74-45d3-bcad-b44eca2d2321",
+      "title": "파편의 흐름",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "7727fd3f-a55d-4f90-82ff-31c4ba055866",
+      "title": "패치워크!",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "c7c4da5d-d241-4751-95f2-09a7f078b8b0",
+      "title": "패트릭 휴즈",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "403cbae9-996b-4933-9081-5863c47ed885",
+      "title": "페트라 콜린스",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "7930ec6f-8767-43c7-9bfd-ba7dc5546314",
+      "title": "한국을 비추다",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "bf05fbeb-9bea-4bcc-9cf4-328d8f490e77",
+      "title": "한의도",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "38508219-7d5a-4841-8844-d6db3af97098",
+      "title": "한정은·미란다 포레스터",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "49824cbb-5587-4a36-88bc-218e3f08d5e8",
+      "title": "헨릭 울달렌",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "4f98f18f-0565-4487-89b3-5433de1ac3eb",
+      "title": "현남",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "5ffaa6e8-4510-4859-b57a-abc8e76f7744",
+      "title": "현대카드 컬처프로젝트 29 톰 삭스",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "5aaa761b-7814-45fb-adee-77b3dff17c41",
+      "title": "형상 회로",
+      "reason": "Description generation failed"
+    },
+    {
+      "exhibition_id": "11e5d851-2515-4095-9672-6da1c9481bfd",
+      "title": "間 Interstice",
+      "reason": "Description generation failed"
+    }
+  ],
+  "startTime": "2025-09-08T13:33:12.506Z",
+  "endTime": "2025-09-08T13:34:40.138Z"
+}

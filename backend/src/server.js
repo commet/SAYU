@@ -95,6 +95,7 @@ const exhibitionCalendarRoutes = require('./routes/exhibitionCalendarRoutes');
 const artveeRoutes = require('./routes/artveeRoutes');
 const artveeImageServer = require('./routes/artveeImageServer');
 const exhibitionRoutes = require('./routes/exhibitionRoutes');
+const exhibitionEnrichRoutes = require('./api/exhibitions/enrich');
 // const emotionTranslationRoutes = require('./routes/emotionTranslationRoutes'); // Temporarily disabled for debugging
 const chatbotRoutes = require('./routes/chatbot');
 // const contemplativeRoutes = require('./routes/contemplativeRoutes'); // Temporarily disabled for debugging
@@ -341,6 +342,7 @@ app.use('/api/calendar', exhibitionCalendarRoutes);
 app.use('/api/artvee', artveeRoutes);
 app.use('/api/artvee', artveeImageServer);
 app.use('/api', exhibitionRoutes);
+app.use('/api/exhibitions/enrich', exhibitionEnrichRoutes);
 // app.use('/api/emotion', emotionTranslationRoutes); // Temporarily disabled for debugging
 app.use('/api/chatbot', chatbotRoutes);
 // app.use('/api/contemplative', contemplativeRoutes); // Temporarily disabled for debugging

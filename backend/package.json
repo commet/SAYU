@@ -36,7 +36,13 @@
     "memory:check": "node ../kill-node-processes.js --status",
     "memory:clean": "node ../kill-node-processes.js --auto-cleanup",
     "memory:monitor": "node ../kill-node-processes.js --monitor --interval 3",
-    "memory:detect": "node memory-leak-detector.js --analysis-duration 10 --monitor-interval 5"
+    "memory:detect": "node memory-leak-detector.js --analysis-duration 10 --monitor-interval 5",
+    "enrich:setup": "node ../run-exhibition-enrichment.js --setup",
+    "enrich:run": "node ../run-exhibition-enrichment.js --enrich",
+    "enrich:report": "node ../run-exhibition-enrichment.js --report",
+    "enrich:full": "node ../run-exhibition-enrichment.js --setup --enrich --report",
+    "enrich:schema": "node scripts/apply-enrichment-schema.js",
+    "enrich:schema:verify": "node scripts/apply-enrichment-schema.js --verify"
   },
   "keywords": [
     "art",
