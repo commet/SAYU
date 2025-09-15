@@ -1,1315 +1,602 @@
-{
-  "total": 163,
-  "exhibitions": [
-    {
-      "exhibitionId": "c1a5e304-16de-42d7-b24d-58200ab7fae3",
-      "title": "1998년 이후",
-      "venue": "리움미술관",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "f64bf835-64a8-4627-aa9d-0821e392982c",
-      "title": "2025 아르코데이",
-      "venue": "아르코미술관",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "9c4a0541-d8af-4e3b-a6c9-72b2078edc66",
-      "title": "2025 타이틀 매치: 장영혜중공업 vs. 홍진훤 - 중간 지대는 없다",
-      "venue": "서울시립 북서울미술관",
-      "city": "서울",
-      "missingKoDesc": false,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "a4dc0161-10ab-4db2-8839-f40e8524fdaf",
-      "title": "8월 라이브 경매 프리뷰",
-      "venue": "서울옥션",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "b4ac2bde-767a-48aa-97c4-b7057ef93e55",
-      "title": "8월 메이저 경매",
-      "venue": "케이옥션",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "11e5d851-2515-4095-9672-6da1c9481bfd",
-      "title": "間 Interstice",
-      "venue": "캡션 서울",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "63e1429a-45bf-49e5-a93a-342e3f059d65",
-      "title": "갈라 포라스-김",
-      "venue": "국제갤러리",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "18e83f2d-e3eb-41e3-90cc-51c146ff1f86",
-      "title": "거상거상 거상거 - 차연서",
-      "venue": "미정",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "fac822c2-8223-465c-a5cd-f7a96802f178",
-      "title": "굴절된 등",
-      "venue": "스페이스 카다로그",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "a41f9787-e0af-4903-b488-9727ae7464e5",
-      "title": "김기정·로지은",
-      "venue": "눈 컨템포러리",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "176af722-6803-48a1-9652-8ac7a34b0315",
-      "title": "김민정",
-      "venue": "갤러리현대",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "844ca0fd-6084-43ba-ab34-2f4ab61a8e21",
-      "title": "김민조·오주안·홍세진",
-      "venue": "상업화랑 을지로",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "cbeac977-0430-4d3d-8d4c-3a508cfd2c0f",
-      "title": "김상소",
-      "venue": "프로젝트 스페이스 사루비아",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "1ae6fe2d-856a-48cb-811d-3ba2c7cec05a",
-      "title": "김연홍",
-      "venue": "코소",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "781a8ebb-a756-4394-bba4-c4543a6be78c",
-      "title": "김주리",
-      "venue": "MO BY CAN",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "c6bd2668-3c3e-47df-8be9-cd9d3452039f",
-      "title": "김주리",
-      "venue": "캔파운데이션",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "e3b43ce2-700d-483c-be32-29dd3e5bd5ea",
-      "title": "김진희",
-      "venue": "박서보재단 26SQM",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "a078a396-935a-4456-b2d0-4d1695795da0",
-      "title": "김창열 회고전",
-      "venue": "국립현대미술관 서울",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "6d76c76f-ffc8-41d4-b21a-10bb21f37114",
-      "title": "김허앵",
-      "venue": "스페이스 윌링앤딜링",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "818b6df4-1afb-4fb0-8008-73a4e568c8eb",
-      "title": "김형대",
-      "venue": "금산갤러리",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "f301cd69-1051-446f-ad85-273da6c1cfc9",
-      "title": "김환기와 브라질·심상의 풍경",
-      "venue": "환기미술관",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "3e33e3a0-07ca-4b17-9564-0a415715b7d2",
-      "title": "나래쉬 쿠마르",
-      "venue": "PS CENTER",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "5d4c3531-eac1-4feb-8fe9-e8abb4e568a4",
-      "title": "남춘모",
-      "venue": "리안갤러리 서울",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "4d91b904-7f65-4725-92b3-ac2bd1fca5ea",
-      "title": "노노탁 스튜디오",
-      "venue": "세화미술관",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": false
-    },
-    {
-      "exhibitionId": "afc692b5-17d4-4da8-9d42-f50e226396e2",
-      "title": "노노탁 스튜디오",
-      "venue": "세화미술관",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "d5e540fd-ddce-4dc9-8105-ca50bedec654",
-      "title": "노이진",
-      "venue": "뉴스프링프로젝트",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "70e084df-a94d-49ef-b70e-d23ac60a3c54",
-      "title": "다시, 지구",
-      "venue": "서울시립 미술아카이브",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "cf57bbd5-ac34-4c14-b926-ccf0b2f163a6",
-      "title": "다시, 지구",
-      "venue": "서울시립 미술아카이브",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": false
-    },
-    {
-      "exhibitionId": "8cb3c6e7-b5c5-4e1d-98cc-6f57c82b238d",
-      "title": "더 퓨처 판타지",
-      "venue": "DDP",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "53e4b4df-0513-4b16-9d1f-7d10524b88f2",
-      "title": "덩었고 영원한 - 루이즈 부르주아",
-      "venue": "호암미술관",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "8ff53da1-556d-46b1-b228-a9d858943f88",
-      "title": "딥다이버 Deep Diver - 배윤환",
-      "venue": "스페이스K 서울",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "a56b9646-1db9-4fc7-a448-48883130cd33",
-      "title": "루이즈 부르주아",
-      "venue": "국제갤러리",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "bf0b53a4-1457-45c7-9df6-696b34eb6fb3",
-      "title": "리리리 이보배",
-      "venue": "코소",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "c9527b8d-1ecb-4115-954a-40a0fff25163",
-      "title": "마나 모아나-신성한 바다의 예술, 오세아니아",
-      "venue": "국립중앙박물관",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": false
-    },
-    {
-      "exhibitionId": "f245e52b-42f4-4d4b-abcf-51eac1b7a6d7",
-      "title": "마나 모아나-신성한 바다의 예술, 오세아니아",
-      "venue": "국립중앙박물관",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "53f89fcf-53f6-44a2-a8c1-815e95faa71c",
-      "title": "마르크 샤갈 특별전: BEYOND TIME",
-      "venue": "예술의전당 한가람미술관",
-      "city": "서울",
-      "missingKoDesc": false,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "e0412ddc-3503-4148-a9b0-1416e9b30d97",
-      "title": "마리우스 슈타이거",
-      "venue": "두아르트 스퀘이라",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "b885ea4a-8981-47ea-a626-e4845c4df14c",
-      "title": "멜랑콜리아 - 김다움, 김의현, 이동혁, 장진승",
-      "venue": "Primary Practice",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "545875dc-9bc1-42ea-8257-0b27b985f70b",
-      "title": "무라카미 다카시",
-      "venue": "아모레퍼시픽미술관",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "41814a9f-5fe8-4e38-9abb-ffc6a87c8f91",
-      "title": "문혜정",
-      "venue": "스페이스 소포라",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "5a93f40d-a427-4e74-b565-f0f1d798d5c8",
-      "title": "물, 쌀, 풀",
-      "venue": "뮤지엄멋",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": false
-    },
-    {
-      "exhibitionId": "f2238842-2203-4f5a-bd64-80653c833c7d",
-      "title": "물, 쌀, 풀",
-      "venue": "뮤지엄멋",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "9adeea32-6ad4-4226-814a-811476e289d4",
-      "title": "물질-실천",
-      "venue": "서울공예박물관",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "a12bbe22-2da3-46dc-b8f1-72d2c71d9727",
-      "title": "물질-실천",
-      "venue": "서울공예박물관",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": false
-    },
-    {
-      "exhibitionId": "329c0bad-ac95-4de2-94a1-535997791bdb",
-      "title": "미셸 들라크루아: 영원히, 화가",
-      "venue": "현대백화점 무역센터점",
-      "city": "서울",
-      "missingKoDesc": false,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "59eb709c-09d3-43cc-85ee-7725a6f2f774",
-      "title": "바자전: IN BETWEEN",
-      "venue": "성곡미술관",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "a0532fd7-b65b-48b0-845c-b4ab017d0fe9",
-      "title": "박기웅·켄토 센가",
-      "venue": "화이트스톤갤러리",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "69adbb8b-0286-49ad-86d9-57f8ca32edd3",
-      "title": "박신영",
-      "venue": "디스위켄드룸",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "167c8cd5-8bc1-406a-b05c-35f7faa0441c",
-      "title": "박영민·유지영·이은우",
-      "venue": "갤러리 키체",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "e28cf2b1-f17b-4444-8523-a1a3562cbe43",
-      "title": "박용식",
-      "venue": "상업화랑 용산",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "87124c0d-b9f8-4eeb-814b-2bfafb7f1004",
-      "title": "박지원",
-      "venue": "스페이스 카다로그",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "0697a684-2a4d-4a51-ad13-0a6482d92c1a",
-      "title": "백경호",
-      "venue": "눈 컨템포러리",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "eae62886-cf0f-489f-81ed-04e254e19e3d",
-      "title": "번승훈",
-      "venue": "가나아트센터",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "52103c1c-dbf3-40eb-9885-83ac47fa8aeb",
-      "title": "보 킴",
-      "venue": "BHAK",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "e19c9ec1-3f2c-45ee-824c-ffa00181ebd0",
-      "title": "수신미확인 - 김봉영, 김지민, 박애나 등",
-      "venue": "휘겸재",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "2a5a0ae8-c3cc-48fb-beb4-0bcdc93e7b97",
-      "title": "스펙트럴 크로싱스",
-      "venue": "DDP",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "3fe55353-f6dc-4400-8902-46892cbc8fcf",
-      "title": "스펙트럴 크로싱스",
-      "venue": "DDP",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": false
-    },
-    {
-      "exhibitionId": "41287abc-3557-43f6-aed7-9721ce660168",
-      "title": "시대전술 - 김영찬, 유이란, 요한한, 신민, 남다현",
-      "venue": "K&L 뮤지엄",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "284f9c11-7566-4946-a9ad-53f1ae417f6b",
-      "title": "신자경·정준원",
-      "venue": "갤러리 지우헌",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "8b97810c-ca96-44e8-91ce-bc17cec95599",
-      "title": "쌩~휙!",
-      "venue": "백아트",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "46828a67-1d7a-4f04-90eb-28f23b67e0e3",
-      "title": "아드리안 비야르 로하스",
-      "venue": "아트선재센터",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "934d60cb-95ef-4d94-a47a-1ac77a723b90",
-      "title": "안상수",
-      "venue": "옴스큐라1",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "7e33bd4c-2c8e-4c9e-970d-5a3e0db1cc63",
-      "title": "안소니 맥콜: Works 1972-2020",
-      "venue": "푸투라서울",
-      "city": "서울",
-      "missingKoDesc": false,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "a36f861f-0f86-43ba-b737-1ab2303703a7",
-      "title": "안토니 곰리",
-      "venue": "타데우스 로팍 서울",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "6e64c5b2-54e7-44a7-a179-d1ed8fb3ade1",
-      "title": "앤 베로니카 얀센스",
-      "venue": "에스더쉬퍼",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "e470c31d-7e30-490b-87a5-b2ed63fe474c",
-      "title": "앤서니 브라운展: 마스터 오브 스토리텔링",
-      "venue": "예술의전당 한가람미술관",
-      "city": "서울",
-      "missingKoDesc": false,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "f50e9fff-6ea4-444b-8f3d-9aa57556d771",
-      "title": "앨리스 달튼 브라운 회고전",
-      "venue": "더현대 서울 ALT.1",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "12c4394b-732b-4e98-9d15-4ec9136ee9c8",
-      "title": "언하우스",
-      "venue": "프리즈 하우스 서울",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "50e76033-6de9-41b7-beee-0a2d81f3a906",
-      "title": "엘리자베스 랭그리터 : 매일이 휴가",
-      "venue": "MUSEUM 209",
-      "city": "서울",
-      "missingKoDesc": false,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "77a9c01d-29d6-4102-97dc-ba65e12f96d5",
-      "title": "연여인",
-      "venue": "디아 컨템포러리",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "ae7ee90e-91dc-4a17-ab25-876a11179049",
-      "title": "열두 개의 질문 - 안규철",
-      "venue": "국제갤러리 부산",
-      "city": "부산",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "df47f3cb-dc70-46ea-8f42-366dd1b034f7",
-      "title": "영혼의 기술",
-      "venue": "서울시립미술관 본관 외 3곳",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "f25c602b-444d-4dca-b76a-d63aa19be930",
-      "title": "오랑주리-오르세 미술관 특별전",
-      "venue": "예술의전당 한가람미술관",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "404c53fa-1369-47e9-b0e7-9721f278d86e",
-      "title": "오세열",
-      "venue": "갤러리조은",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "a4b23d9c-8bdd-4816-8c28-b6f9ccdc2a42",
-      "title": "오수환",
-      "venue": "가나아트센터",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "8c52243e-680f-4107-95c7-115af860c17b",
-      "title": "옥승철: 프로토타입",
-      "venue": "롯데뮤지엄",
-      "city": "서울",
-      "missingKoDesc": false,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "28fca5d1-a978-4db3-b5e0-85ae64ffedfd",
-      "title": "올해의 작가상 2025",
-      "venue": "국립현대미술관 서울",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": false
-    },
-    {
-      "exhibitionId": "8c464aaf-d6a2-495a-a149-e1e225c0c60c",
-      "title": "올해의 작가상 2025",
-      "venue": "국립현대미술관 서울",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "68ed8089-0bf7-4387-bfb5-f85c79a5b32e",
-      "title": "왕 시야오",
-      "venue": "탕 컨템포러리 아트",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "161ee898-a680-41cc-825e-0d6c9259bd15",
-      "title": "우고 론디노네",
-      "venue": "글래드스톤갤러리",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": false
-    },
-    {
-      "exhibitionId": "c2702582-6ab6-47b3-8776-ae85f2a04364",
-      "title": "우고 론디노네",
-      "venue": "글래드스톤갤러리",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "a592511d-672e-4fa2-9713-d34e60fe5d19",
-      "title": "우리의 몸에는 타인이 깃든다",
-      "venue": "모두미술공간",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "be9337eb-7ab5-439e-b984-1b9662fa52d0",
-      "title": "우한나",
-      "venue": "G Gallery",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "e6d29334-1c05-4acb-85ea-1a9c0b206359",
-      "title": "유근택·정용국",
-      "venue": "누크갤러리",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "e50dcbbb-6823-42d0-8195-fe453e4b4b10",
-      "title": "유희적 상태",
-      "venue": "스페이스 수퍼노말",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "4e68e19d-a6e2-482c-81cd-04af47a1fb5c",
-      "title": "윤형재",
-      "venue": "갤러리제이원 서울",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "474470fb-dfa5-4614-a7c0-e6dcfa4be006",
-      "title": "이강승·캔디스 린",
-      "venue": "갤러리현대",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "1c974bc4-2ff7-4535-834c-1c36842fd785",
-      "title": "이미 크뇌벨",
-      "venue": "두아르트 스퀘이라",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "933948c3-efb4-448a-bfac-b8ece331a9e7",
-      "title": "이지수",
-      "venue": "상히읗",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "aec9acdb-e3f2-48e2-b293-8c29584ff44f",
-      "title": "이지수",
-      "venue": "상히읗",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": false
-    },
-    {
-      "exhibitionId": "d3ec7b46-0e9a-4706-81d0-67c22493dcb2",
-      "title": "임현정",
-      "venue": "아뜰리에 아키",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "dab48290-f96a-4cf8-9b21-2413cb324ee5",
-      "title": "자아들의 양상불",
-      "venue": "라니서울",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "72594414-63d2-49d2-8611-c167f8ee0267",
-      "title": "장 미셸 바스키아 기획전",
-      "venue": "DDP 뮤지엄",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "094dc10e-200a-4f3a-9bc2-7b9f8ed018f6",
-      "title": "장, 식탁으로 이어진 풍경",
-      "venue": "재단법인 아름지기",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": false
-    },
-    {
-      "exhibitionId": "bba48a6f-37fd-4897-928a-a2e889a21dcb",
-      "title": "장, 식탁으로 이어진 풍경",
-      "venue": "재단법인 아름지기",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "6336a15d-3b1a-44b3-af4c-af688bd20949",
-      "title": "적절한 소환 - 힐마 아프 클린트",
-      "venue": "부산현대미술관",
-      "city": "부산",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "98682518-182c-437a-871b-08ba855aa6f6",
-      "title": "전통의 재해석",
-      "venue": "링크서울",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "efc81755-00fc-452b-9c6a-6ede0348bd18",
-      "title": "전현지·승지원",
-      "venue": "PBG 한남",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "4fa7674a-4a12-4df3-9c52-6b4550894afa",
-      "title": "정진아",
-      "venue": "로이갤러리 압구정",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "0ca2cce0-0b4e-4053-9089-5198ee8b750a",
-      "title": "정해윤",
-      "venue": "갤러리 나우",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "0a88cd53-0fa4-4f1d-a811-8325c40770fd",
-      "title": "제임스 터렐",
-      "venue": "페이스갤러리",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "9b45d135-240a-4b8b-a5c5-fdfd4fb49722",
-      "title": "조영남·조조 아나비",
-      "venue": "스페이스776",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "88fbe6d3-c76d-4d62-aaa1-6eee31a6ba26",
-      "title": "조주현",
-      "venue": "페이토 갤러리",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "3db2ae73-8adc-4c11-aab6-d1fb52238654",
-      "title": "지미 로버트",
-      "venue": "바라캇 컨템포러리",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "cbd5be1d-7a6b-4a68-ad29-5ffa2eb3c6c4",
-      "title": "지미 로버트",
-      "venue": "바라캇 컨템포러리",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": false
-    },
-    {
-      "exhibitionId": "636f73e5-6d52-47cc-87b5-84869cdf8700",
-      "title": "집, 옷을 입다",
-      "venue": "서울공예박물관",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": false
-    },
-    {
-      "exhibitionId": "a7f72a55-2ba9-44fc-8b49-417266b10f63",
-      "title": "집, 옷을 입다",
-      "venue": "서울공예박물관",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "5dee32f6-86d5-4d63-9133-8a9a9adc7e98",
-      "title": "최영욱·채싱필",
-      "venue": "넥스트뮤지엄갤러리",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "2701718d-24d6-42d3-876c-0d33015b1175",
-      "title": "최지목",
-      "venue": "갤러리바톤",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "71f74f75-f512-49f8-9883-c3bd1c61f4c6",
-      "title": "최철웅",
-      "venue": "토탈미술관",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "9675daf7-06f8-4729-b145-cf88d1e05c85",
-      "title": "카롤린 드네르보",
-      "venue": "화이트스톤갤러리",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "3237bda2-05cf-4e4b-a289-22069ab08b42",
-      "title": "카를로스 블랑코 아르테로",
-      "venue": "ELIGERE 갤러리",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "e812eb03-4acb-4b60-8dcb-938db91a8aff",
-      "title": "카토 이즈미",
-      "venue": "페로탕",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "76471302-063f-4bac-a8e7-d4e6f1bb394c",
-      "title": "쿠사마 야요이",
-      "venue": "세화미술관",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": false
-    },
-    {
-      "exhibitionId": "91e0ea3d-d21b-4cfa-a29f-071f85bf2548",
-      "title": "쿠사마 야요이",
-      "venue": "세화미술관",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "0311ed62-79d8-44dd-872b-596c01b762b3",
-      "title": "테레시타 페르난데스",
-      "venue": "리만머핀",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "a72cddea-20ca-498f-8e15-40857c45dfbe",
-      "title": "파노라마",
-      "venue": "송은",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "e3420ef1-1a60-4bfc-8e41-1fccaa26fc0d",
-      "title": "파노라마",
-      "venue": "송은",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": false
-    },
-    {
-      "exhibitionId": "05e60ff1-46f6-4559-b5f3-2a953c342f73",
-      "title": "파편의 흐름",
-      "venue": "갤러리조선",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": false
-    },
-    {
-      "exhibitionId": "eba9ad43-7b74-45d3-bcad-b44eca2d2321",
-      "title": "파편의 흐름",
-      "venue": "갤러리조선",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "f9af59b4-7517-4af8-8970-eb94e060abd0",
-      "title": "파편의 흐름",
-      "venue": "갤러리조선",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": false
-    },
-    {
-      "exhibitionId": "ffaeef4c-e8b7-4337-b4d8-9a7e3f6d07d2",
-      "title": "파편의 흐름",
-      "venue": "갤러리조선",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": false
-    },
-    {
-      "exhibitionId": "7727fd3f-a55d-4f90-82ff-31c4ba055866",
-      "title": "패치워크!",
-      "venue": "더 월로",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "9ddd376c-0656-4a53-a7db-96495fc3ec98",
-      "title": "패치워크!",
-      "venue": "더 월로",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": false
-    },
-    {
-      "exhibitionId": "c7c4da5d-d241-4751-95f2-09a7f078b8b0",
-      "title": "패트릭 휴즈",
-      "venue": "박여숙화랑",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "38f5717f-5b3b-4127-83a0-fd8cf8333f8c",
-      "title": "페트라 콜린스",
-      "venue": "대림미술관",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": false
-    },
-    {
-      "exhibitionId": "403cbae9-996b-4933-9081-5863c47ed885",
-      "title": "페트라 콜린스",
-      "venue": "대림미술관",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "7930ec6f-8767-43c7-9bfd-ba7dc5546314",
-      "title": "한국을 비추다",
-      "venue": "DDP 이간수문",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "bf05fbeb-9bea-4bcc-9cf4-328d8f490e77",
-      "title": "한의도",
-      "venue": "호리아트스페이스",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "38508219-7d5a-4841-8844-d6db3af97098",
-      "title": "한정은·미란다 포레스터",
-      "venue": "파운드리서울",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "49824cbb-5587-4a36-88bc-218e3f08d5e8",
-      "title": "헨릭 울달렌",
-      "venue": "화이트스톤갤러리",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "7e47058d-5c67-4daf-aa36-08fe8c94de60",
-      "title": "헨릭 울달렌",
-      "venue": "화이트스톤갤러리",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": false
-    },
-    {
-      "exhibitionId": "4f98f18f-0565-4487-89b3-5433de1ac3eb",
-      "title": "현남",
-      "venue": "휘슬",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "5ffaa6e8-4510-4859-b57a-abc8e76f7744",
-      "title": "현대카드 컬처프로젝트 29 톰 삭스",
-      "venue": "DDP",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "44d5122f-80c3-4d35-97d7-d616d1788ee1",
-      "title": "형상 회로",
-      "venue": "일민미술관",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": false
-    },
-    {
-      "exhibitionId": "5aaa761b-7814-45fb-adee-77b3dff17c41",
-      "title": "형상 회로",
-      "venue": "일민미술관",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "c480657f-6613-4aec-b9cd-ae49b2188f4c",
-      "title": "A Chorus - Jennifer Carvalho",
-      "venue": "CYLINDER TWO",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "64ada3d1-3e2d-40c9-9e33-2bd53c7c5f40",
-      "title": "Amoako Boafo: I Have Been Here Before",
-      "venue": "우양미술관",
-      "city": "경주",
-      "missingKoDesc": false,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "05c1d0af-e57d-4e64-b2cd-3c7f9328b8e3",
-      "title": "Cast",
-      "venue": "아마도예술공간",
-      "city": "서울",
-      "missingKoDesc": false,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "6954acac-41b0-4e73-b2ad-b68193f4bf67",
-      "title": "DMZ OPEN 전시: UNDO DMZ (언두 디엠지)",
-      "venue": "파주 통일촌 마을, 갤러리그리브스, 파주 임진각 평화누리",
-      "city": "서울",
-      "missingKoDesc": false,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "29baccb8-6640-4e49-a580-d804a6252267",
-      "title": "Drawing on Space",
-      "venue": "뮤지엄 산",
-      "city": "원주",
-      "missingKoDesc": false,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "386705e5-dc71-4da1-8e67-c37d042cd05c",
-      "title": "Dust - Ruofan Chen",
-      "venue": "SHOWER",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "7c384c67-7e05-4c4b-9de9-8bc32f3a20bd",
-      "title": "Flesh & Love",
-      "venue": "제이슨함",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "57f41f8c-55fa-4648-b385-9c09e4e93bdc",
-      "title": "Frieze Seoul 2025",
-      "venue": "코엑스",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "5ddff979-de57-4c1d-bfcd-9af21e200435",
-      "title": "Heun",
-      "venue": "파이프갤러리",
-      "city": "서울",
-      "missingKoDesc": false,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "46a5dc1a-7a49-45f2-9219-87a40211e053",
-      "title": "Kiaf 서울 2025",
-      "venue": "코엑스",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "1c036e60-6ecf-4255-9dff-911898df080f",
-      "title": "March to March",
-      "venue": "PS CENTER",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": false
-    },
-    {
-      "exhibitionId": "36af402e-506b-4d87-a5b7-20bdd0b91460",
-      "title": "March to March",
-      "venue": "PS CENTER",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "781233f3-6ef6-4f6a-8973-86a5518ee9ea",
-      "title": "Messengers - 김서현",
-      "venue": "실린더 ONE",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "7d3501f6-2788-4f3c-a74c-b4b6ecdca3e4",
-      "title": "Nam June Paik: Humanity in the Circuits",
-      "venue": "우양미술관",
-      "city": "경주",
-      "missingKoDesc": false,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "f6643d8b-1279-4354-a6f1-16119419821b",
-      "title": "others vs others",
-      "venue": "아트조선스페이스",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "19183f1b-cf52-4c5a-8f29-f3ceb5595031",
-      "title": "Pit",
-      "venue": "피트갤러리",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "5537f804-d449-4b0e-963d-88a1f65d739d",
-      "title": "Pit Calls Wall - 김새은",
-      "venue": "뮤지엄헤드",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "498d83dc-ae41-42df-883d-f35d4055469c",
-      "title": "Poetic Forensic",
-      "venue": "상업화랑",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "c59326c0-8326-4ee1-8857-d02ec0049b76",
-      "title": "Poetic Forensic",
-      "venue": "상업화랑",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": false
-    },
-    {
-      "exhibitionId": "5ac404b8-4f02-4824-9f66-2d563f588283",
-      "title": "Small but great",
-      "venue": "Small but great",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "63cd462c-9046-4794-a476-e2899c6fe7a8",
-      "title": "Stone, Time, Touch",
-      "venue": "매스갤러리 한남",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "d75fb884-b225-42ca-9ecb-347a97af940f",
-      "title": "Summer Collective Exhibition",
-      "venue": "스페이스776",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "85e02234-2857-4980-9103-f25866ab3b0b",
-      "title": "The Garden of Forking Paths",
-      "venue": "가나아트 한남",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "49d37d62-844f-4319-862b-e13b55b7915f",
-      "title": "Troubled at his saying - 세실 렘퍼트",
-      "venue": "IAH",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "2bd7b685-fb76-49da-afdb-bc877171bab2",
-      "title": "Under One Roof",
-      "venue": "현대카드 스토리지",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "e7570db7-2985-408f-a789-81e27b3decc1",
-      "title": "VELVET HAMMERS",
-      "venue": "핌서울",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    },
-    {
-      "exhibitionId": "d037815b-4230-45d8-8da0-b59945342e27",
-      "title": "Vivid Rest",
-      "venue": "롯데갤러리 아트홀 잠실점",
-      "city": "서울",
-      "missingKoDesc": true,
-      "missingEnDesc": true
-    }
-  ],
-  "statistics": {
-    "bothMissing": 127,
-    "koOnlyMissing": 23,
-    "enOnlyMissing": 13
+[
+  {
+    "exhibition_id": "ffaeef4c-e8b7-4337-b4d8-9a7e3f6d07d2",
+    "venue_name": "갤러리조선"
   },
-  "timestamp": "2025-09-08T14:10:29.393Z"
-}
+  {
+    "exhibition_id": "f9af59b4-7517-4af8-8970-eb94e060abd0",
+    "venue_name": "갤러리조선"
+  },
+  {
+    "exhibition_id": "c9527b8d-1ecb-4115-954a-40a0fff25163",
+    "venue_name": "국립중앙박물관"
+  },
+  {
+    "exhibition_id": "28fca5d1-a978-4db3-b5e0-85ae64ffedfd",
+    "venue_name": "국립현대미술관 서울"
+  },
+  {
+    "exhibition_id": "094dc10e-200a-4f3a-9bc2-7b9f8ed018f6",
+    "venue_name": "재단법인 아름지기"
+  },
+  {
+    "exhibition_id": "38f5717f-5b3b-4127-83a0-fd8cf8333f8c",
+    "venue_name": "대림미술관"
+  },
+  {
+    "exhibition_id": "9ddd376c-0656-4a53-a7db-96495fc3ec98",
+    "venue_name": "더 월로"
+  },
+  {
+    "exhibition_id": "cbd5be1d-7a6b-4a68-ad29-5ffa2eb3c6c4",
+    "venue_name": "바라캇 컨템포러리"
+  },
+  {
+    "exhibition_id": "cf57bbd5-ac34-4c14-b926-ccf0b2f163a6",
+    "venue_name": "서울시립 미술아카이브"
+  },
+  {
+    "exhibition_id": "aec9acdb-e3f2-48e2-b293-8c29584ff44f",
+    "venue_name": "상히읗"
+  },
+  {
+    "exhibition_id": "76471302-063f-4bac-a8e7-d4e6f1bb394c",
+    "venue_name": "세화미술관"
+  },
+  {
+    "exhibition_id": "4d91b904-7f65-4725-92b3-ac2bd1fca5ea",
+    "venue_name": "세화미술관"
+  },
+  {
+    "exhibition_id": "7e47058d-5c67-4daf-aa36-08fe8c94de60",
+    "venue_name": "화이트스톤갤러리"
+  },
+  {
+    "exhibition_id": "161ee898-a680-41cc-825e-0d6c9259bd15",
+    "venue_name": "글래드스톤갤러리"
+  },
+  {
+    "exhibition_id": "5a93f40d-a427-4e74-b565-f0f1d798d5c8",
+    "venue_name": "뮤지엄멋"
+  },
+  {
+    "exhibition_id": "e3420ef1-1a60-4bfc-8e41-1fccaa26fc0d",
+    "venue_name": "송은"
+  },
+  {
+    "exhibition_id": "44d5122f-80c3-4d35-97d7-d616d1788ee1",
+    "venue_name": "일민미술관"
+  },
+  {
+    "exhibition_id": "636f73e5-6d52-47cc-87b5-84869cdf8700",
+    "venue_name": "서울공예박물관"
+  },
+  {
+    "exhibition_id": "a12bbe22-2da3-46dc-b8f1-72d2c71d9727",
+    "venue_name": "서울공예박물관"
+  },
+  {
+    "exhibition_id": "3fe55353-f6dc-4400-8902-46892cbc8fcf",
+    "venue_name": "DDP"
+  },
+  {
+    "exhibition_id": "1c036e60-6ecf-4255-9dff-911898df080f",
+    "venue_name": "PS CENTER"
+  },
+  {
+    "exhibition_id": "c59326c0-8326-4ee1-8857-d02ec0049b76",
+    "venue_name": "상업화랑"
+  },
+  {
+    "exhibition_id": "05e60ff1-46f6-4559-b5f3-2a953c342f73",
+    "venue_name": "갤러리조선"
+  },
+  {
+    "exhibition_id": "403cbae9-996b-4933-9081-5863c47ed885",
+    "venue_name": "대림미술관"
+  },
+  {
+    "exhibition_id": "934d60cb-95ef-4d94-a47a-1ac77a723b90",
+    "venue_name": "옴스큐라1"
+  },
+  {
+    "exhibition_id": "a4b23d9c-8bdd-4816-8c28-b6f9ccdc2a42",
+    "venue_name": "가나아트센터"
+  },
+  {
+    "exhibition_id": "818b6df4-1afb-4fb0-8008-73a4e568c8eb",
+    "venue_name": "금산갤러리"
+  },
+  {
+    "exhibition_id": "4fa7674a-4a12-4df3-9c52-6b4550894afa",
+    "venue_name": "로이갤러리 압구정"
+  },
+  {
+    "exhibition_id": "18e83f2d-e3eb-41e3-90cc-51c146ff1f86",
+    "venue_name": "미정"
+  },
+  {
+    "exhibition_id": "e0412ddc-3503-4148-a9b0-1416e9b30d97",
+    "venue_name": "두아르트 스퀘이라"
+  },
+  {
+    "exhibition_id": "57f41f8c-55fa-4648-b385-9c09e4e93bdc",
+    "venue_name": "코엑스"
+  },
+  {
+    "exhibition_id": "c1a5e304-16de-42d7-b24d-58200ab7fae3",
+    "venue_name": "리움미술관"
+  },
+  {
+    "exhibition_id": "5ffaa6e8-4510-4859-b57a-abc8e76f7744",
+    "venue_name": "DDP"
+  },
+  {
+    "exhibition_id": "2bd7b685-fb76-49da-afdb-bc877171bab2",
+    "venue_name": "현대카드 스토리지"
+  },
+  {
+    "exhibition_id": "69adbb8b-0286-49ad-86d9-57f8ca32edd3",
+    "venue_name": "디스위켄드룸"
+  },
+  {
+    "exhibition_id": "f50e9fff-6ea4-444b-8f3d-9aa57556d771",
+    "venue_name": "더현대 서울 ALT.1"
+  },
+  {
+    "exhibition_id": "f25c602b-444d-4dca-b76a-d63aa19be930",
+    "venue_name": "예술의전당 한가람미술관"
+  },
+  {
+    "exhibition_id": "d5e540fd-ddce-4dc9-8105-ca50bedec654",
+    "venue_name": "뉴스프링프로젝트"
+  },
+  {
+    "exhibition_id": "52103c1c-dbf3-40eb-9885-83ac47fa8aeb",
+    "venue_name": "BHAK"
+  },
+  {
+    "exhibition_id": "0a88cd53-0fa4-4f1d-a811-8325c40770fd",
+    "venue_name": "페이스갤러리"
+  },
+  {
+    "exhibition_id": "4f98f18f-0565-4487-89b3-5433de1ac3eb",
+    "venue_name": "휘슬"
+  },
+  {
+    "exhibition_id": "49d37d62-844f-4319-862b-e13b55b7915f",
+    "venue_name": "IAH"
+  },
+  {
+    "exhibition_id": "781233f3-6ef6-4f6a-8973-86a5518ee9ea",
+    "venue_name": "실린더 ONE"
+  },
+  {
+    "exhibition_id": "c480657f-6613-4aec-b9cd-ae49b2188f4c",
+    "venue_name": "CYLINDER TWO"
+  },
+  {
+    "exhibition_id": "386705e5-dc71-4da1-8e67-c37d042cd05c",
+    "venue_name": "SHOWER"
+  },
+  {
+    "exhibition_id": "b885ea4a-8981-47ea-a626-e4845c4df14c",
+    "venue_name": "Primary Practice"
+  },
+  {
+    "exhibition_id": "e28cf2b1-f17b-4444-8523-a1a3562cbe43",
+    "venue_name": "상업화랑 용산"
+  },
+  {
+    "exhibition_id": "b4ac2bde-767a-48aa-97c4-b7057ef93e55",
+    "venue_name": "케이옥션"
+  },
+  {
+    "exhibition_id": "7c384c67-7e05-4c4b-9de9-8bc32f3a20bd",
+    "venue_name": "제이슨함"
+  },
+  {
+    "exhibition_id": "46a5dc1a-7a49-45f2-9219-87a40211e053",
+    "venue_name": "코엑스"
+  },
+  {
+    "exhibition_id": "36af402e-506b-4d87-a5b7-20bdd0b91460",
+    "venue_name": "PS CENTER"
+  },
+  {
+    "exhibition_id": "f6643d8b-1279-4354-a6f1-16119419821b",
+    "venue_name": "아트조선스페이스"
+  },
+  {
+    "exhibition_id": "5537f804-d449-4b0e-963d-88a1f65d739d",
+    "venue_name": "뮤지엄헤드"
+  },
+  {
+    "exhibition_id": "498d83dc-ae41-42df-883d-f35d4055469c",
+    "venue_name": "상업화랑"
+  },
+  {
+    "exhibition_id": "5ac404b8-4f02-4824-9f66-2d563f588283",
+    "venue_name": "Small but great"
+  },
+  {
+    "exhibition_id": "d75fb884-b225-42ca-9ecb-347a97af940f",
+    "venue_name": "스페이스776"
+  },
+  {
+    "exhibition_id": "e7570db7-2985-408f-a789-81e27b3decc1",
+    "venue_name": "핌서울"
+  },
+  {
+    "exhibition_id": "d037815b-4230-45d8-8da0-b59945342e27",
+    "venue_name": "롯데갤러리 아트홀 잠실점"
+  },
+  {
+    "exhibition_id": "63e1429a-45bf-49e5-a93a-342e3f059d65",
+    "venue_name": "국제갤러리"
+  },
+  {
+    "exhibition_id": "fac822c2-8223-465c-a5cd-f7a96802f178",
+    "venue_name": "스페이스 카다로그"
+  },
+  {
+    "exhibition_id": "a41f9787-e0af-4903-b488-9727ae7464e5",
+    "venue_name": "눈 컨템포러리"
+  },
+  {
+    "exhibition_id": "a0532fd7-b65b-48b0-845c-b4ab017d0fe9",
+    "venue_name": "화이트스톤갤러리"
+  },
+  {
+    "exhibition_id": "1ae6fe2d-856a-48cb-811d-3ba2c7cec05a",
+    "venue_name": "코소"
+  },
+  {
+    "exhibition_id": "c6bd2668-3c3e-47df-8be9-cd9d3452039f",
+    "venue_name": "캔파운데이션"
+  },
+  {
+    "exhibition_id": "781a8ebb-a756-4394-bba4-c4543a6be78c",
+    "venue_name": "MO BY CAN"
+  },
+  {
+    "exhibition_id": "e3b43ce2-700d-483c-be32-29dd3e5bd5ea",
+    "venue_name": "박서보재단 26SQM"
+  },
+  {
+    "exhibition_id": "a078a396-935a-4456-b2d0-4d1695795da0",
+    "venue_name": "국립현대미술관 서울"
+  },
+  {
+    "exhibition_id": "6d76c76f-ffc8-41d4-b21a-10bb21f37114",
+    "venue_name": "스페이스 윌링앤딜링"
+  },
+  {
+    "exhibition_id": "3e33e3a0-07ca-4b17-9564-0a415715b7d2",
+    "venue_name": "PS CENTER"
+  },
+  {
+    "exhibition_id": "5d4c3531-eac1-4feb-8fe9-e8abb4e568a4",
+    "venue_name": "리안갤러리 서울"
+  },
+  {
+    "exhibition_id": "afc692b5-17d4-4da8-9d42-f50e226396e2",
+    "venue_name": "세화미술관"
+  },
+  {
+    "exhibition_id": "53e4b4df-0513-4b16-9d1f-7d10524b88f2",
+    "venue_name": "호암미술관"
+  },
+  {
+    "exhibition_id": "8ff53da1-556d-46b1-b228-a9d858943f88",
+    "venue_name": "스페이스K 서울"
+  },
+  {
+    "exhibition_id": "a56b9646-1db9-4fc7-a448-48883130cd33",
+    "venue_name": "국제갤러리"
+  },
+  {
+    "exhibition_id": "bf0b53a4-1457-45c7-9df6-696b34eb6fb3",
+    "venue_name": "코소"
+  },
+  {
+    "exhibition_id": "f245e52b-42f4-4d4b-abcf-51eac1b7a6d7",
+    "venue_name": "국립중앙박물관"
+  },
+  {
+    "exhibition_id": "545875dc-9bc1-42ea-8257-0b27b985f70b",
+    "venue_name": "아모레퍼시픽미술관"
+  },
+  {
+    "exhibition_id": "41814a9f-5fe8-4e38-9abb-ffc6a87c8f91",
+    "venue_name": "스페이스 소포라"
+  },
+  {
+    "exhibition_id": "f2238842-2203-4f5a-bd64-80653c833c7d",
+    "venue_name": "뮤지엄멋"
+  },
+  {
+    "exhibition_id": "59eb709c-09d3-43cc-85ee-7725a6f2f774",
+    "venue_name": "성곡미술관"
+  },
+  {
+    "exhibition_id": "0697a684-2a4d-4a51-ad13-0a6482d92c1a",
+    "venue_name": "눈 컨템포러리"
+  },
+  {
+    "exhibition_id": "eae62886-cf0f-489f-81ed-04e254e19e3d",
+    "venue_name": "가나아트센터"
+  },
+  {
+    "exhibition_id": "e19c9ec1-3f2c-45ee-824c-ffa00181ebd0",
+    "venue_name": "휘겸재"
+  },
+  {
+    "exhibition_id": "41287abc-3557-43f6-aed7-9721ce660168",
+    "venue_name": "K&L 뮤지엄"
+  },
+  {
+    "exhibition_id": "284f9c11-7566-4946-a9ad-53f1ae417f6b",
+    "venue_name": "갤러리 지우헌"
+  },
+  {
+    "exhibition_id": "8b97810c-ca96-44e8-91ce-bc17cec95599",
+    "venue_name": "백아트"
+  },
+  {
+    "exhibition_id": "46828a67-1d7a-4f04-90eb-28f23b67e0e3",
+    "venue_name": "아트선재센터"
+  },
+  {
+    "exhibition_id": "a36f861f-0f86-43ba-b737-1ab2303703a7",
+    "venue_name": "타데우스 로팍 서울"
+  },
+  {
+    "exhibition_id": "6e64c5b2-54e7-44a7-a179-d1ed8fb3ade1",
+    "venue_name": "에스더쉬퍼"
+  },
+  {
+    "exhibition_id": "12c4394b-732b-4e98-9d15-4ec9136ee9c8",
+    "venue_name": "프리즈 하우스 서울"
+  },
+  {
+    "exhibition_id": "77a9c01d-29d6-4102-97dc-ba65e12f96d5",
+    "venue_name": "디아 컨템포러리"
+  },
+  {
+    "exhibition_id": "ae7ee90e-91dc-4a17-ab25-876a11179049",
+    "venue_name": "국제갤러리 부산"
+  },
+  {
+    "exhibition_id": "df47f3cb-dc70-46ea-8f42-366dd1b034f7",
+    "venue_name": "서울시립미술관 본관 외 3곳"
+  },
+  {
+    "exhibition_id": "8c464aaf-d6a2-495a-a149-e1e225c0c60c",
+    "venue_name": "국립현대미술관 서울"
+  },
+  {
+    "exhibition_id": "68ed8089-0bf7-4387-bfb5-f85c79a5b32e",
+    "venue_name": "탕 컨템포러리 아트"
+  },
+  {
+    "exhibition_id": "a592511d-672e-4fa2-9713-d34e60fe5d19",
+    "venue_name": "모두미술공간"
+  },
+  {
+    "exhibition_id": "e6d29334-1c05-4acb-85ea-1a9c0b206359",
+    "venue_name": "누크갤러리"
+  },
+  {
+    "exhibition_id": "e50dcbbb-6823-42d0-8195-fe453e4b4b10",
+    "venue_name": "스페이스 수퍼노말"
+  },
+  {
+    "exhibition_id": "474470fb-dfa5-4614-a7c0-e6dcfa4be006",
+    "venue_name": "갤러리현대"
+  },
+  {
+    "exhibition_id": "1c974bc4-2ff7-4535-834c-1c36842fd785",
+    "venue_name": "두아르트 스퀘이라"
+  },
+  {
+    "exhibition_id": "933948c3-efb4-448a-bfac-b8ece331a9e7",
+    "venue_name": "상히읗"
+  },
+  {
+    "exhibition_id": "dab48290-f96a-4cf8-9b21-2413cb324ee5",
+    "venue_name": "라니서울"
+  },
+  {
+    "exhibition_id": "72594414-63d2-49d2-8611-c167f8ee0267",
+    "venue_name": "DDP 뮤지엄"
+  },
+  {
+    "exhibition_id": "bba48a6f-37fd-4897-928a-a2e889a21dcb",
+    "venue_name": "재단법인 아름지기"
+  },
+  {
+    "exhibition_id": "6336a15d-3b1a-44b3-af4c-af688bd20949",
+    "venue_name": "부산현대미술관"
+  },
+  {
+    "exhibition_id": "98682518-182c-437a-871b-08ba855aa6f6",
+    "venue_name": "링크서울"
+  },
+  {
+    "exhibition_id": "0ca2cce0-0b4e-4053-9089-5198ee8b750a",
+    "venue_name": "갤러리 나우"
+  },
+  {
+    "exhibition_id": "9b45d135-240a-4b8b-a5c5-fdfd4fb49722",
+    "venue_name": "스페이스776"
+  },
+  {
+    "exhibition_id": "88fbe6d3-c76d-4d62-aaa1-6eee31a6ba26",
+    "venue_name": "페이토 갤러리"
+  },
+  {
+    "exhibition_id": "a7f72a55-2ba9-44fc-8b49-417266b10f63",
+    "venue_name": "서울공예박물관"
+  },
+  {
+    "exhibition_id": "2701718d-24d6-42d3-876c-0d33015b1175",
+    "venue_name": "갤러리바톤"
+  },
+  {
+    "exhibition_id": "71f74f75-f512-49f8-9883-c3bd1c61f4c6",
+    "venue_name": "토탈미술관"
+  },
+  {
+    "exhibition_id": "9675daf7-06f8-4729-b145-cf88d1e05c85",
+    "venue_name": "화이트스톤갤러리"
+  },
+  {
+    "exhibition_id": "3237bda2-05cf-4e4b-a289-22069ab08b42",
+    "venue_name": "ELIGERE 갤러리"
+  },
+  {
+    "exhibition_id": "85e02234-2857-4980-9103-f25866ab3b0b",
+    "venue_name": "가나아트 한남"
+  },
+  {
+    "exhibition_id": "a72cddea-20ca-498f-8e15-40857c45dfbe",
+    "venue_name": "송은"
+  },
+  {
+    "exhibition_id": "7727fd3f-a55d-4f90-82ff-31c4ba055866",
+    "venue_name": "더 월로"
+  },
+  {
+    "exhibition_id": "c7c4da5d-d241-4751-95f2-09a7f078b8b0",
+    "venue_name": "박여숙화랑"
+  },
+  {
+    "exhibition_id": "7930ec6f-8767-43c7-9bfd-ba7dc5546314",
+    "venue_name": "DDP 이간수문"
+  },
+  {
+    "exhibition_id": "bf05fbeb-9bea-4bcc-9cf4-328d8f490e77",
+    "venue_name": "호리아트스페이스"
+  },
+  {
+    "exhibition_id": "38508219-7d5a-4841-8844-d6db3af97098",
+    "venue_name": "파운드리서울"
+  },
+  {
+    "exhibition_id": "49824cbb-5587-4a36-88bc-218e3f08d5e8",
+    "venue_name": "화이트스톤갤러리"
+  },
+  {
+    "exhibition_id": "5aaa761b-7814-45fb-adee-77b3dff17c41",
+    "venue_name": "일민미술관"
+  },
+  {
+    "exhibition_id": "11e5d851-2515-4095-9672-6da1c9481bfd",
+    "venue_name": "캡션 서울"
+  },
+  {
+    "exhibition_id": "f64bf835-64a8-4627-aa9d-0821e392982c",
+    "venue_name": "아르코미술관"
+  },
+  {
+    "exhibition_id": "844ca0fd-6084-43ba-ab34-2f4ab61a8e21",
+    "venue_name": "상업화랑 을지로"
+  },
+  {
+    "exhibition_id": "87124c0d-b9f8-4eeb-814b-2bfafb7f1004",
+    "venue_name": "스페이스 카다로그"
+  },
+  {
+    "exhibition_id": "0311ed62-79d8-44dd-872b-596c01b762b3",
+    "venue_name": "리만머핀"
+  },
+  {
+    "exhibition_id": "19183f1b-cf52-4c5a-8f29-f3ceb5595031",
+    "venue_name": "피트갤러리"
+  },
+  {
+    "exhibition_id": "5dee32f6-86d5-4d63-9133-8a9a9adc7e98",
+    "venue_name": "넥스트뮤지엄갤러리"
+  },
+  {
+    "exhibition_id": "63cd462c-9046-4794-a476-e2899c6fe7a8",
+    "venue_name": "매스갤러리 한남"
+  },
+  {
+    "exhibition_id": "a4dc0161-10ab-4db2-8839-f40e8524fdaf",
+    "venue_name": "서울옥션"
+  },
+  {
+    "exhibition_id": "efc81755-00fc-452b-9c6a-6ede0348bd18",
+    "venue_name": "PBG 한남"
+  },
+  {
+    "exhibition_id": "2a5a0ae8-c3cc-48fb-beb4-0bcdc93e7b97",
+    "venue_name": "DDP"
+  },
+  {
+    "exhibition_id": "eba9ad43-7b74-45d3-bcad-b44eca2d2321",
+    "venue_name": "갤러리조선"
+  },
+  {
+    "exhibition_id": "f301cd69-1051-446f-ad85-273da6c1cfc9",
+    "venue_name": "환기미술관"
+  },
+  {
+    "exhibition_id": "8cb3c6e7-b5c5-4e1d-98cc-6f57c82b238d",
+    "venue_name": "DDP"
+  },
+  {
+    "exhibition_id": "e812eb03-4acb-4b60-8dcb-938db91a8aff",
+    "venue_name": "페로탕"
+  },
+  {
+    "exhibition_id": "9adeea32-6ad4-4226-814a-811476e289d4",
+    "venue_name": "서울공예박물관"
+  },
+  {
+    "exhibition_id": "176af722-6803-48a1-9652-8ac7a34b0315",
+    "venue_name": "갤러리현대"
+  },
+  {
+    "exhibition_id": "be9337eb-7ab5-439e-b984-1b9662fa52d0",
+    "venue_name": "G Gallery"
+  },
+  {
+    "exhibition_id": "cbeac977-0430-4d3d-8d4c-3a508cfd2c0f",
+    "venue_name": "프로젝트 스페이스 사루비아"
+  },
+  {
+    "exhibition_id": "4e68e19d-a6e2-482c-81cd-04af47a1fb5c",
+    "venue_name": "갤러리제이원 서울"
+  },
+  {
+    "exhibition_id": "404c53fa-1369-47e9-b0e7-9721f278d86e",
+    "venue_name": "갤러리조은"
+  },
+  {
+    "exhibition_id": "167c8cd5-8bc1-406a-b05c-35f7faa0441c",
+    "venue_name": "갤러리 키체"
+  },
+  {
+    "exhibition_id": "d3ec7b46-0e9a-4706-81d0-67c22493dcb2",
+    "venue_name": "아뜰리에 아키"
+  },
+  {
+    "exhibition_id": "3db2ae73-8adc-4c11-aab6-d1fb52238654",
+    "venue_name": "바라캇 컨템포러리"
+  },
+  {
+    "exhibition_id": "70e084df-a94d-49ef-b70e-d23ac60a3c54",
+    "venue_name": "서울시립 미술아카이브"
+  },
+  {
+    "exhibition_id": "91e0ea3d-d21b-4cfa-a29f-071f85bf2548",
+    "venue_name": "세화미술관"
+  },
+  {
+    "exhibition_id": "c2702582-6ab6-47b3-8776-ae85f2a04364",
+    "venue_name": "글래드스톤갤러리"
+  }
+]

@@ -5,122 +5,73 @@ const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXB
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-async function listExhibitionsWithoutDescription() {
+async function listExhibitionsNoDesc() {
   console.log('========================================');
-  console.log('Description 없는 전시 최종 확인');
+  console.log('Description이 없는 전시 목록 (작업용)');
   console.log('========================================\n');
-  
-  try {
-    // 1. 전체 데이터 가져오기
-    const { data: allTranslations, error } = await supabase
-      .from('exhibitions_translations')
-      .select(`
-        exhibition_id,
-        language_code,
-        exhibition_title,
-        venue_name,
-        city,
-        description
-      `)
-      .order('exhibition_id')
-      .order('language_code');
-    
-    if (error) {
-      console.error('Error:', error);
-      return;
-    }
-    
-    console.log(`✅ 총 ${allTranslations.length}개의 레코드 조회\n`);
-    
-    // 2. exhibition_id별로 그룹화
-    const exhibitions = {};
-    allTranslations.forEach(trans => {
-      if (!exhibitions[trans.exhibition_id]) {
-        exhibitions[trans.exhibition_id] = {
-          ko: null,
-          en: null
-        };
-      }
-      exhibitions[trans.exhibition_id][trans.language_code] = trans;
-    });
-    
-    // 3. description 없는 전시 찾기
-    const noDescriptionExhibitions = [];
-    
-    Object.keys(exhibitions).forEach(exhibitionId => {
-      const exh = exhibitions[exhibitionId];
-      const koHasDesc = exh.ko && exh.ko.description && exh.ko.description.trim() !== '';
-      const enHasDesc = exh.en && exh.en.description && exh.en.description.trim() !== '';
-      
-      if (!koHasDesc || !enHasDesc) {
-        noDescriptionExhibitions.push({
-          exhibitionId,
-          title: exh.ko?.exhibition_title || exh.en?.exhibition_title || 'Unknown',
-          venue: exh.ko?.venue_name || exh.en?.venue_name || 'Unknown',
-          city: exh.ko?.city || exh.en?.city || 'Unknown',
-          missingKoDesc: !koHasDesc,
-          missingEnDesc: !enHasDesc
-        });
-      }
-    });
-    
-    // 4. 결과 출력
-    console.log(`📊 분석 결과:`);
-    console.log(`  - 총 전시 수: ${Object.keys(exhibitions).length}개`);
-    console.log(`  - Description 없는 전시: ${noDescriptionExhibitions.length}개\n`);
-    
-    if (noDescriptionExhibitions.length > 0) {
-      // 정렬
-      noDescriptionExhibitions.sort((a, b) => a.title.localeCompare(b.title));
-      
-      console.log('📝 Description이 필요한 전시 목록:');
-      console.log('═'.repeat(80));
-      
-      noDescriptionExhibitions.forEach((exh, idx) => {
-        console.log(`\n${idx + 1}. ${exh.title}`);
-        console.log(`   장소: ${exh.venue} (${exh.city})`);
-        console.log(`   ID: ${exh.exhibitionId}`);
-        
-        const missing = [];
-        if (exh.missingKoDesc) missing.push('ko');
-        if (exh.missingEnDesc) missing.push('en');
-        console.log(`   ❌ Description 없음: [${missing.join(', ')}]`);
-      });
-      
-      // 통계
-      const bothMissing = noDescriptionExhibitions.filter(e => e.missingKoDesc && e.missingEnDesc).length;
-      const koOnlyMissing = noDescriptionExhibitions.filter(e => e.missingKoDesc && !e.missingEnDesc).length;
-      const enOnlyMissing = noDescriptionExhibitions.filter(e => !e.missingKoDesc && e.missingEnDesc).length;
-      
-      console.log('\n' + '═'.repeat(80));
-      console.log('📈 요약:');
-      console.log(`  - ko/en 둘 다 없음: ${bothMissing}개`);
-      console.log(`  - ko만 없음: ${koOnlyMissing}개`);
-      console.log(`  - en만 없음: ${enOnlyMissing}개`);
-      
-      // 파일로 저장
-      const fs = require('fs').promises;
-      const result = {
-        total: noDescriptionExhibitions.length,
-        exhibitions: noDescriptionExhibitions,
-        statistics: {
-          bothMissing,
-          koOnlyMissing,
-          enOnlyMissing
-        },
-        timestamp: new Date().toISOString()
-      };
-      
-      await fs.writeFile(
-        'exhibitions-without-description.json',
-        JSON.stringify(result, null, 2)
-      );
-      console.log('\n📄 상세 목록이 exhibitions-without-description.json에 저장되었습니다.');
-    }
-    
-  } catch (error) {
-    console.error('Unexpected error:', error);
+
+  // Description이 없는 한글 전시 조회 (전체 필드 확인)
+  const { data: exhibitions, error } = await supabase
+    .from('exhibitions_translations')
+    .select('*')
+    .eq('language_code', 'ko')
+    .or('description.is.null,description.eq.""')
+    .order('created_at', { ascending: false })
+    .limit(5);  // 먼저 5개만 확인
+
+  if (error) {
+    console.error('Error:', error);
+    return;
   }
+
+  // 필드 구조 확인
+  if (exhibitions.length > 0) {
+    console.log('샘플 데이터 구조:');
+    console.log(Object.keys(exhibitions[0]));
+    console.log('\n첫 번째 전시 데이터:');
+    console.log(exhibitions[0]);
+  }
+
+  // 전체 데이터 다시 조회
+  const { data: allExhibitions, error: allError } = await supabase
+    .from('exhibitions_translations')
+    .select('*')
+    .eq('language_code', 'ko')
+    .or('description.is.null,description.eq.""')
+    .order('venue_name', { ascending: true });
+
+  if (allError) {
+    console.error('Error:', allError);
+    return;
+  }
+
+  console.log(`\n총 ${allExhibitions.length}개 전시가 description이 필요합니다.\n`);
+
+  // 장소별로 그룹핑
+  const byVenue = {};
+  allExhibitions.forEach(ex => {
+    const venue = ex.venue_name || 'Unknown';
+    if (!byVenue[venue]) {
+      byVenue[venue] = [];
+    }
+    byVenue[venue].push(ex);
+  });
+
+  // 장소별로 출력 (처음 10개 장소만)
+  const venues = Object.keys(byVenue).slice(0, 10);
+  
+  venues.forEach(venue => {
+    console.log(`\n=== ${venue} (${byVenue[venue].length}개) ===`);
+    byVenue[venue].forEach((ex, idx) => {
+      console.log(`  ${idx + 1}. Title: ${ex.exhibition_title || 'No title'}`);
+      console.log(`     ID: ${ex.exhibition_id}`);
+      console.log(`     Artists: ${ex.artists ? ex.artists.join(', ') : 'Unknown'}`);
+      console.log(`     Period: ${ex.start_date || '?'} ~ ${ex.end_date || '?'}`);
+    });
+  });
+
+  console.log('\n\n전시 정보를 제공해주시면 배치 처리하겠습니다.');
+  console.log('형식: { exhibition_id: "...", description: "..." }');
 }
 
-listExhibitionsWithoutDescription().catch(console.error);
+listExhibitionsNoDesc().catch(console.error);

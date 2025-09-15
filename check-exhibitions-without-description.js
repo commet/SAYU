@@ -1,75 +1,91 @@
 const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config({ path: './frontend/.env.local' });
 
-// Supabase URL과 Service Role Key 직접 설정
-const SUPABASE_URL = 'https://hgltvdshuyfffskvjmst.supabase.co';
-const SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnbHR2ZHNodXlmZmZza3ZqbXN0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MjQ4OTUzMSwiZXhwIjoyMDY4MDY1NTMxfQ.CGTxr2fMsj3kT0Qf_Ytk3SmU5zeMLkdB3nvnBWkXtaI';
+const supabaseUrl = 'https://hgltvdshuyfffskvjmst.supabase.co';
+const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnbHR2ZHNodXlmZmZza3ZqbXN0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MjQ4OTUzMSwiZXhwIjoyMDY4MDY1NTMxfQ.CGTxr2fMsj3kT0Qf_Ytk3SmU5zeMLkdB3nvnBWkXtaI';
 
-const supabase = createClient(
-  SUPABASE_URL,
-  SUPABASE_SERVICE_ROLE_KEY
-);
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-async function checkExhibitionsWithoutDescription() {
-  try {
-    console.log('🔍 Checking exhibitions without descriptions...\n');
+async function generateBatchList() {
+  console.log('========================================');
+  console.log('Description 필요 전시 - 배치 리스트');
+  console.log('========================================\n');
+
+  // Description이 없는 한글 전시 전체 조회
+  const { data: exhibitions, error } = await supabase
+    .from('exhibitions_translations')
+    .select('*')
+    .eq('language_code', 'ko')
+    .or('description.is.null,description.eq.""')
+    .order('venue_name', { ascending: true });
+
+  if (error) {
+    console.error('Error:', error);
+    return;
+  }
+
+  console.log(`총 ${exhibitions.length}개 전시가 description이 필요합니다.\n`);
+
+  // 10개씩 배치로 나누기
+  const batchSize = 10;
+  const totalBatches = Math.ceil(exhibitions.length / batchSize);
+  
+  // 첫 3개 배치만 상세히 출력
+  for (let i = 0; i < Math.min(3, totalBatches); i++) {
+    const batchStart = i * batchSize;
+    const batchEnd = Math.min(batchStart + batchSize, exhibitions.length);
+    const batch = exhibitions.slice(batchStart, batchEnd);
     
-    // exhibitions_translations 테이블에서 description이 null이거나 빈 문자열인 전시 조회
-    const { data: exhibitionsWithoutDesc, error } = await supabase
-      .from('exhibitions_translations')
-      .select(`
-        exhibition_id,
-        title,
-        subtitle,
-        description,
-        venue_name,
-        venue_district,
-        exhibitions_master!inner(
-          id,
-          start_date,
-          end_date,
-          status
-        )
-      `)
-      .or('description.is.null,description.eq.')
-      .eq('locale', 'ko')
-      .order('exhibitions_master(start_date)', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching exhibitions:', error);
-      return;
-    }
-
-    console.log(`총 ${exhibitionsWithoutDesc.length}개의 전시가 description이 없습니다:\n`);
+    console.log(`\n========== BATCH ${i + 1} (${batch.length}개 전시) ==========\n`);
     
-    exhibitionsWithoutDesc.forEach((exhibition, index) => {
-      const master = exhibition.exhibitions_master;
-      console.log(`${index + 1}. ${exhibition.title}`);
-      if (exhibition.subtitle) {
-        console.log(`   부제: ${exhibition.subtitle}`);
-      }
-      console.log(`   장소: ${exhibition.venue_name} (${exhibition.venue_district})`);
-      console.log(`   기간: ${master.start_date} ~ ${master.end_date}`);
-      console.log(`   상태: ${master.status}`);
-      console.log(`   ID: ${exhibition.exhibition_id}`);
+    batch.forEach((ex, index) => {
+      const num = batchStart + index + 1;
+      console.log(`${num}. ${ex.exhibition_title || 'No title'}`);
+      console.log(`   - ID: ${ex.exhibition_id}`);
+      console.log(`   - 작가: ${ex.artists ? ex.artists.join(', ') : '미정'}`);
+      console.log(`   - 장소: ${ex.venue_name}`);
+      console.log(`   - 기간: ${ex.start_date || '미정'} ~ ${ex.end_date || '미정'}`);
       console.log('');
     });
-
-    // 상태별 집계
-    const statusCount = {};
-    exhibitionsWithoutDesc.forEach(ex => {
-      const status = ex.exhibitions_master.status;
-      statusCount[status] = (statusCount[status] || 0) + 1;
-    });
-
-    console.log('\n📊 상태별 집계:');
-    Object.entries(statusCount).forEach(([status, count]) => {
-      console.log(`   ${status}: ${count}개`);
-    });
-
-  } catch (error) {
-    console.error('Unexpected error:', error);
   }
+
+  // JSON 파일로 첫 번째 배치 저장
+  const fs = require('fs').promises;
+  const firstBatch = exhibitions.slice(0, 10).map(ex => ({
+    exhibition_id: ex.exhibition_id,
+    title: ex.exhibition_title,
+    artists: ex.artists ? ex.artists.join(', ') : '미정',
+    venue: ex.venue_name,
+    period: `${ex.start_date || '미정'} ~ ${ex.end_date || '미정'}`
+  }));
+
+  await fs.writeFile(
+    'batch1-exhibitions.json',
+    JSON.stringify(firstBatch, null, 2)
+  );
+
+  console.log('\n========================================');
+  console.log('작업 방식 제안:');
+  console.log('1. 10개씩 배치로 나눠서 작업 (총 15개 배치)');
+  console.log('2. 장소별로 그룹핑해서 작업');
+  console.log('3. 주요 갤러리/미술관부터 우선 작업');
+  console.log('\nbatch1-exhibitions.json 파일에 첫 번째 배치 저장됨');
+  console.log('========================================');
+  
+  // 장소별 통계
+  const venueStats = {};
+  exhibitions.forEach(ex => {
+    const venue = ex.venue_name || 'Unknown';
+    venueStats[venue] = (venueStats[venue] || 0) + 1;
+  });
+  
+  console.log('\n주요 장소별 필요 개수:');
+  const sortedVenues = Object.entries(venueStats)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10);
+  
+  sortedVenues.forEach(([venue, count]) => {
+    console.log(`  - ${venue}: ${count}개`);
+  });
 }
 
-checkExhibitionsWithoutDescription();
+generateBatchList().catch(console.error);

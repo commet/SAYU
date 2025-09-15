@@ -1,71 +1,73 @@
 const { createClient } = require('@supabase/supabase-js');
 
-const SUPABASE_URL = 'https://hgltvdshuyfffskvjmst.supabase.co';
-const SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnbHR2ZHNodXlmZmZza3ZqbXN0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MjQ4OTUzMSwiZXhwIjoyMDY4MDY1NTMxfQ.CGTxr2fMsj3kT0Qf_Ytk3SmU5zeMLkdB3nvnBWkXtaI';
+const supabaseUrl = 'https://hgltvdshuyfffskvjmst.supabase.co';
+const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnbHR2ZHNodXlmZmZza3ZqbXN0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MjQ4OTUzMSwiZXhwIjoyMDY4MDY1NTMxfQ.CGTxr2fMsj3kT0Qf_Ytk3SmU5zeMLkdB3nvnBWkXtaI';
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 async function listExhibitionsWithoutDescription() {
-  try {
-    // description이 없는 전시 조회
-    const { data, error } = await supabase
-      .from('exhibitions_translations')
-      .select(`
-        exhibition_id,
-        exhibition_title,
-        subtitle,
-        venue_name,
-        city,
-        language_code,
-        description
-      `)
-      .or('description.is.null,description.eq.""')
-      .order('exhibition_title');
+  console.log('========================================');
+  console.log('Description이 없는 전시 목록');
+  console.log('========================================\n');
 
-    if (error) {
-      console.error('Error:', error);
-      return;
-    }
+  // Description이 없는 한글 전시 조회
+  const { data: exhibitions, error } = await supabase
+    .from('exhibitions_translations')
+    .select('*')
+    .eq('language_code', 'ko')
+    .or('description.is.null,description.eq.""')
+    .order('created_at', { ascending: false });
 
-    console.log(`\n=== Description이 없는 전시 목록 (총 ${data.length}건) ===\n`);
-    
-    // 언어별로 그룹화
-    const byLanguage = {};
-    data.forEach(item => {
-      if (!byLanguage[item.language_code]) {
-        byLanguage[item.language_code] = [];
-      }
-      byLanguage[item.language_code].push(item);
-    });
-
-    // 언어별 출력
-    Object.entries(byLanguage).forEach(([lang, exhibitions]) => {
-      console.log(`\n📌 ${lang.toUpperCase()} (${exhibitions.length}건):`);
-      console.log('─'.repeat(80));
-      
-      exhibitions.forEach((ex, idx) => {
-        console.log(`${idx + 1}. ${ex.exhibition_title || '(제목 없음)'}`);
-        if (ex.subtitle) console.log(`   부제: ${ex.subtitle}`);
-        console.log(`   장소: ${ex.venue_name} (${ex.city})`);
-        console.log(`   ID: ${ex.exhibition_id}`);
-        console.log('');
-      });
-    });
-
-    // 전시 ID별로 유니크한 개수 확인
-    const uniqueExhibitionIds = [...new Set(data.map(d => d.exhibition_id))];
-    console.log(`\n=== 요약 ===`);
-    console.log(`총 ${uniqueExhibitionIds.length}개의 고유한 전시`);
-    console.log(`총 ${data.length}개의 번역 레코드`);
-    
-    // 언어별 요약
-    Object.entries(byLanguage).forEach(([lang, exhibitions]) => {
-      console.log(`  - ${lang}: ${exhibitions.length}건`);
-    });
-
-  } catch (err) {
-    console.error('Unexpected error:', err);
+  if (error) {
+    console.error('Error:', error);
+    return;
   }
+
+  console.log(`총 ${exhibitions.length}개 전시가 description이 필요합니다.\n`);
+
+  // 배치 단위로 그룹핑 (10개씩)
+  const batchSize = 10;
+  const batches = [];
+  
+  for (let i = 0; i < exhibitions.length; i += batchSize) {
+    batches.push(exhibitions.slice(i, i + batchSize));
+  }
+
+  // 각 배치별로 출력
+  batches.forEach((batch, batchIndex) => {
+    console.log(`\n========== Batch ${batchIndex + 1} (${batch.length}개) ==========`);
+    
+    batch.forEach((exhibition, index) => {
+      const globalIndex = batchIndex * batchSize + index + 1;
+      console.log(`\n${globalIndex}. ${exhibition.title}`);
+      console.log(`   - Exhibition ID: ${exhibition.exhibition_id}`);
+      console.log(`   - Artist: ${exhibition.artist_name || 'Unknown'}`);
+      console.log(`   - Venue: ${exhibition.venue_name || 'Unknown'}`);
+      console.log(`   - Period: ${exhibition.start_date} ~ ${exhibition.end_date}`);
+      
+      // 영어 버전 확인
+      console.log(`   - 영어 제목: ${exhibition.title_en || 'N/A'}`);
+    });
+  });
+
+  // 작업용 JSON 파일 생성
+  const fs = require('fs').promises;
+  const exportData = exhibitions.map(ex => ({
+    exhibition_id: ex.exhibition_id,
+    title: ex.title_ko || ex.title,
+    artist_name: ex.artist_name,
+    venue_name: ex.venue_name,
+    start_date: ex.start_date,
+    end_date: ex.end_date
+  }));
+
+  await fs.writeFile(
+    'exhibitions-without-description.json',
+    JSON.stringify(exportData, null, 2)
+  );
+
+  console.log('\n\n✅ exhibitions-without-description.json 파일로 저장되었습니다.');
+  console.log('이 파일을 참고하여 description을 작성해주세요.');
 }
 
-listExhibitionsWithoutDescription();
+listExhibitionsWithoutDescription().catch(console.error);
