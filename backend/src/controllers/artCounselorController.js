@@ -1,0 +1,800 @@
+const artCounselorService = require('../services/artCounselorService');
+const supabaseArtService = require('../services/supabaseArtService');
+const { pool } = require('../config/database');
+const { logger } = require('../utils/logger');
+const { validationResult } = require('express-validator');
+
+class ArtCounselorController {
+    /**
+     * Start a new art therapy session
+     */
+    async startSession(req, res) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({
+                    success: false,
+                    errors: errors.array()
+                });
+            }
+
+            const { userId } = req;
+            const { sessionType = 'general', initialEmotion } = req.body;
+
+            const session = await artCounselorService.startSession(
+                userId,
+                sessionType,
+                initialEmotion
+            );
+
+            logger.info(`Art counselor session started for user ${userId}`, {
+                sessionId: session.sessionId,
+                sessionType
+            });
+
+            res.json({
+                success: true,
+                data: {
+                    sessionId: session.sessionId,
+                    welcomeMessage: session.welcomeMessage,
+                    userProfile: session.userProfile,
+                    sessionType
+                }
+            });
+
+        } catch (error) {
+            logger.error('Error starting counselor session:', error);
+            res.status(500).json({
+                success: false,
+                message: '세션을 시작하는 중 오류가 발생했습니다.',
+                error: process.env.NODE_ENV === 'development' ? error.message : undefined
+            });
+        }
+    }
+
+    /**
+     * Get session details and conversation history
+     */
+    async getSession(req, res) {
+        try {
+            const { sessionId } = req.params;
+            const { userId } = req;
+
+            const client = await pool.connect();
+
+            // Get session details
+            const sessionQuery = `
+                SELECT
+                    id, session_type, session_goal, initial_emotion_state,
+                    final_emotion_state, conversation_summary, key_insights,
+                    started_at, ended_at, user_satisfaction, helpfulness_rating
+                FROM art_counselor_sessions
+                WHERE id = $1 AND user_id = $2
+            `;
+
+            const sessionResult = await client.query(sessionQuery, [sessionId, userId]);
+
+            if (sessionResult.rows.length === 0) {
+                client.release();
+                return res.status(404).json({
+                    success: false,
+                    message: '세션을 찾을 수 없습니다.'
+                });
+            }
+
+            // Get conversation history
+            const conversationQuery = `
+                SELECT
+                    message_type, content, emotion_detected,
+                    therapeutic_theme, created_at
+                FROM counselor_conversation_memory
+                WHERE session_id = $1
+                ORDER BY created_at ASC
+            `;
+
+            const conversationResult = await client.query(conversationQuery, [sessionId]);
+
+            client.release();
+
+            res.json({
+                success: true,
+                data: {
+                    session: sessionResult.rows[0],
+                    conversation: conversationResult.rows
+                }
+            });
+
+        } catch (error) {
+            logger.error('Error getting session:', error);
+            res.status(500).json({
+                success: false,
+                message: '세션 정보를 가져오는 중 오류가 발생했습니다.'
+            });
+        }
+    }
+
+    /**
+     * Send message to counselor
+     */
+    async sendMessage(req, res) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({
+                    success: false,
+                    errors: errors.array()
+                });
+            }
+
+            const { sessionId } = req.params;
+            const { userId } = req;
+            const { message, artworkContext } = req.body;
+
+            // Verify session belongs to user
+            const client = await pool.connect();
+            const sessionCheck = await client.query(
+                'SELECT user_id FROM art_counselor_sessions WHERE id = $1',
+                [sessionId]
+            );
+
+            if (sessionCheck.rows.length === 0 || sessionCheck.rows[0].user_id !== userId) {
+                client.release();
+                return res.status(403).json({
+                    success: false,
+                    message: '접근 권한이 없습니다.'
+                });
+            }
+
+            client.release();
+
+            // Process message with counselor
+            const response = await artCounselorService.processMessage(
+                sessionId,
+                userId,
+                message,
+                artworkContext
+            );
+
+            logger.info(`Counselor message processed for user ${userId}`, {
+                sessionId,
+                therapeuticTheme: response.therapeuticTheme
+            });
+
+            res.json({
+                success: true,
+                data: {
+                    response: response.response,
+                    emotionDetected: response.emotionDetected,
+                    therapeuticTheme: response.therapeuticTheme,
+                    suggestedActions: response.suggestedActions,
+                    artworkRecommendations: response.artworkRecommendations
+                }
+            });
+
+        } catch (error) {
+            logger.error('Error processing counselor message:', error);
+            res.status(500).json({
+                success: false,
+                message: '메시지를 처리하는 중 오류가 발생했습니다.'
+            });
+        }
+    }
+
+    /**
+     * End therapy session
+     */
+    async endSession(req, res) {
+        try {
+            const { sessionId } = req.params;
+            const { userId } = req;
+            const { finalEmotionalState, sessionSummary } = req.body;
+
+            const client = await pool.connect();
+
+            // Verify session belongs to user
+            const sessionCheck = await client.query(
+                'SELECT user_id FROM art_counselor_sessions WHERE id = $1',
+                [sessionId]
+            );
+
+            if (sessionCheck.rows.length === 0 || sessionCheck.rows[0].user_id !== userId) {
+                client.release();
+                return res.status(403).json({
+                    success: false,
+                    message: '접근 권한이 없습니다.'
+                });
+            }
+
+            // Update session with end details
+            const updateQuery = `
+                UPDATE art_counselor_sessions
+                SET
+                    ended_at = CURRENT_TIMESTAMP,
+                    final_emotion_state = $2,
+                    conversation_summary = COALESCE($3, conversation_summary)
+                WHERE id = $1
+                RETURNING ended_at
+            `;
+
+            const result = await client.query(updateQuery, [
+                sessionId,
+                finalEmotionalState || {},
+                sessionSummary
+            ]);
+
+            client.release();
+
+            logger.info(`Counselor session ended for user ${userId}`, { sessionId });
+
+            res.json({
+                success: true,
+                data: {
+                    sessionId,
+                    endedAt: result.rows[0].ended_at
+                }
+            });
+
+        } catch (error) {
+            logger.error('Error ending session:', error);
+            res.status(500).json({
+                success: false,
+                message: '세션을 종료하는 중 오류가 발생했습니다.'
+            });
+        }
+    }
+
+    /**
+     * Get daily art recommendation
+     */
+    async getDailyArtRecommendation(req, res) {
+        try {
+            const { userId } = req;
+            const today = new Date().toISOString().split('T')[0];
+
+            const client = await pool.connect();
+
+            // Check if recommendation already exists for today
+            const existingQuery = `
+                SELECT * FROM daily_art_recommendations
+                WHERE user_id = $1 AND recommendation_date = $2
+                ORDER BY created_at DESC
+                LIMIT 1
+            `;
+
+            const existingResult = await client.query(existingQuery, [userId, today]);
+
+            if (existingResult.rows.length > 0) {
+                client.release();
+                return res.json({
+                    success: true,
+                    data: existingResult.rows[0]
+                });
+            }
+
+            client.release();
+
+            // Generate new recommendation
+            const recommendation = await artCounselorService.generateDailyArtRecommendation(userId);
+
+            logger.info(`Daily art recommendation generated for user ${userId}`, {
+                artworkId: recommendation.artworkId
+            });
+
+            res.json({
+                success: true,
+                data: recommendation
+            });
+
+        } catch (error) {
+            logger.error('Error getting daily art recommendation:', error);
+            res.status(500).json({
+                success: false,
+                message: '일일 추천 작품을 가져오는 중 오류가 발생했습니다.'
+            });
+        }
+    }
+
+    /**
+     * Mark daily recommendation as viewed
+     */
+    async markRecommendationViewed(req, res) {
+        try {
+            const { recommendationId } = req.params;
+            const { userId } = req;
+            const { interactionTimeSeconds = 0 } = req.body;
+
+            const client = await pool.connect();
+
+            const updateQuery = `
+                UPDATE daily_art_recommendations
+                SET
+                    viewed = true,
+                    viewed_at = CURRENT_TIMESTAMP,
+                    interaction_time_seconds = $3
+                WHERE id = $1 AND user_id = $2
+                RETURNING id
+            `;
+
+            const result = await client.query(updateQuery, [
+                recommendationId,
+                userId,
+                interactionTimeSeconds
+            ]);
+
+            if (result.rows.length === 0) {
+                client.release();
+                return res.status(404).json({
+                    success: false,
+                    message: '추천 항목을 찾을 수 없습니다.'
+                });
+            }
+
+            client.release();
+
+            res.json({
+                success: true,
+                data: { viewed: true, viewedAt: new Date() }
+            });
+
+        } catch (error) {
+            logger.error('Error marking recommendation as viewed:', error);
+            res.status(500).json({
+                success: false,
+                message: '추천 확인 처리 중 오류가 발생했습니다.'
+            });
+        }
+    }
+
+    /**
+     * Record emotional response to artwork
+     */
+    async recordEmotionalResponse(req, res) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({
+                    success: false,
+                    errors: errors.array()
+                });
+            }
+
+            const { userId } = req;
+            const {
+                artworkId,
+                artworkTitle,
+                artworkArtist,
+                artworkYear,
+                emotionalResponse,
+                responseIntensity,
+                personalMeaning,
+                sessionId
+            } = req.body;
+
+            const client = await pool.connect();
+
+            const insertQuery = `
+                INSERT INTO artwork_emotional_responses (
+                    user_id, artwork_id, artwork_title, artwork_artist,
+                    artwork_year, emotional_response, response_intensity,
+                    personal_meaning, session_id
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                RETURNING id, created_at
+            `;
+
+            const result = await client.query(insertQuery, [
+                userId,
+                artworkId,
+                artworkTitle,
+                artworkArtist,
+                artworkYear,
+                emotionalResponse,
+                responseIntensity,
+                personalMeaning,
+                sessionId
+            ]);
+
+            client.release();
+
+            logger.info(`Emotional response recorded for user ${userId}`, {
+                artworkId,
+                responseId: result.rows[0].id
+            });
+
+            res.json({
+                success: true,
+                data: {
+                    responseId: result.rows[0].id,
+                    recordedAt: result.rows[0].created_at
+                }
+            });
+
+        } catch (error) {
+            logger.error('Error recording emotional response:', error);
+            res.status(500).json({
+                success: false,
+                message: '감정 응답을 기록하는 중 오류가 발생했습니다.'
+            });
+        }
+    }
+
+    /**
+     * Get conversation memory
+     */
+    async getConversationMemory(req, res) {
+        try {
+            const { userId } = req;
+            const { sessionId, limit = 20, theme } = req.query;
+
+            const client = await pool.connect();
+
+            let query = `
+                SELECT
+                    id, session_id, message_type, content,
+                    emotion_detected, therapeutic_theme,
+                    created_at
+                FROM counselor_conversation_memory
+                WHERE user_id = $1
+            `;
+
+            const params = [userId];
+            let paramCount = 1;
+
+            if (sessionId) {
+                paramCount++;
+                query += ` AND session_id = $${paramCount}`;
+                params.push(sessionId);
+            }
+
+            if (theme) {
+                paramCount++;
+                query += ` AND therapeutic_theme = $${paramCount}`;
+                params.push(theme);
+            }
+
+            query += ` ORDER BY created_at DESC LIMIT $${paramCount + 1}`;
+            params.push(limit);
+
+            const result = await client.query(query, params);
+            client.release();
+
+            res.json({
+                success: true,
+                data: result.rows
+            });
+
+        } catch (error) {
+            logger.error('Error getting conversation memory:', error);
+            res.status(500).json({
+                success: false,
+                message: '대화 기록을 가져오는 중 오류가 발생했습니다.'
+            });
+        }
+    }
+
+    /**
+     * Get emotional profile
+     */
+    async getEmotionalProfile(req, res) {
+        try {
+            const { userId } = req;
+
+            const client = await pool.connect();
+
+            const profileQuery = `
+                SELECT
+                    uep.*,
+                    cup.preferred_counselor_persona,
+                    cup.communication_formality,
+                    cup.preferred_therapeutic_approaches,
+                    cup.crisis_support_enabled,
+                    cup.trigger_warnings_enabled
+                FROM user_emotional_profiles uep
+                LEFT JOIN counselor_user_preferences cup ON cup.user_id = uep.user_id
+                WHERE uep.user_id = $1
+            `;
+
+            const result = await client.query(profileQuery, [userId]);
+            client.release();
+
+            if (result.rows.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: '감정 프로필을 찾을 수 없습니다.'
+                });
+            }
+
+            res.json({
+                success: true,
+                data: result.rows[0]
+            });
+
+        } catch (error) {
+            logger.error('Error getting emotional profile:', error);
+            res.status(500).json({
+                success: false,
+                message: '감정 프로필을 가져오는 중 오류가 발생했습니다.'
+            });
+        }
+    }
+
+    /**
+     * Provide crisis support
+     */
+    async provideCrisisSupport(req, res) {
+        try {
+            const { userId } = req;
+            const { immediateNeed, safetyLevel, message } = req.body;
+
+            // Log crisis request for monitoring
+            logger.warn(`Crisis support requested by user ${userId}`, {
+                immediateNeed,
+                safetyLevel,
+                timestamp: new Date()
+            });
+
+            // Get crisis resources based on user location/preferences
+            const client = await pool.connect();
+
+            const userQuery = `
+                SELECT
+                    cup.crisis_resources_region,
+                    cup.emergency_contact_email,
+                    up.location
+                FROM counselor_user_preferences cup
+                LEFT JOIN user_profiles up ON up.user_id = cup.user_id
+                WHERE cup.user_id = $1
+            `;
+
+            const userResult = await client.query(userQuery, [userId]);
+            const userPrefs = userResult.rows[0] || {};
+
+            client.release();
+
+            // Generate crisis response
+            const crisisResponse = this.generateCrisisResponse(safetyLevel, userPrefs);
+
+            // If immediate danger, also log for emergency protocols
+            if (safetyLevel === 'immediate_danger') {
+                logger.error(`EMERGENCY: User ${userId} indicated immediate danger`, {
+                    message,
+                    emergencyContact: userPrefs.emergency_contact_email
+                });
+            }
+
+            res.json({
+                success: true,
+                data: {
+                    response: crisisResponse.message,
+                    resources: crisisResponse.resources,
+                    emergencyContacts: crisisResponse.emergencyContacts,
+                    recommendedActions: crisisResponse.actions
+                }
+            });
+
+        } catch (error) {
+            logger.error('Error providing crisis support:', error);
+            res.status(500).json({
+                success: false,
+                message: '위기 지원을 제공하는 중 오류가 발생했습니다.'
+            });
+        }
+    }
+
+    /**
+     * Health check for service
+     */
+    async healthCheck(req, res) {
+        try {
+            const client = await pool.connect();
+            await client.query('SELECT 1');
+            client.release();
+
+            res.json({
+                success: true,
+                service: 'Art Counselor Service',
+                status: 'healthy',
+                timestamp: new Date(),
+                version: '1.0.0'
+            });
+
+        } catch (error) {
+            res.status(503).json({
+                success: false,
+                service: 'Art Counselor Service',
+                status: 'unhealthy',
+                error: error.message
+            });
+        }
+    }
+
+    /**
+     * Generate crisis response based on safety level
+     */
+    generateCrisisResponse(safetyLevel, userPrefs) {
+        const baseResources = [
+            {
+                name: '생명의전화',
+                phone: '1588-9191',
+                description: '24시간 상담 서비스'
+            },
+            {
+                name: '청소년전화',
+                phone: '1388',
+                description: '청소년 위기상담'
+            }
+        ];
+
+        switch (safetyLevel) {
+            case 'immediate_danger':
+                return {
+                    message: '지금 당장 안전이 우려되는 상황이시군요. 즉시 전문가의 도움을 받으시기 바랍니다.',
+                    resources: [
+                        { name: '응급실', phone: '119', urgent: true },
+                        { name: '경찰', phone: '112', urgent: true },
+                        ...baseResources
+                    ],
+                    emergencyContacts: userPrefs.emergency_contact_email ? [userPrefs.emergency_contact_email] : [],
+                    actions: [
+                        '즉시 안전한 장소로 이동하세요',
+                        '신뢰할 수 있는 사람에게 연락하세요',
+                        '응급 서비스에 연락하는 것을 주저하지 마세요'
+                    ]
+                };
+
+            case 'at_risk':
+                return {
+                    message: '힘든 상황을 겪고 계시는군요. 혼자 감당하지 마시고 도움을 요청하세요.',
+                    resources: baseResources,
+                    emergencyContacts: [],
+                    actions: [
+                        '신뢰할 수 있는 친구나 가족에게 이야기하세요',
+                        '전문 상담사와 상담을 고려해보세요',
+                        '규칙적인 생활패턴을 유지하세요'
+                    ]
+                };
+
+            default:
+                return {
+                    message: '어려운 감정을 느끼고 계시는군요. 함께 이겨낼 수 있어요.',
+                    resources: baseResources,
+                    emergencyContacts: [],
+                    actions: [
+                        '깊게 숨을 쉬고 현재 순간에 집중하세요',
+                        '좋아하는 예술작품을 감상해보세요',
+                        '산책이나 가벼운 운동을 해보세요'
+                    ]
+                };
+        }
+    }
+
+    /**
+     * Get today's artwork recommendation (Supabase-based)
+     */
+    async getTodaysArtwork(req, res) {
+        try {
+            const { userId } = req;
+
+            const result = await supabaseArtService.selectDailyArtwork(userId);
+
+            logger.info(`Daily artwork selected for user ${userId}`, {
+                artworkId: result.artworkId
+            });
+
+            res.json({
+                success: true,
+                data: result
+            });
+
+        } catch (error) {
+            logger.error('Error getting today\'s artwork:', error);
+            res.status(500).json({
+                success: false,
+                message: '오늘의 작품을 가져오는 중 오류가 발생했습니다.'
+            });
+        }
+    }
+
+    /**
+     * Generate artwork presentation (Supabase-based)
+     */
+    async getArtworkPresentation(req, res) {
+        try {
+            const { artworkId } = req.params;
+            const { userId } = req;
+
+            const presentation = await supabaseArtService.generatePresentation(artworkId, userId);
+
+            logger.info(`Artwork presentation generated for user ${userId}`, {
+                artworkId
+            });
+
+            res.json({
+                success: true,
+                data: presentation
+            });
+
+        } catch (error) {
+            logger.error('Error generating artwork presentation:', error);
+            res.status(500).json({
+                success: false,
+                message: '작품 프레젠테이션을 생성하는 중 오류가 발생했습니다.'
+            });
+        }
+    }
+
+    /**
+     * Save journal entry (Supabase-based)
+     */
+    async saveJournalEntry(req, res) {
+        try {
+            const { userId } = req;
+            const { artworkId, entry } = req.body;
+
+            const result = await supabaseArtService.saveJournalEntry(userId, artworkId, entry);
+
+            logger.info(`Journal entry saved for user ${userId}`, {
+                artworkId,
+                entryId: result.id
+            });
+
+            res.json({
+                success: true,
+                data: result
+            });
+
+        } catch (error) {
+            logger.error('Error saving journal entry:', error);
+            res.status(500).json({
+                success: false,
+                message: '감상 기록을 저장하는 중 오류가 발생했습니다.'
+            });
+        }
+    }
+
+    /**
+     * Get user collection (Supabase-based)
+     */
+    async getUserCollection(req, res) {
+        try {
+            const { userId } = req;
+            const { limit = 20 } = req.query;
+
+            const collection = await supabaseArtService.getUserCollection(userId, parseInt(limit));
+
+            res.json({
+                success: true,
+                data: collection
+            });
+
+        } catch (error) {
+            logger.error('Error getting user collection:', error);
+            res.status(500).json({
+                success: false,
+                message: '사용자 컬렉션을 가져오는 중 오류가 발생했습니다.'
+            });
+        }
+    }
+
+    /**
+     * Get all artworks (Supabase-based)
+     */
+    async getAllArtworks(req, res) {
+        try {
+            const artworks = await supabaseArtService.getAllArtworks();
+
+            res.json({
+                success: true,
+                data: artworks
+            });
+
+        } catch (error) {
+            logger.error('Error getting all artworks:', error);
+            res.status(500).json({
+                success: false,
+                message: '작품 목록을 가져오는 중 오류가 발생했습니다.'
+            });
+        }
+    }
+}
+
+module.exports = new ArtCounselorController();

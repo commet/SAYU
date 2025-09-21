@@ -110,6 +110,8 @@ const venueRoutes = require('./routes/venueRoutes');
 const artveeArtworkRoutes = require('./routes/artveeArtworkRoutes');
 const artistAPTRoutes = require('./routes/artistAPT');
 const healthRoutes = require('./routes/health');
+const artCounselorRoutes = require('./routes/artCounselorRoutes');
+const consentRoutes = require('./routes/consentRoutes');
 
 const app = express();
 
@@ -345,6 +347,8 @@ app.use('/api', exhibitionRoutes);
 app.use('/api/exhibitions/enrich', exhibitionEnrichRoutes);
 // app.use('/api/emotion', emotionTranslationRoutes); // Temporarily disabled for debugging
 app.use('/api/chatbot', chatbotRoutes);
+app.use('/api/art-counselor', artCounselorRoutes); // 🧠 Art Counselor System with RAG
+app.use('/api/consent', consentRoutes); // 🛡️ Safety & Consent Management
 // app.use('/api/contemplative', contemplativeRoutes); // Temporarily disabled for debugging
 app.use('/api/apt', aptRecommendationRoutes); // APT 기반 추천 시스템
 app.use('/api/easter-eggs', easterEggRoutes);
