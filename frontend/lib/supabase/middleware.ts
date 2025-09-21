@@ -5,7 +5,7 @@ export async function updateSession(request: NextRequest) {
   // Check if Supabase environment variables are set
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  
+
   if (!supabaseUrl || !supabaseAnonKey) {
     // If Supabase is not configured, just pass through
     return NextResponse.next()
@@ -14,40 +14,48 @@ export async function updateSession(request: NextRequest) {
   // Create response first
   const response = NextResponse.next()
 
-  const supabase = createServerClient(
-    supabaseUrl,
-    supabaseAnonKey,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value
+  try {
+    const supabase = createServerClient(
+      supabaseUrl,
+      supabaseAnonKey,
+      {
+        cookies: {
+          get(name: string) {
+            return request.cookies.get(name)?.value
+          },
+          set(name: string, value: string, options: CookieOptions) {
+            response.cookies.set({
+              name,
+              value,
+              ...options,
+            })
+          },
+          remove(name: string, options: CookieOptions) {
+            response.cookies.set({
+              name,
+              value: '',
+              ...options,
+            })
+          },
         },
-        set(name: string, value: string, options: CookieOptions) {
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          })
+        auth: {
+          flowType: 'pkce',
+          detectSessionInUrl: false, // Disable URL session detection in middleware
+          persistSession: false, // Disable session persistence in middleware
+          autoRefreshToken: false, // Disable auto refresh in middleware
         },
-        remove(name: string, options: CookieOptions) {
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-        },
-      },
-      auth: {
-        flowType: 'pkce',
-        detectSessionInUrl: true,
-        persistSession: true,
-        autoRefreshToken: true,
+        realtime: {
+          disabled: true // Disable realtime to avoid Edge Runtime issues
+        }
       }
-    }
-  )
+    )
 
-  // Only refresh session, don't block navigation
-  await supabase.auth.getUser()
+    // Only get user without triggering realtime connections
+    await supabase.auth.getUser()
+  } catch (error) {
+    // If any error occurs, just pass through
+    console.warn('Supabase middleware error (skipping):', error)
+  }
 
   return response
 }
