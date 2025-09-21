@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Brain, Search, Filter, Calendar, Heart, MessageCircle, Palette, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import * as d3 from 'd3';
 
 const MemoryVisualization = ({ userId, onMemorySelect }) => {
   const [memories, setMemories] = useState([]);
@@ -19,11 +18,8 @@ const MemoryVisualization = ({ userId, onMemorySelect }) => {
   }, [userId]);
 
   useEffect(() => {
-    if (memories.length > 0 && viewMode === 'network') {
-      renderNetworkVisualization();
-    } else if (memories.length > 0 && viewMode === 'heatmap') {
-      renderEmotionHeatmap();
-    }
+    // D3 visualizations disabled for now
+    // Can be implemented later with d3 dependency
   }, [memories, viewMode]);
 
   const loadMemories = async () => {
@@ -97,220 +93,15 @@ const MemoryVisualization = ({ userId, onMemorySelect }) => {
   };
 
   const renderNetworkVisualization = () => {
-    const svg = d3.select(svgRef.current);
-    svg.selectAll("*").remove();
-
-    const width = 600;
-    const height = 400;
-
-    svg.attr("width", width).attr("height", height);
-
-    // Group memories by session and theme
-    const sessions = d3.group(memories, d => d.session_id);
-    const themes = Array.from(new Set(memories.map(m => m.therapeutic_theme).filter(Boolean)));
-
-    // Create nodes and links
-    const nodes = [];
-    const links = [];
-
-    // Add theme nodes
-    themes.forEach((theme, i) => {
-      nodes.push({
-        id: `theme-${theme}`,
-        type: 'theme',
-        name: theme,
-        color: getThemeColor(theme),
-        x: (width / themes.length) * i + 50,
-        y: height / 2
-      });
-    });
-
-    // Add memory nodes and links
-    sessions.forEach((sessionMemories, sessionId) => {
-      sessionMemories.forEach((memory, i) => {
-        nodes.push({
-          id: memory.id,
-          type: 'memory',
-          data: memory,
-          name: memory.content.substring(0, 50) + '...',
-          theme: memory.therapeutic_theme,
-          color: getThemeColor(memory.therapeutic_theme)
-        });
-
-        // Link to theme
-        if (memory.therapeutic_theme) {
-          links.push({
-            source: memory.id,
-            target: `theme-${memory.therapeutic_theme}`,
-            strength: memory.memory_importance || 0.5
-          });
-        }
-
-        // Link to previous memory in session
-        if (i > 0) {
-          links.push({
-            source: sessionMemories[i - 1].id,
-            target: memory.id,
-            strength: 0.3
-          });
-        }
-      });
-    });
-
-    // Create force simulation
-    const simulation = d3.forceSimulation(nodes)
-      .force("link", d3.forceLink(links).id(d => d.id).strength(d => d.strength))
-      .force("charge", d3.forceManyBody().strength(-100))
-      .force("center", d3.forceCenter(width / 2, height / 2));
-
-    // Add links
-    const link = svg.append("g")
-      .selectAll("line")
-      .data(links)
-      .enter().append("line")
-      .attr("stroke", "#999")
-      .attr("stroke-opacity", 0.6)
-      .attr("stroke-width", d => Math.sqrt(d.strength * 5));
-
-    // Add nodes
-    const node = svg.append("g")
-      .selectAll("circle")
-      .data(nodes)
-      .enter().append("circle")
-      .attr("r", d => d.type === 'theme' ? 15 : 8)
-      .attr("fill", d => d.color)
-      .attr("stroke", "#fff")
-      .attr("stroke-width", 2)
-      .style("cursor", "pointer")
-      .on("click", (event, d) => {
-        if (d.type === 'memory') {
-          setSelectedMemory(d.data);
-          onMemorySelect?.(d.data);
-        }
-      });
-
-    // Add labels
-    const label = svg.append("g")
-      .selectAll("text")
-      .data(nodes.filter(d => d.type === 'theme'))
-      .enter().append("text")
-      .text(d => d.name.replace('_', ' '))
-      .style("font-size", "12px")
-      .style("text-anchor", "middle")
-      .attr("dy", 25);
-
-    // Update positions on simulation tick
-    simulation.on("tick", () => {
-      link
-        .attr("x1", d => d.source.x)
-        .attr("y1", d => d.source.y)
-        .attr("x2", d => d.target.x)
-        .attr("y2", d => d.target.y);
-
-      node
-        .attr("cx", d => d.x)
-        .attr("cy", d => d.y);
-
-      label
-        .attr("x", d => d.x)
-        .attr("y", d => d.y);
-    });
+    // Network visualization placeholder
+    // Requires d3 library to be installed
+    console.log('Network visualization not available - d3 dependency missing');
   };
 
   const renderEmotionHeatmap = () => {
-    const svg = d3.select(svgRef.current);
-    svg.selectAll("*").remove();
-
-    const width = 600;
-    const height = 300;
-    const margin = { top: 50, right: 100, bottom: 50, left: 100 };
-
-    svg.attr("width", width).attr("height", height);
-
-    // Group memories by date and emotion
-    const emotionsByDate = d3.rollup(
-      memories.filter(m => m.emotion_detected),
-      v => v.length,
-      d => d3.timeDay(new Date(d.created_at)),
-      d => {
-        const emotions = Object.keys(d.emotion_detected.primary_emotions || {});
-        return emotions[0] || 'neutral';
-      }
-    );
-
-    const dates = Array.from(emotionsByDate.keys()).sort();
-    const emotions = Array.from(new Set(
-      Array.from(emotionsByDate.values())
-        .flatMap(dateMap => Array.from(dateMap.keys()))
-    ));
-
-    if (dates.length === 0 || emotions.length === 0) {
-      svg.append("text")
-        .attr("x", width / 2)
-        .attr("y", height / 2)
-        .attr("text-anchor", "middle")
-        .text("감정 데이터가 충분하지 않습니다")
-        .style("font-size", "14px")
-        .style("fill", "#666");
-      return;
-    }
-
-    const xScale = d3.scaleBand()
-      .domain(dates.map(d => d.toISOString().split('T')[0]))
-      .range([margin.left, width - margin.right])
-      .padding(0.1);
-
-    const yScale = d3.scaleBand()
-      .domain(emotions)
-      .range([margin.top, height - margin.bottom])
-      .padding(0.1);
-
-    const colorScale = d3.scaleSequential(d3.interpolateViridis)
-      .domain([0, d3.max(Array.from(emotionsByDate.values()).flatMap(dateMap => Array.from(dateMap.values())))]);
-
-    // Add rectangles
-    dates.forEach(date => {
-      emotions.forEach(emotion => {
-        const count = emotionsByDate.get(date)?.get(emotion) || 0;
-
-        svg.append("rect")
-          .attr("x", xScale(date.toISOString().split('T')[0]))
-          .attr("y", yScale(emotion))
-          .attr("width", xScale.bandwidth())
-          .attr("height", yScale.bandwidth())
-          .attr("fill", colorScale(count))
-          .attr("stroke", "#fff")
-          .attr("stroke-width", 1)
-          .style("cursor", "pointer")
-          .append("title")
-          .text(`${date.toISOString().split('T')[0]}, ${emotion}: ${count}회`);
-      });
-    });
-
-    // Add axes
-    svg.append("g")
-      .attr("transform", `translate(0, ${height - margin.bottom})`)
-      .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%m/%d")));
-
-    svg.append("g")
-      .attr("transform", `translate(${margin.left}, 0)`)
-      .call(d3.axisLeft(yScale));
-
-    // Add labels
-    svg.append("text")
-      .attr("x", width / 2)
-      .attr("y", height - 10)
-      .attr("text-anchor", "middle")
-      .text("날짜")
-      .style("font-size", "12px");
-
-    svg.append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 20)
-      .attr("x", -height / 2)
-      .attr("text-anchor", "middle")
-      .text("감정")
-      .style("font-size", "12px");
+    // Emotion heatmap placeholder
+    // Requires d3 library to be installed
+    console.log('Emotion heatmap not available - d3 dependency missing');
   };
 
   const formatDate = (dateString) => {
@@ -407,7 +198,15 @@ const MemoryVisualization = ({ userId, onMemorySelect }) => {
             {/* Visualization */}
             {(viewMode === 'network' || viewMode === 'heatmap') && (
               <div className="bg-gray-50 rounded-lg p-4">
-                <svg ref={svgRef}></svg>
+                <div className="text-center p-8">
+                  <Brain className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600">
+                    {viewMode === 'network' ? '네트워크 시각화' : '감정 히트맵'} 기능은 현재 개발 중입니다.
+                  </p>
+                  <p className="text-gray-500 text-sm mt-2">
+                    시간순 보기를 이용해 주세요.
+                  </p>
+                </div>
               </div>
             )}
 
