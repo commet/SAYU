@@ -116,6 +116,15 @@ const nextConfig = {
     } : false,
   },
   
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      'zod/v4/core': require.resolve('zod/v4/core'),
+      'zod/v4': require.resolve('zod/v4'),
+    };
+    return config;
+  },
+
   // Force cache invalidation
   generateBuildId: async () => {
     return 'build-' + Date.now()
