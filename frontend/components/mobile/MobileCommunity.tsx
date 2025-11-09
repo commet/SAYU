@@ -17,6 +17,7 @@ import { synergyTable, getSynergyKey } from '@/data/personality-synergy-table';
 import { chemistryData, ChemistryData } from '@/data/personality-chemistry';
 import FeedbackButton from '@/components/feedback/FeedbackButton';
 import Image from 'next/image';
+import { generateFallbackChemistry } from '@/lib/generateFallbackChemistry';
 
 interface UserMatch {
   id: string;
@@ -349,7 +350,7 @@ export default function MobileCommunity() {
       };
     }
 
-    return null;
+    return generateFallbackChemistry(type1, type2);
   };
 
   // 케미스트리 데이터 가져오기 (기존 + 커스텀)

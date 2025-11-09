@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
-import { Home, Sparkles, Users, User, Menu, X, Sun, Moon, Zap, LayoutDashboard, Calendar, LogIn, LogOut, GalleryVerticalEnd, ChevronDown, History } from 'lucide-react';
+import { Home, Sparkles, Users, User, Menu, X, Sun, Moon, Zap, LayoutDashboard, Calendar, LogIn, LogOut, GalleryVerticalEnd, ChevronDown, History, HeartHandshake } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useDarkMode } from '@/contexts/DarkModeContext';
 import LanguageToggle from '@/components/ui/LanguageToggle';
@@ -12,7 +12,7 @@ import toast from 'react-hot-toast';
 import { useOnboardingV2 } from '@/contexts/OnboardingContextV2';
 
 interface NavItem {
-  iconType: 'home' | 'sparkles' | 'users' | 'user' | 'zap' | 'dashboard' | 'calendar' | 'collection';
+  iconType: 'home' | 'sparkles' | 'users' | 'user' | 'zap' | 'dashboard' | 'calendar' | 'collection' | 'companion';
   label: { en: string; ko: string };
   path: string;
   requiresAuth?: boolean;
@@ -23,7 +23,6 @@ interface NavItem {
 const desktopNavItems: NavItem[] = [
   { iconType: 'home', label: { en: 'Home', ko: '홈' }, path: '/' },
   { iconType: 'sparkles', label: { en: 'Discover', ko: '탐색' }, path: '/quiz' },
-  { iconType: 'users', label: { en: 'Community', ko: '커뮤니티' }, path: '/community', requiresAuth: true },
   { 
     iconType: 'collection', 
     label: { en: 'Art Collection', ko: '아트 컬렉션' }, 
@@ -34,6 +33,16 @@ const desktopNavItems: NavItem[] = [
       { iconType: 'collection', label: { en: 'My Collection', ko: '내 컬렉션' }, path: '/gallery' },
       { iconType: 'calendar', label: { en: 'Exhibitions', ko: '전시회' }, path: '/exhibitions' }
     ]
+  },
+  { 
+    iconType: 'companion',
+    label: { en: 'Art Companion', ko: '아트 컴패니언' },
+    path: '#',
+    requiresAuth: true,
+    children: [
+      { iconType: 'sparkles', label: { en: 'Art Counselor', ko: '아트 카운슬러' }, path: '/art-counselor', requiresAuth: true },
+      { iconType: 'users', label: { en: 'Community', ko: '커뮤니티' }, path: '/community', requiresAuth: true },
+    ],
   },
   { iconType: 'user', label: { en: 'Profile', ko: '프로필' }, path: '/profile', requiresAuth: true },
 ];
@@ -77,6 +86,7 @@ export default function FloatingNav() {
       case 'dashboard': return <LayoutDashboard className="w-5 h-5 text-current" />;
       case 'calendar': return <Calendar className="w-5 h-5 text-current" />;
       case 'collection': return <GalleryVerticalEnd className="w-5 h-5 text-current" />;
+      case 'companion': return <HeartHandshake className="w-5 h-5 text-current" />;
       default: return null;
     }
   };
@@ -258,7 +268,11 @@ export default function FloatingNav() {
               const hasDropdown = item.children && item.children.length > 0;
               
               return (
-                <div key={item.path} className="relative" data-dropdown-container>
+                <div
+                  key={`${item.path}-${item.label.en}`}
+                  className="relative"
+                  data-dropdown-container
+                >
                   <motion.button
                     onClick={() => {
                       if (hasDropdown) {
@@ -445,7 +459,7 @@ export default function FloatingNav() {
             
             return (
               <motion.div
-                key={item.path}
+                key={`${item.path}-${item.label.en}`}
                 className="relative"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ 
@@ -577,7 +591,7 @@ export default function FloatingNav() {
                     const isDropdownOpen = mobileDropdownOpen === item.path;
                     
                     return (
-                      <div key={item.path}>
+                      <div key={`${item.path}-${item.label.en}`}>
                         <motion.button
                           onClick={() => handleNavClick(item)}
                           className={`
@@ -665,3 +679,4 @@ export default function FloatingNav() {
     </div>
   );
 }
+

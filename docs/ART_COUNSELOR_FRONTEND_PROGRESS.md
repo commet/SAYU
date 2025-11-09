@@ -1,4 +1,20 @@
-# SAYU Art Counselor Frontend 진행 현황 (2025-XX-XX)
+# SAYU Art Counselor Frontend 진행 현황 (2025-11-08)
+
+## 신규 업데이트 (2025-11-08)
+- `/art-counselor` 랜딩 페이지를 구축해 오늘의 작품, APT 추천 컬렉션, 서비스 철학 및 데일리 리추얼을 한 화면에서 소개합니다.
+- Next.js API 프록시(`/api/art-counselor/*`, `/api/art-counselor/hybrid/*`)를 추가하여 프런트가 항상 동일한 엔드포인트를 호출하도록 정리했습니다.
+- React 19 규칙에 맞춰 `useArtCounselorSession`/세션 페이지의 `zustand` selector를 안정화했고, 세션 진입 시 경고 없이 동작합니다.
+- `supabaseArtService`가 `mood_atlas_artworks` 테이블을 읽도록 재작성되어 일일 추천/프레젠테이션/컬렉션이 실제 작품 ID를 반환합니다.
+- 랜딩 페이지의 저널 & 메모리 섹션이 `/memory`, `/response/history` 데이터를 노출하며, API 응답이 없을 때는 샘플 카드로 UX를 유지합니다.
+
+## 남은 TODO (업데이트)
+1. `/api/art-counselor/journal`, `/preferences`, `/insights`를 실제 저장/조회 로직과 연결하고 UI에서 바로 쓸 수 있게 하기.
+2. Complete 단계에서 자동으로 저널을 저장하고 랜딩 페이지 저널 리스트와 연동.
+3. 커뮤니티 브리지(저널 공유/감정 메모리) UX를 설계하고 `/memory/search`·커뮤니티 엔드포인트와 연동.
+
+---
+
+## 이전 기록 (2025-XX-XX 스냅샷)
 
 ## 1. 현재 단계
 - 하이브리드 상담 플로우(Opening → Exploration → Connection → Complete)용 핵심 페이지와 컴포넌트 구현 완료

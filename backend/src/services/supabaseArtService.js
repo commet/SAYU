@@ -1,169 +1,213 @@
 /**
- * SAYU Art Counselor - Supabase 기반 서비스 (간소화)
- * 실제 DB 구조에 맞춘 안전한 버전
+ * SAYU Art Counselor - Supabase integration layer
+ * Provides mood-atlas artworks and lightweight journal/collection scaffolding.
  */
 
 const { createClient } = require('@supabase/supabase-js');
 
+const DEFAULT_DURATION_MINUTES = 6;
+const MOOD_ATLAS_TABLE = 'mood_atlas_artworks';
+
 class SupabaseArtService {
   constructor() {
-    this.supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY
-    );
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (!supabaseUrl) {
+      console.warn('[SupabaseArtService] SUPABASE_URL is not configured.');
+      this.supabase = null;
+    } else {
+      this.supabase = createClient(
+        supabaseUrl,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY,
+      );
+    }
+  }
 
-    // 16가지 성격 유형별 추천 작품 매핑
-    this.personalityRecommendations = {
-      LAEF: ['550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440004', '550e8400-e29b-41d4-a716-446655440013'],
-      LAEC: ['550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440005'],
-      LAMF: ['550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440013', '550e8400-e29b-41d4-a716-446655440016'],
-      LAMC: ['550e8400-e29b-41d4-a716-446655440006', '550e8400-e29b-41d4-a716-446655440007', '550e8400-e29b-41d4-a716-446655440010'],
-      LREF: ['550e8400-e29b-41d4-a716-446655440005', '550e8400-e29b-41d4-a716-446655440007', '550e8400-e29b-41d4-a716-446655440008'],
-      LREC: ['550e8400-e29b-41d4-a716-446655440004', '550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440009'],
-      LRMF: ['550e8400-e29b-41d4-a716-446655440015', '550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440013'],
-      LRMC: ['550e8400-e29b-41d4-a716-446655440010', '550e8400-e29b-41d4-a716-446655440012', '550e8400-e29b-41d4-a716-446655440007'],
-      SAEF: ['550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440011', '550e8400-e29b-41d4-a716-446655440003'],
-      SAEC: ['550e8400-e29b-41d4-a716-446655440012', '550e8400-e29b-41d4-a716-446655440009', '550e8400-e29b-41d4-a716-446655440005'],
-      SAMF: ['550e8400-e29b-41d4-a716-446655440014', '550e8400-e29b-41d4-a716-446655440011', '550e8400-e29b-41d4-a716-446655440001'],
-      SAMC: ['550e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440012'],
-      SREF: ['550e8400-e29b-41d4-a716-446655440014', '550e8400-e29b-41d4-a716-446655440008', '550e8400-e29b-41d4-a716-446655440011'],
-      SREC: ['550e8400-e29b-41d4-a716-446655440008', '550e8400-e29b-41d4-a716-446655440011', '550e8400-e29b-41d4-a716-446655440012'],
-      SRMF: ['550e8400-e29b-41d4-a716-446655440007', '550e8400-e29b-41d4-a716-446655440015', '550e8400-e29b-41d4-a716-446655440016'],
-      SRMC: ['550e8400-e29b-41d4-a716-446655440016', '550e8400-e29b-41d4-a716-446655440007', '550e8400-e29b-41d4-a716-446655440010']
+  getClient() {
+    if (!this.supabase) {
+      throw new Error('Supabase client is not configured in SupabaseArtService.');
+    }
+    return this.supabase;
+  }
+
+  transformArtwork(record) {
+    if (!record) return null;
+    return {
+      id: record.id,
+      title: record.title,
+      artist: record.artist,
+      year: record.year,
+      region: record.region,
+      imageUrl: record.image_url || record.hero_image_url,
+      thumbnailUrl: record.thumbnail_url || record.preview_image_url,
+      width: record.width,
+      height: record.height,
+      emotions: record.emotions,
+      story: record.story,
+      funFact: record.fun_fact,
+      tags: record.tags,
+      matchScore: record.match_score,
+      durationMinutes: record.duration_minutes || DEFAULT_DURATION_MINUTES,
     };
   }
 
+  async fetchAllMoodAtlasArtworks() {
+    const client = this.getClient();
+    const { data, error } = await client
+      .from(MOOD_ATLAS_TABLE)
+      .select(
+        'id, title, artist, year, region, image_url, thumbnail_url, width, height, emotions, story, fun_fact, tags, match_score, duration_minutes',
+      )
+      .order('title', { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    return (data || []).map((record) => this.transformArtwork(record)).filter(Boolean);
+  }
+
   /**
-   * 오늘의 작품 선정 (간소화 버전)
+   * Select daily artwork using deterministic hash of user + day.
    */
   async selectDailyArtwork(userId) {
     try {
-      // 기본 추천 로직 (사용자별 의사 랜덤)
-      const userSeed = parseInt(userId.replace(/-/g, '').slice(0, 8), 16) || 1;
-      const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-
-      // 기본 추천 작품들
-      const defaultArtworks = [
-        '550e8400-e29b-41d4-a716-446655440001', // 별밤
-        '550e8400-e29b-41d4-a716-446655440002', // 수련
-        '550e8400-e29b-41d4-a716-446655440003', // 키스
-        '550e8400-e29b-41d4-a716-446655440005', // 진주소녀
-        '550e8400-e29b-41d4-a716-446655440008', // 씨름
-        '550e8400-e29b-41d4-a716-446655440016'  // 인왕제색도
-      ];
-
-      const index = (userSeed + dayOfYear) % defaultArtworks.length;
-      const selectedArtworkId = defaultArtworks[index];
-
-      // 작품 정보 조회
-      const { data: artwork, error } = await this.supabase
-        .from('artworks')
-        .select('*')
-        .eq('id', selectedArtworkId)
-        .single();
-
-      if (error || !artwork) {
+      const artworks = await this.fetchAllMoodAtlasArtworks();
+      if (!artworks.length) {
         return await this.getFallbackArtwork();
       }
 
-      return {
-        artworkId: selectedArtworkId,
-        artwork: artwork
-      };
+      const userSeed = parseInt(userId.replace(/-/g, '').slice(0, 8), 16) || 1;
+      const yearStart = new Date(new Date().getFullYear(), 0, 0).valueOf();
+      const dayOfYear = Math.floor((Date.now() - yearStart) / 86400000);
+      const index = (userSeed + dayOfYear) % artworks.length;
+      const selected = artworks[index];
 
+      return {
+        artworkId: selected.id,
+        artwork: selected,
+      };
     } catch (error) {
-      console.error('Error selecting daily artwork:', error);
+      console.error('[SupabaseArtService] selectDailyArtwork failed:', error);
       return await this.getFallbackArtwork();
     }
   }
 
   /**
-   * 작품 프레젠테이션 생성 (간소화 버전)
+   * Generate lightweight presentation data for a given artwork.
    */
   async generatePresentation(artworkId, userId) {
-    try {
-      const { data: artwork, error } = await this.supabase
-        .from('artworks')
-        .select('*')
-        .eq('id', artworkId)
-        .single();
+    const client = this.getClient();
+    const { data, error } = await client
+      .from(MOOD_ATLAS_TABLE)
+      .select(
+        'id, title, artist, year, region, image_url, thumbnail_url, width, height, emotions, story, fun_fact, tags',
+      )
+      .eq('id', artworkId)
+      .single();
 
-      if (error || !artwork) {
-        throw new Error(`Artwork ${artworkId} not found`);
-      }
-
-      // 간단한 프레젠테이션 구성
-      const presentation = {
-        visual: {
-          imageUrl: artwork.image_url,
-          title: artwork.title,
-          artist: artwork.artist,
-          metadata: artwork.metadata
-        },
-        content: {
-          description: `${artwork.artist}의 작품 ${artwork.title}입니다.`,
-          yearCreated: artwork.year_created,
-          medium: artwork.medium,
-          style: artwork.style
-        }
-      };
-
-      return presentation;
-
-    } catch (error) {
-      console.error('Error generating presentation:', error);
-      throw error;
+    if (error || !data) {
+      throw new Error(
+        `Artwork ${artworkId} not found in ${MOOD_ATLAS_TABLE} for user ${userId}`,
+      );
     }
+
+    return {
+      hero: {
+        imageUrl: data.image_url || data.thumbnail_url,
+        title: data.title,
+        artist: data.artist,
+        year: data.year,
+        region: data.region,
+      },
+      content: {
+        description: data.story || '이 작품에 대한 스토리가 준비 중입니다.',
+        funFact: data.fun_fact,
+        emotions: data.emotions,
+        tags: data.tags,
+      },
+    };
   }
 
-  /**
-   * 모든 작품 조회
-   */
   async getAllArtworks() {
+    const artworks = await this.fetchAllMoodAtlasArtworks();
+    return {
+      total: artworks.length,
+      records: artworks,
+    };
+  }
+
+  async getFallbackArtwork() {
+    if (!this.supabase) {
+      return {
+        artworkId: 'fallback-water-lilies',
+        artwork: {
+          id: 'fallback-water-lilies',
+          title: 'Water Lilies (Fallback)',
+          artist: 'Claude Monet',
+          summary: 'Supabase 연결 전용 임시 작품입니다.',
+        },
+      };
+    }
+
+    const client = this.getClient();
+    const { data } = await client
+      .from(MOOD_ATLAS_TABLE)
+      .select(
+        'id, title, artist, year, region, image_url, thumbnail_url, width, height, emotions, story, fun_fact, tags, match_score, duration_minutes',
+      )
+      .limit(1)
+      .single();
+
+    const artwork =
+      this.transformArtwork(data) || {
+        id: 'fallback-water-lilies',
+        title: 'Water Lilies (Fallback)',
+        artist: 'Claude Monet',
+      };
+
+    return {
+      artworkId: artwork.id,
+      artwork,
+    };
+  }
+
+  async saveJournalEntry() {
+    return { id: 'pending', message: 'Journal persistence coming soon.' };
+  }
+
+  async getUserCollection(userId, limit = 20) {
     try {
-      const { data, error } = await this.supabase
-        .from('artworks')
-        .select('*')
-        .order('created_at', { ascending: true });
+      const client = this.getClient();
+      const { data, error, count } = await client
+        .from(MOOD_ATLAS_TABLE)
+        .select(
+          'id, title, artist, year, region, image_url, thumbnail_url, emotions, story, fun_fact, tags, duration_minutes',
+          { count: 'exact' },
+        )
+        .limit(limit);
 
       if (error) {
         throw error;
       }
 
-      return data || [];
+      const entries = (data || []).map((item) => ({
+        ...this.transformArtwork(item),
+        source: 'mood_atlas',
+        addedAt: new Date().toISOString(),
+      }));
+
+      return {
+        entries,
+        stats: {
+          totalEntries: count ?? entries.length,
+          userId,
+          lastSync: new Date().toISOString(),
+        },
+      };
     } catch (error) {
-      console.error('Error getting all artworks:', error);
-      throw error;
+      console.error('[SupabaseArtService] getUserCollection failed:', error);
+      return { entries: [], stats: { totalEntries: 0, userId, lastSync: null } };
     }
-  }
-
-  /**
-   * 폴백 작품 (모네 수련)
-   */
-  async getFallbackArtwork() {
-    const { data } = await this.supabase
-      .from('artworks')
-      .select('*')
-      .eq('id', '550e8400-e29b-41d4-a716-446655440002')
-      .single();
-
-    return {
-      artworkId: '550e8400-e29b-41d4-a716-446655440002',
-      artwork: data || {
-        id: '550e8400-e29b-41d4-a716-446655440002',
-        title: '수련',
-        artist: '클로드 모네'
-      }
-    };
-  }
-
-  // 기존 복잡한 기능들은 일단 스텁으로 처리
-  async saveJournalEntry(userId, artworkId, entry) {
-    return { id: 'temp', message: '기능 준비 중입니다.' };
-  }
-
-  async getUserCollection(userId, limit = 20) {
-    return { entries: [], stats: { totalEntries: 0 } };
   }
 }
 

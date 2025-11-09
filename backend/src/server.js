@@ -112,6 +112,7 @@ const artistAPTRoutes = require('./routes/artistAPT');
 const healthRoutes = require('./routes/health');
 const artCounselorRoutes = require('./routes/artCounselorRoutes');
 const consentRoutes = require('./routes/consentRoutes');
+const moodAtlasRoutes = require('./routes/moodAtlasRoutes');
 
 const app = express();
 
@@ -353,6 +354,7 @@ app.use('/api/consent', consentRoutes); // 🛡️ Safety & Consent Management
 app.use('/api/apt', aptRecommendationRoutes); // APT 기반 추천 시스템
 app.use('/api/easter-eggs', easterEggRoutes);
 app.use('/api/daily-habit', dailyHabitRoutes); // Daily Art Habit 시스템
+app.use('/api/mood-atlas', moodAtlasRoutes); // Mood Atlas - 감정 기반 예술 여정
 app.use('/api/artist-data', artistDataRoutes); // 아티스트 데이터 수집 및 관리
 app.use('/api/matching', require('./routes/matchingRoutes')); // 매칭 시스템
 app.use('/api/waitlist', require('./routes/waitlistRoutes')); // 베타 대기 목록

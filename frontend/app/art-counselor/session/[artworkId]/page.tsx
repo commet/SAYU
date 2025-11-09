@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useArtCounselorSession } from '@/hooks/useArtCounselorSession';
 import { useArtCounselorStore } from '@/lib/art-counselor/store';
+import { useShallow } from 'zustand/react/shallow';
 import { createMessage } from '@/lib/art-counselor/utils';
 import { CounselorOption } from '@/lib/art-counselor/types';
 import { ArtCounselorShell } from '@/components/art-counselor-hybrid/ArtCounselorShell';
@@ -33,16 +34,18 @@ export default function ArtCounselorSessionPage() {
     journalPayload,
     appendMessage,
     setOptions,
-  } = useArtCounselorStore((state) => ({
-    stage: state.stage,
-    messages: state.messages,
-    options: state.options,
-    isLoading: state.isLoading,
-    artwork: state.artwork,
-    journalPayload: state.journalPayload,
-    appendMessage: state.appendMessage,
-    setOptions: state.setOptions,
-  }));
+  } = useArtCounselorStore(
+    useShallow((state) => ({
+      stage: state.stage,
+      messages: state.messages,
+      options: state.options,
+      isLoading: state.isLoading,
+      artwork: state.artwork,
+      journalPayload: state.journalPayload,
+      appendMessage: state.appendMessage,
+      setOptions: state.setOptions,
+    }))
+  );
 
   const {
     resetSession,

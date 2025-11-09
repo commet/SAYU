@@ -14,7 +14,8 @@ import {
   Calendar,
   LayoutDashboard,
   LogOut,
-  ChevronRight
+  ChevronRight,
+  HeartHandshake,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
@@ -54,8 +55,9 @@ const drawerMenuItems = [
     ]
   },
   {
-    title: { en: 'Community', ko: '커뮤니티' },
+    title: { en: 'Art Companion', ko: '아트 컴패니언' },
     items: [
+      { icon: HeartHandshake, label: { en: 'Art Counselor', ko: '아트 카운슬러' }, path: '/art-counselor', requiresAuth: true },
       { icon: Users, label: { en: 'Community', ko: '커뮤니티' }, path: '/community', requiresAuth: true },
     ]
   },

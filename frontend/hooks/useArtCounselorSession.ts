@@ -2,6 +2,7 @@
 
 import { useCallback } from 'react';
 import { useArtCounselorStore } from '@/lib/art-counselor/store';
+import { useShallow } from 'zustand/react/shallow';
 import {
   ArtCounselorStage,
   HybridOpeningResponse,
@@ -51,7 +52,20 @@ export function useArtCounselorSession() {
     setError,
     reset,
     sessionId,
-  } = useArtCounselorStore();
+  } = useArtCounselorStore(
+    useShallow((state) => ({
+      setStage: state.setStage,
+      setSessionMeta: state.setSessionMeta,
+      setArtwork: state.setArtwork,
+      setOptions: state.setOptions,
+      appendMessage: state.appendMessage,
+      setLoading: state.setLoading,
+      setJournalPayload: state.setJournalPayload,
+      setError: state.setError,
+      reset: state.reset,
+      sessionId: state.sessionId,
+    }))
+  );
 
   const resetSession = useCallback(() => {
     reset();
