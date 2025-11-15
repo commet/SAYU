@@ -844,7 +844,7 @@ INSERT INTO titles (id, name, name_ko, description_ko, icon, rarity) VALUES
 
 ## 🎯 다음 단계
 
-1. **우선순위 확정**
+1. **우선순위 확정**\
    - Phase 1 두 기능 중 어느 것을 먼저 시작할지 결정
    - 리소스 할당 (백엔드 vs 프론트엔드)
 
