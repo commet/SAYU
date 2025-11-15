@@ -672,27 +672,26 @@ export default function ArtCounselorLandingPage() {
                     <p className="text-sm font-semibold text-white">
                       {entry.artworkTitle ?? '기록된 작품'}
                     </p>
-                      {entry.artworkArtist && (
-                        <p className="text-xs text-slate-400">{entry.artworkArtist}</p>
-                      )}
-                      <p className="mt-2 text-sm text-slate-200">
-                        {entry.emotionalResponse ?? '감정 기록이 준비 중입니다.'}
-                      </p>
-                      <div className="mt-3 flex items-center justify-between text-xs text-slate-400">
-                        <span>
-                          강도{' '}
-                          {typeof entry.intensity === 'number'
-                            ? `${Math.round(entry.intensity * 100)}%`
-                            : entry.intensity ?? '-'}
-                        </span>
-                        <span>
-                          {entry.createdAt
-                            ? new Date(entry.createdAt).toLocaleDateString()
-                            : '최근'}
-                        </span>
-                      </div>
+                    {entry.artworkArtist && (
+                      <p className="text-xs text-slate-400">{entry.artworkArtist}</p>
+                    )}
+                    <p className="mt-2 text-sm text-slate-200">
+                      {entry.emotionalResponse ?? '감정 기록이 준비 중입니다.'}
+                    </p>
+                    <div className="mt-3 flex items-center justify-between text-xs text-slate-400">
+                      <span>
+                        강도{' '}
+                        {typeof entry.intensity === 'number'
+                          ? `${Math.round(entry.intensity * 100)}%`
+                          : entry.intensity ?? '-'}
+                      </span>
+                      <span>
+                        {entry.createdAt
+                          ? new Date(entry.createdAt).toLocaleDateString()
+                          : '최근'}
+                      </span>
                     </div>
-                  ),
+                  </div>
                 ))}
                 {!journalEntries.length && !insightLoading && (
                   <p className="text-sm text-slate-400">
@@ -710,19 +709,18 @@ export default function ArtCounselorLandingPage() {
                 {displayMemorySnippets.map((snippet) => (
                   <div key={snippet.id} className="rounded-2xl border border-white/5 p-4">
                     <p className="text-sm text-slate-200">{snippet.content}</p>
-                      <div className="mt-3 flex items-center justify-between text-xs text-slate-400">
-                        <span>{snippet.theme ?? '기록'}</span>
-                        <span>
-                          {snippet.createdAt
-                            ? new Date(snippet.createdAt).toLocaleString()
-                            : '최근'}
-                        </span>
-                      </div>
-                      {snippet.emotion && (
-                        <p className="mt-1 text-xs text-pink-300">감정 · {snippet.emotion}</p>
-                      )}
+                    <div className="mt-3 flex items-center justify-between text-xs text-slate-400">
+                      <span>{snippet.theme ?? '기록'}</span>
+                      <span>
+                        {snippet.createdAt
+                          ? new Date(snippet.createdAt).toLocaleString()
+                          : '최근'}
+                      </span>
                     </div>
-                  ),
+                    {snippet.emotion && (
+                      <p className="mt-1 text-xs text-pink-300">감정 · {snippet.emotion}</p>
+                    )}
+                  </div>
                 ))}
                 {!memorySnippets.length && !insightLoading && (
                   <p className="text-sm text-slate-400">
