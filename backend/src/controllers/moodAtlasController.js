@@ -432,6 +432,29 @@ class MoodAtlasController {
       next(error);
     }
   }
+
+  /**
+   * Complete a daily entry with engagement metrics
+   * POST /api/mood-atlas/entries/:entryId/complete
+   */
+  async completeEntry(req, res, next) {
+    try {
+      const userId = req.user?.id || req.userId;
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const { entryId } = req.params;
+      if (!entryId) {
+        return res.status(400).json({ error: 'entryId is required.' });
+      }
+
+      const result = await moodAtlasService.completeEntry(userId, entryId, req.body || {});
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new MoodAtlasController();

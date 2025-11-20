@@ -13,6 +13,7 @@ router.post('/recommend', moodAtlasController.recommendArtworks);
 router.post('/entry', moodAtlasController.createEntry);
 router.get('/entry/today', moodAtlasController.getTodayEntry);
 router.get('/entry/:date', moodAtlasController.getDateEntry);
+router.post('/entries/:entryId/complete', moodAtlasController.completeEntry);
 
 // ============================================================================
 // 2. Progress & region roadmap

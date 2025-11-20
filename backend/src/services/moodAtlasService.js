@@ -860,6 +860,94 @@ class MoodAtlasService {
 
     return suggestion;
   }
+
+  /**
+   * 세션 완료 시 점수 집계 및 상태 업데이트
+   */
+  async completeEntry(userId, entryId, payload = {}) {
+    const {
+      interactionId = null,
+      infoLayersViewed = [],
+      infoTimeSpent = 0,
+      memoWordCount = 0,
+      memoUsedSuggestions = false,
+      memoConnectedToPast = false,
+      counselorInsights = [],
+      interactionPoints: clientInteractionPoints = null,
+    } = payload;
+
+    const { data: entry, error: entryError } = await supabase
+      .from('mood_atlas_entries')
+      .select('id, user_id, entry_status, info_layers_viewed, info_exploration_time')
+      .eq('id', entryId)
+      .eq('user_id', userId)
+      .single();
+
+    if (entryError) throw entryError;
+
+    // 스코어 계산 (휴리스틱)
+    const uniqueLayers = Array.from(new Set([...(entry.info_layers_viewed || []), ...infoLayersViewed]));
+    const infoPoints = uniqueLayers.length * 10 + Math.min(20, Math.floor((infoTimeSpent || 0) / 60));
+    const memoPoints =
+      Math.min(20, Math.floor((memoWordCount || 0) / 30)) +
+      (memoUsedSuggestions ? 5 : 0) +
+      (memoConnectedToPast ? 5 : 0);
+    const counselorPoints = (counselorInsights?.length || 0) * 5;
+    const interactionPoints = clientInteractionPoints ?? 0;
+
+    const pointBreakdown = {
+      interactionPoints,
+      infoPoints,
+      memoPoints,
+      counselorPoints,
+    };
+    const totalPoints = interactionPoints + infoPoints + memoPoints + counselorPoints;
+
+    const { data: updated, error: updateError } = await supabase
+      .from('mood_atlas_entries')
+      .update({
+        entry_status: 'completed',
+        interaction_id: interactionId,
+        interaction_points: interactionPoints,
+        counselor_insights: counselorInsights,
+        info_layers_viewed: uniqueLayers,
+        info_exploration_time: (entry.info_exploration_time || 0) + (infoTimeSpent || 0),
+        memo_word_count: memoWordCount,
+        memo_used_suggestions: memoUsedSuggestions,
+        memo_connected_to_past: memoConnectedToPast,
+        total_points: totalPoints,
+        point_breakdown: pointBreakdown,
+      })
+      .eq('id', entryId)
+      .eq('user_id', userId)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
+
+    // Gamification 포인트 적립 (옵션)
+    await this.awardGamificationPoints(userId, totalPoints, entryId);
+
+    return {
+      entry: updated,
+      points: { total: totalPoints, breakdown: pointBreakdown },
+    };
+  }
+
+  /**
+   * 게이미피케이션 포인트 적립 (실패해도 플로우 지속)
+   */
+  async awardGamificationPoints(userId, points, entryId) {
+    try {
+      const { getGamificationService } = require('./gamificationService');
+      const gamification = getGamificationService();
+      if (gamification?.earnPoints) {
+        await gamification.earnPoints(userId, 'MOOD_ATLAS_ENTRY', { entryId, points });
+      }
+    } catch (err) {
+      console.warn('[MoodAtlas] Gamification award skipped:', err.message);
+    }
+  }
 }
 
 module.exports = new MoodAtlasService();
