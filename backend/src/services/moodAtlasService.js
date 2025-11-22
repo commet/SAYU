@@ -133,43 +133,33 @@ class MoodAtlasService {
    * AI 추천 이유 생성
    */
   async generateRecommendationReason(artwork, emotionColor, emotionIntensity) {
-    try {
-      const emotionDescriptions = {
-        blue: '평온하고 차분한 마음',
-        red: '열정적이고 활기찬 에너지',
-        yellow: '밝고 희망찬 기분',
-        purple: '신비롭고 몽환적인 감정',
-        green: '생동하고 조화로운 느낌',
-        gray: '쓸쓸하고 고요한 마음'
-      };
+    const emotionDescriptions = {
+      blue: '차분하고 편안한 마음',
+      red: '열정적이고 활기찬 감정',
+      yellow: '밝고 희망찬 기분',
+      purple: '신비롭고 몽환적인 감정',
+      green: '생동하고 조화로운 느낌',
+      gray: '고요하고 잔잔한 마음'
+    };
 
-      const prompt = `
-당신은 감정과 예술을 연결하는 친근한 큐레이터입니다.
+    const prompt = `당신은 사용자 감정에 맞춰 작품을 권하는 친절한 도슨트입니다.
 
 사용자 상태:
-- 감정: ${emotionDescriptions[emotionColor]}
+- 감정: ${emotionDescriptions[emotionColor] || emotionColor}
 - 강도: ${emotionIntensity}%
 
 추천 작품:
 - 제목: ${artwork.title}
 - 작가: ${artwork.artist}
 
-이 작품이 사용자의 감정에 어울리는 이유를 1-2문장으로 따뜻하게 설명해주세요.
-"~할 거예요", "~해줄 거예요" 같은 친근한 말투를 사용하세요.`.trim();
+이 작품이 지금 감정에 어울리는 이유를 1~2문장으로, 따뜻하고 간결하게 설명해 주세요.`;
 
-      const completion = await this.groq.chat.completions.create({
-        messages: [{ role: 'user', content: prompt }],
-        model: this.model,
-        temperature: 0.7,
-        max_tokens: 100
-      });
-
-      return completion.choices[0]?.message?.content?.trim() ||
-             artwork.emotions[`${emotionColor}-${this.getEmotionLevel(emotionIntensity)}`];
-    } catch (error) {
-      console.error('AI 이유 생성 실패:', error);
-      return artwork.emotions[`${emotionColor}-${this.getEmotionLevel(emotionIntensity)}`];
-    }
+    const aiText = await this.safeGroqChat(prompt, { temperature: 0.6, maxTokens: 120 });
+    return (
+      aiText ||
+      artwork.emotions?.[`${emotionColor}-${this.getEmotionLevel(emotionIntensity)}`] ||
+      '이 감정에 잘 맞는 작품입니다.'
+    );
   }
 
   // ============================================================================
@@ -830,17 +820,18 @@ class MoodAtlasService {
 
     if (error) throw error;
 
-    const questions = [
+    const aiQuestions = await this.generateMemoQuestionsAI(entry);
+    const questions = aiQuestions || [
       {
-        q: `오늘 선택한 ${entry.emotion_color} 감정이 가장 진하게 느껴진 순간은 언제였나요?`,
+        q: `오늘 선택한 ${entry.emotion_color} 감정이 가장 진하게 느껴진 순간이 있었나요?`,
         type: 'emotion',
       },
       {
-        q: '방금 터치했던 작품의 디테일 중 다시 떠올리고 싶은 장면이 있나요?',
+        q: '방금 터치하던 작품의 디테일을 다시 떠올리고 싶다면 어디에 두고 싶나요?',
         type: 'interaction',
       },
       {
-        q: '이 감정을 내일의 나와 공유한다면 어떤 말을 전해주고 싶나요?',
+        q: '지금 감정을 며칠 뒤의 나에게 공유한다면 어떤 말을 해주고 싶나요?',
         type: 'future-self',
       },
     ];
@@ -947,6 +938,52 @@ class MoodAtlasService {
     } catch (err) {
       console.warn('[MoodAtlas] Gamification award skipped:', err.message);
     }
+  }
+
+  // --------------------------------------------------------------------------
+  // AI helper utilities
+  // --------------------------------------------------------------------------
+
+  async safeGroqChat(prompt, { temperature = 0.6, maxTokens = 160 } = {}) {
+    try {
+      if (!this.groq) return null;
+      const completion = await this.groq.chat.completions.create({
+        messages: [{ role: 'user', content: prompt }],
+        model: this.model,
+        temperature,
+        max_tokens: maxTokens,
+      });
+      return completion.choices?.[0]?.message?.content?.trim() || null;
+    } catch (err) {
+      console.warn('[MoodAtlas] Groq chat fallback:', err.message);
+      return null;
+    }
+  }
+
+  parseQuestionList(aiText) {
+    if (!aiText) return null;
+    const lines = aiText
+      .split('\n')
+      .map((l) => l.replace(/^[\\-\\d\\.\\)\\s]+/, '').trim())
+      .filter(Boolean);
+    if (!lines.length) return null;
+    const types = ['emotion', 'interaction', 'future-self'];
+    return lines.slice(0, 3).map((q, idx) => ({
+      q,
+      type: types[idx] || 'note',
+    }));
+  }
+
+  async generateMemoQuestionsAI(entry) {
+    const prompt = `당신은 사용자의 감정 기록을 돕는 저널 코치입니다.
+오늘의 감정: ${entry.emotion_color} (${entry.emotion_intensity}%)
+사용자가 작품과 상호작용을 마쳤고 메모를 쓰려 합니다.
+감정 회상, 작품 디테일 상기, 미래의 나에게 보내는 메시지 관점에서
+짧은 질문 3개를 한국어로 제안하세요.
+출력 형식: 각각 한 줄에 질문만 적어 주세요.`;
+
+    const aiText = await this.safeGroqChat(prompt, { temperature: 0.7, maxTokens: 180 });
+    return this.parseQuestionList(aiText);
   }
 }
 
