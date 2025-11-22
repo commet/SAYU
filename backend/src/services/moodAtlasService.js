@@ -995,6 +995,90 @@ class MoodAtlasService {
   }
 
   // --------------------------------------------------------------------------
+  // Emotion capsules (P2P)
+  // --------------------------------------------------------------------------
+
+  async sendCapsule(userId, payload) {
+    const {
+      entryId = null,
+      emotionColor = null,
+      emotionLabel = null,
+      artworkId = null,
+      artworkTitle = null,
+      artworkArtist = null,
+      message = '',
+      deliveryDelayDays = 3,
+      recipientId = null,
+      recipientCharacterId = null,
+      isPublic = true,
+    } = payload || {};
+
+    const trimmed = (message || '').slice(0, 120);
+
+    const { data, error } = await supabase
+      .from('emotion_capsules')
+      .insert({
+        sender_id: userId,
+        entry_id: entryId,
+        emotion_color: emotionColor,
+        emotion_label: emotionLabel,
+        artwork_id: artworkId,
+        artwork_title: artworkTitle,
+        artwork_artist: artworkArtist,
+        message: trimmed,
+        delivery_delay_days: deliveryDelayDays,
+        recipient_id: recipientId,
+        recipient_character_id: recipientCharacterId,
+        is_public: isPublic,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  async listCapsules(userId, box = 'inbox') {
+    const isOutbox = box === 'outbox';
+    const { data, error } = await supabase
+      .from('emotion_capsules')
+      .select('*')
+      .eq(isOutbox ? 'sender_id' : 'recipient_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  async updateCapsuleStatus(userId, capsuleId, status) {
+    const allowed = ['pending', 'delivered', 'read', 'archived'];
+    if (!allowed.includes(status)) {
+      throw new Error('Invalid status');
+    }
+
+    const { data: capsule, error: fetchError } = await supabase
+      .from('emotion_capsules')
+      .select('*')
+      .eq('id', capsuleId)
+      .single();
+    if (fetchError) throw fetchError;
+    if (!capsule) throw new Error('Capsule not found');
+    if (capsule.sender_id !== userId && capsule.recipient_id !== userId) {
+      throw new Error('Forbidden');
+    }
+
+    const { data, error } = await supabase
+      .from('emotion_capsules')
+      .update({ status })
+      .eq('id', capsuleId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  // --------------------------------------------------------------------------
   // AI helper utilities
   // --------------------------------------------------------------------------
 

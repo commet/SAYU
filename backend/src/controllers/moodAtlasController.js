@@ -455,6 +455,67 @@ class MoodAtlasController {
       next(error);
     }
   }
+
+  /**
+   * Create an emotion capsule (P2P)
+   * POST /api/mood-atlas/capsules
+   */
+  async createCapsule(req, res, next) {
+    try {
+      const userId = req.user?.id || req.userId;
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const capsule = await moodAtlasService.sendCapsule(userId, req.body || {});
+      res.json(capsule);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * List capsules (inbox/outbox)
+   * GET /api/mood-atlas/capsules?box=inbox|outbox
+   */
+  async listCapsules(req, res, next) {
+    try {
+      const userId = req.user?.id || req.userId;
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const box = req.query.box === 'outbox' ? 'outbox' : 'inbox';
+      const capsules = await moodAtlasService.listCapsules(userId, box);
+      res.json(capsules);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Update capsule status
+   * PATCH /api/mood-atlas/capsules/:capsuleId/status
+   */
+  async updateCapsuleStatus(req, res, next) {
+    try {
+      const userId = req.user?.id || req.userId;
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const { capsuleId } = req.params;
+      const { status } = req.body || {};
+      if (!capsuleId || !status) {
+        return res.status(400).json({ error: 'capsuleId and status are required.' });
+      }
+
+      const capsule = await moodAtlasService.updateCapsuleStatus(userId, capsuleId, status);
+      res.json(capsule);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new MoodAtlasController();

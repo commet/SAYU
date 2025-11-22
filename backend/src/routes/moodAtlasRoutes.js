@@ -14,6 +14,9 @@ router.post('/entry', moodAtlasController.createEntry);
 router.get('/entry/today', moodAtlasController.getTodayEntry);
 router.get('/entry/:date', moodAtlasController.getDateEntry);
 router.post('/entries/:entryId/complete', moodAtlasController.completeEntry);
+router.post('/capsules', moodAtlasController.createCapsule);
+router.get('/capsules', moodAtlasController.listCapsules);
+router.patch('/capsules/:capsuleId/status', moodAtlasController.updateCapsuleStatus);
 
 // ============================================================================
 // 2. Progress & region roadmap
