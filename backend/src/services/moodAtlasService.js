@@ -878,12 +878,12 @@ class MoodAtlasService {
 
     // 스코어 계산 (휴리스틱)
     const uniqueLayers = Array.from(new Set([...(entry.info_layers_viewed || []), ...infoLayersViewed]));
-    const infoPoints = uniqueLayers.length * 10 + Math.min(20, Math.floor((infoTimeSpent || 0) / 60));
+    const infoPoints = uniqueLayers.length * 12 + Math.min(30, Math.floor((infoTimeSpent || 0) / 45));
     const memoPoints =
-      Math.min(20, Math.floor((memoWordCount || 0) / 30)) +
-      (memoUsedSuggestions ? 5 : 0) +
-      (memoConnectedToPast ? 5 : 0);
-    const counselorPoints = (counselorInsights?.length || 0) * 5;
+      Math.min(30, Math.floor((memoWordCount || 0) / 25)) +
+      (memoUsedSuggestions ? 8 : 0) +
+      (memoConnectedToPast ? 8 : 0);
+    const counselorPoints = (counselorInsights?.length || 0) * 6;
     const interactionPoints = clientInteractionPoints ?? 0;
 
     const pointBreakdown = {
@@ -919,9 +919,13 @@ class MoodAtlasService {
     // Gamification 포인트 적립 (옵션)
     await this.awardGamificationPoints(userId, totalPoints, entryId);
 
+    // 캐릭터 언락 체크 (조건 단순화: 총 포인트/연속 돌봄일 기반)
+    const characterUnlock = await this.checkCharacterUnlock(userId, updated);
+
     return {
       entry: updated,
       points: { total: totalPoints, breakdown: pointBreakdown },
+      characterUnlock,
     };
   }
 
@@ -937,6 +941,56 @@ class MoodAtlasService {
       }
     } catch (err) {
       console.warn('[MoodAtlas] Gamification award skipped:', err.message);
+    }
+  }
+
+  /**
+   * 간단한 캐릭터 언락 체크 (포인트/스테이지 조건)
+   * - total_points가 120 이상이거나 info+memo 포인트 합이 60 이상이면 언락 시도
+   */
+  async checkCharacterUnlock(userId, entry) {
+    try {
+      const totalPoints = entry.total_points || 0;
+      const breakdown = entry.point_breakdown || {};
+      const infoMemo = (breakdown.infoPoints || 0) + (breakdown.memoPoints || 0);
+      const shouldUnlock = totalPoints >= 120 || infoMemo >= 60;
+      if (!shouldUnlock) return null;
+
+      // 이미 대표 캐릭터가 있는지 확인
+      const { data: existing } = await supabase
+        .from('user_characters')
+        .select('id, character_name')
+        .eq('user_id', userId)
+        .limit(1);
+      if (existing && existing.length) {
+        return null; // 이미 언락된 경우 스킵
+      }
+
+      const characterName = `Atlas Companion ${new Date().getFullYear()}`;
+      const { data: created, error } = await supabase
+        .from('user_characters')
+        .insert({
+          user_id: userId,
+          character_name: characterName,
+          character_name_ko: '아틀라스 동행자',
+          character_type: 'guide',
+          level: 1,
+          experience: totalPoints,
+          is_representative: true,
+          creation_data: {
+            unlocked_by: 'mood_atlas_complete',
+            entry_id: entry.id,
+            points: totalPoints,
+          },
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return created;
+    } catch (err) {
+      console.warn('[MoodAtlas] Character unlock skipped:', err.message);
+      return null;
     }
   }
 
