@@ -13,13 +13,18 @@ import toast from 'react-hot-toast';
 type Rating = 'love' | 'like' | 'neutral' | 'dislike';
 type Mode = 'select' | 'custom';
 
-const slugify = (str: string) =>
-  str
+// Supabase Storage 키는 특수문자/공백/한글에 민감할 수 있으므로 업로드 파일명을 ASCII 슬러그로 정규화한다.
+const slugifyAscii = (str: string) => {
+  const normalized = str
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '') // 결합 문자 제거
     .toLowerCase()
-    .replace(/[^a-z0-9\u3131-\u318e\uac00-\ud7a3\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-')
-    .slice(0, 60) || 'custom';
+    .replace(/[^a-z0-9-]+/g, '-') // 영문/숫자/대시만 허용
+    .replace(/-{2,}/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60);
+  return normalized || 'custom';
+};
 
 export default function RecordPage() {
   const router = useRouter();
@@ -110,10 +115,10 @@ export default function RecordPage() {
       let photoUrl: string | null = null;
       // Upload photo if exists
       if (photoFile) {
-        const fileExt = photoFile.name.split('.').pop();
+        const fileExt = photoFile.name.split('.').pop() || 'jpg';
         const baseName =
           mode === 'custom'
-            ? `custom-${slugify(customTitle)}`
+            ? `custom-${slugifyAscii(customTitle)}`
             : selectedArtwork?.id || 'artwork';
         const fileName = `${user.id}-${baseName}-${Date.now()}.${fileExt}`;
         const filePath = `mmca-impressions/${fileName}`;
@@ -223,6 +228,8 @@ export default function RecordPage() {
               onClick={() => {
                 setMode('select');
                 setCustomTitle('');
+                setPhotoFile(null);
+                setPhotoPreview(null);
               }}
               className={`w-full py-3 rounded-xl border transition-all ${mode === 'select' ? 'bg-purple-600 text-white border-purple-500' : 'bg-gray-800 border-gray-700 text-gray-300 hover:border-purple-500/50'}`}
             >
@@ -235,6 +242,8 @@ export default function RecordPage() {
                 setSelectedArtwork(null);
                 setSearchQuery('');
                 setSearchResults([]);
+                setPhotoFile(null);
+                setPhotoPreview(null);
               }}
               className={`w-full py-3 rounded-xl border transition-all ${mode === 'custom' ? 'bg-blue-600 text-white border-blue-500' : 'bg-gray-800 border-gray-700 text-gray-300 hover:border-blue-500/50'}`}
             >
@@ -347,66 +356,62 @@ export default function RecordPage() {
           )}
 
           {mode === 'custom' && (
-            <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
-              <div className="text-sm font-medium mb-3">직접 업로드</div>
+            <div className="rounded-2xl bg-gradient-to-r from-blue-900/60 via-slate-900 to-indigo-900/60 border border-blue-700/60 p-5 space-y-4">
+              <div className="flex items-center gap-2">
+                <Camera className="w-5 h-5 text-blue-300" />
+                <div className="text-sm font-semibold text-blue-100">?? ?? ?? ???</div>
+              </div>
               <div className="space-y-3">
                 <input
                   type="text"
                   value={customTitle}
                   onChange={(e) => setCustomTitle(e.target.value)}
-                  placeholder="예: 전시장에서 내가 찍은 물방울"
-                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-500"
+                  placeholder="?: ?? ?? ??? / ?? ?? ??"
+                  className="w-full px-4 py-3 bg-slate-900/70 border border-blue-700/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-gray-500"
                 />
-                <p className="text-xs text-gray-400">제목과 사진을 함께 올리면 개인 기록으로 저장됩니다.</p>
+                <div className="text-xs text-blue-100/80">??? ??? ?? ?????.</div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-3 text-blue-100/90">?? (??)</label>
+                {!photoPreview ? (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full aspect-video rounded-xl flex flex-col items-center justify-center gap-3 border-2 border-dashed border-blue-500/60 bg-blue-500/5 hover:bg-blue-500/10 transition-all"
+                  >
+                    <Upload className="w-8 h-8 text-blue-200" />
+                    <div className="text-sm text-blue-100/80">?? ?? ??? ??????</div>
+                  </button>
+                ) : (
+                  <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-900 border border-blue-700/60">
+                    <img
+                      src={photoPreview}
+                      alt="Preview"
+                      className="w-full h-full object-contain"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPhotoFile(null);
+                        setPhotoPreview(null);
+                      }}
+                      className="absolute top-3 right-3 p-2 bg-black/60 backdrop-blur-sm rounded-full hover:bg-black/70 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoChange}
+                  className="hidden"
+                />
               </div>
             </div>
           )}
-
-          {/* Photo Upload */}
-          <div>
-            <label className="block text-sm font-medium mb-3">
-              {mode === 'custom' ? '사진 (필수)' : '사진 (선택)'}
-            </label>
-            {!photoPreview ? (
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className={`w-full aspect-video rounded-xl flex flex-col items-center justify-center gap-3 border-2 border-dashed transition-all ${
-                  mode === 'custom'
-                    ? 'border-blue-500 bg-blue-500/5 hover:bg-blue-500/10'
-                    : 'border-gray-700 bg-gray-800 hover:border-purple-500 hover:bg-gray-800/50'
-                }`}
-              >
-                <Upload className="w-8 h-8 text-gray-400" />
-                <div className="text-sm text-gray-400">작품 사진을 업로드하세요</div>
-              </button>
-            ) : (
-              <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-900">
-                <img
-                  src={photoPreview}
-                  alt="Preview"
-                  className="w-full h-full object-contain"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setPhotoFile(null);
-                    setPhotoPreview(null);
-                  }}
-                  className="absolute top-3 right-3 p-2 bg-black/50 backdrop-blur-sm rounded-full hover:bg-black/70 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            )}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handlePhotoChange}
-              className="hidden"
-            />
-          </div>
 
           {/* Rating */}
           <div>

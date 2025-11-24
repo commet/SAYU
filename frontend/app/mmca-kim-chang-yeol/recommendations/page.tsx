@@ -61,6 +61,37 @@ const curatedReasons: Partial<Record<SAYUTypeCode, Record<string, string>>> = {
   },
 };
 
+const EXHIBITION_SECTIONS = [
+  {
+    id: 'section-1',
+    title: '1장. 상흔',
+    subtitle: '전쟁과 분단의 상처가 새겨진 초기 구상 작업',
+    description:
+      '한국전쟁 직후, 총탄 자국과 피 묻은 천처럼 거칠고 무거운 화면에 상처를 새겨 넣은 시기입니다. 전쟁과 월남의 경험이 캔버스에 각인되며, 이후 물방울 모티프가 태동하기 전 감정의 원형을 보여줍니다.',
+  },
+  {
+    id: 'section-2',
+    title: '2장. 현상',
+    subtitle: '뉴욕·파리 전환기의 추상 실험과 점액질 형상',
+    description:
+      '앵포르멜 이후 질감을 걷어내며 기하학적 추상으로 옮겨가던 시기입니다. 뉴욕의 소비사회에 대한 이질감, 파리 정착 후 점액질로 변형되는 유기적 형상을 통해 존재의 경계와 변화를 탐구합니다.',
+  },
+  {
+    id: 'section-3',
+    title: '3장. 물방울',
+    subtitle: '극사실적 물방울에서 수행적 반복으로',
+    description:
+      '파리 외곽 작업실에서 우연히 발견한 물방울을 극사실적으로 그리기 시작해 50년간 반복합니다. 촉촉한 빛과 그림자가 사실성을 넘어 명상적·치유적 공간을 만드는 시기입니다.',
+  },
+  {
+    id: 'section-4',
+    title: '4장. 회귀',
+    subtitle: '천자문과 물방울이 만나는 후기 작업',
+    description:
+      '신문지·한지 위에 문자와 물방울을 결합하며 어린 시절 배운 천자문으로 귀환합니다. 언어(기억)와 이미지(물방울)가 겹쳐지는 지점에서 존재와 시간, 수행의 의미를 묻습니다.',
+  },
+];
+
 export default function RecommendationsPage() {
   const router = useRouter();
   const { user } = useAuth();
@@ -69,6 +100,7 @@ export default function RecommendationsPage() {
   const [selectedType, setSelectedType] = useState<SAYUTypeCode | null>(null);
   const [recommendedArtworks, setRecommendedArtworks] = useState<Artwork[]>([]);
   const [selectedArtwork, setSelectedArtwork] = useState<Artwork | null>(null);
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const loadPersona = async () => {
@@ -95,22 +127,32 @@ export default function RecommendationsPage() {
     loadPersona();
   }, [user, supabase]);
 
-  useEffect(() => {
-    if (selectedType) {
-      const filtered = MMCA_ARTWORKS.filter(artwork => {
-        return artwork.aptRecommendations && artwork.aptRecommendations[selectedType];
-      }).map(artwork => {
-        const reason =
-          curatedReasons[selectedType]?.[artwork.id] ||
-          artwork.aptRecommendations?.[selectedType] ||
-          '당신을 위한 특별한 작품입니다.';
-        return { ...artwork, reason };
-      });
-      setRecommendedArtworks(filtered);
-    }
+  
+useEffect(() => {
+    if (!selectedType) return;
+
+    
+    const filtered = MMCA_ARTWORKS.filter(artwork => {
+      return artwork.aptRecommendations && artwork.aptRecommendations[selectedType];
+    }).map(artwork => {
+      const reason =
+        curatedReasons[selectedType]?.[artwork.id] ||
+        artwork.aptRecommendations?.[selectedType] ||
+        '???? ???? ?????.';
+      return { ...artwork, reason };
+    });
+
+    const existingIds = new Set(filtered.map(a => a.id));
+    const fillers = MMCA_ARTWORKS.filter(a => !existingIds.has(a.id))
+      .slice(0, Math.max(0, 3 - filtered.length))
+      .map(a => ({ ...a, reason: '?? ????? ?? ?? ???.' }));
+const existingIds = new Set(filtered.map(a => a.id));
+    const fillers = MMCA_ARTWORKS.filter(a => !existingIds.has(a.id)).slice(0, Math.max(0, 3 - filtered.length));
+    setRecommendedArtworks([...filtered, ...fillers]);
   }, [selectedType]);
 
-  const introText = useMemo(() => {
+
+const introText = useMemo(() => {
     if (!selectedType) return '';
     return introMessages[selectedType] || introMessages.default || '각 작품에 담긴 김창열의 상처, 치유, 사유의 흐름을 느껴보세요.';
   }, [selectedType]);
@@ -230,9 +272,10 @@ export default function RecommendationsPage() {
                 {/* Artwork Image */}
                 <div className="relative aspect-[4/3] bg-gray-900 overflow-hidden">
                   <img
-                    src={artwork.imageUrl}
+                    src={encodeURI(artwork.imageUrl)}
                     alt={artwork.title}
                     className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
                   />
                   <div className="absolute top-3 right-3">
                     <div className="p-2 bg-purple-500/90 backdrop-blur-sm rounded-full">
@@ -262,6 +305,51 @@ export default function RecommendationsPage() {
             ))}
           </div>
         )}
+
+        {/* Exhibition Sections (1~4장) */}
+        <div className="mt-12 space-y-4">
+          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+            <Info className="w-5 h-5 text-blue-300" />
+            전시 구성 (1장~4장)
+          </h3>
+          {EXHIBITION_SECTIONS.map(section => {
+            const isOpen = !!openSections[section.id];
+            return (
+              <motion.div
+                key={section.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="border border-blue-700/40 rounded-2xl bg-slate-900/60 overflow-hidden"
+              >
+                <button
+                  type="button"
+                  onClick={() =>
+                    setOpenSections(prev => ({ ...prev, [section.id]: !isOpen }))
+                  }
+                  className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-blue-900/40 transition-colors"
+                >
+                  <div>
+                    <div className="text-sm text-blue-200">{section.title}</div>
+                    <div className="text-base font-semibold text-white">{section.subtitle}</div>
+                  </div>
+                  <div className="text-blue-200 text-sm">{isOpen ? '닫기' : '더보기'}</div>
+                </button>
+                <AnimatePresence>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="px-5 pb-5 text-sm text-gray-200 leading-relaxed"
+                    >
+                      {section.description}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })}
+        </div>
 
         {/* Team Common Recommendations */}
         {recommendedArtworks.length > 0 && (
