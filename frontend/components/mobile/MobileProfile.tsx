@@ -144,14 +144,26 @@ export default function MobileProfile({ gameStats: propsGameStats, user: propsUs
   });
   const [uploadingImage, setUploadingImage] = useState(false);
 
-  // Load quiz results from localStorage
+  // Load quiz results from user data or localStorage
   useEffect(() => {
-    const quizResults = localStorage.getItem('quizResults');
-    if (quizResults) {
-      const results = JSON.parse(quizResults);
-      setUserPersonalityType(results.personalityType);
+    // Priority 1: Use personality type from user object (from DB)
+    if (user?.personalityType) {
+      console.log('Mobile Profile - Using personality type from user:', user.personalityType);
+      setUserPersonalityType(user.personalityType);
+    } else {
+      // Fallback: Use localStorage
+      const quizResults = localStorage.getItem('quizResults');
+      if (quizResults) {
+        try {
+          const results = JSON.parse(quizResults);
+          setUserPersonalityType(results.personalityType);
+          console.log('Mobile Profile - Using personality type from localStorage:', results.personalityType);
+        } catch (e) {
+          console.error('Error parsing quiz results:', e);
+        }
+      }
     }
-  }, []);
+  }, [user]);
 
   // Check if profile is completed - for mobile
   useEffect(() => {
@@ -352,35 +364,46 @@ export default function MobileProfile({ gameStats: propsGameStats, user: propsUs
 
               {/* User Info */}
               <div className="flex-1">
-                <h1 className="text-lg font-bold text-white">{user.nickname || user.email}</h1>
-                
-                {/* Personality Type Badge */}
+                <h1 className="text-lg font-bold text-white mb-1">{user.nickname || user.email}</h1>
+
+                {/* Personality Type Badge - 더 눈에 띄게 */}
                 {userPersonalityType && (
-                  <div className="mt-1">
-                    <span 
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold text-white"
-                      style={{ 
-                        background: getGradientStyle(userPersonalityType as keyof typeof personalityGradients)
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    className="mb-2"
+                  >
+                    <div
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold shadow-lg transform active:scale-95 transition-transform"
+                      style={{
+                        background: getGradientStyle(userPersonalityType as keyof typeof personalityGradients) ||
+                                   'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        color: 'white',
+                        textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.3)'
                       }}
                     >
-                      <Palette className="w-3 h-3" />
-                      {userPersonalityType}
-                    </span>
-                  </div>
+                      <Palette className="w-3.5 h-3.5" />
+                      <span className="tracking-wide">{userPersonalityType}</span>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Personality Description */}
+                {userPersonalityType && (
+                  <p className="text-xs text-purple-200 mb-2 font-medium">
+                    {personalityGradients[userPersonalityType as keyof typeof personalityGradients]?.name ||
+                     personalityDescriptions[userPersonalityType]?.title ||
+                     '창의적인 예술 탐험가'}
+                  </p>
                 )}
 
                 {/* Level & Points */}
-                <div className="mt-2">
-                  <div className="flex items-center gap-3 text-xs text-gray-300">
-                    <span>Lv.{propsGameStats?.level || 1}</span>
-                    <span>•</span>
-                    <span>{propsGameStats?.total_points || 0}P</span>
-                  </div>
-                  <p className="text-xs text-purple-300 mt-1 opacity-90">
-                    {language === 'ko' 
-                      ? '🎁 포인트로 전시 할인 혜택 등 준비중' 
-                      : '🎁 Exhibition discounts coming soon'}
-                  </p>
+                <div className="flex items-center gap-3 text-xs text-gray-300">
+                  <span className="font-semibold">Lv.{propsGameStats?.level || 1}</span>
+                  <span>•</span>
+                  <span className="font-semibold">{propsGameStats?.total_points || 0}P</span>
                 </div>
               </div>
             </div>

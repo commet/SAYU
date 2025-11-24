@@ -35,7 +35,9 @@
       "Bash(taskkill:*)",
       "Bash(npm run dev:*)",
       "mcp__serena__find_symbol",
-      "mcp__serena__search_for_pattern"
+      "mcp__serena__search_for_pattern",
+      "Bash(npm search mcp-server)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
@@ -48,6 +50,21 @@
         "serena-mcp-server"
       ],
       "cwd": "C:\\Users\\admin\\documents\\github\\sayu\\serena"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "C:\\Users\\admin\\documents\\github\\sayu"
+      ]
+    },
+    "codex": {
+      "command": "codex",
+      "args": [
+        "mcp",
+        "serve"
+      ]
     }
   }
 }

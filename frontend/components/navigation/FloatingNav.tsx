@@ -21,8 +21,16 @@ interface NavItem {
 
 // 데스크탑 메뉴 (상단) - 모든 항목
 const desktopNavItems: NavItem[] = [
-  { iconType: 'home', label: { en: 'Home', ko: '홈' }, path: '/' },
-  { iconType: 'sparkles', label: { en: 'Discover', ko: '탐색' }, path: '/quiz' },
+  {
+    iconType: 'home',
+    label: { en: 'Main', ko: '메인' },
+    path: '#',
+    children: [
+      { iconType: 'home', label: { en: 'Home', ko: '홈' }, path: '/' },
+      { iconType: 'sparkles', label: { en: 'Discover', ko: '탐색' }, path: '/quiz' },
+      { iconType: 'sparkles', label: { en: 'MMCA_Kim Tschang-yeul', ko: 'MMCA_김창열' }, path: '/mmca-kim-chang-yeol' },
+    ],
+  },
   { 
     iconType: 'collection', 
     label: { en: 'Art Collection', ko: '아트 컬렉션' }, 
@@ -679,4 +687,3 @@ export default function FloatingNav() {
     </div>
   );
 }
-

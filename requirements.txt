@@ -1,0 +1,4 @@
+# Core data workflow libraries
+pandas>=2.0
+numpy>=1.25
+jupyter

@@ -44,6 +44,7 @@ const drawerMenuItems = [
     items: [
       { icon: Home, label: { en: 'Home', ko: '홈' }, path: '/' },
       { icon: Sparkles, label: { en: 'Discover', ko: '탐색' }, path: '/quiz' },
+      { icon: GalleryVerticalEnd, label: { en: 'MMCA_Kim Tschang-yeul', ko: 'MMCA_김창열' }, path: '/mmca-kim-chang-yeol' },
     ]
   },
   {
