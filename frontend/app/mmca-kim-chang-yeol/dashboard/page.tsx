@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Users, Activity, Clock, Heart, Meh, ThumbsDown, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Users, Activity, Clock, Heart, Meh, ThumbsDown } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { getArtworkById } from '@/data/mmca-tour-data';
 import { EMOTION_TAG_PRESETS } from '@/types/mmca-tour';
@@ -26,6 +26,8 @@ interface Impression {
     personality_type?: string;
   };
 }
+
+const placeholderImage = '/placeholder-artwork.jpg';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -66,7 +68,6 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchImpressions();
 
-    // Auto-refresh every 30 seconds
     const interval = setInterval(() => {
       fetchImpressions();
     }, 30000);
@@ -95,17 +96,46 @@ export default function DashboardPage() {
     return user.full_name || user.username || '사용자';
   };
 
-  // Group impressions by artwork
-  const artworkGroups = impressions.reduce((acc, impression) => {
-    const artworkId = impression.artwork_id;
-    if (!acc[artworkId]) {
-      acc[artworkId] = [];
+  const resolveArtworkInfo = (impression: Impression) => {
+    const artwork = getArtworkById(impression.artwork_id);
+    if (artwork) {
+      return {
+        title: artwork.title,
+        subtitle: artwork.year,
+        room: artwork.room,
+        imageUrl: artwork.imageUrl || placeholderImage,
+        isCustom: false
+      };
     }
-    acc[artworkId].push(impression);
-    return acc;
-  }, {} as Record<string, Impression[]>);
+    if (impression.artwork_id?.startsWith('custom:')) {
+      const raw = impression.artwork_id.replace(/^custom:/, '');
+      const title = raw.split('-')[0] || '직접 업로드';
+      return {
+        title,
+        subtitle: '직접 촬영',
+        room: '',
+        imageUrl: impression.photo_url || placeholderImage,
+        isCustom: true
+      };
+    }
+    return {
+      title: impression.artwork_id || '미확인 작품',
+      subtitle: '',
+      room: '',
+      imageUrl: impression.photo_url || placeholderImage,
+      isCustom: true
+    };
+  };
 
-  // Stats
+  const artworkGroups = useMemo(() => {
+    return impressions.reduce((acc, imp) => {
+      const key = imp.artwork_id || 'unknown';
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(imp);
+      return acc;
+    }, {} as Record<string, Impression[]>);
+  }, [impressions]);
+
   const totalImpressions = impressions.length;
   const uniqueUsers = new Set(impressions.map(i => i.user_id)).size;
   const uniqueArtworks = new Set(impressions.map(i => i.artwork_id)).size;
@@ -183,7 +213,7 @@ export default function DashboardPage() {
           ) : (
             <div className="space-y-4">
               {impressions.slice(0, 10).map((impression, index) => {
-                const artwork = getArtworkById(impression.artwork_id);
+                const artworkInfo = resolveArtworkInfo(impression);
                 const ratingInfo = getRatingIcon(impression.rating);
                 const RatingIcon = ratingInfo.icon;
 
@@ -197,12 +227,10 @@ export default function DashboardPage() {
                     className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-gray-700/50 hover:border-purple-500/50 transition-all cursor-pointer group"
                   >
                     <div className="flex items-start gap-4">
-                      {/* User Avatar */}
                       <div className="w-10 h-10 flex-shrink-0 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
                         {getUserDisplay(impression).charAt(0).toUpperCase()}
                       </div>
 
-                      {/* Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="font-medium text-white">
@@ -219,47 +247,25 @@ export default function DashboardPage() {
                         </div>
 
                         <div className="text-sm text-gray-300 mb-2">
-                          <span className="font-medium">{artwork?.title || impression.artwork_id}</span>
+                          <span className="font-medium">{artworkInfo.title}</span>
                           <span className="text-gray-500"> 작품을 감상했습니다</span>
                         </div>
 
-                        <div className="flex items-center gap-3 flex-wrap">
-                          {/* Rating */}
-                          <div className="flex items-center gap-1 text-xs">
-                            <RatingIcon className={`w-4 h-4 ${ratingInfo.color}`} />
-                            <span className="text-gray-400">{ratingInfo.label}</span>
-                          </div>
-
-                          {/* Emotions */}
-                          {impression.emotion_tags && impression.emotion_tags.length > 0 && (
-                            <div className="flex items-center gap-1 flex-wrap">
-                              {impression.emotion_tags.slice(0, 3).map((tag) => (
-                                <span key={tag} className="text-xs px-2 py-0.5 bg-gray-700/50 text-gray-300 rounded-full">
-                                  {getEmotionLabel(tag)}
-                                </span>
-                              ))}
-                              {impression.emotion_tags.length > 3 && (
-                                <span className="text-xs text-gray-500">+{impression.emotion_tags.length - 3}</span>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Photo Indicator */}
-                          {impression.photo_url && (
-                            <div className="flex items-center gap-1 text-xs text-purple-400">
-                              <ImageIcon className="w-4 h-4" />
-                              <span>사진</span>
-                            </div>
-                          )}
+                        <div className="flex items-center gap-2">
+                          <RatingIcon className={`w-4 h-4 ${ratingInfo.color}`} />
+                          <span className="text-sm text-gray-400">{ratingInfo.label}</span>
                         </div>
-
-                        {/* Memo Preview */}
-                        {impression.memo && (
-                          <div className="mt-2 text-sm text-gray-400 italic line-clamp-2">
-                            "{impression.memo}"
-                          </div>
-                        )}
                       </div>
+
+                      {impression.photo_url && (
+                        <div className="w-12 h-12 flex-shrink-0 rounded-lg overflow-hidden bg-gray-900 border border-gray-700">
+                          <img
+                            src={impression.photo_url}
+                            alt="업로드 사진"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 );
@@ -268,25 +274,24 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Artworks Grid */}
-        {Object.keys(artworkGroups).length > 0 && (
-          <div>
+        {/* Artwork Groups */}
+        {impressions.length > 0 && (
+          <div className="space-y-4">
             <h2 className="text-xl font-bold mb-4">작품별 반응</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Object.entries(artworkGroups).map(([artworkId, artworkImpressions]) => {
-                const artwork = getArtworkById(artworkId);
-                if (!artwork) return null;
+                const sample = artworkImpressions[0];
+                const info = resolveArtworkInfo(sample);
 
                 return (
                   <div
                     key={artworkId}
                     className="bg-gray-800/50 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-700/50"
                   >
-                    {/* Artwork Image */}
                     <div className="relative aspect-[4/3] bg-gray-900">
                       <img
-                        src={artwork.imageUrl}
-                        alt={artwork.title}
+                        src={info.imageUrl}
+                        alt={info.title}
                         className="w-full h-full object-contain"
                       />
                       <div className="absolute top-2 right-2 px-2 py-1 bg-black/70 backdrop-blur-sm rounded-full text-xs font-medium text-white">
@@ -294,13 +299,11 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    {/* Info */}
                     <div className="p-4">
-                      <h3 className="font-bold text-white mb-1">{artwork.title}</h3>
-                      <p className="text-sm text-gray-400 mb-3">{artwork.year}</p>
+                      <h3 className="font-bold text-white mb-1">{info.title}</h3>
+                      <p className="text-sm text-gray-400 mb-3">{info.subtitle}</p>
 
-                      {/* Ratings Distribution */}
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 flex-wrap">
                         {['love', 'like', 'neutral', 'dislike'].map((rating) => {
                           const count = artworkImpressions.filter(i => i.rating === rating).length;
                           const ratingInfo = getRatingIcon(rating);
@@ -357,7 +360,6 @@ export default function DashboardPage() {
                 )}
 
                 <div className="p-6">
-                  {/* User */}
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-lg">
                       {getUserDisplay(selectedImpression).charAt(0).toUpperCase()}
@@ -370,18 +372,16 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  {/* Artwork */}
                   {(() => {
-                    const artwork = getArtworkById(selectedImpression.artwork_id);
-                    return artwork ? (
+                    const info = resolveArtworkInfo(selectedImpression);
+                    return (
                       <div className="mb-4">
-                        <h3 className="font-bold text-white text-lg">{artwork.title}</h3>
-                        <p className="text-sm text-gray-400">{artwork.year}</p>
+                        <h3 className="font-bold text-white text-lg">{info.title}</h3>
+                        {info.subtitle && <p className="text-sm text-gray-400">{info.subtitle}</p>}
                       </div>
-                    ) : null;
+                    );
                   })()}
 
-                  {/* Rating */}
                   {(() => {
                     const ratingInfo = getRatingIcon(selectedImpression.rating);
                     const RatingIcon = ratingInfo.icon;
@@ -393,7 +393,6 @@ export default function DashboardPage() {
                     );
                   })()}
 
-                  {/* Emotions */}
                   {selectedImpression.emotion_tags && selectedImpression.emotion_tags.length > 0 && (
                     <div className="mb-4">
                       <div className="text-sm font-medium text-gray-400 mb-2">느낀 감정</div>
@@ -407,7 +406,6 @@ export default function DashboardPage() {
                     </div>
                   )}
 
-                  {/* Memo */}
                   {selectedImpression.memo && (
                     <div className="mb-6">
                       <div className="text-sm font-medium text-gray-400 mb-2">감상</div>

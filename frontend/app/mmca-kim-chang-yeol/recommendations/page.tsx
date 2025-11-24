@@ -1,59 +1,118 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Sparkles, Heart, Info } from 'lucide-react';
-import { MMCA_ARTWORKS, MMCA_ARTISTS, getArtworkById, getArtistById } from '@/data/mmca-tour-data';
+import { ArrowLeft, Sparkles, Heart, Info, Trophy } from 'lucide-react';
+import { MMCA_ARTWORKS } from '@/data/mmca-tour-data';
 import { SAYUTypeCode } from '@/shared/SAYUTypeDefinitions';
 import { useAuth } from '@/hooks/useAuth';
+import { createClient } from '@/lib/supabase/client';
 
-// APT 유형 선택지 (팀원들 위한 간단한 선택)
+type Artwork = (typeof MMCA_ARTWORKS)[number] & { reason?: string };
+
 const APT_OPTIONS = [
-  { code: 'LAEF', label: '명상적 추상', emoji: '🌊' },
-  { code: 'LAEC', label: '체계적 추상', emoji: '🎨' },
-  { code: 'LAMF', label: '철학적 탐구', emoji: '🤔' },
-  { code: 'LAMC', label: '분석적 사고', emoji: '🧠' },
-  { code: 'LREF', label: '서정적 감성', emoji: '🍃' },
-  { code: 'LREC', label: '섬세한 관찰', emoji: '👁️' },
-  { code: 'LRMF', label: '혁신적 탐구', emoji: '🚀' },
-  { code: 'LRMC', label: '학구적 연구', emoji: '📚' },
-  { code: 'SAEF', label: '열정적 표현', emoji: '🔥' },
-  { code: 'SAEC', label: '조화로운 연결', emoji: '🤝' },
-  { code: 'SAMF', label: '영감을 주는', emoji: '💡' },
-  { code: 'SAMC', label: '통합적 기획', emoji: '🎯' },
-  { code: 'SREF', label: '따뜻한 공감', emoji: '☀️' },
-  { code: 'SREC', label: '포용적 안내', emoji: '🫂' },
-  { code: 'SRMF', label: '교육적 멘토', emoji: '👨‍🏫' },
-  { code: 'SRMC', label: '전문적 체계', emoji: '📊' }
-];
+  { code: 'LAEF', label: '몽환적 방랑자', emoji: '🦊' },
+  { code: 'LAEC', label: '감성 큐레이터', emoji: '🐱' },
+  { code: 'LAMF', label: '직관적 탐구자', emoji: '🦉' },
+  { code: 'LAMC', label: '철학적 수집가', emoji: '🐢' },
+  { code: 'LREF', label: '고독한 관찰자', emoji: '🦎' },
+  { code: 'LREC', label: '섬세한 감정가', emoji: '🦔' },
+  { code: 'LRMF', label: '디지털 탐험가', emoji: '🐙' },
+  { code: 'LRMC', label: '학구적 연구자', emoji: '🦫' },
+  { code: 'SAEF', label: '감성 나눔이', emoji: '🦋' },
+  { code: 'SAEC', label: '예술 네트워커', emoji: '🐧' },
+  { code: 'SAMF', label: '영감 전도사', emoji: '🦜' },
+  { code: 'SAMC', label: '문화 기획자', emoji: '🦌' },
+  { code: 'SREF', label: '열정적 관람자', emoji: '🐕' },
+  { code: 'SREC', label: '따뜻한 안내자', emoji: '🦆' },
+  { code: 'SRMF', label: '지식 멘토', emoji: '🐘' },
+  { code: 'SRMC', label: '체계적 교육자', emoji: '🦅' },
+] as const;
+
+const introMessages: Partial<Record<SAYUTypeCode | 'default', string>> = {
+  LAEF: '여우처럼 자유롭게 동선에 얽매이지 말고, 노란·대형 물방울 앞에서 직관적으로 몰입해 보세요. 시(詩)를 물방울로 번역한 작품도 놓치지 마세요.',
+  LREC: '서두르지 말고 작품마다 오래 머물러 보세요. 극사실 물방울과 천자문 대형작에서 섬세한 감정과 체계를 함께 느낄 수 있습니다.',
+  LRMC: '거북이처럼 천천히 변화를 추적하세요. 점액질 같은 현상 연작 → 초기 물방울 → 천자문 회귀까지 의미의 정제 과정을 따라가 보세요.',
+  SRMC: '독수리 시선으로 큰 흐름을 팀과 함께 보세요. 앵포르멜 → 뉴욕 전환 → 첫 물방울 → 회귀까지 서사를 토론해보세요.',
+  default: '각 작품에 담긴 김창열의 상처, 치유, 사유의 흐름을 느껴보세요.',
+};
+
+const curatedReasons: Partial<Record<SAYUTypeCode, Record<string, string>>> = {
+  LREC: {
+    'sangheun-01': '1950년대 전쟁 직후의 구상 작업으로, 상처를 구체적 형상에 담아낸 순간입니다.',
+    'moolbangul-01': '1970년대 극사실 물방울의 정점. 촉촉한 질감과 감정을 섬세하게 느껴보세요.',
+    'hoegwi-01': '천자문과 물방울이 만나는 회귀작. 체계와 감정이 만나는 지점을 음미해보세요.',
+  },
+  SRMC: {
+    'sangheun-01': '한국 앵포르멜의 역사적 맥락을 팀과 함께 토론해보세요.',
+    'hyunsang-01': '뉴욕·파리 전환기의 실험적 추상. 전환점을 함께 분석해보세요.',
+    'moolbangul-01': '초기 물방울의 탄생 배경을 질문해보세요. “왜 물방울인가?”',
+  },
+  LRMC: {
+    'hyunsang-01': '고체에서 액체로 변하는 경계의 순간. 존재론적 전환을 천천히 추적하세요.',
+    'moolbangul-01': '끈적한 점액질에서 투명한 물방울로 정제되는 과정 자체가 수행입니다.',
+    'hoegwi-01': '언어(천자문)와 이미지(물방울)의 관계를 철학적으로 사유해보세요.',
+  },
+  LAEF: {
+    'moolbangul-02': '노란 바탕의 따뜻한 물방울, 비극 속에서도 놓지 않은 생명력을 직관적으로 느껴보세요.',
+    'moolbangul-03': '거대한 물방울 앞에서 몽환적 몰입을 경험해보세요.',
+    'il-pleut': '시(詩)를 물방울로 번역한 작품. 빛과 리듬을 자유롭게 느껴보세요.',
+  },
+};
 
 export default function RecommendationsPage() {
   const router = useRouter();
   const { user } = useAuth();
+  const supabase = createClient();
+
   const [selectedType, setSelectedType] = useState<SAYUTypeCode | null>(null);
-  const [recommendedArtworks, setRecommendedArtworks] = useState<any[]>([]);
-  const [selectedArtwork, setSelectedArtwork] = useState<any | null>(null);
+  const [recommendedArtworks, setRecommendedArtworks] = useState<Artwork[]>([]);
+  const [selectedArtwork, setSelectedArtwork] = useState<Artwork | null>(null);
 
   useEffect(() => {
-    // 로그인한 사용자의 personality_type 가져오기
-    if (user?.personality_type) {
-      setSelectedType(user.personality_type as SAYUTypeCode);
-    }
-  }, [user]);
+    const loadPersona = async () => {
+      if (user?.personality_type) {
+        setSelectedType(user.personality_type as SAYUTypeCode);
+        return;
+      }
+      if (user?.id) {
+        try {
+          const { data, error } = await supabase
+            .from('users')
+            .select('personality_type')
+            .eq('id', user.id)
+            .single();
+          if (error) throw error;
+          if (data?.personality_type) {
+            setSelectedType(data.personality_type as SAYUTypeCode);
+          }
+        } catch (err) {
+          console.error('Failed to load personality_type:', err);
+        }
+      }
+    };
+    loadPersona();
+  }, [user, supabase]);
 
   useEffect(() => {
     if (selectedType) {
-      // 선택된 유형에 맞는 작품 필터링
       const filtered = MMCA_ARTWORKS.filter(artwork => {
         return artwork.aptRecommendations && artwork.aptRecommendations[selectedType];
-      }).map(artwork => ({
-        ...artwork,
-        reason: artwork.aptRecommendations?.[selectedType] || '당신을 위한 특별한 작품입니다.'
-      }));
-
+      }).map(artwork => {
+        const reason =
+          curatedReasons[selectedType]?.[artwork.id] ||
+          artwork.aptRecommendations?.[selectedType] ||
+          '당신을 위한 특별한 작품입니다.';
+        return { ...artwork, reason };
+      });
       setRecommendedArtworks(filtered);
     }
+  }, [selectedType]);
+
+  const introText = useMemo(() => {
+    if (!selectedType) return '';
+    return introMessages[selectedType] || introMessages.default || '각 작품에 담긴 김창열의 상처, 치유, 사유의 흐름을 느껴보세요.';
   }, [selectedType]);
 
   if (!selectedType) {
@@ -145,11 +204,7 @@ export default function RecommendationsPage() {
               <div>
                 <h3 className="text-lg font-bold text-white mb-2">당신을 위한 특별한 여정</h3>
                 <p className="text-sm text-gray-300 leading-relaxed">
-                  {selectedType === 'LAEF' && '🦊 밤에 자유롭게 숲을 헤매는 여우처럼, 동선에 얽매이지 말고 편하게 둘러보세요. 마음이 끌리는 물방울 앞에 서 있으면 될 것 같아요.'}
-                  {selectedType === 'LREC' && '🐢 서두르지 않으셔도 괜찮아요. 작품 하나하나 앞에서 시간을 두고 서 있어보세요. 그 시간이 김창열의 50년과 공명할 거예요.'}
-                  {selectedType === 'LRMC' && '🐢 깊이 있게 사유하며 천천히 의미를 탐구해보시는 건 어떨까요? 혼자만의 시간에 작품을 음미하시면 좋을 것 같아요.'}
-                  {selectedType === 'SRMC' && '🦅 팀원들과 함께 역사적 맥락 속에서 작품을 이해하고 이야기 나눠보면 재미있을 거예요. 김창열 예술의 변화 과정을 함께 따라가보세요.'}
-                  {!['LAEF', 'LREC', 'LRMC', 'SRMC'].includes(selectedType) && '각 작품에 담긴 작가의 철학과 감정을 느껴보시면 좋을 것 같아요.'}
+                  {introText}
                 </p>
               </div>
             </div>
@@ -224,21 +279,19 @@ export default function RecommendationsPage() {
               <div className="p-4 bg-black/20 rounded-xl">
                 <h4 className="font-bold text-white mb-2">1. 8전시실 '무슈 구뜨, 김창열' 아카이브</h4>
                 <p className="text-sm text-gray-300 leading-relaxed">
-                  작가가 '무슈 구뜨(Monsieur Gouttes·물방울 씨)'로 불렸대요.
-                  작가의 삶과 예술의 또 다른 면모를 볼 수 있는 별도 공간이니 꼭 들러보세요.
+                  작가가 '무슈 구뜨(Monsieur Gouttes·물방울 씨)'로 불렸던 이야기를 만날 수 있는 별도 공간입니다.
                 </p>
               </div>
               <div className="p-4 bg-black/20 rounded-xl">
                 <h4 className="font-bold text-white mb-2">2. 작가 육성 영상</h4>
                 <p className="text-sm text-gray-300 leading-relaxed">
-                  작가의 삶과 예술 여정을 그의 목소리로 직접 들을 수 있어요.
-                  영화 '물방울을 그리는 남자'의 축약본이니 시간 내서 보시면 좋을 것 같아요.
+                  영화 '물방울을 그리는 남자' 축약본을 통해 작가의 육성과 여정을 들을 수 있습니다.
                 </p>
               </div>
               <div className="p-4 bg-amber-500/10 rounded-xl border border-amber-500/20">
                 <h4 className="font-bold text-amber-300 mb-2">💬 관람 후 함께 이야기 나눠요</h4>
                 <ul className="text-sm text-gray-300 space-y-2">
-                  <li>• 김창열에게 물방울은 무엇이었을까요? 전쟁의 상처? 치유? 생명?</li>
+                  <li>• 김창열에게 물방울은 무엇이었을까요? 전쟁의 상처? 치유? 수행? 존재 증명?</li>
                   <li>• 각자 가장 인상 깊었던 작품과 그 이유는 무엇인가요?</li>
                   <li>• 앵포르멜에서 물방울까지의 변화 과정에서 무엇을 느끼셨나요?</li>
                 </ul>
@@ -266,7 +319,6 @@ export default function RecommendationsPage() {
                 onClick={(e) => e.stopPropagation()}
                 className="w-full max-w-2xl bg-gray-900 rounded-2xl overflow-hidden border border-gray-700"
               >
-                {/* Image */}
                 <div className="relative aspect-[4/3] bg-gray-950">
                   <img
                     src={selectedArtwork.imageUrl}
@@ -275,55 +327,29 @@ export default function RecommendationsPage() {
                   />
                 </div>
 
-                {/* Content */}
-                <div className="p-6">
-                  <h2 className="text-2xl font-bold text-white mb-2">
-                    {selectedArtwork.title}
-                  </h2>
-                  <p className="text-gray-400 mb-4">
-                    {selectedArtwork.year} · {selectedArtwork.room}
-                  </p>
-
-                  {/* Recommendation */}
-                  <div className="mb-6 p-4 bg-purple-500/10 rounded-xl border border-purple-500/20">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Heart className="w-5 h-5 text-purple-400" />
-                      <span className="font-bold text-purple-300">추천 이유</span>
+                <div className="p-6 space-y-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h3 className="text-xl font-bold text-white">{selectedArtwork.title}</h3>
+                      <p className="text-sm text-gray-400">{selectedArtwork.year} · {selectedArtwork.room}</p>
                     </div>
-                    <p className="text-sm text-purple-200 leading-relaxed">
-                      {selectedArtwork.reason}
-                    </p>
+                    <span className="text-2xl">
+                      {APT_OPTIONS.find(o => o.code === selectedType)?.emoji}
+                    </span>
                   </div>
 
-                  {/* Description */}
+                  <div className="p-4 bg-purple-500/10 rounded-xl border border-purple-500/20 flex items-start gap-2">
+                    <Heart className="w-5 h-5 text-purple-300 mt-0.5" />
+                    <p className="text-sm text-gray-200 leading-relaxed">{selectedArtwork.reason}</p>
+                  </div>
+
                   {selectedArtwork.description && (
-                    <div className="mb-6">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Info className="w-5 h-5 text-gray-400" />
-                        <span className="font-bold text-white">작품 설명</span>
-                      </div>
-                      <p className="text-sm text-gray-300 leading-relaxed">
-                        {selectedArtwork.description}
-                      </p>
+                    <div className="p-4 bg-gray-800/50 rounded-xl border border-gray-700 flex items-start gap-2">
+                      <Info className="w-5 h-5 text-gray-300 mt-0.5" />
+                      <p className="text-sm text-gray-200 leading-relaxed">{selectedArtwork.description}</p>
                     </div>
                   )}
 
-                  {/* Viewing Questions */}
-                  {selectedArtwork.viewingQuestions && selectedArtwork.viewingQuestions.length > 0 && (
-                    <div className="mb-6">
-                      <div className="font-bold text-white mb-3">감상 포인트</div>
-                      <ul className="space-y-2">
-                        {selectedArtwork.viewingQuestions.map((q: string, i: number) => (
-                          <li key={i} className="flex items-start gap-2">
-                            <span className="text-purple-400 mt-1">•</span>
-                            <span className="text-sm text-gray-300">{q}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Close Button */}
                   <button
                     onClick={() => setSelectedArtwork(null)}
                     className="w-full py-3 bg-gray-800 hover:bg-gray-700 rounded-xl font-medium transition-colors"

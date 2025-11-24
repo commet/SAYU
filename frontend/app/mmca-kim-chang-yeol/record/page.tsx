@@ -11,6 +11,15 @@ import { createClient } from '@/lib/supabase/client';
 import toast from 'react-hot-toast';
 
 type Rating = 'love' | 'like' | 'neutral' | 'dislike';
+type Mode = 'select' | 'custom';
+
+const slugify = (str: string) =>
+  str
+    .toLowerCase()
+    .replace(/[^a-z0-9\u3131-\u318e\uac00-\ud7a3\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .slice(0, 60) || 'custom';
 
 export default function RecordPage() {
   const router = useRouter();
@@ -18,10 +27,12 @@ export default function RecordPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
 
-  // Search state
+  // Search & select state
+  const [mode, setMode] = useState<Mode>('select');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [selectedArtwork, setSelectedArtwork] = useState<any | null>(null);
+  const [customTitle, setCustomTitle] = useState('');
 
   // Form state
   const [rating, setRating] = useState<Rating>('like');
@@ -32,6 +43,7 @@ export default function RecordPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSearch = (query: string) => {
+    if (mode === 'custom') return;
     setSearchQuery(query);
     if (query.trim()) {
       const results = searchArtworks(query);
@@ -76,23 +88,37 @@ export default function RecordPage() {
       return;
     }
 
-    if (!selectedArtwork) {
+    if (mode === 'select' && !selectedArtwork) {
       toast.error('작품을 선택해주세요');
       return;
+    }
+
+    if (mode === 'custom') {
+      if (!customTitle.trim()) {
+        toast.error('직접 업로드 시 제목을 입력해주세요');
+        return;
+      }
+      if (!photoFile) {
+        toast.error('직접 찍은 사진을 업로드해주세요');
+        return;
+      }
     }
 
     setIsSubmitting(true);
 
     try {
-      let photoUrl = null;
-
+      let photoUrl: string | null = null;
       // Upload photo if exists
       if (photoFile) {
         const fileExt = photoFile.name.split('.').pop();
-        const fileName = `${user.id}-${selectedArtwork.id}-${Date.now()}.${fileExt}`;
+        const baseName =
+          mode === 'custom'
+            ? `custom-${slugify(customTitle)}`
+            : selectedArtwork?.id || 'artwork';
+        const fileName = `${user.id}-${baseName}-${Date.now()}.${fileExt}`;
         const filePath = `mmca-impressions/${fileName}`;
 
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('artworks')
           .upload(filePath, photoFile);
 
@@ -106,15 +132,27 @@ export default function RecordPage() {
         photoUrl = publicUrl;
       }
 
+      const artworkId =
+        mode === 'custom'
+          ? `custom:${customTitle.trim()}-${Date.now()}`
+          : selectedArtwork?.id;
+
+      const finalMemo =
+        mode === 'custom'
+          ? memo
+            ? `${customTitle.trim()} - ${memo}`
+            : customTitle.trim()
+          : memo || null;
+
       // Save impression to database
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('mmca_tour_impressions')
         .insert({
           user_id: user.id,
-          artwork_id: selectedArtwork.id,
+          artwork_id: artworkId,
           rating,
           emotion_tags: selectedEmotions,
-          memo: memo || null,
+          memo: finalMemo,
           photo_url: photoUrl,
         })
         .select()
@@ -129,9 +167,10 @@ export default function RecordPage() {
       setRating('like');
       setSelectedEmotions([]);
       setMemo('');
+      setCustomTitle('');
       setPhotoFile(null);
       setPhotoPreview(null);
-
+      setMode('select');
     } catch (error: any) {
       console.error('Error saving impression:', error);
       toast.error('기록 저장에 실패했습니다');
@@ -177,8 +216,34 @@ export default function RecordPage() {
 
       <div className="max-w-4xl mx-auto px-6 py-8">
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Mode Toggle */}
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setMode('select');
+                setCustomTitle('');
+              }}
+              className={`w-full py-3 rounded-xl border transition-all ${mode === 'select' ? 'bg-purple-600 text-white border-purple-500' : 'bg-gray-800 border-gray-700 text-gray-300 hover:border-purple-500/50'}`}
+            >
+              전시 작품 선택
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMode('custom');
+                setSelectedArtwork(null);
+                setSearchQuery('');
+                setSearchResults([]);
+              }}
+              className={`w-full py-3 rounded-xl border transition-all ${mode === 'custom' ? 'bg-blue-600 text-white border-blue-500' : 'bg-gray-800 border-gray-700 text-gray-300 hover:border-blue-500/50'}`}
+            >
+              직접 찍은 사진 업로드
+            </button>
+          </div>
+
           {/* Artwork Search */}
-          {!selectedArtwork ? (
+          {mode === 'select' && !selectedArtwork ? (
             <div>
               <label className="block text-sm font-medium mb-3">작품 검색</label>
               <div className="relative">
@@ -252,8 +317,7 @@ export default function RecordPage() {
               </div>
             </div>
           ) : (
-            <>
-              {/* Selected Artwork */}
+            mode === 'select' && selectedArtwork && (
               <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
                 <div className="flex items-center justify-between mb-3">
                   <div className="text-sm font-medium">선택된 작품</div>
@@ -279,150 +343,172 @@ export default function RecordPage() {
                   </div>
                 </div>
               </div>
+            )
+          )}
 
-              {/* Photo Upload */}
-              <div>
-                <label className="block text-sm font-medium mb-3">사진 (선택)</label>
-                {!photoPreview ? (
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-full aspect-video bg-gray-800 border-2 border-dashed border-gray-700 rounded-xl flex flex-col items-center justify-center gap-3 hover:border-purple-500 hover:bg-gray-800/50 transition-all"
-                  >
-                    <Upload className="w-8 h-8 text-gray-500" />
-                    <div className="text-sm text-gray-400">작품 사진을 업로드하세요</div>
-                  </button>
-                ) : (
-                  <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-900">
-                    <img
-                      src={photoPreview}
-                      alt="Preview"
-                      className="w-full h-full object-contain"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPhotoFile(null);
-                        setPhotoPreview(null);
-                      }}
-                      className="absolute top-3 right-3 p-2 bg-black/50 backdrop-blur-sm rounded-full hover:bg-black/70 transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
+          {mode === 'custom' && (
+            <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
+              <div className="text-sm font-medium mb-3">직접 업로드</div>
+              <div className="space-y-3">
                 <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoChange}
-                  className="hidden"
+                  type="text"
+                  value={customTitle}
+                  onChange={(e) => setCustomTitle(e.target.value)}
+                  placeholder="예: 전시장에서 내가 찍은 물방울"
+                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-500"
                 />
+                <p className="text-xs text-gray-400">제목과 사진을 함께 올리면 개인 기록으로 저장됩니다.</p>
               </div>
+            </div>
+          )}
 
-              {/* Rating */}
-              <div>
-                <label className="block text-sm font-medium mb-3">평가</label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {ratingOptions.map((option) => {
-                    const Icon = option.icon;
-                    const isSelected = rating === option.value;
-                    return (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => setRating(option.value)}
-                        className={`p-4 rounded-xl border-2 transition-all ${
-                          isSelected
-                            ? 'bg-purple-500/20 border-purple-500'
-                            : 'bg-gray-800 border-gray-700 hover:border-gray-600'
-                        }`}
-                      >
-                        <Icon className={`w-6 h-6 mx-auto mb-2 ${isSelected ? option.color : 'text-gray-500'}`} />
-                        <div className="text-xs font-medium text-center">{option.label}</div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Emotion Tags */}
-              <div>
-                <label className="block text-sm font-medium mb-3">느낀 감정 (선택)</label>
-                <div className="flex flex-wrap gap-2">
-                  {EMOTION_TAG_PRESETS.map((tag) => {
-                    const isSelected = selectedEmotions.includes(tag.id);
-                    return (
-                      <button
-                        key={tag.id}
-                        type="button"
-                        onClick={() => toggleEmotion(tag.id)}
-                        className={`px-3 py-2 rounded-full text-sm font-medium transition-all ${
-                          isSelected
-                            ? 'bg-purple-500 text-white'
-                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-                        }`}
-                      >
-                        {tag.emoji} {tag.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Memo */}
-              <div>
-                <label className="block text-sm font-medium mb-3">한 줄 감상 (선택)</label>
-                <textarea
-                  value={memo}
-                  onChange={(e) => setMemo(e.target.value)}
-                  placeholder="이 작품에 대한 당신의 생각을 짧게 적어보세요"
-                  rows={3}
-                  maxLength={200}
-                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-gray-500 resize-none"
-                />
-                <div className="mt-2 flex items-center justify-between">
-                  <div className="text-xs text-gray-500">{memo.length}/200</div>
-                  <div className="flex flex-wrap gap-1">
-                    {memoExamples.map((example, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => setMemo(example)}
-                        className="text-xs px-2 py-1 bg-gray-800 hover:bg-gray-700 rounded-md text-gray-400 transition-colors"
-                      >
-                        {example}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Submit Button */}
+          {/* Photo Upload */}
+          <div>
+            <label className="block text-sm font-medium mb-3">
+              {mode === 'custom' ? '사진 (필수)' : '사진 (선택)'}
+            </label>
+            {!photoPreview ? (
               <button
-                type="submit"
-                disabled={isSubmitting || !user}
-                className="w-full py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-gray-700 disabled:to-gray-700 disabled:cursor-not-allowed rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all"
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className={`w-full aspect-video rounded-xl flex flex-col items-center justify-center gap-3 border-2 border-dashed transition-all ${
+                  mode === 'custom'
+                    ? 'border-blue-500 bg-blue-500/5 hover:bg-blue-500/10'
+                    : 'border-gray-700 bg-gray-800 hover:border-purple-500 hover:bg-gray-800/50'
+                }`}
               >
-                {isSubmitting ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    기록하는 중...
-                  </>
-                ) : (
-                  <>
-                    <Check className="w-5 h-5" />
-                    감상 기록하기
-                  </>
-                )}
+                <Upload className="w-8 h-8 text-gray-400" />
+                <div className="text-sm text-gray-400">작품 사진을 업로드하세요</div>
               </button>
+            ) : (
+              <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-900">
+                <img
+                  src={photoPreview}
+                  alt="Preview"
+                  className="w-full h-full object-contain"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPhotoFile(null);
+                    setPhotoPreview(null);
+                  }}
+                  className="absolute top-3 right-3 p-2 bg-black/50 backdrop-blur-sm rounded-full hover:bg-black/70 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoChange}
+              className="hidden"
+            />
+          </div>
 
-              {!user && (
-                <p className="text-sm text-center text-amber-400">
-                  로그인 후 감상을 기록할 수 있습니다
-                </p>
-              )}
-            </>
+          {/* Rating */}
+          <div>
+            <label className="block text-sm font-medium mb-3">평가</label>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {ratingOptions.map((option) => {
+                const Icon = option.icon;
+                const isSelected = rating === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setRating(option.value)}
+                    className={`p-4 rounded-xl border-2 transition-all ${
+                      isSelected
+                        ? 'bg-purple-500/20 border-purple-500'
+                        : 'bg-gray-800 border-gray-700 hover:border-gray-600'
+                    }`}
+                  >
+                    <Icon className={`w-6 h-6 mx-auto mb-2 ${isSelected ? option.color : 'text-gray-500'}`} />
+                    <div className="text-xs font-medium text-center">{option.label}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Emotion Tags */}
+          <div>
+            <label className="block text-sm font-medium mb-3">느낀 감정 (선택)</label>
+            <div className="flex flex-wrap gap-2">
+              {EMOTION_TAG_PRESETS.map((tag) => {
+                const isSelected = selectedEmotions.includes(tag.id);
+                return (
+                  <button
+                    key={tag.id}
+                    type="button"
+                    onClick={() => toggleEmotion(tag.id)}
+                    className={`px-3 py-2 rounded-full text-sm font-medium transition-all ${
+                      isSelected
+                        ? 'bg-purple-500 text-white'
+                        : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                    }`}
+                  >
+                    {tag.emoji} {tag.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Memo */}
+          <div>
+            <label className="block text-sm font-medium mb-3">한 줄 감상 (선택)</label>
+            <textarea
+              value={memo}
+              onChange={(e) => setMemo(e.target.value)}
+              placeholder={mode === 'custom' ? '사진에 대한 생각을 적어보세요' : '이 작품에 대한 당신의 생각을 짧게 적어보세요'}
+              rows={3}
+              maxLength={200}
+              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-gray-500 resize-none"
+            />
+            <div className="mt-2 flex items-center justify-between">
+              <div className="text-xs text-gray-500">{memo.length}/200</div>
+              <div className="flex flex-wrap gap-1">
+                {memoExamples.map((example, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setMemo(example)}
+                    className="text-xs px-2 py-1 bg-gray-800 hover:bg-gray-700 rounded-md text-gray-400 transition-colors"
+                  >
+                    {example}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={isSubmitting || !user}
+            className="w-full py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-gray-700 disabled:to-gray-700 disabled:cursor-not-allowed rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all"
+          >
+            {isSubmitting ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                기록하는 중...
+              </>
+            ) : (
+              <>
+                <Check className="w-5 h-5" />
+                감상 기록하기
+              </>
+            )}
+          </button>
+
+          {!user && (
+            <p className="text-sm text-center text-amber-400">
+              로그인 후 감상을 기록할 수 있습니다
+            </p>
           )}
         </form>
       </div>
