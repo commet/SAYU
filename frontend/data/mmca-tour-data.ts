@@ -27,8 +27,6 @@ export const VALID_THEME_TAGS = [
 ] as const;
 
 // ==================== 전시 데이터 ====================
-// 필수: id, title, location, startDate, endDate
-// 선택: titleEn, description, curatorNote, imageUrl, tags
 export const MMCA_EXHIBITIONS: MMCAExhibition[] = [
   {
     id: 'kim-tschang-yeul-water-drops',
@@ -44,8 +42,6 @@ export const MMCA_EXHIBITIONS: MMCAExhibition[] = [
 ];
 
 // ==================== 작가 데이터 ====================
-// 필수: id, name
-// 선택: nameEn, birthYear, deathYear, nationality, biography, philosophy, anecdotes, styleDescription, imageUrl
 export const MMCA_ARTISTS: MMCAArtist[] = [
   {
     id: 'kim-tschang-yeul',
@@ -65,8 +61,6 @@ export const MMCA_ARTISTS: MMCAArtist[] = [
 ];
 
 // ==================== 작품 데이터 ====================
-// 필수: id, exhibitionId, artistId, title, floor, styleTags(1개이상), moodTags(1개이상), themeTags(1개이상)
-// 선택: titleEn, year, medium, dimensions, description, artistContext, viewingQuestions, room, locationNote, imageUrl, thumbnailUrl, aptRecommendations
 export const MMCA_ARTWORKS: MMCAArtwork[] = [
   // 1장. 상흔 시리즈
   {
@@ -174,13 +168,10 @@ export const MMCA_ARTWORKS: MMCAArtwork[] = [
       '물방울은 당신에게 어떤 감정을 불러일으키나요?'
     ],
     aptRecommendations: {
-      'LAEF': '🦊 노란색 위의 투명한 물방울이 참 따뜻하게 느껴지지 않나요? 빛이 굴절되며 만드는 온기가 느껴질 거예요. 참혹한 시대를 통과했지만 작가가 끝까지 놓지 않은 생명력이랍니다. 동선에 얽매이지 말고, 마음이 끌리는 물방울 앞에 편하게 서 있어보세요.',
-      'LAEC': '정갈하고 섬세한 기법으로 완성된 물방울의 깊이있는 미학이 인상적이에요. 에어스프레이로 만든 극사실적 표현을 가까이서 천천히 보시면 좋을 것 같아요.',
-      'LREC': '🐢 이 물방울이 정말 캔버스에 맺혀있는 것처럼 보이죠? 극사실적 표현의 정점이에요. 에어스프레이로 만든 촉촉한 질감을 가까이서 느껴보시면, 정교한 기술로 만들어진 극사실 물방울이 어떻게 감정을 불러일으키는지 경험하실 수 있을 거예요.',
-      'LRMC': '🐢 초기 물방울(1971-1973)은 끈적한 점액질에 가까웠대요. 점차 투명한 물방울로 정제되는 과정을 천천히 따라가보는 건 어떨까요? 거북이처럼 천천히, 이 "변화의 과정" 자체를 음미하시면 좋을 것 같아요. 작품 앞에서 시간을 두고 서 있어보세요.',
-      'SAEF': '투명하고 순수한 물방울이 주는 감정적 울림을 함께 나눠보면 좋을 것 같아요.',
-      'SAEC': '물방울의 조화로운 배치와 균형미를 통해 연결감을 느껴보시는 건 어떨까요?',
-      'SRMC': '🦅 앵포르멜(형식 거부, 즉흥적 추상)이 왜 전후 한국에서 중요했는지 함께 이야기 나눠보면 재미있을 거예요. 김창열 예술이 어떻게 변화해왔는지 시간순으로 따라가보시면, 초기 상흔에서 물방울까지의 역사적 맥락이 보일 거예요.'
+      'LAEF': '명상적이고 고요한 물방울의 세계에서 내면의 평화를 찾을 수 있습니다.',
+      'LAEC': '정갈하고 섬세한 기법으로 완성된 물방울의 깊이있는 미학을 감상하세요.',
+      'SAEF': '투명하고 순수한 물방울이 주는 감정적 울림을 함께 나눠보세요.',
+      'SAEC': '물방울의 조화로운 배치와 균형미를 통해 연결감을 느껴보세요.'
     }
   },
   {
@@ -241,13 +232,10 @@ export const MMCA_ARTWORKS: MMCAArtwork[] = [
     imageUrl: '/mmca-tour-kcy/artwork/회귀 작품 1.png',
     artistContext: '신문지 실험을 거쳐 직접 쓴 천자문을 바탕으로 삼으며, 문자(기억)와 곧 사라질 물방울(존재)의 긴장을 구축했다. 남프랑스 드라기냥 작업실 이후 색채와 콜라주, 대형 화면으로 확장되며 노년기의 사유가 응축된다.',
     aptRecommendations: {
-      'LREC': '🐢 〈회귀 SNM93001〉(1991)은 국립현대미술관 소장 이후 처음 공개되는 7.8m 규모의 대형 작품이에요. 천자문(어린 시절 배운 한자)과 물방울의 결합이 인상적이죠. 작가가 90세에 가까워지며 자신의 뿌리로 돌아간 순간이랍니다. 한자라는 체계적 문자 시스템과 물방울이 만나는 지점을 천천히 느껴보시면 좋을 것 같아요.',
-      'LRMC': '🐢 작가가 유년기에 익힌 한문을 통해 정체성과 세계 질서를 되짚는 과정이 담겨있어요. 문자(기억)와 곧 사라질 물방울(존재)의 긴장 관계를 천천히 음미해보시는 건 어떨까요?',
-      'LREF': '한국 전통과 현대미술의 따뜻한 만남이 느껴지는 작품이에요.',
-      'SAMC': '전통과 현대의 통합적 비전을 보여주는 기획적 작품이랍니다.',
-      'SREF': '한국적 정서가 담긴 친근하고 따뜻한 작품이에요.',
-      'SREC': '전통 문화를 현대적으로 재해석한 과정이 흥미로워요.',
-      'SRMC': '🦅 천자문을 도입해 문자와 물방울을 결합한 후기 작업이에요. 한국의 전통 문자 시스템이 어떻게 현대 미술과 만나는지 함께 살펴보면 재미있을 거예요. 7.8m 규모의 대형 작품 앞에서 팀원들과 이야기 나눠보시는 건 어떨까요?'
+      'LREF': '한국 전통과 현대미술의 따뜻한 만남을 서정적으로 느껴보세요.',
+      'SAMC': '전통과 현대의 통합적 비전을 보여주는 기획적 작품입니다.',
+      'SREF': '한국적 정서가 담긴 친근하고 따뜻한 작품입니다.',
+      'SREC': '전통 문화를 포용하며 현대적으로 재해석한 작품입니다.'
     }
   },
   {
@@ -331,7 +319,6 @@ export function searchArtworks(query: string): MMCAArtwork[] {
 export function validateArtwork(artwork: Partial<MMCAArtwork>): string[] {
   const errors: string[] = [];
 
-  // 필수 필드 검증
   if (!artwork.id) errors.push('id 필수');
   if (!artwork.exhibitionId) errors.push('exhibitionId 필수');
   if (!artwork.artistId) errors.push('artistId 필수');
@@ -341,12 +328,10 @@ export function validateArtwork(artwork: Partial<MMCAArtwork>): string[] {
   if (!artwork.moodTags || artwork.moodTags.length === 0) errors.push('moodTags 최소 1개 필수');
   if (!artwork.themeTags || artwork.themeTags.length === 0) errors.push('themeTags 최소 1개 필수');
 
-  // ID 형식 검증
   if (artwork.id && !/^[a-z0-9-]+$/.test(artwork.id)) {
     errors.push('id는 영문 소문자, 숫자, 하이픈만 사용');
   }
 
-  // 태그 유효성 검증
   artwork.styleTags?.forEach(tag => {
     if (!VALID_STYLE_TAGS.includes(tag as any)) {
       errors.push(`유효하지 않은 styleTags: ${tag}`);
@@ -363,7 +348,6 @@ export function validateArtwork(artwork: Partial<MMCAArtwork>): string[] {
     }
   });
 
-  // 참조 무결성 검증
   if (artwork.exhibitionId && !getExhibitionById(artwork.exhibitionId)) {
     errors.push(`존재하지 않는 exhibitionId: ${artwork.exhibitionId}`);
   }
