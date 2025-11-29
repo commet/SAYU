@@ -174,7 +174,7 @@ export const MMCA_ARTWORKS: MMCAArtwork[] = [
     styleTags: ['구상', '회화', '극사실주의'],
     moodTags: ['명상적', '고요한', '신비로운', '전환적'],
     themeTags: ['발견', '깨달음', '전환', '존재'],
-    imageUrl: '/mmca-tour-kcy/artwork/밤에 일어난 일.png',
+    imageUrl: '/mmca-tour-kcy/artwork/제사.jpg',
     artistContext: '그토록 오랫동안 찾아 헤매던 조형 언어를 마침내 발견한 순간이었다. 이후 그는 평생을 물방울이라는 조형 언어에 천착하며, 그 안에 존재와 상처, 침묵과 사유의 모든 층위를 응축해나간다. 1971년 물방울의 등장은 단순한 우연의 산물이 아니라 오랜 시간에 걸친 실험과 고민, 그리고 철학적 성찰 끝에 이룬 필연적 발견이었다.',
     viewingQuestions: [
       '어두운 바탕 위에 떠 있는 단 하나의 물방울이 보이나요?',
