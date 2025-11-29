@@ -469,7 +469,7 @@ const introText = useMemo(() => {
               >
                 <div className="relative aspect-[4/3] bg-gray-950">
                   <img
-                    src={selectedArtwork.imageUrl}
+                    src={encodeURI(selectedArtwork.imageUrl)}
                     alt={selectedArtwork.title}
                     className="w-full h-full object-contain"
                   />

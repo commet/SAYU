@@ -290,7 +290,7 @@ export default function DashboardPage() {
                   >
                     <div className="relative aspect-[4/3] bg-gray-900">
                       <img
-                        src={info.imageUrl}
+                        src={info.imageUrl.startsWith('/mmca-tour-kcy') ? encodeURI(info.imageUrl) : info.imageUrl}
                         alt={info.title}
                         className="w-full h-full object-contain"
                       />

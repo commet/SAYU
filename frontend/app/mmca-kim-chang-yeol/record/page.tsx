@@ -284,11 +284,11 @@ export default function RecordPage() {
                       >
                         {artwork.imageUrl && (
                           <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-900">
-                            <img
-                              src={artwork.imageUrl}
-                              alt={artwork.title}
-                              className="w-full h-full object-cover"
-                            />
+                          <img
+                            src={encodeURI(artwork.imageUrl)}
+                            alt={artwork.title}
+                            className="w-full h-full object-cover"
+                          />
                           </div>
                         )}
                         <div className="flex-1 text-left">
@@ -313,7 +313,7 @@ export default function RecordPage() {
                       className="relative aspect-square rounded-xl overflow-hidden bg-gray-800 hover:ring-2 hover:ring-purple-500 transition-all group"
                     >
                       <img
-                        src={artwork.imageUrl}
+                        src={encodeURI(artwork.imageUrl)}
                         alt={artwork.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                       />
@@ -341,7 +341,7 @@ export default function RecordPage() {
                 <div className="flex items-center gap-4">
                   <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-900">
                     <img
-                      src={selectedArtwork.imageUrl}
+                      src={encodeURI(selectedArtwork.imageUrl)}
                       alt={selectedArtwork.title}
                       className="w-full h-full object-cover"
                     />
