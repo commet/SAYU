@@ -194,9 +194,9 @@ export default function RecordPage() {
   // Memo examples
   const memoExamples = [
     '물방울이 정말 투명하게 느껴진다',
-    '마음이 차분해지는 느낌',
-    '작가의 철학이 느껴지는 작품',
-    '색감이 인상적이다'
+    '마음이 고요해지는 순간',
+    '존재와 소멸을 묻는 물방울',
+    '빛과 그림자가 만드는 시간'
   ];
 
   return (
@@ -359,21 +359,21 @@ export default function RecordPage() {
             <div className="rounded-2xl bg-gradient-to-r from-blue-900/60 via-slate-900 to-indigo-900/60 border border-blue-700/60 p-5 space-y-4">
               <div className="flex items-center gap-2">
                 <Camera className="w-5 h-5 text-blue-300" />
-                <div className="text-sm font-semibold text-blue-100">?? ?? ?? ???</div>
+                <div className="text-sm font-semibold text-blue-100">당신의 시선으로 포착한 순간</div>
               </div>
               <div className="space-y-3">
                 <input
                   type="text"
                   value={customTitle}
                   onChange={(e) => setCustomTitle(e.target.value)}
-                  placeholder="?: ?? ?? ??? / ?? ?? ??"
+                  placeholder="예: 마음을 멈춘 물방울의 빛"
                   className="w-full px-4 py-3 bg-slate-900/70 border border-blue-700/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-gray-500"
                 />
-                <div className="text-xs text-blue-100/80">??? ??? ?? ?????.</div>
+                <div className="text-xs text-blue-100/80">당신만의 감상이 소중한 예술 여정으로 남습니다.</div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-3 text-blue-100/90">?? (??)</label>
+                <label className="block text-sm font-medium mb-3 text-blue-100/90">마음에 담은 장면 (필수)</label>
                 {!photoPreview ? (
                   <button
                     type="button"
@@ -381,7 +381,7 @@ export default function RecordPage() {
                     className="w-full aspect-video rounded-xl flex flex-col items-center justify-center gap-3 border-2 border-dashed border-blue-500/60 bg-blue-500/5 hover:bg-blue-500/10 transition-all"
                   >
                     <Upload className="w-8 h-8 text-blue-200" />
-                    <div className="text-sm text-blue-100/80">?? ?? ??? ??????</div>
+                    <div className="text-sm text-blue-100/80">당신의 시선을 이곳에 담아주세요</div>
                   </button>
                 ) : (
                   <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-900 border border-blue-700/60">
@@ -469,7 +469,7 @@ export default function RecordPage() {
             <textarea
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
-              placeholder={mode === 'custom' ? '사진에 대한 생각을 적어보세요' : '이 작품에 대한 당신의 생각을 짧게 적어보세요'}
+              placeholder={mode === 'custom' ? '이 순간이 당신에게 남긴 것을 적어보세요' : '이 작품이 당신에게 남긴 것을 적어보세요'}
               rows={3}
               maxLength={200}
               className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-gray-500 resize-none"
