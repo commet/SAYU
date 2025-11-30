@@ -2,6 +2,8 @@
   "buildCommand": "cd frontend && npm run build:vercel",
   "outputDirectory": "frontend/.next",
   "installCommand": "cd frontend && npm install",
+  "devCommand": "cd frontend && npm run dev",
+  "framework": "nextjs",
   "env": {
     "NEXT_PUBLIC_API_URL": "",
     "SKIP_ENV_VALIDATION": "true",

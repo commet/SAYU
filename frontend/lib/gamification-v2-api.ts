@@ -1,6 +1,10 @@
 import { createClient } from './supabase/client';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3007';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+
+// 프로덕션 환경에서 API_URL이 설정되지 않았으면 gamification 비활성화
+const GAMIFICATION_ENABLED = !IS_PRODUCTION || (IS_PRODUCTION && API_URL);
 
 export interface UserGameProfile {
   id: string;
@@ -98,6 +102,26 @@ class GamificationV2API {
 
   // 사용자 게임 프로필 및 통계 조회
   async getUserStats(): Promise<UserGameStats> {
+    // 프로덕션에서 API가 없으면 기본값 반환
+    if (!GAMIFICATION_ENABLED || !API_URL) {
+      console.log('Gamification API not available, returning default stats');
+      return {
+        id: '',
+        user_id: '',
+        level: 1,
+        current_exp: 0,
+        total_points: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        nextLevelExp: 100,
+        levelProgress: 0,
+        todayActivities: [],
+        recentTransactions: [],
+        followerCount: 0,
+        followingCount: 0,
+      };
+    }
+
     const response = await fetch(`${API_URL}/api/gamification-v2/profile`, {
       headers: await this.getAuthHeaders(),
     });
