@@ -492,9 +492,18 @@ const introText = useMemo(() => {
                   </div>
 
                   {selectedArtwork.description && (
-                    <div className="p-4 bg-gray-800/50 rounded-xl border border-gray-700 flex items-start gap-2">
-                      <Info className="w-5 h-5 text-gray-300 mt-0.5" />
-                      <p className="text-sm text-gray-200 leading-relaxed">{selectedArtwork.description}</p>
+                    <div className="p-4 bg-gray-800/50 rounded-xl border border-gray-700">
+                      <div className="flex items-start gap-2 mb-2">
+                        <Info className="w-5 h-5 text-gray-300 mt-0.5 flex-shrink-0" />
+                        <h4 className="text-sm font-semibold text-gray-100">작품 설명</h4>
+                      </div>
+                      <div className="ml-7 space-y-3">
+                        {selectedArtwork.description.split(/[.!?]\s+/).filter(s => s.trim()).map((sentence, i) => (
+                          <p key={i} className="text-sm text-gray-300 leading-relaxed">
+                            {sentence.trim()}{sentence.match(/[.!?]$/) ? '' : '.'}
+                          </p>
+                        ))}
+                      </div>
                     </div>
                   )}
 
