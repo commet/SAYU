@@ -64,11 +64,34 @@ export default function MMCAKimChangYeolPage() {
       </div>
 
       <div className="max-w-4xl mx-auto px-6 py-8">
-        {/* Exhibition Info */}
+        {/* Exhibition Map (Overview) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
+          className="mb-8"
+        >
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-4 border border-gray-700/50">
+            <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-gray-900 mb-3">
+              <img
+                src="/mmca-tour-kcy/map/map_1.png"
+                alt="전시 전체 지도"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div className="text-center">
+              <p className="text-xs text-gray-400">
+                오늘 투어 순서: <span className="text-purple-300 font-medium">1F: 8전시실</span> → <span className="text-purple-300 font-medium">B1F: 6전시실</span> → <span className="text-purple-300 font-medium">7전시실</span>
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Exhibition Info */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
           className="mb-12"
         >
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
@@ -162,32 +185,6 @@ export default function MMCAKimChangYeolPage() {
           </div>
         </motion.div>
 
-        {/* Exhibition Map */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-        >
-          <h2 className="text-2xl font-bold mb-6 text-white">
-            전시 지도
-          </h2>
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-4 border border-gray-700/50">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[1, 2, 3, 4, 5].map((num) => (
-                <div
-                  key={num}
-                  className="relative aspect-[4/3] rounded-lg overflow-hidden bg-gray-900"
-                >
-                  <img
-                    src={`/mmca-tour-kcy/map/map_${num}.png`}
-                    alt={`전시 지도 ${num}`}
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </motion.div>
       </div>
     </div>
   );
