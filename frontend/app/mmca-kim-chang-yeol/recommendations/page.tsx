@@ -126,32 +126,52 @@ const curatedReasons: Partial<Record<SAYUTypeCode, Record<string, string>>> = {
 const EXHIBITION_SECTIONS = [
   {
     id: 'section-1',
-    title: '1장. 상흔 (1950년대)',
-    subtitle: '전쟁과 분단의 상처가 새겨진 초기 구상 작업',
+    title: '1?. ??',
+    subtitle: '??? ?? ??? ?? ?? ??',
     description:
-      '열다섯 살에 홀로 월남한 김창열은 해방, 분단, 한국전쟁이라는 격동기를 겪으며 "너무 많은 죽음과 끔찍한 잔인함"을 목격했습니다. 그 경험은 삶과 죽음이라는 주제를 내면화하는 필연적 계기가 되었습니다. 김창열에게 앵포르멜은 단순한 양식이 아니라 총탄 자국과 탱크의 흔적처럼 전쟁의 상처를 화면에 각인시키고 죽음을 위로하는 제의(祭儀)와도 같았습니다. 실제로 당시 대다수 작품에 "제사"라는 제목을 붙였는데, 이는 그의 예술 세계에서 상처를 형상화하는 시작점이자 물방울 이전의 원형 모티프를 예고합니다. 1957년 현대미술가협회를 창립하며 앵포르멜 실험을 주도했고, 1961년 파리비엔날레, 1965년 상파울루비엔날레 참가로 한국 현대미술의 국제 교류를 개척했습니다.',
+      '?? ??? ??? ???? ???? ?? ?? ??. ??? ??? ??? ???? ?????.',
+    highlights: [
+      '???: ??, ?? ? ?? ??? ???? ??? ??? ??? ?????.',
+      '?? ???: ???? ?? ??, ??? ?? ??? ???? ???? ?? ??? ??? ???.',
+      '??: ? ??? ?????? ??? ??? ?? ??? ??????'
+    ]
   },
   {
     id: 'section-2',
-    title: '2장. 현상 (1965-1970)',
-    subtitle: '뉴욕·파리 전환기의 추상 실험과 점액질 형상',
+    title: '2?. ??',
+    subtitle: '?? ??? ????? ??',
     description:
-      '1965년 록펠러 재단 지원으로 뉴욕에 머물렀으나, 한국에서 그려온 앵포르멜 회화는 주목받지 못했고 자본주의 소비사회의 이질감은 "전쟁보다 견디기 힘든 악몽 같은 시간"으로 다가왔습니다. 앵포르멜의 두터운 질감이 사라지고 매끈하고 정제된 화면 위에 기하학적 형태가 등장하며, 옵아트를 연상케 하는 시각적 착시를 실험했습니다. 생계를 위해 일한 넥타이 공장에서 익힌 스프레이와 스텐실 기법도 적극 활용했습니다. 1969년 파리로 이동 후 팔레조 외곽의 허물어진 마구간 작업실에 정착하며, 뉴욕 시기 차가운 구체들이 점액질처럼 흘러내리는 유기적 형상으로 변주됩니다. 김창열은 이를 "창자 미술"이라 부르며 신체와 물질, 추상과 재현 사이의 경계를 탐색했고, 이는 곧 등장할 물방울 회화의 전조가 되었습니다.',
+      '?? ??? ????, ??? ???? ???? ??. ??? ??? ??? ?????.',
+    highlights: [
+      '???: ?? 1?2?3 ? ?? ??? ??? ??? ??? ???? ????.',
+      '?? ???: ?? ??? ??? ?, ?? ?? ??, ??? ??? ??? ???.',
+      '??: ???? ??? ?????, ?????? ????? ???? ??????'
+    ]
   },
   {
     id: 'section-3',
-    title: '3장. 물방울 (1971년 이후)',
-    subtitle: '극사실적 물방울에서 수행적 반복으로',
+    title: '3?. ???',
+    subtitle: '???? ???? ??? ??',
     description:
-      '캔버스를 재활용하기 위해 물을 뿌려두던 중 우연히 뒷면에 맺힌 물방울을 발견한 순간, "회화적으로 점이 가질 수 있는 최고의 성취"라는 직관적 깨달음에 이르렀습니다. 1973년 파리 첫 개인전에서 초현실주의 거장 살바도르 달리와 여배우 까트린 드뇌브가 방문했고, 비평가 알랭 보스케는 "물질을 재정의하고 정신성을 제시하는 보기 드문 최면력"이라며 극찬했습니다. 김창열에게 물방울은 "아기의 소변이자 스님들의 정화수"로, 전쟁의 눈물이자 정화수, 생명이자 소멸을 아우르는 상징이었습니다. 거친 바탕 위에 맺힌 극사실적 물방울은 현실과 환영 사이를 오가며 명상적·치유적 공간을 만들어냅니다. 이후 50년간 물방울을 반복하며, 상처를 응시하고 존재를 묻는 독자적 조형 언어로 완성시켰습니다.',
+      '1970?? ?? ???? ?? ???. ???? ??? ??? ??? ??? ?????.',
+    highlights: [
+      '???: ??? ?? ? ??? ??? ?? ??? ?????.',
+      '?? ???: ? ??, ???, ??? ?? ??? ????? ??? ??? ?? ?????.',
+      '??: ? ???????? ???? ???? ?????, ??? ??????'
+    ]
   },
   {
     id: 'section-4',
-    title: '4장. 회귀 (1980년대 이후)',
-    subtitle: '천자문과 물방울이 만나는 후기 작업',
+    title: '4?. ??',
+    subtitle: '???? ???? ??? ?? ??',
     description:
-      '1970년대 중반 신문지 위에 물방울을 그리며 문자와의 결합을 시도하다, 1980년대 중반부터 캔버스에 직접 천자문을 쓴 뒤 그 위에 물방울을 그리기 시작했습니다. 김창열은 어린 시절 할아버지로부터 천자문을 배웠는데, 그에게 천자문은 단순한 글이 아니라 "자연과 우주의 질서를 인식하는 기호"였고 유년의 기억과 긴밀하게 연결되는 고리였습니다. 마치 습자지에 글씨를 써내려가듯 화면을 천자문으로 촘촘히 채워나가며, 흔들리고 어슴푸레한 문자 표면 위에 물방울을 띄웁니다. 남프랑스 드라기냥 작업실에서 강렬한 햇빛과 풍요로운 자연을 만나며 본격적으로 색채를 탐구했고 화면은 더욱 대형화되었습니다. 천자문(세계 이해의 토대)과 물방울(존재에 대한 질문)이 조우하는 회귀 연작은 기억을 담는 문자와 곧 소멸할 물방울의 긴장 속에서, 기존 회화의 문법을 넘어서는 독자적 미학적 성취를 보여줍니다.',
-  },
+      '??(???)? ???? ? ??? ??? ??? ??? ?? ???.',
+    highlights: [
+      '???: ?? ?? ? ?? ?? ?? ???? ??? ??? ??????.',
+      '?? ???: ??? ???? ??, ??, ??? ?? ??? ?????.',
+      '??: ??? ???? ???, ??? ?? ? ??? ? ???? ?????'
+    ]
+  }
 ];
 
 export default function RecommendationsPage() {
@@ -248,19 +268,35 @@ const introText = useMemo(() => {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {APT_OPTIONS.map((option) => (
-              <motion.button
-                key={option.code}
-                onClick={() => setSelectedType(option.code as SAYUTypeCode)}
-                className="p-4 bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 hover:border-purple-500/50 transition-all text-left"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <div className="text-2xl mb-2">{option.emoji}</div>
-                <div className="text-xs font-bold text-white mb-1">{option.code}</div>
-                <div className="text-xs text-gray-400">{option.label}</div>
-              </motion.button>
-            ))}
+            {APT_OPTIONS.map((option) => {
+              const isHighlighted = option.code === 'LAMF' || option.code === 'SAMF';
+              return (
+                <motion.button
+                  key={option.code}
+                  onClick={() => setSelectedType(option.code as SAYUTypeCode)}
+                  className={`p-4 backdrop-blur-sm rounded-xl border transition-all text-left ${
+                    isHighlighted
+                      ? 'bg-gradient-to-br from-purple-600/40 to-pink-600/40 border-purple-400/60 shadow-lg shadow-purple-500/20'
+                      : 'bg-gray-800/50 border-gray-700/50 hover:border-purple-500/50'
+                  }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="text-2xl mb-2">{option.emoji}</div>
+                  <div className={`text-xs font-bold mb-1 ${isHighlighted ? 'text-purple-200' : 'text-white'}`}>
+                    {option.code}
+                  </div>
+                  <div className={`text-xs ${isHighlighted ? 'text-purple-100' : 'text-gray-400'}`}>
+                    {option.label}
+                  </div>
+                  {isHighlighted && (
+                    <div className="mt-2 text-[10px] text-purple-300 font-medium">
+                      ✨ 오늘의 도슨트 대상
+                    </div>
+                  )}
+                </motion.button>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -366,12 +402,21 @@ const introText = useMemo(() => {
           </div>
         )}
 
-        {/* Exhibition Sections (1~4장) */}
+                {/* Exhibition Sections (1~4?) */}
         <div className="mt-12 space-y-4">
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <Info className="w-5 h-5 text-blue-300" />
-            전시 구성 (1장~4장)
-          </h3>
+          <div className="flex items-center gap-3">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <Info className="w-5 h-5 text-blue-300" />
+              ?? ?? (1?~4?)
+            </h3>
+            <button
+              type="button"
+              onClick={() => setOpenSections({})}
+              className="text-xs text-blue-200 hover:text-white border border-blue-700/60 px-3 py-1 rounded-full"
+            >
+              ?? ??
+            </button>
+          </div>
           {EXHIBITION_SECTIONS.map(section => {
             const isOpen = !!openSections[section.id];
             return (
@@ -392,7 +437,7 @@ const introText = useMemo(() => {
                     <div className="text-sm text-blue-200">{section.title}</div>
                     <div className="text-base font-semibold text-white">{section.subtitle}</div>
                   </div>
-                  <div className="text-blue-200 text-sm">{isOpen ? '닫기' : '더보기'}</div>
+                  <div className="text-blue-200 text-sm">{isOpen ? '??' : '???'}</div>
                 </button>
                 <AnimatePresence>
                   {isOpen && (
@@ -400,9 +445,25 @@ const introText = useMemo(() => {
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      className="px-5 pb-5 text-sm text-gray-200 leading-relaxed"
+                      className="px-5 pb-5 text-sm text-gray-200 leading-relaxed space-y-3"
                     >
-                      {section.description}
+                      <p className="text-gray-100">{section.description}</p>
+                      {section.highlights?.map((item, idx) => (
+                        <p key={idx} className="text-gray-200 leading-relaxed">
+                          {item}
+                        </p>
+                      ))}
+                      <div className="pt-2">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setOpenSections(prev => ({ ...prev, [section.id]: false }))
+                          }
+                          className="text-xs text-blue-200 hover:text-white underline"
+                        >
+                          ???? ????
+                        </button>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
