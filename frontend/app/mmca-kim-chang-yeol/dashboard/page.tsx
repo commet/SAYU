@@ -169,6 +169,7 @@ export default function DashboardPage() {
                 <p className="text-sm text-gray-400">
                   마지막 업데이트: {formatDistanceToNow(lastUpdate, { addSuffix: true, locale: ko })}
                 </p>
+                <p className="text-xs text-gray-500 mt-1">로그인 시 팀 대시보드 기능이 적용됩니다.</p>
               </div>
             </div>
             <button
