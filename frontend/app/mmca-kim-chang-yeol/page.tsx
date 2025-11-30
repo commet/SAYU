@@ -63,13 +63,13 @@ export default function MMCAKimChangYeolPage() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-8">
+      <div className="max-w-4xl mx-auto px-6 pt-2 pb-8">
         {/* Exhibition Map (Overview) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mb-8"
+          className="mb-6"
         >
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-4 border border-gray-700/50">
             <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-gray-900 mb-3">
