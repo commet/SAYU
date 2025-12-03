@@ -12,22 +12,22 @@ import { createClient } from '@/lib/supabase/client';
 type Artwork = (typeof MMCA_ARTWORKS)[number] & { reason?: string };
 
 const APT_OPTIONS = [
-  { code: 'LAEF', label: '몽환적 방랑자', emoji: '🦊' },
-  { code: 'LAEC', label: '감성 큐레이터', emoji: '🐱' },
-  { code: 'LAMF', label: '직관적 탐구자', emoji: '🦉' },
-  { code: 'LAMC', label: '철학적 수집가', emoji: '🐢' },
-  { code: 'LREF', label: '고독한 관찰자', emoji: '🦎' },
-  { code: 'LREC', label: '섬세한 감정가', emoji: '🦔' },
-  { code: 'LRMF', label: '디지털 탐험가', emoji: '🐙' },
-  { code: 'LRMC', label: '학구적 연구자', emoji: '🦫' },
-  { code: 'SAEF', label: '감성 나눔이', emoji: '🦋' },
-  { code: 'SAEC', label: '예술 네트워커', emoji: '🐧' },
-  { code: 'SAMF', label: '영감 전도사', emoji: '🦜' },
-  { code: 'SAMC', label: '문화 기획자', emoji: '🦌' },
-  { code: 'SREF', label: '열정적 관람자', emoji: '🐕' },
-  { code: 'SREC', label: '따뜻한 안내자', emoji: '🦆' },
-  { code: 'SRMF', label: '지식 멘토', emoji: '🐘' },
-  { code: 'SRMC', label: '체계적 교육자', emoji: '🦅' },
+  { code: 'LAEF', label: '감성 탐험가', emoji: '🌙' },
+  { code: 'LAEC', label: '감성 큐레이터', emoji: '🎨' },
+  { code: 'LAMF', label: '직관 탐색자', emoji: '🔍' },
+  { code: 'LAMC', label: '지식 수집가', emoji: '📚' },
+  { code: 'LREF', label: '섬세한 관찰자', emoji: '👁️' },
+  { code: 'LREC', label: '깊이있는 감상자', emoji: '🎧' },
+  { code: 'LRMF', label: '자유로운 분석가', emoji: '🛰️' },
+  { code: 'LRMC', label: '체계적 연구자', emoji: '🧪' },
+  { code: 'SAEF', label: '감정의 물결', emoji: '🤝' },
+  { code: 'SAEC', label: '감정의 건축가', emoji: '🗺️' },
+  { code: 'SAMF', label: '의미의 직조자', emoji: '✨' },
+  { code: 'SAMC', label: '지혜의 건축가', emoji: '📅' },
+  { code: 'SREF', label: '마음의 여행자', emoji: '🔥' },
+  { code: 'SREC', label: '감정의 치유사', emoji: '🌿' },
+  { code: 'SRMF', label: '문화의 시간여행자', emoji: '🧠' },
+  { code: 'SRMC', label: '마스터 도슨트', emoji: '🧭' },
 ] as const;
 
 const introMessages: Partial<Record<SAYUTypeCode | 'default', string>> = {
@@ -506,7 +506,7 @@ const introText = useMemo(() => {
                 </p>
               </div>
               <div className="p-4 bg-amber-500/10 rounded-xl border border-amber-500/20">
-                <h4 className="font-bold text-amber-300 mb-2">💬 관람 후 함께 이야기 나눠요</h4>
+                <h4 className="font-bold text-amber-300 mb-2">관람 후 함께 이야기 나눠요</h4>
                 <ul className="text-sm text-gray-300 space-y-2">
                   <li>• 김창열에게 물방울은 무엇이었을까요? 전쟁의 상처? 치유? 수행? 존재 증명?</li>
                   <li>• 각자 가장 인상 깊었던 작품과 그 이유는 무엇인가요?</li>

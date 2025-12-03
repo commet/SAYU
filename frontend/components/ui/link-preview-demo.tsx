@@ -202,7 +202,7 @@ export const SayuGalleryTourPreview = () => {
               >
                 AR 기술을 활용한 몰입형 갤러리
               </LinkPreview>
-              에서 작품의 �숨은 디테일과 역사적 배경을 깊이 있게 이해할 수 있습니다.
+              에서 작품의 숨은 디테일과 역사적 배경을 깊이 있게 이해할 수 있습니다.
             </p>
 
             <p className="text-gray-700 dark:text-gray-300 text-xl md:text-2xl leading-relaxed">
