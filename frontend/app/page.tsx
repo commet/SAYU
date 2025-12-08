@@ -84,7 +84,7 @@ export default function HomePage() {
       </nav>
 
       {/* Hero - Full Screen */}
-      <section className="relative h-screen flex items-center pt-20">
+      <section className="relative h-screen flex items-center pt-10">
         <Container size="2xl">
           <div className="grid grid-cols-2 gap-16 items-center">
             {/* Left - Typography */}
@@ -303,7 +303,7 @@ export default function HomePage() {
         </Container>
       </section>
 
-      {/* Final CTA - 개선 */}
+      {/* Final CTA */}
       <section className="py-32">
         <Container size="2xl">
           <div className="text-center max-w-3xl mx-auto">
@@ -321,6 +321,61 @@ export default function HomePage() {
           </div>
         </Container>
       </section>
+
+      {/* Footer - 짧고 깔끔하게 */}
+      <footer className="border-t border-neutral-200 py-12">
+        <Container size="2xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-2xl font-bold text-black mb-2">SAYU</p>
+              <p className="text-sm text-neutral-600">예술을 통한 자기 발견</p>
+            </div>
+
+            <div className="flex gap-12">
+              <div>
+                <p className="text-sm font-medium text-black mb-3">탐색</p>
+                <div className="space-y-2">
+                  <button onClick={() => router.push('/gallery')} className="block text-sm text-neutral-600 hover:text-black">
+                    갤러리
+                  </button>
+                  <button onClick={() => router.push('/exhibitions')} className="block text-sm text-neutral-600 hover:text-black">
+                    전시
+                  </button>
+                  <button onClick={() => router.push('/community')} className="block text-sm text-neutral-600 hover:text-black">
+                    커뮤니티
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-sm font-medium text-black mb-3">정보</p>
+                <div className="space-y-2">
+                  <button onClick={() => router.push('/about')} className="block text-sm text-neutral-600 hover:text-black">
+                    소개
+                  </button>
+                  <button className="block text-sm text-neutral-600 hover:text-black">
+                    이용약관
+                  </button>
+                  <button className="block text-sm text-neutral-600 hover:text-black">
+                    개인정보처리방침
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-12 pt-8 border-t border-neutral-200 flex items-center justify-between">
+            <p className="text-xs text-neutral-600">
+              © 2025 SAYU. All rights reserved.
+            </p>
+            <div className="flex gap-6">
+              <button className="text-xs text-neutral-600 hover:text-black">Instagram</button>
+              <button className="text-xs text-neutral-600 hover:text-black">Twitter</button>
+              <button className="text-xs text-neutral-600 hover:text-black">Email</button>
+            </div>
+          </div>
+        </Container>
+      </footer>
     </div>
   );
 }
