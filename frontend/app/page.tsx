@@ -4,23 +4,20 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { useResponsive } from '@/lib/responsive';
 import dynamic from 'next/dynamic';
-import { Container, Card, Button, Heading, Text } from '@/components/design-system';
-import { Sparkles, ArrowRight, Heart, Users, Eye, TrendingUp } from 'lucide-react';
+import { Container, Card, Button } from '@/components/design-system';
+import { Sparkles, ArrowRight, Users, Eye, MessageSquare, TrendingUp, Palette } from 'lucide-react';
 
-// Mobile component
 const MobileHomePage = dynamic(() => import('./MobileHomePageFixed'), {
   ssr: false,
   loading: () => (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-2 border-black border-t-transparent mx-auto mb-4" />
+      <div className="animate-spin rounded-full h-12 w-12 border-2 border-black border-t-transparent" />
     </div>
   ),
 });
 
-// Featured artworks
 const featuredArtworks = [
   {
     id: 1,
@@ -47,64 +44,38 @@ export default function HomePage() {
   const { isMobile } = useResponsive();
   const [currentArtwork, setCurrentArtwork] = useState(0);
   const [todayUsers] = useState(47);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   if (isMobile) return <MobileHomePage />;
 
-  // Auto-rotate artworks
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentArtwork((prev) => (prev + 1) % featuredArtworks.length);
-    }, 4000);
+    }, 5000);
     return () => clearInterval(timer);
   }, []);
 
-  // Mouse tracking for subtle parallax
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({
-        x: (e.clientX / window.innerWidth - 0.5) * 20,
-        y: (e.clientY / window.innerHeight - 0.5) * 20,
-      });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
   return (
-    <div className="min-h-screen bg-white">
-      {/* Minimal Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b border-black/5">
+    <div className="min-h-screen bg-white text-black">
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-neutral-200">
         <Container size="2xl">
           <div className="flex items-center justify-between h-20">
-            {/* Logo - Bold */}
-            <button onClick={() => router.push('/')} className="text-3xl font-bold tracking-tight">
+            <button onClick={() => router.push('/')} className="text-2xl font-bold text-black">
               SAYU
             </button>
 
-            {/* Center Nav */}
             <div className="hidden md:flex items-center gap-10">
-              <button
-                onClick={() => router.push('/exhibitions')}
-                className="text-base hover:opacity-60 transition-opacity"
-              >
+              <button onClick={() => router.push('/exhibitions')} className="text-black hover:text-neutral-600 transition-colors">
                 전시
               </button>
-              <button
-                onClick={() => router.push('/gallery')}
-                className="text-base hover:opacity-60 transition-opacity"
-              >
+              <button onClick={() => router.push('/gallery')} className="text-black hover:text-neutral-600 transition-colors">
                 갤러리
               </button>
-              <button
-                onClick={() => router.push('/quiz')}
-                className="text-base font-medium hover:opacity-60 transition-opacity"
-              >
+              <button onClick={() => router.push('/quiz')} className="text-black font-medium hover:text-neutral-600 transition-colors">
                 APT 테스트
               </button>
             </div>
 
-            {/* CTA */}
             <Button variant="primary" onClick={() => router.push('/quiz')}>
               시작하기
             </Button>
@@ -112,40 +83,34 @@ export default function HomePage() {
         </Container>
       </nav>
 
-      {/* Hero Section - Full Screen with Big Typography */}
+      {/* Hero - Full Screen */}
       <section className="relative h-screen flex items-center pt-20">
         <Container size="2xl">
-          <div className="grid grid-cols-12 gap-8 items-center">
-            {/* Left - Big Typography */}
-            <div className="col-span-7">
+          <div className="grid grid-cols-2 gap-16 items-center">
+            {/* Left - Typography */}
+            <div>
               <motion.div
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
+                transition={{ duration: 0.6 }}
               >
-                {/* Eyebrow */}
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-12 h-[2px] bg-black" />
-                  <span className="text-sm font-medium tracking-widest uppercase">
+                  <span className="text-xs font-medium tracking-[0.2em] uppercase text-black">
                     Art Discovery Platform
                   </span>
                 </div>
 
-                {/* Main Headline - HUGE */}
-                <h1 className="text-[5.5rem] leading-[1.1] font-bold tracking-tight mb-8">
+                <h1 className="text-7xl font-bold leading-[1.1] tracking-tight mb-8 text-black">
                   예술과 함께<br />
                   진정한 나를<br />
-                  <span className="italic font-serif">발견하는</span> 여정
+                  발견하는 여정
                 </h1>
 
-                {/* Subheading */}
-                <p className="text-xl leading-relaxed mb-12 max-w-lg">
-                  당신만의 예술적 성향을 발견하고,
-                  세계의 명작들을 탐험하며,
-                  같은 취향의 사람들과 연결되세요.
+                <p className="text-xl leading-relaxed mb-10 text-black max-w-lg">
+                  당신만의 예술적 성향을 발견하고, 세계의 명작들을 탐험하며, 같은 취향의 사람들과 연결되세요.
                 </p>
 
-                {/* CTAs */}
                 <div className="flex items-center gap-4">
                   <Button variant="primary" size="lg" onClick={() => router.push('/quiz')}>
                     <Sparkles className="w-5 h-5" />
@@ -153,149 +118,176 @@ export default function HomePage() {
                   </Button>
                   <button
                     onClick={() => router.push('/gallery')}
-                    className="text-base font-medium hover:opacity-60 transition-opacity flex items-center gap-2"
+                    className="text-base font-medium text-black hover:text-neutral-600 transition-colors flex items-center gap-2"
                   >
-                    갤러리 둘러보기
+                    둘러보기
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
 
-                {/* Live Stats - Fun Point! */}
-                <motion.div
-                  className="mt-16 inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-full text-sm"
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                >
+                {/* Live badge */}
+                <div className="mt-12 inline-flex items-center gap-2 px-4 py-2 bg-black text-white text-sm rounded-full">
                   <TrendingUp className="w-4 h-4" />
-                  <span>오늘 <strong>{todayUsers}명</strong>이 Art Persona를 발견했어요</span>
-                </motion.div>
+                  <span className="text-white">오늘 <strong>{todayUsers}명</strong>이 발견했어요</span>
+                </div>
               </motion.div>
             </div>
 
-            {/* Right - Artwork Showcase with Parallax */}
-            <div className="col-span-5">
-              <motion.div
-                className="relative"
-                style={{
-                  x: mousePosition.x,
-                  y: mousePosition.y,
-                }}
-                transition={{ type: "spring", stiffness: 100, damping: 30 }}
-              >
-                {/* Main Image */}
-                <div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl">
-                  {featuredArtworks.map((artwork, index) => (
-                    <motion.div
-                      key={artwork.id}
-                      className="absolute inset-0"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: currentArtwork === index ? 1 : 0 }}
-                      transition={{ duration: 1 }}
-                    >
-                      <Image
-                        src={artwork.image}
-                        alt={artwork.title}
-                        fill
-                        className="object-cover"
-                        priority={index === 0}
-                      />
-
-                      {/* Info overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-                        <p className="text-sm opacity-80 mb-1">{artwork.artist}</p>
-                        <p className="text-2xl font-bold">{artwork.title}</p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-
-                {/* Floating Card - Fun Point! */}
+            {/* Right - Artwork */}
+            <div className="relative h-[600px]">
+              {featuredArtworks.map((artwork, index) => (
                 <motion.div
-                  className="absolute -bottom-6 -left-6 bg-white p-6 rounded-xl shadow-xl border border-black/5"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
+                  key={artwork.id}
+                  className="absolute inset-0"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: currentArtwork === index ? 1 : 0 }}
+                  transition={{ duration: 1 }}
                 >
-                  <p className="text-sm font-medium mb-1">Featured Collection</p>
-                  <p className="text-xs opacity-60">10,234 artworks curated</p>
+                  <div className="relative w-full h-full">
+                    <Image
+                      src={artwork.image}
+                      alt={artwork.title}
+                      fill
+                      className="object-cover"
+                      priority={index === 0}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    <div className="absolute bottom-8 left-8 text-white">
+                      <p className="text-sm mb-1 text-white/80">{artwork.artist}</p>
+                      <p className="text-2xl font-bold text-white">{artwork.title}</p>
+                    </div>
+                  </div>
                 </motion.div>
-              </motion.div>
+              ))}
+
+              {/* Indicators */}
+              <div className="absolute bottom-8 right-8 flex gap-2">
+                {featuredArtworks.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentArtwork(index)}
+                    className={`h-1 transition-all ${
+                      currentArtwork === index ? 'w-8 bg-white' : 'w-1 bg-white/50'
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </Container>
       </section>
 
-      {/* Stats Section - Asymmetric Layout (Fun!) */}
-      <section className="py-32 bg-neutral-50">
+      {/* Features Section - 실제 기능 소개 */}
+      <section className="py-32 border-t border-neutral-200">
         <Container size="2xl">
-          <div className="grid grid-cols-12 gap-8">
-            {/* Large stat */}
-            <div className="col-span-5">
-              <div className="sticky top-32">
-                <div className="mb-4">
-                  <div className="text-[8rem] font-bold leading-none tracking-tighter">
-                    {todayUsers}
-                  </div>
-                  <p className="text-xl mt-4">
-                    새로운 Art Persona<br />발견 (오늘)
-                  </p>
+          <div className="text-center mb-20">
+            <h2 className="text-5xl font-bold mb-4 text-black">SAYU가 제공하는 경험</h2>
+            <p className="text-xl text-black">예술을 통한 자기 발견의 여정</p>
+          </div>
+
+          <div className="space-y-24">
+            {/* Feature 1 - APT Test */}
+            <div className="grid grid-cols-2 gap-16 items-center">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-black text-white text-xs font-medium mb-4 rounded-full">
+                  <Sparkles className="w-3 h-3" />
+                  APT 테스트
                 </div>
+                <h3 className="text-4xl font-bold mb-6 text-black">
+                  나만의 Art Persona<br />발견하기
+                </h3>
+                <p className="text-lg leading-relaxed text-black mb-8">
+                  16가지 예술 성향 중 당신의 유형을 찾아보세요.
+                  5분의 테스트로 당신이 어떤 방식으로 예술을 감상하고,
+                  어떤 작품에 끌리는지 알 수 있습니다.
+                </p>
+                <Button variant="outline" onClick={() => router.push('/quiz')}>
+                  테스트 하러가기
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="bg-neutral-100 aspect-[4/3] flex items-center justify-center">
+                <Palette className="w-24 h-24 text-neutral-400" />
               </div>
             </div>
 
-            {/* Small stats - Stacked */}
-            <div className="col-span-7 space-y-6">
-              <Card className="p-8 hover:shadow-lg transition-shadow">
-                <Eye className="w-8 h-8 mb-4" />
-                <div className="text-4xl font-bold mb-2">10,234</div>
-                <p className="text-lg">큐레이션된 명작</p>
-              </Card>
+            {/* Feature 2 - Gallery */}
+            <div className="grid grid-cols-2 gap-16 items-center">
+              <div className="bg-neutral-100 aspect-[4/3] flex items-center justify-center">
+                <Eye className="w-24 h-24 text-neutral-400" />
+              </div>
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-black text-white text-xs font-medium mb-4 rounded-full">
+                  갤러리
+                </div>
+                <h3 className="text-4xl font-bold mb-6 text-black">
+                  세계의 명작을<br />한곳에서
+                </h3>
+                <p className="text-lg leading-relaxed text-black mb-8">
+                  10,000점 이상의 큐레이션된 작품을 탐험하세요.
+                  당신의 APT 유형에 맞춰 추천되는 작품부터,
+                  시대와 장르를 넘나드는 명작까지.
+                </p>
+                <Button variant="outline" onClick={() => router.push('/gallery')}>
+                  갤러리 둘러보기
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
 
-              <Card className="p-8 hover:shadow-lg transition-shadow">
-                <Users className="w-8 h-8 mb-4" />
-                <div className="text-4xl font-bold mb-2">2,450</div>
-                <p className="text-lg">활동 중인 커뮤니티 멤버</p>
-              </Card>
-
-              <Card className="p-8 hover:shadow-lg transition-shadow">
-                <Heart className="w-8 h-8 mb-4" />
-                <div className="text-4xl font-bold mb-2">156</div>
-                <p className="text-lg">진행 중인 전시</p>
-              </Card>
+            {/* Feature 3 - Community */}
+            <div className="grid grid-cols-2 gap-16 items-center">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-black text-white text-xs font-medium mb-4 rounded-full">
+                  커뮤니티
+                </div>
+                <h3 className="text-4xl font-bold mb-6 text-black">
+                  같은 취향의<br />사람들과 연결
+                </h3>
+                <p className="text-lg leading-relaxed text-black mb-8">
+                  비슷한 APT 유형을 가진 사람들과 만나 작품을 공유하고,
+                  전시를 함께 방문하며, 예술에 대한 대화를 나눠보세요.
+                </p>
+                <Button variant="outline" onClick={() => router.push('/community')}>
+                  커뮤니티 참여하기
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="bg-neutral-100 aspect-[4/3] flex items-center justify-center">
+                <Users className="w-24 h-24 text-neutral-400" />
+              </div>
             </div>
           </div>
         </Container>
       </section>
 
-      {/* Gallery Preview - Horizontal Scroll */}
-      <section className="py-32">
+      {/* Gallery Grid - 둥근 테두리 제거 */}
+      <section className="py-32 bg-neutral-50">
         <Container size="2xl">
           <div className="flex items-end justify-between mb-12">
             <div>
-              <h2 className="text-5xl font-bold mb-4">Featured Artworks</h2>
-              <p className="text-xl opacity-60">당신을 위한 큐레이션</p>
+              <h2 className="text-5xl font-bold mb-2 text-black">Featured Collection</h2>
+              <p className="text-lg text-black">엄선된 명작들</p>
             </div>
             <button
               onClick={() => router.push('/gallery')}
-              className="text-base font-medium hover:opacity-60 transition-opacity flex items-center gap-2"
+              className="text-base font-medium text-black hover:text-neutral-600 transition-colors flex items-center gap-2"
             >
               전체 보기
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
 
-          {/* Horizontal scroll */}
-          <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide">
-            {[...featuredArtworks, ...featuredArtworks].map((artwork, index) => (
+          <div className="grid grid-cols-4 gap-6">
+            {featuredArtworks.map((artwork) => (
               <motion.div
-                key={`${artwork.id}-${index}`}
-                className="flex-shrink-0 w-[300px] group cursor-pointer"
-                whileHover={{ y: -8 }}
-                transition={{ duration: 0.3 }}
+                key={artwork.id}
+                className="group cursor-pointer"
+                whileHover={{ y: -4 }}
+                transition={{ duration: 0.2 }}
                 onClick={() => router.push('/gallery')}
               >
-                <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-4">
+                <div className="relative aspect-[3/4] bg-neutral-200 overflow-hidden mb-4">
                   <Image
                     src={artwork.image}
                     alt={artwork.title}
@@ -303,40 +295,29 @@ export default function HomePage() {
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
-                <p className="font-semibold mb-1">{artwork.title}</p>
-                <p className="text-sm opacity-60">{artwork.artist}</p>
+                <p className="font-semibold mb-1 text-black">{artwork.title}</p>
+                <p className="text-sm text-neutral-600">{artwork.artist}</p>
               </motion.div>
             ))}
           </div>
         </Container>
       </section>
 
-      {/* Final CTA - Full Width */}
-      <section className="py-32 bg-black text-white">
+      {/* Final CTA - 개선 */}
+      <section className="py-32">
         <Container size="2xl">
-          <div className="text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
-              <h2 className="text-6xl font-bold mb-8">
-                당신의 Art Persona를<br />
-                발견할 시간
-              </h2>
-              <p className="text-xl opacity-80 mb-12 max-w-2xl mx-auto">
-                단 5분이면 당신만의 예술적 성향을 알 수 있어요
-              </p>
-              <Button
-                variant="primary"
-                size="lg"
-                onClick={() => router.push('/quiz')}
-                className="bg-white text-black hover:bg-white/90"
-              >
-                <Sparkles className="w-5 h-5" />
-                무료로 시작하기
-              </Button>
-            </motion.div>
+          <div className="text-center max-w-3xl mx-auto">
+            <h2 className="text-6xl font-bold mb-6 text-black">
+              지금 시작하세요
+            </h2>
+            <p className="text-xl text-black mb-10">
+              5분이면 당신만의 예술적 성향을 발견할 수 있습니다.<br />
+              오늘 {todayUsers}명이 이미 발견했어요.
+            </p>
+            <Button variant="primary" size="lg" onClick={() => router.push('/quiz')}>
+              <Sparkles className="w-5 h-5" />
+              무료로 시작하기
+            </Button>
           </div>
         </Container>
       </section>
