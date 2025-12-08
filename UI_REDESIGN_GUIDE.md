@@ -11,8 +11,10 @@
 2. [디자인 시스템 구조](#디자인-시스템-구조)
 3. [핵심 원칙](#핵심-원칙)
 4. [컴포넌트 사용법](#컴포넌트-사용법)
-5. [페이지별 리뉴얼 가이드](#페이지별-리뉴얼-가이드)
-6. [금지 사항](#금지-사항)
+5. [공통 컴포넌트 가이드](#공통-컴포넌트-가이드)
+6. [실전 변환 예시](#실전-변환-예시)
+7. [페이지별 리뉴얼 가이드](#페이지별-리뉴얼-가이드)
+8. [금지 사항](#금지-사항)
 
 ---
 
@@ -208,6 +210,596 @@ accentCool: '#0369A1'     // Sky blue
 <Container size="2xl">
   {/* 컨텐츠 */}
 </Container>
+```
+
+---
+
+## 🔧 공통 컴포넌트 가이드
+
+모든 페이지에서 사용하는 공통 요소들의 정확한 구현 방법입니다.
+
+### **Navigation (모든 페이지 동일)**
+
+```tsx
+<nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-neutral-200">
+  <Container size="2xl">
+    <div className="flex items-center justify-between h-20">
+      {/* Logo */}
+      <button
+        onClick={() => router.push('/')}
+        className="text-2xl font-bold text-black hover:opacity-80 transition-opacity"
+      >
+        SAYU
+      </button>
+
+      {/* Center Navigation */}
+      <div className="hidden md:flex items-center gap-10">
+        <button
+          onClick={() => router.push('/exhibitions')}
+          className="text-base text-black hover:text-neutral-600 transition-colors"
+        >
+          전시
+        </button>
+        <button
+          onClick={() => router.push('/gallery')}
+          className="text-base text-black hover:text-neutral-600 transition-colors"
+        >
+          갤러리
+        </button>
+        <button
+          onClick={() => router.push('/community')}
+          className="text-base text-black hover:text-neutral-600 transition-colors"
+        >
+          커뮤니티
+        </button>
+        <button
+          onClick={() => router.push('/quiz')}
+          className="text-base font-medium text-black hover:text-neutral-600 transition-colors"
+        >
+          APT 테스트
+        </button>
+      </div>
+
+      {/* Right CTA */}
+      <div className="flex items-center gap-3">
+        {user ? (
+          <>
+            <Button variant="ghost" size="sm" onClick={() => router.push('/dashboard')}>
+              대시보드
+            </Button>
+            <Button variant="primary" size="sm" onClick={() => router.push('/profile')}>
+              프로필
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button variant="ghost" size="sm" onClick={() => router.push('/login')}>
+              로그인
+            </Button>
+            <Button variant="primary" size="sm" onClick={() => router.push('/quiz')}>
+              시작하기
+            </Button>
+          </>
+        )}
+      </div>
+    </div>
+  </Container>
+</nav>
+```
+
+**주의사항:**
+- `h-20` 고정 높이
+- `border-b border-neutral-200` 하단 테두리
+- Logo는 `text-2xl font-bold`
+- Nav 링크는 `text-base`
+- 모든 텍스트 `text-black`
+
+---
+
+### **Footer (모든 페이지 동일)**
+
+```tsx
+<footer className="border-t border-neutral-200 py-12">
+  <Container size="2xl">
+    <div className="flex items-center justify-between">
+      {/* Left - Branding */}
+      <div>
+        <p className="text-2xl font-bold text-black mb-2">SAYU</p>
+        <p className="text-sm text-neutral-600">예술을 통한 자기 발견</p>
+      </div>
+
+      {/* Right - Links */}
+      <div className="flex gap-12">
+        {/* Column 1 */}
+        <div>
+          <p className="text-sm font-medium text-black mb-3">탐색</p>
+          <div className="space-y-2">
+            <button
+              onClick={() => router.push('/gallery')}
+              className="block text-sm text-neutral-600 hover:text-black transition-colors"
+            >
+              갤러리
+            </button>
+            <button
+              onClick={() => router.push('/exhibitions')}
+              className="block text-sm text-neutral-600 hover:text-black transition-colors"
+            >
+              전시
+            </button>
+            <button
+              onClick={() => router.push('/community')}
+              className="block text-sm text-neutral-600 hover:text-black transition-colors"
+            >
+              커뮤니티
+            </button>
+          </div>
+        </div>
+
+        {/* Column 2 */}
+        <div>
+          <p className="text-sm font-medium text-black mb-3">정보</p>
+          <div className="space-y-2">
+            <button
+              onClick={() => router.push('/about')}
+              className="block text-sm text-neutral-600 hover:text-black transition-colors"
+            >
+              소개
+            </button>
+            <button className="block text-sm text-neutral-600 hover:text-black transition-colors">
+              이용약관
+            </button>
+            <button className="block text-sm text-neutral-600 hover:text-black transition-colors">
+              개인정보처리방침
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Bottom - Copyright & Social */}
+    <div className="mt-12 pt-8 border-t border-neutral-200 flex items-center justify-between">
+      <p className="text-xs text-neutral-600">
+        © 2025 SAYU. All rights reserved.
+      </p>
+      <div className="flex gap-6">
+        <button className="text-xs text-neutral-600 hover:text-black transition-colors">
+          Instagram
+        </button>
+        <button className="text-xs text-neutral-600 hover:text-black transition-colors">
+          Twitter
+        </button>
+        <button className="text-xs text-neutral-600 hover:text-black transition-colors">
+          Email
+        </button>
+      </div>
+    </div>
+  </Container>
+</footer>
+```
+
+---
+
+### **Loading States**
+
+```tsx
+// Page Loading
+<div className="min-h-screen bg-white flex items-center justify-center">
+  <div className="text-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-2 border-black border-t-transparent mx-auto mb-4" />
+    <p className="text-sm text-neutral-600">불러오는 중...</p>
+  </div>
+</div>
+
+// Content Loading (Skeleton)
+<div className="space-y-4">
+  <div className="h-6 bg-neutral-200 rounded animate-pulse" />
+  <div className="h-4 bg-neutral-200 rounded animate-pulse w-3/4" />
+  <div className="h-4 bg-neutral-200 rounded animate-pulse w-1/2" />
+</div>
+
+// Button Loading
+<Button disabled>
+  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+  처리 중...
+</Button>
+```
+
+---
+
+### **Empty States**
+
+```tsx
+<div className="text-center py-20">
+  <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-6">
+    <Icon className="w-8 h-8 text-neutral-400" />
+  </div>
+  <h3 className="text-2xl font-bold text-black mb-2">
+    아직 콘텐츠가 없습니다
+  </h3>
+  <p className="text-base text-neutral-600 mb-6">
+    새로운 작품을 탐험해보세요
+  </p>
+  <Button variant="primary" onClick={...}>
+    갤러리 둘러보기
+  </Button>
+</div>
+```
+
+---
+
+### **Error States**
+
+```tsx
+<div className="text-center py-20">
+  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+    <AlertCircle className="w-8 h-8 text-red-600" />
+  </div>
+  <h3 className="text-2xl font-bold text-black mb-2">
+    오류가 발생했습니다
+  </h3>
+  <p className="text-base text-neutral-600 mb-6">
+    {errorMessage}
+  </p>
+  <Button variant="outline" onClick={retry}>
+    다시 시도
+  </Button>
+</div>
+```
+
+---
+
+### **Form Inputs**
+
+```tsx
+// Text Input
+<div>
+  <label className="block text-sm font-medium text-black mb-2">
+    이름
+  </label>
+  <input
+    type="text"
+    className="w-full px-4 py-3 border border-neutral-300 rounded-lg text-black placeholder:text-neutral-400 focus:outline-none focus:border-black transition-colors"
+    placeholder="이름을 입력하세요"
+  />
+</div>
+
+// Textarea
+<div>
+  <label className="block text-sm font-medium text-black mb-2">
+    설명
+  </label>
+  <textarea
+    rows={4}
+    className="w-full px-4 py-3 border border-neutral-300 rounded-lg text-black placeholder:text-neutral-400 focus:outline-none focus:border-black transition-colors resize-none"
+    placeholder="설명을 입력하세요"
+  />
+</div>
+
+// Select
+<div>
+  <label className="block text-sm font-medium text-black mb-2">
+    카테고리
+  </label>
+  <select className="w-full px-4 py-3 border border-neutral-300 rounded-lg text-black focus:outline-none focus:border-black transition-colors">
+    <option value="">선택하세요</option>
+    <option value="1">회화</option>
+    <option value="2">조각</option>
+  </select>
+</div>
+```
+
+**Form 스타일 규칙:**
+- Border: `border-neutral-300`
+- Focus: `focus:border-black` (outline 없음!)
+- Text: `text-black`
+- Placeholder: `placeholder:text-neutral-400`
+- Padding: `px-4 py-3`
+
+---
+
+### **Modal/Dialog**
+
+```tsx
+<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  {/* Overlay */}
+  <div
+    className="absolute inset-0 bg-black/50"
+    onClick={onClose}
+  />
+
+  {/* Modal */}
+  <div className="relative bg-white rounded-xl max-w-lg w-full p-8 shadow-2xl">
+    {/* Close button */}
+    <button
+      onClick={onClose}
+      className="absolute top-4 right-4 text-neutral-600 hover:text-black"
+    >
+      <X className="w-5 h-5" />
+    </button>
+
+    {/* Content */}
+    <h2 className="text-3xl font-bold text-black mb-4">
+      제목
+    </h2>
+    <p className="text-base text-black mb-6">
+      내용...
+    </p>
+
+    {/* Actions */}
+    <div className="flex gap-3">
+      <Button variant="outline" onClick={onClose} fullWidth>
+        취소
+      </Button>
+      <Button variant="primary" onClick={onConfirm} fullWidth>
+        확인
+      </Button>
+    </div>
+  </div>
+</div>
+```
+
+---
+
+### **Image Handling**
+
+```tsx
+// Artwork Image (3:4 ratio)
+<div className="relative aspect-[3/4] bg-neutral-200 overflow-hidden">
+  <Image
+    src={artwork.image}
+    alt={artwork.title}
+    fill
+    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+    className="object-cover"
+    priority={index === 0} // First image only
+  />
+</div>
+
+// Exhibition Image (4:3 ratio)
+<div className="relative aspect-[4/3] bg-neutral-200 overflow-hidden">
+  <Image
+    src={exhibition.image}
+    alt={exhibition.title}
+    fill
+    className="object-cover"
+  />
+</div>
+
+// Profile Image (1:1 ratio)
+<div className="relative w-32 h-32 bg-neutral-200 rounded-full overflow-hidden">
+  <Image
+    src={user.avatar}
+    alt={user.name}
+    fill
+    className="object-cover"
+  />
+</div>
+```
+
+**Image 규칙:**
+- 항상 `bg-neutral-200` fallback
+- `object-cover` 사용
+- `fill` + `relative` parent
+- Aspect ratio container 사용
+- 둥근 테두리 최소화 (profile만 rounded-full)
+
+---
+
+### **Badges & Tags**
+
+```tsx
+// Category Badge
+<span className="inline-flex items-center gap-2 px-3 py-1 bg-black text-white text-xs font-medium rounded-full">
+  <Icon className="w-3 h-3" />
+  카테고리
+</span>
+
+// Status Badge
+<span className="inline-block px-3 py-1 bg-neutral-100 text-black text-xs font-medium rounded-full">
+  진행 중
+</span>
+
+// Tag
+<button className="px-3 py-1 border border-neutral-300 text-black text-sm rounded-full hover:bg-neutral-50 transition-colors">
+  인상주의
+</button>
+```
+
+---
+
+## 🔄 실전 변환 예시
+
+실제 코드를 어떻게 변환하는지 Before/After 예시입니다.
+
+### **예시 1: Hero Section 변환**
+
+**❌ Before (보라색 gradient)**
+
+```tsx
+<div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
+  <div className="container mx-auto px-4 py-12">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8 }}
+    >
+      <h1 className="text-5xl font-bold mb-4">
+        {personalityType}
+      </h1>
+      <p className="text-xl text-white/80">
+        당신의 예술적 성향입니다
+      </p>
+    </motion.div>
+  </div>
+</div>
+```
+
+**✅ After (깔끔한 흰색)**
+
+```tsx
+<div className="min-h-screen bg-white">
+  <section className="py-32 bg-neutral-50">
+    <Container size="xl">
+      <div className="text-center">
+        <h1 className="text-6xl font-bold mb-6 text-black">
+          {personalityType}
+        </h1>
+        <p className="text-xl text-black">
+          당신의 예술적 성향입니다
+        </p>
+      </div>
+    </Container>
+  </section>
+</div>
+```
+
+**변경 사항:**
+- `bg-gradient-to-br from-purple-...` → `bg-white`
+- `text-white` → `text-black`
+- `text-white/80` → `text-black` (opacity 제거!)
+- 복잡한 motion → 제거 (필요시 간단하게)
+- Container 컴포넌트 사용
+
+---
+
+### **예시 2: Card 변환**
+
+**❌ Before (glass morphism)**
+
+```tsx
+<div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
+  <h3 className="text-2xl font-bold mb-4 text-white">제목</h3>
+  <p className="text-white/60">내용...</p>
+</div>
+```
+
+**✅ After (깔끔한 카드)**
+
+```tsx
+<Card className="p-8">
+  <h3 className="text-2xl font-bold mb-4 text-black">제목</h3>
+  <p className="text-black">내용...</p>
+</Card>
+```
+
+**변경 사항:**
+- `bg-white/10 backdrop-blur-md` → Card 컴포넌트 (자동으로 `bg-white`)
+- `rounded-2xl` → 기본 `rounded-lg`
+- `border-white/20` → `border-gray-200`
+- `text-white` → `text-black`
+- `text-white/60` → `text-black` (opacity 제거!)
+
+---
+
+### **예시 3: Button 변환**
+
+**❌ Before (보라색 버튼)**
+
+```tsx
+<button className="px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-500 rounded-2xl font-bold text-lg hover:scale-105 transition-all">
+  클릭
+</button>
+```
+
+**✅ After (accent 버튼)**
+
+```tsx
+<Button variant="primary" size="lg">
+  클릭
+</Button>
+```
+
+**변경 사항:**
+- Gradient 제거 → Button 컴포넌트
+- `rounded-2xl` → `rounded-lg`
+- `hover:scale-105` → subtle shadow만
+
+---
+
+### **예시 4: Stats Section 변환**
+
+**❌ Before (복잡한 gradient cards)**
+
+```tsx
+<div className="grid grid-cols-3 gap-6">
+  <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-sm rounded-xl p-6">
+    <p className="text-3xl font-bold text-white">{count}</p>
+    <p className="text-white/60">항목</p>
+  </div>
+</div>
+```
+
+**✅ After (깔끔한 카드)**
+
+```tsx
+<div className="grid grid-cols-3 gap-6">
+  <Card className="p-8 text-center">
+    <Icon className="w-8 h-8 mx-auto mb-4 text-black" />
+    <div className="text-3xl font-bold text-black">{count}</div>
+    <p className="text-sm text-neutral-600">항목</p>
+  </Card>
+</div>
+```
+
+**변경 사항:**
+- Gradient 제거
+- backdrop-blur 제거
+- Icon 추가 (시각적 포인트)
+- 텍스트 색상 명확히
+
+---
+
+### **예시 5: Text Color 수정**
+
+**❌ Before (회색/투명)**
+
+```tsx
+<p className="text-xl opacity-60">설명</p>
+<p className="text-gray-400">부가 정보</p>
+<p className="text-white/80">내용</p>
+```
+
+**✅ After (명확한 색상)**
+
+```tsx
+<p className="text-xl text-black">설명</p>
+<p className="text-sm text-neutral-600">부가 정보</p>
+<p className="text-base text-black">내용</p>
+```
+
+**규칙:**
+- `opacity-XX` 절대 금지!
+- `text-gray-400` 같은 연한 회색 금지
+- `text-white/XX` 금지
+- 항상 명시적 색상 사용
+
+---
+
+### **예시 6: Navigation 변환**
+
+**❌ Before (어두운 nav)**
+
+```tsx
+<nav className="bg-black/30 backdrop-blur-md">
+  <div className="flex items-center gap-8">
+    <a className="text-white hover:text-purple-400">링크</a>
+  </div>
+</nav>
+```
+
+**✅ After (깔끔한 nav)**
+
+```tsx
+<nav className="bg-white border-b border-neutral-200">
+  <Container size="2xl">
+    <div className="flex items-center justify-between h-20">
+      <button className="text-2xl font-bold text-black">SAYU</button>
+      <button className="text-base text-black hover:text-neutral-600 transition-colors">
+        링크
+      </button>
+    </div>
+  </Container>
+</nav>
 ```
 
 ---
