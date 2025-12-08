@@ -77,45 +77,75 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // SAYU 디자인 시스템 색상 팔레트
+        // SAYU 새 디자인 시스템 (v2 - Clean Museum Theme)
         sayu: {
-          // 따뜻하고 부드러운 조합
-          'peach-breeze': '#F5D9C4',
-          'lavender-dream': '#BA98D4',
-          'apricot-whisper': '#F4CFA3',
-          'tangerine-zest': '#F57B28',
-          'peppermint-pink': '#F6C6C2',
-          'silent-night': '#62709F',
-          'tea-rose': '#E5C8CD',
-          'fern-green': '#4E724C',
-          
-          // 차분하고 세련된 조합
-          'sage': '#C3C98D',
-          'dark-purple': '#31243E',
-          'dusty-jupiter': '#40554B',
-          'lime-cream': '#D6EF84',
-          'dusty-mauve': '#776B75',
-          'ivory-mist': '#F0EDE9',
-          'powder-blue': '#A9C7EC',
-          'urban-smoke': '#535350',
-          
-          // 대비가 강한 활기찬 조합
-          'match-point': '#DADE55',
-          'double-bounce': '#F05692',
-          'soft-melon': '#F6CFB5',
-          'astral-blue': '#191B47',
-          'ucla-blue': '#536895',
-          'pearl': '#DBDABE',
-          
-          // 배경색
-          'bg-primary': '#F0EDE9',
-          'bg-secondary': '#DBDABE',
-          'bg-card': '#FAFAF8',
-          
-          // 텍스트 색상
-          'text-primary': '#31243E',
-          'text-secondary': '#535350',
-          'text-muted': '#776B75',
+          // Base Colors
+          white: '#FFFFFF',
+          'off-white': '#FAFAF9',
+          'light-gray': '#F5F5F4',
+
+          // Text Colors
+          black: '#1A1A1A',
+          'dark-gray': '#404040',
+          'mid-gray': '#737373',
+          'light-gray-text': '#A3A3A3',
+
+          // Borders
+          border: '#E5E5E5',
+          'border-light': '#F5F5F4',
+
+          // Accents - Amber/Orange (NO PURPLE!)
+          accent: '#D97706',         // Primary amber
+          'accent-warm': '#EA580C',  // Orange for CTAs
+          'accent-cool': '#0369A1',  // Sky blue for links
+
+          // Amber scale
+          amber: {
+            50: '#FFFBEB',
+            100: '#FEF3C7',
+            200: '#FDE68A',
+            300: '#FCD34D',
+            400: '#FBBF24',
+            500: '#F59E0B',
+            600: '#D97706',
+            700: '#B45309',
+            800: '#92400E',
+            900: '#78350F',
+          },
+
+          // Orange scale
+          orange: {
+            50: '#FFF7ED',
+            100: '#FFEDD5',
+            200: '#FED7AA',
+            300: '#FDBA74',
+            400: '#FB923C',
+            500: '#F97316',
+            600: '#EA580C',
+            700: '#C2410C',
+            800: '#9A3412',
+            900: '#7C2D12',
+          },
+
+          // Sky scale (for links/secondary)
+          sky: {
+            50: '#F0F9FF',
+            100: '#E0F2FE',
+            200: '#BAE6FD',
+            300: '#7DD3FC',
+            400: '#38BDF8',
+            500: '#0EA5E9',
+            600: '#0284C7',
+            700: '#0369A1',
+            800: '#075985',
+            900: '#0C4A6E',
+          },
+
+          // Semantic
+          success: '#16A34A',
+          warning: '#EAB308',
+          error: '#DC2626',
+          info: '#0EA5E9',
         },
       },
       borderRadius: {
@@ -124,6 +154,17 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
         xl: "1.5rem",
         "2xl": "2rem",
+      },
+      fontFamily: {
+        heading: ["'Playfair Display'", "'Noto Serif KR'", 'serif'],
+        body: ["'Inter'", "'Pretendard'", '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+      },
+      boxShadow: {
+        'card-default': '0 1px 3px rgba(0, 0, 0, 0.04)',
+        'card-hover': '0 4px 12px rgba(0, 0, 0, 0.08)',
+        'button-hover': '0 2px 8px rgba(0, 0, 0, 0.08)',
+        'dropdown': '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04)',
+        'modal': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
       },
       backdropBlur: {
         xs: "4px",
