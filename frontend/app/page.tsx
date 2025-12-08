@@ -84,7 +84,7 @@ export default function HomePage() {
       </nav>
 
       {/* Hero - Full Screen */}
-      <section className="relative h-screen flex items-center pt-0">
+      <section className="relative min-h-screen flex items-start pt-24">
         <Container size="2xl">
           <div className="grid grid-cols-2 gap-16 items-center">
             {/* Left - Typography */}
