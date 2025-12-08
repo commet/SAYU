@@ -102,8 +102,8 @@ export function PersonalityAxes({ personalityType, scores = {} }: PersonalityAxe
     <div className="space-y-3 mb-4 mt-2">
       {/* Section Title */}
       <div className="text-center mb-2">
-        <h3 className="text-lg font-bold text-white mb-0.5">각 축의 세부 설명</h3>
-        <p className="text-gray-300 text-xs">당신의 예술 페르소나를 4개 축으로 분석한 결과입니다</p>
+        <h3 className="text-lg font-bold text-black mb-0.5">각 축의 세부 설명</h3>
+        <p className="text-black text-xs">당신의 예술 페르소나를 4개 축으로 분석한 결과입니다</p>
       </div>
       
       <div className="space-y-3">
@@ -119,24 +119,24 @@ export function PersonalityAxes({ personalityType, scores = {} }: PersonalityAxe
           <div className="flex justify-between items-center text-sm">
             <div className="flex items-center gap-2">
               <span className={`font-semibold ${
-                axis.userSide === axis.leftLabel[0] ? 'text-white' : 'text-gray-300'
+                axis.userSide === axis.leftLabel[0] ? 'text-black' : 'text-neutral-600'
               }`}>
                 {axis.leftLabel}
               </span>
               <span className={`text-sm font-medium ${
-                axis.userSide === axis.leftLabel[0] ? 'text-white' : 'text-gray-400'
+                axis.userSide === axis.leftLabel[0] ? 'text-black' : 'text-neutral-600'
               }`}>
                 {axis.leftPercent}%
               </span>
             </div>
             <div className="flex items-center gap-2">
               <span className={`text-sm font-medium ${
-                axis.userSide === axis.rightLabel[0] ? 'text-white' : 'text-gray-400'
+                axis.userSide === axis.rightLabel[0] ? 'text-black' : 'text-neutral-600'
               }`}>
                 {axis.rightPercent}%
               </span>
               <span className={`font-semibold ${
-                axis.userSide === axis.rightLabel[0] ? 'text-white' : 'text-gray-300'
+                axis.userSide === axis.rightLabel[0] ? 'text-black' : 'text-neutral-600'
               }`}>
                 {axis.rightLabel}
               </span>
@@ -144,7 +144,7 @@ export function PersonalityAxes({ personalityType, scores = {} }: PersonalityAxe
           </div>
           
           {/* Bar Chart */}
-          <div className="relative h-4 bg-gray-800/30 rounded-full overflow-hidden border border-gray-700/50">
+          <div className="relative h-4 bg-neutral-100 rounded-full overflow-hidden border border-neutral-200">
             {/* Single unified bar with gradient based on dominant side */}
             <motion.div
               className="absolute left-0 top-0 h-full rounded-full"
@@ -173,18 +173,18 @@ export function PersonalityAxes({ personalityType, scores = {} }: PersonalityAxe
             />
             
             {/* Center divider line */}
-            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gray-600/50 -translate-x-1/2" />
+            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-neutral-300 -translate-x-1/2" />
           </div>
           
           {/* Descriptions */}
           <div className="flex justify-between text-xs">
             <span className={`max-w-[45%] ${
-              axis.userSide === axis.leftLabel[0] ? 'text-white' : 'text-gray-400'
+              axis.userSide === axis.leftLabel[0] ? 'text-black' : 'text-neutral-600'
             }`}>
               {axis.leftDescKo}
             </span>
             <span className={`max-w-[45%] text-right ${
-              axis.userSide === axis.rightLabel[0] ? 'text-white' : 'text-gray-400'
+              axis.userSide === axis.rightLabel[0] ? 'text-black' : 'text-neutral-600'
             }`}>
               {axis.rightDescKo}
             </span>

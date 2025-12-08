@@ -145,56 +145,56 @@ export default function TeamPage() {
   const topRecorder = [...members].sort((a, b) => b.impressionCount - a.impressionCount)[0];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
+    <div className="min-h-screen bg-neutral-50 text-black">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-lg border-b border-white/10">
-        <div className="max-w-lg mx-auto px-4 py-4 flex items-center gap-4">
+      <header className="sticky top-0 z-50 bg-white border-b border-neutral-200">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
           <button
             onClick={() => router.back()}
-            className="p-2 hover:bg-white/10 rounded-full transition"
+            className="p-2 rounded-full transition hover:bg-neutral-100"
           >
-            <ChevronLeft className="w-5 h-5 text-white" />
+            <ChevronLeft className="w-5 h-5 text-black" aria-hidden />
           </button>
-          <h1 className="text-lg font-semibold text-white flex-1">팀 현황</h1>
+          <h1 className="text-lg font-semibold flex-1">팀 현황</h1>
           <button
             onClick={refreshData}
             disabled={loading}
-            className="p-2 hover:bg-white/10 rounded-full transition"
+            className="p-2 rounded-full transition hover:bg-neutral-100 disabled:opacity-50"
           >
-            <RefreshCw className={`w-5 h-5 text-white/70 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-5 h-5 text-neutral-600 ${loading ? 'animate-spin' : ''}`} aria-hidden />
           </button>
         </div>
       </header>
 
-      <main className="max-w-lg mx-auto px-4 py-6 space-y-6">
+      <main className="max-w-4xl mx-auto px-4 py-8 space-y-8">
         {/* Summary Stats */}
-        <section className="grid grid-cols-3 gap-3">
-          <div className="bg-white/5 rounded-xl p-4 text-center border border-white/10">
-            <div className="text-2xl font-bold text-amber-400">{totalImpressions}</div>
-            <div className="text-xs text-white/50 mt-1">총 감상 기록</div>
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-2xl p-4 text-center border border-neutral-200 shadow-sm">
+            <div className="text-2xl font-bold text-amber-600">{totalImpressions}</div>
+            <div className="text-xs text-neutral-600 mt-1">총 감상 기록</div>
           </div>
-          <div className="bg-white/5 rounded-xl p-4 text-center border border-white/10">
-            <div className="text-2xl font-bold text-green-400">{activeMembers}</div>
-            <div className="text-xs text-white/50 mt-1">활동 중</div>
+          <div className="bg-white rounded-2xl p-4 text-center border border-neutral-200 shadow-sm">
+            <div className="text-2xl font-bold text-green-600">{activeMembers}</div>
+            <div className="text-xs text-neutral-600 mt-1">활동 중</div>
           </div>
-          <div className="bg-white/5 rounded-xl p-4 text-center border border-white/10">
-            <div className="text-2xl font-bold text-blue-400">{members.length}</div>
-            <div className="text-xs text-white/50 mt-1">팀원</div>
+          <div className="bg-white rounded-2xl p-4 text-center border border-neutral-200 shadow-sm">
+            <div className="text-2xl font-bold text-blue-600">{members.length}</div>
+            <div className="text-xs text-neutral-600 mt-1">팀원</div>
           </div>
         </section>
 
         {/* Top Recorder */}
         {topRecorder && (
-          <section className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-2xl p-4 border border-amber-500/30">
+          <section className="bg-amber-50 rounded-2xl p-5 border border-amber-200">
             <div className="flex items-center gap-3">
-              <Trophy className="w-6 h-6 text-amber-400" />
+              <Trophy className="w-6 h-6 text-amber-600" aria-hidden />
               <div className="flex-1">
-                <p className="text-amber-400 text-xs">가장 많이 기록한 팀원</p>
-                <p className="text-white font-semibold">
+                <p className="text-amber-700 text-xs">가장 많이 기록한 팀원</p>
+                <p className="text-black font-semibold">
                   {topRecorder.username} ({topRecorder.impressionCount}개)
                 </p>
               </div>
-              <span className="text-2xl">{SAYU_TYPES[topRecorder.personalityType].emoji}</span>
+              <span className="text-2xl" aria-hidden>{SAYU_TYPES[topRecorder.personalityType].emoji}</span>
             </div>
           </section>
         )}
@@ -202,11 +202,11 @@ export default function TeamPage() {
         {/* Team Members */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-white font-semibold flex items-center gap-2">
-              <Users className="w-5 h-5 text-blue-400" />
+            <h2 className="text-black font-semibold flex items-center gap-2">
+              <Users className="w-5 h-5 text-blue-600" aria-hidden />
               팀원들
             </h2>
-            <span className="text-xs text-white/40">
+            <span className="text-xs text-neutral-500">
               {formatTimeAgo(lastRefresh)} 업데이트
             </span>
           </div>
@@ -220,8 +220,8 @@ export default function TeamPage() {
 
         {/* Recent Activity */}
         <section>
-          <h2 className="text-white font-semibold mb-4 flex items-center gap-2">
-            <Clock className="w-5 h-5 text-green-400" />
+          <h2 className="text-black font-semibold mb-4 flex items-center gap-2">
+            <Clock className="w-5 h-5 text-green-600" aria-hidden />
             최근 활동
           </h2>
           <div className="space-y-2">
@@ -235,18 +235,18 @@ export default function TeamPage() {
               .map(member => (
                 <div
                   key={member.oderId}
-                  className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10"
+                  className="flex items-center gap-3 p-3 bg-white rounded-xl border border-neutral-200 shadow-sm"
                 >
-                  <span className="text-lg">{SAYU_TYPES[member.personalityType].emoji}</span>
+                  <span className="text-lg" aria-hidden>{SAYU_TYPES[member.personalityType].emoji}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm truncate">
+                    <p className="text-black text-sm truncate">
                       <span className="font-medium">{member.username}</span>
-                      <span className="text-white/50">님이 </span>
-                      <span className="text-amber-400">"{member.lastActivity!.artworkTitle}"</span>
-                      <span className="text-white/50"> 감상을 남겼어요</span>
+                      <span className="text-neutral-600">님이 </span>
+                      <span className="text-amber-700">"{member.lastActivity!.artworkTitle}"</span>
+                      <span className="text-neutral-600"> 감상을 남겼어요</span>
                     </p>
                   </div>
-                  <span className="text-xs text-white/40">
+                  <span className="text-xs text-neutral-500">
                     {formatTimeAgo(new Date(member.lastActivity!.timestamp))}
                   </span>
                 </div>
@@ -258,13 +258,13 @@ export default function TeamPage() {
         <section className="pt-4 space-y-3">
           <Link
             href="/mmca-tour/record"
-            className="block w-full py-4 bg-amber-500 text-white text-center rounded-xl font-semibold hover:bg-amber-600 transition"
+            className="block w-full py-4 bg-black text-white text-center rounded-xl font-semibold hover:bg-neutral-800 transition"
           >
             감상 기록하러 가기
           </Link>
           <Link
             href="/mmca-tour"
-            className="block w-full py-4 bg-white/10 text-white text-center rounded-xl font-semibold hover:bg-white/20 transition"
+            className="block w-full py-4 bg-white text-center rounded-xl font-semibold border border-neutral-200 hover:bg-neutral-100 transition"
           >
             추천 작품 보기
           </Link>
@@ -280,7 +280,7 @@ function MemberCard({ member }: { member: MMCATourMemberStatus }) {
   const progress = Math.round((member.impressionCount / member.totalRecommended) * 100);
 
   return (
-    <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+    <div className="bg-white rounded-2xl p-4 border border-neutral-200 shadow-sm">
       <div className="flex items-center gap-3">
         {/* Avatar */}
         <div className="relative">
@@ -291,47 +291,47 @@ function MemberCard({ member }: { member: MMCATourMemberStatus }) {
               className="w-12 h-12 rounded-full object-cover"
             />
           ) : (
-            <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
-              <UserCircle className="w-8 h-8 text-white/50" />
+            <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center border border-neutral-200">
+              <UserCircle className="w-8 h-8 text-neutral-500" aria-hidden />
             </div>
           )}
           {member.isOnline && (
-            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-slate-900" />
+            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
           )}
         </div>
 
         {/* Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-medium text-white">{member.username}</span>
-            <span className="text-lg">{typeInfo.emoji}</span>
+            <span className="font-medium text-black">{member.username}</span>
+            <span className="text-lg" aria-hidden>{typeInfo.emoji}</span>
           </div>
           <div className="flex items-center gap-2 mt-1">
-            <span className="text-xs text-white/50">{typeInfo.name}</span>
-            <span className="text-white/30">·</span>
-            <span className="text-xs text-amber-400">{member.personalityType}</span>
+            <span className="text-xs text-neutral-600">{typeInfo.name}</span>
+            <span className="text-neutral-300">·</span>
+            <span className="text-xs text-amber-700">{member.personalityType}</span>
           </div>
         </div>
 
         {/* Stats */}
         <div className="text-right">
-          <div className="flex items-center gap-1 text-rose-400">
-            <Heart className="w-4 h-4 fill-current" />
+          <div className="flex items-center gap-1 text-rose-600">
+            <Heart className="w-4 h-4" aria-hidden />
             <span className="font-bold">{member.impressionCount}</span>
           </div>
-          <p className="text-xs text-white/40 mt-1">감상 기록</p>
+          <p className="text-xs text-neutral-500 mt-1">감상 기록</p>
         </div>
       </div>
 
       {/* Progress Bar */}
       <div className="mt-3">
         <div className="flex items-center justify-between text-xs mb-1">
-          <span className="text-white/50">추천 작품 진행도</span>
-          <span className="text-amber-400">{member.recommendedArtworksViewed}/{member.totalRecommended}</span>
+          <span className="text-neutral-600">추천 작품 진행도</span>
+          <span className="text-amber-700">{member.recommendedArtworksViewed}/{member.totalRecommended}</span>
         </div>
-        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+        <div className="h-2 bg-neutral-200 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-500"
+            className="h-full bg-amber-500 rounded-full transition-all duration-500"
             style={{ width: `${Math.min(progress, 100)}%` }}
           />
         </div>
@@ -339,7 +339,7 @@ function MemberCard({ member }: { member: MMCATourMemberStatus }) {
 
       {/* Last Activity */}
       {member.lastActivity && (
-        <p className="text-xs text-white/40 mt-3">
+        <p className="text-xs text-neutral-600 mt-3">
           마지막: "{member.lastActivity.artworkTitle}" · {formatTimeAgo(new Date(member.lastActivity.timestamp))}
         </p>
       )}

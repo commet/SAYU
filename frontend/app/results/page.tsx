@@ -346,7 +346,7 @@ function ResultsContent() {
 
           <button
             onClick={() => router.push('/profile/art-profile?from=quiz')}
-            className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-all font-medium flex-1 sm:flex-none"
+            className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 bg-black text-white rounded-lg hover:bg-neutral-800 transition-all font-medium flex-1 sm:flex-none"
           >
             <Sparkles size={16} className="sm:w-[18px] sm:h-[18px]" />
             <span className="text-[10px] sm:text-base">
@@ -549,7 +549,7 @@ function ResultsContent() {
         >
           {/* 상세 설명 (essence) - 탭 위에 항상 표시 */}
           <div className="p-4 sm:p-8 pb-0">
-            <div className="mb-4 sm:mb-6 p-4 sm:p-6 bg-amber-50 rounded-xl border border-amber-200">
+            <div className="mb-4 sm:mb-6 p-4 sm:p-6 bg-neutral-50 rounded-xl border border-neutral-200">
               <h3 className="text-lg font-semibold text-black mb-3">
                 {language === 'ko' ? '갤러리에서의 당신:' : 'You at the Gallery:'}
               </h3>
@@ -849,7 +849,7 @@ function ResultsContent() {
             viewport={{ once: true }}
             className="max-w-4xl mx-auto px-4 text-center"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-100 text-amber-800 rounded-full text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-100 text-black rounded-full text-sm font-medium mb-6">
               <Sparkles className="w-4 h-4" />
               {language === 'ko' ? '게스트로 보는 중' : 'Viewing as Guest'}
             </div>
@@ -872,8 +872,8 @@ function ResultsContent() {
             
             <div className="grid grid-cols-3 gap-2 sm:gap-6 max-w-3xl mx-auto mb-4 sm:mb-8">
               <div className="text-center p-2 sm:p-4">
-                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-1 sm:mb-3">
-                  <Heart className="w-5 h-5 sm:w-7 sm:h-7 text-amber-700" />
+                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-1 sm:mb-3">
+                  <Heart className="w-5 h-5 sm:w-7 sm:h-7 text-black" />
                 </div>
                 <h3 className="font-medium text-xs sm:text-base text-black mb-1 sm:mb-2">
                   {language === 'ko' ? '작품 저장' : 'Save'}
@@ -884,8 +884,8 @@ function ResultsContent() {
               </div>
 
               <div className="text-center p-2 sm:p-4">
-                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-1 sm:mb-3">
-                  <Map className="w-5 h-5 sm:w-7 sm:h-7 text-amber-700" />
+                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-1 sm:mb-3">
+                  <Map className="w-5 h-5 sm:w-7 sm:h-7 text-black" />
                 </div>
                 <h3 className="font-medium text-xs sm:text-base text-black mb-1 sm:mb-2">
                   {language === 'ko' ? '전시 추천' : 'Guide'}
@@ -896,8 +896,8 @@ function ResultsContent() {
               </div>
 
               <div className="text-center p-2 sm:p-4">
-                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-1 sm:mb-3">
-                  <Palette className="w-5 h-5 sm:w-7 sm:h-7 text-amber-700" />
+                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-1 sm:mb-3">
+                  <Palette className="w-5 h-5 sm:w-7 sm:h-7 text-black" />
                 </div>
                 <h3 className="font-medium text-xs sm:text-base text-black mb-1 sm:mb-2">
                   {language === 'ko' ? 'AI 프로필' : 'Profile'}
@@ -917,7 +917,7 @@ function ResultsContent() {
                   });
                   router.push(`/login?${params.toString()}`);
                 }}
-                className="px-6 sm:px-8 py-3 sm:py-4 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-all font-medium text-base sm:text-lg flex items-center justify-center gap-2"
+                className="px-6 sm:px-8 py-3 sm:py-4 bg-black text-white rounded-lg hover:bg-neutral-800 transition-all font-medium text-base sm:text-lg flex items-center justify-center gap-2"
               >
                 {language === 'ko' ? '결과 저장하고 시작하기' : 'Save Results & Start'}
                 <ArrowRight className="w-5 h-5" />
