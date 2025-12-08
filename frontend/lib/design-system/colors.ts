@@ -9,11 +9,11 @@ export const colors = {
   offWhite: '#FAFAF9',
   lightGray: '#F5F5F4',
 
-  // Text Hierarchy
-  black: '#1A1A1A',
-  darkGray: '#404040',
-  midGray: '#737373',
-  lightGrayText: '#A3A3A3',
+  // Text Hierarchy (IMPROVED - Better contrast)
+  black: '#000000',           // Pure black for headings
+  darkGray: '#1A1A1A',        // Near black for body
+  midGray: '#525252',         // Darker gray for secondary
+  lightGrayText: '#737373',   // Only for captions
 
   // Borders & Dividers
   border: '#E5E5E5',

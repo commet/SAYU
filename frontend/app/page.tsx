@@ -8,333 +8,338 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useResponsive } from '@/lib/responsive';
 import dynamic from 'next/dynamic';
 import { Container, Card, Button, Heading, Text } from '@/components/design-system';
-import { Sparkles, ArrowRight, Heart, Users, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Sparkles, ArrowRight, Heart, Users, Eye, TrendingUp } from 'lucide-react';
 
 // Mobile component
 const MobileHomePage = dynamic(() => import('./MobileHomePageFixed'), {
   ssr: false,
   loading: () => (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-2 border-sayu-accent border-t-transparent mx-auto mb-4" />
-        <p className="text-sayu-mid-gray text-sm">Loading...</p>
-      </div>
+      <div className="animate-spin rounded-full h-12 w-12 border-2 border-black border-t-transparent mx-auto mb-4" />
     </div>
   ),
 });
 
-// Featured artworks (placeholder - connect to API later)
+// Featured artworks
 const featuredArtworks = [
   {
     id: 1,
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/800px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1200px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg',
     title: '별이 빛나는 밤',
     artist: '빈센트 반 고흐',
-    museum: 'MoMA',
   },
   {
     id: 2,
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Monet_Water_Lilies_1916.jpg/800px-Monet_Water_Lilies_1916.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Monet_Water_Lilies_1916.jpg/1200px-Monet_Water_Lilies_1916.jpg',
     title: '수련',
     artist: '클로드 모네',
-    museum: '오랑주리 미술관',
   },
   {
     id: 3,
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Gustav_Klimt_016.jpg/800px-Gustav_Klimt_016.jpg',
     title: '키스',
     artist: '구스타프 클림트',
-    museum: '벨베데레 궁전',
-  },
-  {
-    id: 4,
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/The_Great_Wave_off_Kanagawa.jpg/800px-The_Great_Wave_off_Kanagawa.jpg',
-    title: '가나가와 해변의 큰 파도',
-    artist: '가쓰시카 호쿠사이',
-    museum: 'Metropolitan Museum',
   },
 ];
 
 export default function HomePage() {
   const router = useRouter();
-  const { language } = useLanguage();
   const { isMobile } = useResponsive();
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [todayUsers, setTodayUsers] = useState(47);
+  const [currentArtwork, setCurrentArtwork] = useState(0);
+  const [todayUsers] = useState(47);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  // Mobile redirect
-  if (isMobile) {
-    return <MobileHomePage />;
-  }
+  if (isMobile) return <MobileHomePage />;
 
-  // Auto-play carousel
+  // Auto-rotate artworks
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % featuredArtworks.length);
-    }, 5000);
+      setCurrentArtwork((prev) => (prev + 1) % featuredArtworks.length);
+    }, 4000);
     return () => clearInterval(timer);
   }, []);
 
-  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % featuredArtworks.length);
-  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + featuredArtworks.length) % featuredArtworks.length);
+  // Mouse tracking for subtle parallax
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({
+        x: (e.clientX / window.innerWidth - 0.5) * 20,
+        y: (e.clientY / window.innerHeight - 0.5) * 20,
+      });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white border-b border-sayu-border">
+      {/* Minimal Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b border-black/5">
         <Container size="2xl">
-          <div className="flex items-center justify-between h-16">
-            <Heading as="h5" serif={false} className="text-sayu-accent">
+          <div className="flex items-center justify-between h-20">
+            {/* Logo - Bold */}
+            <button onClick={() => router.push('/')} className="text-3xl font-bold tracking-tight">
               SAYU
-            </Heading>
+            </button>
 
-            <div className="hidden md:flex items-center gap-8">
-              <button onClick={() => router.push('/exhibitions')} className="text-sm text-sayu-dark-gray hover:text-sayu-black transition-colors">
+            {/* Center Nav */}
+            <div className="hidden md:flex items-center gap-10">
+              <button
+                onClick={() => router.push('/exhibitions')}
+                className="text-base hover:opacity-60 transition-opacity"
+              >
                 전시
               </button>
-              <button onClick={() => router.push('/gallery')} className="text-sm text-sayu-dark-gray hover:text-sayu-black transition-colors">
+              <button
+                onClick={() => router.push('/gallery')}
+                className="text-base hover:opacity-60 transition-opacity"
+              >
                 갤러리
               </button>
-              <button onClick={() => router.push('/community')} className="text-sm text-sayu-dark-gray hover:text-sayu-black transition-colors">
-                커뮤니티
-              </button>
-              <button onClick={() => router.push('/quiz')} className="text-sm text-sayu-dark-gray hover:text-sayu-black transition-colors">
+              <button
+                onClick={() => router.push('/quiz')}
+                className="text-base font-medium hover:opacity-60 transition-opacity"
+              >
                 APT 테스트
               </button>
             </div>
 
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" onClick={() => router.push('/login')}>
-                로그인
-              </Button>
-              <Button variant="primary" size="sm" onClick={() => router.push('/quiz')}>
-                시작하기
-              </Button>
-            </div>
+            {/* CTA */}
+            <Button variant="primary" onClick={() => router.push('/quiz')}>
+              시작하기
+            </Button>
           </div>
         </Container>
       </nav>
 
-      {/* Hero Section - Carousel */}
-      <section className="relative bg-sayu-off-white">
-        <Container size="2xl" noPadding>
-          <div className="relative h-[600px] overflow-hidden">
-            {/* Slides */}
-            {featuredArtworks.map((artwork, index) => (
+      {/* Hero Section - Full Screen with Big Typography */}
+      <section className="relative h-screen flex items-center pt-20">
+        <Container size="2xl">
+          <div className="grid grid-cols-12 gap-8 items-center">
+            {/* Left - Big Typography */}
+            <div className="col-span-7">
               <motion.div
-                key={artwork.id}
-                className="absolute inset-0"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: currentSlide === index ? 1 : 0 }}
-                transition={{ duration: 0.5 }}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
               >
-                <div className="grid grid-cols-2 h-full">
-                  {/* Image */}
-                  <div className="relative bg-sayu-light-gray">
-                    <Image
-                      src={artwork.image}
-                      alt={artwork.title}
-                      fill
-                      className="object-cover"
-                      priority={index === 0}
-                    />
-                  </div>
-
-                  {/* Text */}
-                  <div className="flex flex-col justify-center px-20">
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: currentSlide === index ? 1 : 0, y: currentSlide === index ? 0 : 20 }}
-                      transition={{ delay: 0.2, duration: 0.5 }}
-                    >
-                      <Text size="sm" color="tertiary" className="mb-2">
-                        {artwork.museum}
-                      </Text>
-                      <Heading as="h1" className="mb-4">
-                        {artwork.title}
-                      </Heading>
-                      <Text size="lg" color="secondary" className="mb-8">
-                        {artwork.artist}
-                      </Text>
-                      <Button variant="primary" onClick={() => router.push('/gallery')}>
-                        자세히 보기
-                        <ArrowRight className="w-4 h-4" />
-                      </Button>
-                    </motion.div>
-                  </div>
+                {/* Eyebrow */}
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-[2px] bg-black" />
+                  <span className="text-sm font-medium tracking-widest uppercase">
+                    Art Discovery Platform
+                  </span>
                 </div>
+
+                {/* Main Headline - HUGE */}
+                <h1 className="text-[5.5rem] leading-[1.1] font-bold tracking-tight mb-8">
+                  예술과 함께<br />
+                  진정한 나를<br />
+                  <span className="italic font-serif">발견하는</span> 여정
+                </h1>
+
+                {/* Subheading */}
+                <p className="text-xl leading-relaxed mb-12 max-w-lg">
+                  당신만의 예술적 성향을 발견하고,
+                  세계의 명작들을 탐험하며,
+                  같은 취향의 사람들과 연결되세요.
+                </p>
+
+                {/* CTAs */}
+                <div className="flex items-center gap-4">
+                  <Button variant="primary" size="lg" onClick={() => router.push('/quiz')}>
+                    <Sparkles className="w-5 h-5" />
+                    APT 테스트 시작
+                  </Button>
+                  <button
+                    onClick={() => router.push('/gallery')}
+                    className="text-base font-medium hover:opacity-60 transition-opacity flex items-center gap-2"
+                  >
+                    갤러리 둘러보기
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Live Stats - Fun Point! */}
+                <motion.div
+                  className="mt-16 inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-full text-sm"
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                >
+                  <TrendingUp className="w-4 h-4" />
+                  <span>오늘 <strong>{todayUsers}명</strong>이 Art Persona를 발견했어요</span>
+                </motion.div>
               </motion.div>
-            ))}
+            </div>
 
-            {/* Controls */}
-            <button
-              onClick={prevSlide}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-colors shadow-md"
-            >
-              <ChevronLeft className="w-5 h-5 text-sayu-black" />
-            </button>
-            <button
-              onClick={nextSlide}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-colors shadow-md"
-            >
-              <ChevronRight className="w-5 h-5 text-sayu-black" />
-            </button>
+            {/* Right - Artwork Showcase with Parallax */}
+            <div className="col-span-5">
+              <motion.div
+                className="relative"
+                style={{
+                  x: mousePosition.x,
+                  y: mousePosition.y,
+                }}
+                transition={{ type: "spring", stiffness: 100, damping: 30 }}
+              >
+                {/* Main Image */}
+                <div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl">
+                  {featuredArtworks.map((artwork, index) => (
+                    <motion.div
+                      key={artwork.id}
+                      className="absolute inset-0"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: currentArtwork === index ? 1 : 0 }}
+                      transition={{ duration: 1 }}
+                    >
+                      <Image
+                        src={artwork.image}
+                        alt={artwork.title}
+                        fill
+                        className="object-cover"
+                        priority={index === 0}
+                      />
 
-            {/* Indicators */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
-              {featuredArtworks.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentSlide(index)}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    currentSlide === index ? 'bg-sayu-accent w-8' : 'bg-sayu-mid-gray'
-                  }`}
-                />
-              ))}
+                      {/* Info overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+                        <p className="text-sm opacity-80 mb-1">{artwork.artist}</p>
+                        <p className="text-2xl font-bold">{artwork.title}</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Floating Card - Fun Point! */}
+                <motion.div
+                  className="absolute -bottom-6 -left-6 bg-white p-6 rounded-xl shadow-xl border border-black/5"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  <p className="text-sm font-medium mb-1">Featured Collection</p>
+                  <p className="text-xs opacity-60">10,234 artworks curated</p>
+                </motion.div>
+              </motion.div>
             </div>
           </div>
         </Container>
       </section>
 
-      {/* Main Content */}
-      <Container size="2xl" className="py-20">
-        {/* Intro Text */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <Heading as="h2" className="mb-4">
-            예술과 함께 진정한 나를 발견하는 여정
-          </Heading>
-          <Text size="lg" color="secondary" className="leading-relaxed">
-            SAYU는 당신만의 예술적 성향을 발견하고, 세계의 명작들을 탐험하며,
-            같은 취향을 가진 사람들과 연결되는 공간입니다.
-          </Text>
-        </div>
-
-        {/* APT Quiz CTA - Prominent */}
-        <Card className="mb-20 bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200">
-          <div className="flex items-center justify-between p-8">
-            <div className="flex items-center gap-6">
-              <div className="w-16 h-16 rounded-full bg-sayu-accent flex items-center justify-center">
-                <Sparkles className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <Heading as="h3" serif={false} className="mb-2">
-                  나의 예술 성향 발견하기
-                </Heading>
-                <Text color="secondary">
-                  간단한 테스트로 당신만의 APT(Art Personality Type)를 찾아보세요
-                </Text>
+      {/* Stats Section - Asymmetric Layout (Fun!) */}
+      <section className="py-32 bg-neutral-50">
+        <Container size="2xl">
+          <div className="grid grid-cols-12 gap-8">
+            {/* Large stat */}
+            <div className="col-span-5">
+              <div className="sticky top-32">
+                <div className="mb-4">
+                  <div className="text-[8rem] font-bold leading-none tracking-tighter">
+                    {todayUsers}
+                  </div>
+                  <p className="text-xl mt-4">
+                    새로운 Art Persona<br />발견 (오늘)
+                  </p>
+                </div>
               </div>
             </div>
-            <Button variant="primary" size="lg" onClick={() => router.push('/quiz')}>
-              테스트 시작
-              <ArrowRight className="w-5 h-5" />
-            </Button>
+
+            {/* Small stats - Stacked */}
+            <div className="col-span-7 space-y-6">
+              <Card className="p-8 hover:shadow-lg transition-shadow">
+                <Eye className="w-8 h-8 mb-4" />
+                <div className="text-4xl font-bold mb-2">10,234</div>
+                <p className="text-lg">큐레이션된 명작</p>
+              </Card>
+
+              <Card className="p-8 hover:shadow-lg transition-shadow">
+                <Users className="w-8 h-8 mb-4" />
+                <div className="text-4xl font-bold mb-2">2,450</div>
+                <p className="text-lg">활동 중인 커뮤니티 멤버</p>
+              </Card>
+
+              <Card className="p-8 hover:shadow-lg transition-shadow">
+                <Heart className="w-8 h-8 mb-4" />
+                <div className="text-4xl font-bold mb-2">156</div>
+                <p className="text-lg">진행 중인 전시</p>
+              </Card>
+            </div>
           </div>
-        </Card>
+        </Container>
+      </section>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-6 mb-20">
-          <Card className="text-center p-8">
-            <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
-              <Users className="w-6 h-6 text-sayu-accent" />
+      {/* Gallery Preview - Horizontal Scroll */}
+      <section className="py-32">
+        <Container size="2xl">
+          <div className="flex items-end justify-between mb-12">
+            <div>
+              <h2 className="text-5xl font-bold mb-4">Featured Artworks</h2>
+              <p className="text-xl opacity-60">당신을 위한 큐레이션</p>
             </div>
-            <Text size="xs" color="tertiary" className="mb-1 uppercase tracking-wider">
-              Today
-            </Text>
-            <Heading as="h3" serif={false}>
-              {todayUsers}명
-            </Heading>
-            <Text size="sm" color="secondary" className="mt-2">
-              새로운 Art Persona 발견
-            </Text>
-          </Card>
-
-          <Card className="text-center p-8">
-            <div className="w-12 h-12 rounded-full bg-sky-100 flex items-center justify-center mx-auto mb-4">
-              <Eye className="w-6 h-6 text-sayu-accent-cool" />
-            </div>
-            <Text size="xs" color="tertiary" className="mb-1 uppercase tracking-wider">
-              Artworks
-            </Text>
-            <Heading as="h3" serif={false}>
-              10,234
-            </Heading>
-            <Text size="sm" color="secondary" className="mt-2">
-              큐레이션된 작품
-            </Text>
-          </Card>
-
-          <Card className="text-center p-8">
-            <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center mx-auto mb-4">
-              <Heart className="w-6 h-6 text-sayu-accent-warm" />
-            </div>
-            <Text size="xs" color="tertiary" className="mb-1 uppercase tracking-wider">
-              Community
-            </Text>
-            <Heading as="h3" serif={false}>
-              2,450
-            </Heading>
-            <Text size="sm" color="secondary" className="mt-2">
-              활동 중인 멤버
-            </Text>
-          </Card>
-        </div>
-
-        {/* Featured Collections Grid */}
-        <div className="mb-20">
-          <div className="flex items-center justify-between mb-8">
-            <Heading as="h2">Featured Collections</Heading>
             <button
               onClick={() => router.push('/gallery')}
-              className="text-sm text-sayu-accent-cool hover:underline flex items-center gap-1"
+              className="text-base font-medium hover:opacity-60 transition-opacity flex items-center gap-2"
             >
-              모두 보기
+              전체 보기
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="grid grid-cols-4 gap-6">
-            {featuredArtworks.map((artwork) => (
-              <Card
-                key={artwork.id}
-                padding="none"
-                clickable
+          {/* Horizontal scroll */}
+          <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide">
+            {[...featuredArtworks, ...featuredArtworks].map((artwork, index) => (
+              <motion.div
+                key={`${artwork.id}-${index}`}
+                className="flex-shrink-0 w-[300px] group cursor-pointer"
+                whileHover={{ y: -8 }}
+                transition={{ duration: 0.3 }}
                 onClick={() => router.push('/gallery')}
               >
-                <div className="relative aspect-[3/4] bg-sayu-light-gray overflow-hidden">
+                <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-4">
                   <Image
                     src={artwork.image}
                     alt={artwork.title}
                     fill
-                    className="object-cover transition-transform duration-300 hover:scale-105"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
-                <div className="p-4">
-                  <Text size="sm" weight="semibold" className="mb-1 line-clamp-1">
-                    {artwork.title}
-                  </Text>
-                  <Text size="xs" color="secondary" className="line-clamp-1">
-                    {artwork.artist}
-                  </Text>
-                </div>
-              </Card>
+                <p className="font-semibold mb-1">{artwork.title}</p>
+                <p className="text-sm opacity-60">{artwork.artist}</p>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </Container>
+      </section>
 
-        {/* Bottom CTA */}
-        <div className="text-center py-12 border-t border-sayu-border">
-          <Heading as="h3" className="mb-4">
-            지금 시작하세요
-          </Heading>
-          <Text size="lg" color="secondary" className="mb-6">
-            오늘 {todayUsers}명이 새로운 Art Persona를 발견했어요.
-          </Text>
-          <Button variant="primary" size="lg" onClick={() => router.push('/quiz')}>
-            나의 예술 성향 찾기
-          </Button>
-        </div>
-      </Container>
+      {/* Final CTA - Full Width */}
+      <section className="py-32 bg-black text-white">
+        <Container size="2xl">
+          <div className="text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="text-6xl font-bold mb-8">
+                당신의 Art Persona를<br />
+                발견할 시간
+              </h2>
+              <p className="text-xl opacity-80 mb-12 max-w-2xl mx-auto">
+                단 5분이면 당신만의 예술적 성향을 알 수 있어요
+              </p>
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={() => router.push('/quiz')}
+                className="bg-white text-black hover:bg-white/90"
+              >
+                <Sparkles className="w-5 h-5" />
+                무료로 시작하기
+              </Button>
+            </motion.div>
+          </div>
+        </Container>
+      </section>
     </div>
   );
 }

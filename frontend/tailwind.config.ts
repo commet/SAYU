@@ -84,11 +84,11 @@ const config: Config = {
           'off-white': '#FAFAF9',
           'light-gray': '#F5F5F4',
 
-          // Text Colors
-          black: '#1A1A1A',
-          'dark-gray': '#404040',
-          'mid-gray': '#737373',
-          'light-gray-text': '#A3A3A3',
+          // Text Colors (IMPROVED - Better contrast)
+          black: '#000000',
+          'dark-gray': '#1A1A1A',
+          'mid-gray': '#525252',
+          'light-gray-text': '#737373',
 
           // Borders
           border: '#E5E5E5',
