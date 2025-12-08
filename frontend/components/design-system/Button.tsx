@@ -31,9 +31,9 @@ const variantClasses = {
     'active:bg-gray-300',
   ],
   outline: [
-    'border border-sayu-border text-sayu-dark-gray',
-    'hover:bg-sayu-off-white',
-    'active:bg-sayu-light-gray',
+    'border-2 border-black text-black',
+    'hover:bg-black hover:text-white',
+    'active:bg-black/90',
   ],
   ghost: [
     'text-sayu-dark-gray',

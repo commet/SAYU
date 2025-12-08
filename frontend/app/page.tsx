@@ -101,7 +101,7 @@ export default function HomePage() {
                   </span>
                 </div>
 
-                <h1 className="text-7xl font-bold leading-[1.1] tracking-tight mb-8 text-black">
+                <h1 className="text-7xl font-bold leading-[1.1] tracking-tight mb-8" style={{ color: '#000000' }}>
                   예술과 함께<br />
                   진정한 나를<br />
                   발견하는 여정
@@ -178,7 +178,7 @@ export default function HomePage() {
       </section>
 
       {/* Features Section - 실제 기능 소개 */}
-      <section className="py-32 border-t border-neutral-200">
+      <section className="py-20 border-t border-neutral-200">
         <Container size="2xl">
           <div className="text-center mb-20">
             <h2 className="text-5xl font-bold mb-4 text-black">SAYU가 제공하는 경험</h2>
