@@ -1,18 +1,74 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MessageSquare, Users, Clock, Pin, Lock } from 'lucide-react';
 import Link from 'next/link';
+import { MessageSquare, Clock } from 'lucide-react';
+import { Card } from '@/components/design-system/Card';
 
-interface Forum {
+type ForumItem = {
   id: string;
-  name: string;
-  description: string;
+  title: string;
+  excerpt: string;
+  category: 'exhibition' | 'artwork' | 'discussion';
+  replies: number;
+  lastActivity: string;
+  author: string;
   slug: string;
-  category: string;
-  topic_count: number;
-  last_activity: string;
+};
+
+const seededForums: ForumItem[] = [
+  {
+    id: 'kimchangyeol-visit',
+    title: 'MMCA 김창열전 주말 동행 구합니다',
+    excerpt: '토요일 오후 3시 관람 예정인데 함께 보실 분 계실까요? 관람 후 카페에서 감상 공유해요.',
+    category: 'exhibition',
+    replies: 12,
+    lastActivity: '1시간 전',
+    author: '@sj.moment',
+    slug: 'kimchangyeol-visit'
+  },
+  {
+    id: 'warhol-pop',
+    title: '앤디 워홀 전시에서 가장 인상 깊었던 작품은?',
+    excerpt: '실크스크린 작업과 드로잉 중 무엇이 더 강렬했나요? 작품별로 느낀 점 나눠봐요.',
+    category: 'discussion',
+    replies: 8,
+    lastActivity: '오늘',
+    author: '@art_weather',
+    slug: 'warhol-pop'
+  },
+  {
+    id: 'lee-bul',
+    title: '이불 개인전: 시작은 모든 것을 바꾼다 관람 후기',
+    excerpt: '설치 작업에서 공간감이 대단했어요. 같이 본 분들 전시 동선 추천해주시면 감사!',
+    category: 'exhibition',
+    replies: 5,
+    lastActivity: '어제',
+    author: '@gallery_buddy',
+    slug: 'lee-bul'
+  },
+  {
+    id: 'favorite-abstract',
+    title: '추상화 입문자를 위한 추천 작가 리스트',
+    excerpt: 'APT 유형별로 입문하기 좋은 작가 5명 정리했습니다. 의견 주세요!',
+    category: 'artwork',
+    replies: 14,
+    lastActivity: '3일 전',
+    author: '@ur.fav.muse',
+    slug: 'favorite-abstract'
+  }
+];
+
+function categoryBadge(category: ForumItem['category']) {
+  switch (category) {
+    case 'exhibition':
+      return 'bg-neutral-100 text-neutral-800 border border-neutral-200';
+    case 'artwork':
+      return 'bg-white text-neutral-800 border border-neutral-200';
+    case 'discussion':
+    default:
+      return 'bg-neutral-50 text-neutral-800 border border-neutral-200';
+  }
 }
 
 interface ForumListProps {
@@ -20,137 +76,60 @@ interface ForumListProps {
 }
 
 export function ForumList({ className = '' }: ForumListProps) {
-  const [forums, setForums] = useState<Forum[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchForums();
-  }, []);
-
-  const fetchForums = async () => {
-    try {
-      const response = await fetch('/api/community/forums', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setForums(data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch forums:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const formatLastActivity = (dateStr: string) => {
-    if (!dateStr) return 'No activity';
-    
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffHours < 1) return 'Less than 1 hour ago';
-    if (diffHours < 24) return `${diffHours} hours ago`;
-    if (diffDays < 7) return `${diffDays} days ago`;
-    
-    return date.toLocaleDateString();
-  };
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'general': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
-      case 'artwork': return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
-      case 'exhibition': return 'bg-green-500/20 text-green-400 border-green-500/30';
-      case 'discussion': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className={`${className}`}>
-        <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="bg-gray-900/50 backdrop-blur-lg rounded-xl p-6 border border-gray-800">
-              <div className="animate-pulse">
-                <div className="h-6 bg-gray-700 rounded w-1/3 mb-2"></div>
-                <div className="h-4 bg-gray-700 rounded w-2/3 mb-4"></div>
-                <div className="flex gap-4">
-                  <div className="h-4 bg-gray-700 rounded w-20"></div>
-                  <div className="h-4 bg-gray-700 rounded w-24"></div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  const forums = seededForums;
 
   return (
     <div className={`space-y-4 ${className}`}>
       {forums.map((forum, index) => (
         <motion.div
           key={forum.id}
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.1 }}
-          className="bg-black/70 backdrop-blur-lg rounded-xl border border-white/40 hover:border-purple-500/50 transition-all duration-300"
+          transition={{ delay: index * 0.04 }}
         >
-          <Link href={`/community/forums/${forum.slug}`}>
-            <div className="p-6 cursor-pointer">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-xl font-semibold text-white hover:text-purple-400 transition-colors">
-                      {forum.name}
-                    </h3>
-                    <span className={`px-2 py-1 rounded-full text-xs border ${getCategoryColor(forum.category)}`}>
-                      {forum.category}
+          <Link href={`/community/forums/${forum.slug}`} className="block">
+            <Card className="p-5 border-neutral-200 hover:shadow-lg transition-shadow">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-lg font-semibold text-black line-clamp-1">{forum.title}</h3>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${categoryBadge(forum.category)}`}>
+                      {forum.category === 'exhibition'
+                        ? '전시'
+                        : forum.category === 'artwork'
+                        ? '작품'
+                        : '토론'}
                     </span>
                   </div>
-                  
-                  <p className="text-gray-400 mb-4 line-clamp-2">
-                    {forum.description || 'No description available'}
-                  </p>
-                  
-                  <div className="flex items-center gap-6 text-sm text-gray-500">
+
+                  <p className="text-sm text-neutral-600 line-clamp-2">{forum.excerpt}</p>
+
+                  <div className="flex items-center gap-4 text-sm text-neutral-600">
                     <div className="flex items-center gap-2">
-                      <MessageSquare className="w-4 h-4" />
-                      <span>{forum.topic_count || 0} topics</span>
+                      <MessageSquare className="w-4 h-4 text-neutral-500" />
+                      <span>{forum.replies} 댓글</span>
                     </div>
-                    
                     <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4" />
-                      <span>{formatLastActivity(forum.last_activity)}</span>
+                      <Clock className="w-4 h-4 text-neutral-500" />
+                      <span>{forum.lastActivity}</span>
                     </div>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-2 ml-4">
-                  <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                    <MessageSquare className="w-5 h-5 text-purple-400" />
+                    <span className="text-neutral-500">{forum.author}</span>
                   </div>
                 </div>
               </div>
-            </div>
+            </Card>
           </Link>
         </motion.div>
       ))}
-      
+
       {forums.length === 0 && (
-        <div className="text-center py-12">
-          <MessageSquare className="w-20 h-20 text-white/60 mx-auto mb-6" />
-          <h3 className="text-2xl font-bold text-white mb-4">포럼 기능은 곧 오픈 예정입니다! 🚀</h3>
-          <p className="text-white/80 text-lg">COMING SOON</p>
-          <p className="text-gray-300 mt-2">커뮤니티 포럼이 곧 시작됩니다.</p>
-        </div>
+        <Card className="p-8 text-center border-neutral-200">
+          <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center mx-auto mb-4">
+            <MessageSquare className="w-6 h-6 text-neutral-500" />
+          </div>
+          <h3 className="text-xl font-semibold text-black mb-2">아직 토론이 없어요</h3>
+          <p className="text-sm text-neutral-600">첫 글을 작성해보세요.</p>
+        </Card>
       )}
     </div>
   );

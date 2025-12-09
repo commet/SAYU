@@ -5,7 +5,7 @@
 html {
   visibility: visible !important;
   opacity: 1 !important;
-  background: #111827 !important;
+  background: #ffffff !important;
 }
 
 /* Smooth transitions for all elements */
@@ -149,7 +149,7 @@ a {
 
 /* Prevent content jump on load */
 body {
-  background: #111827 !important;
+  background: #ffffff !important;
   min-height: 100vh;
 }
 

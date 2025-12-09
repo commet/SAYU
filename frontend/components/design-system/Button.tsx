@@ -20,28 +20,28 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 const variantClasses = {
   primary: [
-    'bg-sayu-accent text-white',
-    'hover:bg-sayu-accent-warm',
-    'active:bg-amber-800',
-    'shadow-sm hover:shadow-button-hover',
+    'bg-black text-white',
+    'hover:bg-neutral-800',
+    'active:bg-neutral-900',
+    'shadow-sm hover:shadow-md',
   ],
   secondary: [
-    'bg-sayu-light-gray text-sayu-black',
-    'hover:bg-gray-200',
-    'active:bg-gray-300',
+    'bg-neutral-100 text-black',
+    'hover:bg-neutral-200',
+    'active:bg-neutral-300',
   ],
   outline: [
-    'border-2 border-black text-black',
+    'border-2 border-black text-black bg-white',
     'hover:bg-black hover:text-white',
-    'active:bg-black/90',
+    'active:bg-neutral-900',
   ],
   ghost: [
-    'text-sayu-dark-gray',
-    'hover:bg-sayu-off-white',
-    'active:bg-sayu-light-gray',
+    'text-black bg-transparent',
+    'hover:bg-neutral-100',
+    'active:bg-neutral-200',
   ],
   link: [
-    'text-sayu-accent-cool underline-offset-4',
+    'text-black underline-offset-4',
     'hover:underline',
   ],
 };

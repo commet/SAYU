@@ -133,7 +133,7 @@ export const MinimalGuideBot = () => {
   // 심플한 플로팅 헬프 버튼 (항상 표시)
   const HelpButton = () => (
     <motion.button
-      className="fixed bottom-6 right-6 w-12 h-12 bg-white dark:bg-gray-800 rounded-full shadow-lg flex items-center justify-center hover:shadow-xl transition-shadow z-40"
+      className="fixed bottom-2 right-6 w-12 h-12 bg-white dark:bg-gray-800 rounded-full shadow-lg flex items-center justify-center hover:shadow-xl transition-shadow z-40"
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       onClick={() => {
@@ -158,7 +158,7 @@ export const MinimalGuideBot = () => {
       <AnimatePresence>
         {isVisible && currentGuide && (
           <motion.div
-            className="fixed bottom-20 right-6 max-w-sm bg-white dark:bg-gray-800 rounded-lg shadow-xl p-4 z-50"
+            className="fixed bottom-16 right-6 max-w-sm bg-white dark:bg-gray-800 rounded-lg shadow-xl p-4 z-50"
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}

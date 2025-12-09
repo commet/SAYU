@@ -210,30 +210,26 @@ export const AudioGuideQuiz: React.FC = () => {
   
   const phase = getPhaseByQuestion(currentQuestion + 1);
   const backgroundData = getBackgroundForQuestion(currentQuestion + 1);
-  
-  // Preload current and next background images
+
+  // Preload current and next background images - Use direct mapping
   const currentBackgroundUrl = useMemo(() => {
-    if (backgroundData.backgrounds && backgroundData.backgrounds.length > 0) {
-      return backgroundData.backgrounds[currentQuestion % backgroundData.backgrounds.length];
-    }
-    return null;
-  }, [backgroundData, currentQuestion]);
+    const questionNumber = currentQuestion + 1;
+    return questionBackgrounds[questionNumber] || null;
+  }, [currentQuestion]);
 
   const { isLoaded: bgLoaded, currentSrc: bgSrc } = useImagePreloader(currentBackgroundUrl, {
     priority: true,
     blur: true
   });
 
-  // Preload next 3 background images
+  // Preload next 3 background images - Use direct mapping
   const nextBackgroundUrls = useMemo(() => {
     const urls: string[] = [];
     for (let i = 1; i <= 3; i++) {
-      const nextQ = currentQuestion + i;
-      if (nextQ < narrativeQuestions.length) {
-        const nextBgData = getBackgroundForQuestion(nextQ + 1);
-        if (nextBgData.backgrounds && nextBgData.backgrounds.length > 0) {
-          urls.push(nextBgData.backgrounds[nextQ % nextBgData.backgrounds.length]);
-        }
+      const nextQuestionNumber = currentQuestion + 1 + i;
+      if (nextQuestionNumber <= narrativeQuestions.length) {
+        const bgUrl = questionBackgrounds[nextQuestionNumber];
+        if (bgUrl) urls.push(bgUrl);
       }
     }
     return urls;
@@ -282,97 +278,51 @@ export const AudioGuideQuiz: React.FC = () => {
         )}
       </div>
 
-      {/* Language Toggle */}
-      <div className="absolute top-4 right-4 z-50">
-        <LanguageToggle variant="glass" />
-      </div>
-      
-      {/* Audio Guide Device - Bottom Right Position */}
-      <motion.div 
-        className="audio-guide-device-improved"
-        initial={{ y: 100, opacity: 0 }}
+      {/* Minimal Top Progress Bar */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-sm"
+        initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.5, type: "spring", stiffness: 100 }}
+        transition={{ delay: 0.3 }}
       >
-        <div>
-          {/* Header with Guide Number and Play Control */}
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Headphones className="w-4 h-4 text-green-400" />
-              <span className="text-lg font-bold text-white">{audioGuideNumber}</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+          {/* Progress */}
+          <div className="flex-1 max-w-md">
+            <div className="h-1.5 bg-white/20 rounded-full overflow-hidden mb-1.5">
+              <motion.div
+                className="h-full bg-white rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ ease: "easeOut", duration: 0.8 }}
+              />
             </div>
-            <button
-              onClick={() => setAudioPlaying(!audioPlaying)}
-              className="w-7 h-7 rounded-full bg-indigo-500/20 hover:bg-indigo-500/30 flex items-center justify-center transition-colors"
-              aria-label={audioPlaying ? "Pause" : "Play"}
-            >
-              {audioPlaying ? <Pause className="w-3 h-3 text-indigo-500" /> : <Play className="w-3 h-3 text-indigo-500" />}
-            </button>
+            <p className="text-xs text-white/90 font-medium">
+              {currentQuestion + 1} / {narrativeQuestions.length} · {galleryRoom}
+            </p>
           </div>
-          
-          {/* Progress Bar */}
-          <div className="h-1 bg-gray-700 relative rounded-full mb-2">
-            <motion.div 
-              className="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-500 to-indigo-400 rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ ease: "easeOut", duration: 0.8 }}
-            />
-          </div>
-          
-          <p className="text-xs font-medium text-gray-300 mb-1">{galleryRoom}</p>
-          
-          {/* Audio Visualizer - Compact */}
-          <div className="h-6 flex items-center justify-center gap-1 mb-2">
-            {audioPlaying ? (
-              [...Array(5)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="w-1 bg-gradient-to-t from-indigo-600 to-indigo-400 rounded-full"
-                  animate={{
-                    height: [4, 16, 4],
-                  }}
-                  transition={{
-                    duration: 1.2,
-                    repeat: Infinity,
-                    delay: i * 0.15,
-                    ease: "easeInOut"
-                  }}
-                />
-              ))
-            ) : (
-              <div className="text-gray-400 text-xs font-medium">
-                {language === 'ko' ? '오디오 가이드' : 'Audio Guide'}
-              </div>
-            )}
-          </div>
-          
-          {/* Navigation Controls */}
-          <div className="flex items-center justify-between gap-2">
+
+          {/* Controls */}
+          <div className="flex items-center gap-2">
             <button
               onClick={handleGoBack}
               disabled={currentQuestion === 0}
-              className="text-sm text-gray-300 hover:text-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 font-medium transition-colors px-2 py-1 rounded hover:bg-gray-800 whitespace-nowrap"
+              className="p-2 text-white/80 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              title={language === 'ko' ? '이전' : 'Back'}
             >
-              <ChevronLeft className="w-4 h-4" />
-              {language === 'ko' ? '이전' : 'Back'}
+              <ChevronLeft className="w-5 h-5" />
             </button>
-            
-            <button
-              onClick={() => setShowGalleryMap(true)}
-              className="text-sm text-gray-300 hover:text-indigo-400 flex items-center gap-1 font-medium transition-colors px-2 py-1 rounded hover:bg-gray-800 whitespace-nowrap"
-            >
-              <Map className="w-4 h-4" />
-              {language === 'ko' ? '지도' : 'Map'}
-            </button>
-            
+
             <button
               onClick={handleExitQuiz}
-              className="text-sm text-gray-300 hover:text-red-400 flex items-center gap-1 font-medium transition-colors px-2 py-1 rounded hover:bg-gray-800 whitespace-nowrap"
+              className="p-2 text-white/80 hover:text-white transition-colors"
+              title={language === 'ko' ? '나가기' : 'Exit'}
             >
-              <Home className="w-4 h-4" />
-              {language === 'ko' ? '나가기' : 'Exit'}
+              <Home className="w-5 h-5" />
             </button>
+
+            <div className="ml-2">
+              <LanguageToggle variant="glass" size="sm" />
+            </div>
           </div>
         </div>
       </motion.div>
@@ -406,11 +356,16 @@ export const AudioGuideQuiz: React.FC = () => {
             }}
           />
         </div>
-        {/* Gradient Overlay - Reduced opacity in dark mode */}
-        <div className={cn(
-          "gallery-overlay bg-gradient-to-br",
-          backgroundData.overlay.color
-        )} style={{ opacity: 0.2 }} />
+        {/* Strong Vignette Overlay */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `radial-gradient(circle at center, transparent 10%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.6) 100%)`
+          }}
+        />
+
+        {/* Bottom Gradient for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40 pointer-events-none" />
 
         {/* Main Content */}
         <div className="gallery-content">
@@ -424,32 +379,27 @@ export const AudioGuideQuiz: React.FC = () => {
                 transition={{ duration: 0.6 }}
                 className="quiz-content-wrapper"
               >
-                {/* Main Question Frame - 전체 액자 */}
-                <div className="question-artwork-frame max-w-4xl mx-auto mb-4">
-                  {/* Gallery Room Title - Inside Frame Top Right */}
-                  <motion.div 
-                    className="room-plaque-new"
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                  >
-                    <h3 className="text-sm font-medium text-white">{galleryRoom}</h3>
-                    <p className="text-xs opacity-70 text-white">Stop {currentQuestion + 1} of {narrativeQuestions.length}</p>
-                  </motion.div>
-                  {/* Narrative Setup - 액자 없는 상황 설명 */}
+                {/* Main Question - Subtle Box */}
+                <motion.div
+                  className="max-w-2xl mx-auto mb-4 bg-white/60 backdrop-blur-md rounded-2xl p-5 shadow-lg"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.6 }}
+                >
+                  {/* Narrative Setup */}
                   {(question.narrative.setup || question.narrative.transition) && (
                     <motion.div
-                      className="narrative-setup-box mb-6"
+                      className="mb-3"
                       initial={{ opacity: 0 }}
-                      animate={{ 
+                      animate={{
                         opacity: componentVisibility.setup ? 1 : 0
                       }}
-                      transition={{ 
+                      transition={{
                         duration: 0.5,
                         ease: "easeOut"
                       }}
                     >
-                      <p className="text-lg leading-relaxed font-medium text-gray-900">
+                      <p className="text-sm leading-relaxed text-gray-900">
                         {getTransitionText()}
                       </p>
                     </motion.div>
@@ -457,13 +407,13 @@ export const AudioGuideQuiz: React.FC = () => {
 
                   {/* Question */}
                   <motion.h2
-                    className="question-title text-2xl md:text-3xl font-bold text-center mb-4 leading-tight text-gray-900"
+                    className="text-lg sm:text-xl font-bold text-center leading-tight text-black"
                     initial={{ opacity: 0, y: 10 }}
-                    animate={{ 
+                    animate={{
                       opacity: componentVisibility.question ? 1 : 0,
                       y: componentVisibility.question ? 0 : 10
                     }}
-                    transition={{ 
+                    transition={{
                       duration: 0.5,
                       ease: "easeOut"
                     }}
@@ -477,69 +427,61 @@ export const AudioGuideQuiz: React.FC = () => {
                         </React.Fragment>
                       ))}
                   </motion.h2>
-                </div>
+                </motion.div>
 
-                {/* Choice Cards */}
-                <motion.div 
-                  className="grid md:grid-cols-2 gap-4 max-w-4xl mx-auto"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ 
-                    opacity: componentVisibility.choices ? 1 : 0,
-                    scale: componentVisibility.choices ? 1 : 0.95
+                {/* Choice Buttons - 2 Column Compact */}
+                <motion.div
+                  className="grid md:grid-cols-2 gap-3 max-w-2xl mx-auto"
+                  initial={{ opacity: 0 }}
+                  animate={{
+                    opacity: componentVisibility.choices ? 1 : 0
                   }}
-                  transition={{ 
+                  transition={{
                     duration: 0.4,
                     ease: [0.4, 0, 0.2, 1]
                   }}
                 >
                   {question.options.map((option, index) => (
-                    <motion.div
+                    <motion.button
                       key={option.id}
                       initial={{ opacity: 0, y: 20 }}
-                      animate={{ 
-                        opacity: componentVisibility.choices ? 1 : 0, 
-                        y: componentVisibility.choices ? 0 : 20 
+                      animate={{
+                        opacity: componentVisibility.choices ? 1 : 0,
+                        y: componentVisibility.choices ? 0 : 20
                       }}
-                      transition={{ 
-                        delay: componentVisibility.choices ? index * 0.2 : 0, // 각 선택지 간 0.2초 간격
+                      transition={{
+                        delay: componentVisibility.choices ? index * 0.1 : 0,
                         duration: 0.4,
                         ease: "easeOut"
                       }}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
+                      onClick={() => handleChoice(option.id)}
+                      className="w-full p-4 bg-white/70 backdrop-blur-md hover:bg-white/85 hover:shadow-xl text-left rounded-xl border border-white/40 hover:border-black/20 transition-all group"
                     >
-                      <div
-                        className="choice-card-fixed cursor-pointer group h-full relative overflow-hidden"
-                        onClick={() => handleChoice(option.id)}
-                      >
-                        {/* Background Pattern */}
-                        <div className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity">
-                          <div className="absolute inset-0" style={{
-                            backgroundImage: `radial-gradient(circle at 2px 2px, #8b7355 1px, transparent 1px)`,
-                            backgroundSize: '20px 20px'
-                          }} />
+                      <div className="flex flex-col gap-2.5">
+                        {/* Option Label */}
+                        <div className="flex justify-between items-center">
+                          <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-black text-white font-bold text-sm">
+                            {index === 0 ? 'A' : 'B'}
+                          </span>
+                          <ChevronRight className="w-5 h-5 text-gray-600 group-hover:text-black group-hover:translate-x-1 transition-all" />
                         </div>
 
-                        <div className="relative z-10 flex flex-col justify-center py-4">
-                          <div className="flex justify-between items-start mb-4">
-                            <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-800 text-white font-bold text-lg">
-                              {index === 0 ? 'A' : 'B'}
-                            </span>
-                            <ChevronRight className="w-6 h-6 text-gray-600 group-hover:text-gray-800 group-hover:translate-x-1 transition-all" />
-                          </div>
-                          
-                          <h4 className="text-xl font-semibold mb-3 text-gray-900 leading-tight">
+                        {/* Text Content */}
+                        <div>
+                          <h4 className="text-lg font-semibold mb-1 text-black leading-snug">
                             {language === 'ko' && option.text_ko ? option.text_ko : option.text}
                           </h4>
-                          
+
                           {option.subtext && (
-                            <p className="text-gray-700 text-sm leading-relaxed italic">
+                            <p className="text-base text-gray-700 leading-relaxed">
                               {language === 'ko' && option.subtext_ko ? option.subtext_ko : option.subtext}
                             </p>
                           )}
                         </div>
                       </div>
-                    </motion.div>
+                    </motion.button>
                   ))}
                 </motion.div>
 

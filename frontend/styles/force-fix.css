@@ -100,3 +100,33 @@
   border: 2px solid red !important;
   background: rgba(255, 0, 0, 0.1) !important;
 }
+
+/* 9. 레거시 보라/검정 내비게이션 숨김 (desktop/mobile) */
+.sayu-floating-nav,
+.sayu-floating-nav * {
+  display: none !important;
+}
+[class*="fixed"][class*="top-0"][class*="z-\\[1000\\]"][class*="bg-gray-900"],
+[class*="fixed"][class*="top-0"][class*="z-\\[1000\\]"][class*="bg-gray-900"] * {
+  display: none !important;
+}
+[style*="31, 41, 55"][class*="fixed"][class*="top-0"][class*="z-\\[1000\\]"],
+[style*="31, 41, 55"][class*="fixed"][class*="top-0"][class*="z-\\[1000\\]"] * {
+  display: none !important;
+}
+.sayu-floating-header,
+.sayu-floating-header * {
+  display: none !important;
+}
+
+/* 10. 모든 고정 상단 내비 중 data-primary-nav가 없는 것은 숨기기 (last resort) */
+nav.fixed.top-0:not([data-primary-nav]),
+nav.fixed.top-0:not([data-primary-nav]) * {
+  display: none !important;
+}
+
+/* 11. z-[1000] 상단 고정 div 중 data-primary-nav 없는 것은 숨김 */
+div[class*="fixed"][class*="top-0"][class*="z-\\[1000\\]"]:not([data-primary-nav]),
+div[class*="fixed"][class*="top-0"][class*="z-\\[1000\\]"]:not([data-primary-nav]) * {
+  display: none !important;
+}

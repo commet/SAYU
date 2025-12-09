@@ -106,31 +106,21 @@ export default function MobileNav() {
   return (
     <>
       {/* 모바일 상단 헤더 */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-gray-900/95 backdrop-blur-md border-b border-gray-800">
-        <div className="flex items-center justify-between px-4 py-2">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-b border-neutral-200">
+        <div className="flex items-center justify-between px-4 py-3">
           <button 
             onClick={() => setIsDrawerOpen(true)}
-            className="p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors touch-manipulation"
+            className="p-2 -ml-2 rounded-lg hover:bg-neutral-100 transition-colors touch-manipulation"
             aria-label="Open menu"
           >
-            <Menu className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+            <Menu className="w-6 h-6 text-neutral-700" />
           </button>
           
           <button 
             onClick={() => router.push('/')}
             className="hover:opacity-80 transition-opacity touch-manipulation"
           >
-            <div className="relative group">
-              {/* 로고 스타일: Artistic Script - 모바일 버전 */}
-              <div className="text-2xl italic relative" 
-                   style={{ fontFamily: 'var(--font-playfair), serif', letterSpacing: '-0.02em' }}>
-                <span className="bg-gradient-to-br from-purple-500 via-pink-400 to-purple-500 bg-clip-text text-transparent">
-                  Sayu
-                </span>
-                {/* 점 장식 */}
-                <div className="absolute -top-1 -right-2 w-1 h-1 rounded-full bg-pink-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </div>
-            </div>
+            <div className="text-xl font-semibold tracking-tight text-black">SAYU</div>
           </button>
           
           <div className="w-10" /> {/* 균형을 위한 spacer */}
@@ -156,17 +146,17 @@ export default function MobileNav() {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed left-0 top-0 h-full w-80 max-w-[85vw] bg-gray-900 z-[9999] shadow-2xl lg:hidden overflow-y-auto"
+              className="fixed left-0 top-0 h-full w-80 max-w-[85vw] bg-white z-[9999] shadow-2xl border-r border-neutral-200 lg:hidden overflow-y-auto"
             >
               {/* 드로어 헤더 */}
-              <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+              <div className="p-6 border-b border-neutral-200">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  <h2 className="text-xl font-bold text-neutral-900">
                     {language === 'ko' ? '메뉴' : 'Menu'}
                   </h2>
                   <button
                     onClick={() => setIsDrawerOpen(false)}
-                    className="p-2 -mr-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors touch-manipulation"
+                    className="p-2 -mr-2 rounded-lg hover:bg-neutral-100 transition-colors touch-manipulation"
                     aria-label="Close menu"
                   >
                     <X className="w-5 h-5 text-gray-500" />
@@ -176,14 +166,14 @@ export default function MobileNav() {
                 {/* 사용자 정보 */}
                 {user && (
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                    <div className="w-12 h-12 rounded-full bg-neutral-100 border border-neutral-200 flex items-center justify-center text-black font-bold">
                       {user.nickname?.[0] || user.email?.[0] || 'U'}
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-gray-900 dark:text-white">
+                      <p className="font-medium text-neutral-900">
                         {user.nickname || user.email}
                       </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className="text-sm text-neutral-500">
                         {user.personalityType || 'SAYU Explorer'}
                       </p>
                     </div>
@@ -197,7 +187,7 @@ export default function MobileNav() {
                       setIsDrawerOpen(false);
                       router.push('/login');
                     }}
-                    className="w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium hover:opacity-90 transition-opacity touch-manipulation"
+                    className="w-full px-4 py-3 bg-black text-white rounded-xl font-medium hover:bg-neutral-900 transition-colors touch-manipulation"
                   >
                     {language === 'ko' ? '로그인' : 'Login'}
                   </button>
@@ -208,7 +198,7 @@ export default function MobileNav() {
               <div className="py-4">
                 {drawerMenuItems.map((section, sectionIndex) => (
                   <div key={sectionIndex} className="mb-6">
-                    <h3 className="px-6 mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <h3 className="px-6 mb-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
                       {section.title[language]}
                     </h3>
                     <div>
@@ -225,10 +215,10 @@ export default function MobileNav() {
                             className={`
                               w-full px-6 py-3 flex items-center gap-3 transition-colors touch-manipulation
                               ${isActive 
-                                ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border-r-4 border-purple-600' 
+                                ? 'bg-neutral-100 text-black border-r-4 border-black' 
                                 : isDisabled
-                                  ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                                  ? 'text-neutral-400 cursor-not-allowed'
+                                  : 'text-neutral-800 hover:bg-neutral-50'
                               }
                             `}
                           >
@@ -237,7 +227,7 @@ export default function MobileNav() {
                               {item.label[language]}
                             </span>
                             {item.requiresAuth && !user && (
-                              <span className="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
+                              <span className="text-xs bg-neutral-200 px-2 py-1 rounded">
                                 {language === 'ko' ? '로그인 필요' : 'Login'}
                               </span>
                             )}
@@ -253,10 +243,10 @@ export default function MobileNav() {
                 
                 {/* 로그아웃 버튼 (로그인 시) */}
                 {user && (
-                  <div className="px-6 pt-4 border-t border-gray-200 dark:border-gray-800">
+                  <div className="px-6 pt-4 border-t border-neutral-200">
                     <button
                       onClick={handleSignOut}
-                      className="w-full px-4 py-3 flex items-center justify-center gap-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors touch-manipulation"
+                      className="w-full px-4 py-3 flex items-center justify-center gap-2 text-red-600 hover:bg-red-50 rounded-xl transition-colors touch-manipulation"
                     >
                       <LogOut className="w-5 h-5" />
                       <span>{language === 'ko' ? '로그아웃' : 'Logout'}</span>
@@ -270,8 +260,8 @@ export default function MobileNav() {
       </AnimatePresence>
 
       {/* 하단 탭 바 */}
-      <div className="lg:hidden fixed-bottom-nav fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 z-[100]" 
-           style={{ 
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 border-t border-neutral-200 backdrop-blur-sm z-[100]"
+           style={{
              paddingBottom: 'env(safe-area-inset-bottom)',
              position: 'fixed',
              WebkitBackfaceVisibility: 'hidden',
@@ -293,10 +283,10 @@ export default function MobileNav() {
                 className={`
                   flex-1 py-2 px-2 flex flex-col items-center gap-1 transition-colors touch-manipulation
                   ${isActive 
-                    ? 'text-purple-600 dark:text-purple-400' 
+                    ? 'text-black bg-neutral-100 rounded-lg'
                     : isDisabled
-                      ? 'text-gray-400 dark:text-gray-600'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                      ? 'text-neutral-400'
+                      : 'text-neutral-600 hover:text-black hover:bg-neutral-50 rounded-lg'
                   }
                 `}
               >
@@ -304,8 +294,8 @@ export default function MobileNav() {
                   <Icon className="w-5 h-5" />
                   {isActive && (
                     <motion.div
-                      layoutId="activeTab"
-                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-purple-600 dark:bg-purple-400 rounded-full"
+                      layoutId="activeTabMobile"
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-black rounded-full"
                     />
                   )}
                 </div>
