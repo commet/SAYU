@@ -156,9 +156,9 @@ export function MainNav() {
             href={isLocked ? '#' : item.href}
             className={cn(
               'flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors',
-              isActive 
-                ? 'bg-primary text-primary-foreground' 
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted',
+              isActive
+                ? 'bg-white/20 text-white shadow-sm'
+                : 'text-white/80 hover:text-white hover:bg-white/10',
               isLocked && 'opacity-70 hover:opacity-100'
             )}
             onClick={(e) => {
@@ -173,7 +173,7 @@ export function MainNav() {
             <span className="flex-1">{item.name}</span>
             {isLocked && <Lock className="h-4 w-4" />}
             {item.href === '/daily-challenge' && !isActive && (
-              <Badge variant="secondary" className="ml-auto">
+              <Badge variant="secondary" className="ml-auto bg-white/20 text-white border-0">
                 NEW
               </Badge>
             )}
@@ -186,34 +186,37 @@ export function MainNav() {
   return (
     <>
       {/* Desktop Navigation */}
-      <nav className="hidden md:flex flex-col gap-2 w-64 h-full p-4 border-r bg-background">
+      <nav
+        className="hidden md:flex flex-col gap-2 w-64 h-full p-4 border-r"
+        style={{ backgroundColor: '#D4A520', background: '#D4A520' }}
+      >
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-primary">SAYU</h1>
-          <p className="text-sm text-muted-foreground">Art Life Platform</p>
+          <h1 className="text-2xl font-bold text-white">SAYU</h1>
+          <p className="text-sm text-white/80">Art Life Platform</p>
         </div>
 
         {/* User Info Section */}
         {isAuthenticated && userInfo && (
-          <div className="p-3 mb-4 bg-muted/50 rounded-lg">
+          <div className="p-3 mb-4 bg-white/10 rounded-lg backdrop-blur-sm">
             <div className="flex items-center gap-3">
               <div className="flex-shrink-0">
                 {userInfo.user_metadata?.avatar_url ? (
                   <img
                     src={userInfo.user_metadata.avatar_url}
                     alt="Profile"
-                    className="w-10 h-10 rounded-full"
+                    className="w-10 h-10 rounded-full ring-2 ring-white/20"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <User className="w-5 h-5 text-primary" />
+                  <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                    <User className="w-5 h-5 text-white" />
                   </div>
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">
+                <p className="text-sm font-medium truncate text-white">
                   {userInfo.user_metadata?.full_name || userInfo.email?.split('@')[0] || '사용자'}
                 </p>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1 text-xs text-white/70">
                   {getProviderIcon(userInfo.app_metadata?.provider || '')}
                   <span className="capitalize">
                     {userInfo.app_metadata?.provider === 'facebook' ? 'Instagram' : userInfo.app_metadata?.provider || 'Email'}
@@ -229,9 +232,9 @@ export function MainNav() {
         </div>
 
         {!communityUnlocked && isAuthenticated && (
-          <div className="mt-auto p-4 bg-muted rounded-lg">
-            <p className="text-sm font-medium mb-2">커뮤니티 잠금 해제까지</p>
-            <p className="text-xs text-muted-foreground">
+          <div className="mt-auto p-4 bg-white/10 rounded-lg backdrop-blur-sm">
+            <p className="text-sm font-medium mb-2 text-white">커뮤니티 잠금 해제까지</p>
+            <p className="text-xs text-white/70">
               더 많은 활동을 통해 다른 사용자들과 교류할 수 있는 기능을 열어보세요
             </p>
           </div>
@@ -239,12 +242,12 @@ export function MainNav() {
       </nav>
 
       {/* Mobile Navigation */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-background border-b">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 border-b" style={{ backgroundColor: '#D4A520' }}>
         <div className="flex items-center justify-between p-4">
-          <h1 className="text-xl font-bold text-primary">SAYU</h1>
+          <h1 className="text-xl font-bold text-white">SAYU</h1>
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="hover:bg-white/10 text-white">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>

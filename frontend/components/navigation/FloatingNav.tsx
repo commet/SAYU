@@ -140,14 +140,15 @@ export default function FloatingNav() {
       {/* Desktop top bar */}
       <div
         data-primary-nav="desktop"
-        className="hidden lg:block fixed top-0 left-0 right-0 z-[1000] border-b border-neutral-200 bg-white/95 backdrop-blur-sm"
+        className="hidden lg:block fixed top-0 left-0 right-0 z-[1000] border-b border-[#FFD800]/20"
+        style={{ backgroundColor: '#D4A520' }}
       >
         <div className="mx-auto max-w-6xl px-6">
-          <div className="flex h-16 items-center justify-between gap-6">
+          <div className="flex items-center justify-between gap-6" style={{ height: '70px' }}>
             {/* Logo + onboarding hint */}
             <button
               onClick={() => router.push('/')}
-              className="flex items-center gap-2 text-xl font-semibold tracking-tight text-black"
+              className="flex items-center gap-2 text-xl font-semibold tracking-tight text-white"
             >
               SAYU
               {isNewUser && !isOnboardingComplete && currentJourney && (
@@ -185,7 +186,7 @@ export default function FloatingNav() {
                         }
                       }}
                       className={`flex items-center gap-1 rounded-full px-3 py-2 text-sm font-medium transition-colors ${
-                        isGroupActive ? 'bg-black text-white' : 'text-neutral-800 hover:bg-neutral-100'
+                        isGroupActive ? 'bg-white text-black' : 'text-white hover:bg-white/10'
                       } ${isDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
                     >
                       {group.label[language]}
@@ -229,7 +230,7 @@ export default function FloatingNav() {
             <div className="flex items-center gap-2">
               <button
                 onClick={toggleDarkMode}
-                className="hidden items-center rounded-full border border-neutral-200 px-2 py-2 text-neutral-600 transition hover:border-neutral-300 hover:text-black lg:flex"
+                className="hidden items-center rounded-full border border-white/20 px-2 py-2 text-white transition hover:bg-white/10 lg:flex"
                 aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
               >
                 {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -237,7 +238,7 @@ export default function FloatingNav() {
               {user ? (
                 <button
                   onClick={handleSignOut}
-                  className="flex items-center gap-2 rounded-full border border-neutral-200 px-3 py-2 text-sm font-medium text-neutral-800 transition hover:border-neutral-300 hover:bg-neutral-50"
+                  className="flex items-center gap-2 rounded-full border border-white/20 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/10"
                 >
                   <LogOut className="h-4 w-4" />
                   {language === 'ko' ? '로그아웃' : 'Logout'}
@@ -245,7 +246,7 @@ export default function FloatingNav() {
               ) : (
                 <button
                   onClick={() => router.push('/login')}
-                  className="flex items-center gap-2 rounded-full bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-900"
+                  className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-black transition hover:bg-white/90"
                 >
                   <LogIn className="h-4 w-4" />
                   {language === 'ko' ? '로그인' : 'Login'}

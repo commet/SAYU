@@ -106,23 +106,23 @@ export default function MobileNav() {
   return (
     <>
       {/* 모바일 상단 헤더 */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-b border-neutral-200">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 backdrop-blur-sm border-b border-[#FFD800]/20" style={{ backgroundColor: '#D4A520' }}>
         <div className="flex items-center justify-between px-4 py-3">
-          <button 
+          <button
             onClick={() => setIsDrawerOpen(true)}
-            className="p-2 -ml-2 rounded-lg hover:bg-neutral-100 transition-colors touch-manipulation"
+            className="p-2 -ml-2 rounded-lg hover:bg-white/10 transition-colors touch-manipulation"
             aria-label="Open menu"
           >
-            <Menu className="w-6 h-6 text-neutral-700" />
+            <Menu className="w-6 h-6 text-white" />
           </button>
-          
-          <button 
+
+          <button
             onClick={() => router.push('/')}
             className="hover:opacity-80 transition-opacity touch-manipulation"
           >
-            <div className="text-xl font-semibold tracking-tight text-black">SAYU</div>
+            <div className="text-xl font-semibold tracking-tight text-white">SAYU</div>
           </button>
-          
+
           <div className="w-10" /> {/* 균형을 위한 spacer */}
         </div>
       </div>

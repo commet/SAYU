@@ -1,4 +1,4 @@
-// ?�� SAYU Quiz Background System - Dynamic Atmosphere Progression
+﻿// SAYU Quiz Background System - Dynamic Atmosphere Progression
 
 export interface BackgroundPhase {
   questions: number[];
@@ -12,20 +12,21 @@ export interface BackgroundPhase {
 
 // Direct question-to-background mapping (1:1 exact matching)
 export const questionBackgrounds: Record<number, string> = {
-  1: '/images/backgrounds/modern-museum-entrance-stairs-crowded.jpg',  // Q1 - ?�구 (Note: filename has typo 'odern' not 'modern')
-  2: '/images/backgrounds/stone-gallery-entrance-solitary-figure.jpg',  // Q2
-  3: '/images/backgrounds/minimal-white-gallery-photography-bright.jpg',  // Q3
-  4: '/images/backgrounds/warm-gallery-abstract-art-casual-viewing.jpg',  // Q4
-  5: '/images/backgrounds/modern-staircase-natural-light-transition.jpg',  // Q5
-  6: '/images/backgrounds/dual-viewing-portraits-synchronized-black.jpg',  // Q6
-  7: '/images/backgrounds/modern-gallery-purple-infinity-child.jpg',  // Q7
-  8: '/images/backgrounds/neon-corridor-gradient-light-installation.jpg',  // Q8
-  9: '/images/backgrounds/back-view-landscape-painting-minimal.jpg',  // Q9
-  10: '/images/backgrounds/classical-gallery-floor-sitting-contemplation.jpg',  // Q10
-  11: '/images/backgrounds/bright-cafe-paper-lanterns-social-space.jpg',  // Q11 - 카페/??  12: '/images/backgrounds/grand-baroque-hall-crowded-tourists.jpg',  // Q12
-  13: '/images/backgrounds/home-studio-abstract-art-warm-vintage.jpg',  // Q13 - 개인공간
-  14: '/images/backgrounds/circular-atrium-overhead-view-busy.jpg',  // Q14
-  15: '/images/backgrounds/baroque-gallery-ornate-arches-historical.jpg'  // Q15
+  1: '/images/backgrounds/modern-museum-entrance-stairs-crowded.jpg',
+  2: '/images/backgrounds/stone-gallery-entrance-solitary-figure.jpg',
+  3: '/images/backgrounds/minimal-white-gallery-photography-bright.jpg',
+  4: '/images/backgrounds/warm-gallery-abstract-art-casual-viewing.jpg',
+  5: '/images/backgrounds/modern-staircase-natural-light-transition.jpg',
+  6: '/images/backgrounds/dual-viewing-portraits-synchronized-black.jpg',
+  7: '/images/backgrounds/modern-gallery-purple-infinity-child.jpg',
+  8: '/images/backgrounds/neon-corridor-gradient-light-installation.jpg',
+  9: '/images/backgrounds/back-view-landscape-painting-minimal.jpg',
+  10: '/images/backgrounds/classical-gallery-floor-sitting-contemplation.jpg',
+  11: '/images/backgrounds/bright-cafe-paper-lanterns-social-space.jpg',
+  12: '/images/backgrounds/grand-baroque-hall-crowded-tourists.jpg',
+  13: '/images/backgrounds/home-studio-abstract-art-warm-vintage.jpg',
+  14: '/images/backgrounds/circular-atrium-overhead-view-busy.jpg',
+  15: '/images/backgrounds/baroque-gallery-ornate-arches-historical.jpg'
 };
 
 export const backgroundProgression: Record<string, BackgroundPhase> = {
@@ -41,7 +42,6 @@ export const backgroundProgression: Record<string, BackgroundPhase> = {
       opacity: 0.4
     }
   },
-  
   phase2_inside: {
     questions: [3, 4, 5, 6, 7],
     backgrounds: [
@@ -57,7 +57,6 @@ export const backgroundProgression: Record<string, BackgroundPhase> = {
       opacity: 0.35
     }
   },
-  
   phase3_deeper: {
     questions: [8, 9, 10],
     backgrounds: [
@@ -71,7 +70,6 @@ export const backgroundProgression: Record<string, BackgroundPhase> = {
       opacity: 0.4
     }
   },
-  
   phase4_shop: {
     questions: [11, 12],
     backgrounds: [
@@ -84,7 +82,6 @@ export const backgroundProgression: Record<string, BackgroundPhase> = {
       opacity: 0.35
     }
   },
-  
   phase5_personal: {
     questions: [13, 14, 15],
     backgrounds: [
@@ -106,7 +103,7 @@ export const getPhaseByQuestion = (questionNumber: number): string => {
       return phase;
     }
   }
-  return 'phase2_inside'; // Default fallback
+  return 'phase2_inside';
 };
 
 export const getBackgroundForQuestion = (questionNumber: number): BackgroundPhase => {
@@ -114,7 +111,6 @@ export const getBackgroundForQuestion = (questionNumber: number): BackgroundPhas
   return backgroundProgression[phase];
 };
 
-// Fallback gradients for when images aren't loaded
 export const fallbackGradients = {
   phase1_outside: 'bg-gradient-to-br from-[hsl(var(--journey-dawn-cream))] via-[hsl(var(--journey-dawn-peach))] to-[hsl(var(--journey-dawn-blush))]',
   phase2_inside: 'bg-gradient-to-br from-[hsl(var(--journey-lavender))] via-[hsl(var(--gallery-white))] to-[hsl(var(--journey-dusty-rose))]',
@@ -123,15 +119,13 @@ export const fallbackGradients = {
   phase5_personal: 'bg-gradient-to-br from-[hsl(var(--journey-twilight))] via-[hsl(var(--journey-amber))] to-[hsl(var(--journey-midnight))]'
 };
 
-// Unsplash collection IDs for dynamic backgrounds (if using API)
 export const unsplashCollections = {
-  museums: '1163637', // Museums & galleries
-  architecture: '1885471', // Architectural spaces
-  minimalist: '778914', // Minimal interiors
-  artGalleries: '2203755', // Art galleries specifically
+  museums: '1163637',
+  architecture: '1885471',
+  minimalist: '778914',
+  artGalleries: '2203755'
 };
 
-// Background image requirements
 export const imageRequirements = {
   dimensions: {
     width: 1920,
@@ -140,11 +134,5 @@ export const imageRequirements = {
   },
   format: ['jpg', 'webp'],
   maxSize: '500KB',
-  style: [
-    'Natural lighting',
-    'Minimal people or empty',
-    'Professional quality',
-    'Warm, inviting tones',
-    'Not too busy or distracting'
-  ]
+  style: ['Natural lighting', 'Minimal people or empty', 'Professional quality', 'Warm, inviting tones', 'Not too busy or distracting']
 };

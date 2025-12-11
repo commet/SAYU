@@ -114,6 +114,7 @@ export default function CommunityPage() {
   const { language } = useLanguage();
 
   const [activeTab, setActiveTab] = useState<'matches' | 'exhibitions' | 'forums'>('matches');
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const strings = useMemo(
     () => ({
@@ -138,13 +139,17 @@ export default function CommunityPage() {
 
   const handleLike = (id: string) => {
     if (!user) return requireAuth({ message: strings.gateMessage });
-    // no-op mock action
+    setCurrentIndex((prev) => Math.min(prev + 1, mockMatches.length - 1));
   };
 
   const handlePass = (id: string) => {
     if (!user) return requireAuth({ message: strings.gateMessage });
-    // no-op mock action
+    setCurrentIndex((prev) => Math.min(prev + 1, mockMatches.length - 1));
   };
+
+  const handlePrev = () => setCurrentIndex((prev) => Math.max(prev - 1, 0));
+
+  const currentMatch = mockMatches[currentIndex];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white text-black">
@@ -189,46 +194,63 @@ export default function CommunityPage() {
         </div>
 
         {/* Content */}
-        {activeTab === 'matches' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {mockMatches.map((match) => (
-              <Card key={match.id} className="p-5 border-neutral-200 space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-neutral-100 overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={match.avatar} alt={match.nickname} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-lg font-semibold">{match.nickname}</p>
-                    <p className="text-sm text-neutral-600">
-                      {match.personalityType} · {match.lastActive}
-                    </p>
-                  </div>
-                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-black text-white">
-                    {match.compatibilityScore}%
-                  </span>
+        {activeTab === 'matches' && currentMatch && (
+          <div className="max-w-3xl mx-auto space-y-4">
+            <div className="flex items-center justify-between text-sm text-neutral-600">
+              <span>{language === 'ko' ? '매칭 제안' : 'Matches for you'}</span>
+              <span className="font-medium text-neutral-800">
+                {currentIndex + 1} / {mockMatches.length}
+              </span>
+            </div>
+            <Card className="p-6 md:p-8 border-neutral-200 space-y-5">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-full bg-neutral-100 overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={currentMatch.avatar} alt={currentMatch.nickname} className="w-full h-full object-cover" />
                 </div>
+                <div className="flex-1">
+                  <p className="text-xl font-semibold">{currentMatch.nickname}</p>
+                  <p className="text-sm text-neutral-600">
+                    {currentMatch.personalityType} · {currentMatch.lastActive}
+                  </p>
+                </div>
+                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-black text-white">
+                  {currentMatch.compatibilityScore}%
+                </span>
+              </div>
 
-                <div className="flex items-center justify-between text-sm text-neutral-600">
-                  <span>{language === 'ko' ? `전시 ${match.exhibitions}회` : `${match.exhibitions} exhibitions`}</span>
-                  <span>{language === 'ko' ? `작품 ${match.artworks}점` : `${match.artworks} artworks`}</span>
-                  {match.distanceKm && (
-                    <span>{language === 'ko' ? `${match.distanceKm}km 이내` : `${match.distanceKm} km away`}</span>
-                  )}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-neutral-700">
+                <div className="rounded-xl bg-neutral-50 border border-neutral-200 p-3">
+                  <p className="text-neutral-500">{language === 'ko' ? '전시 경험' : 'Exhibitions'}</p>
+                  <p className="text-lg font-semibold text-black">{currentMatch.exhibitions}</p>
                 </div>
+                <div className="rounded-xl bg-neutral-50 border border-neutral-200 p-3">
+                  <p className="text-neutral-500">{language === 'ko' ? '작품 감상' : 'Artworks'}</p>
+                  <p className="text-lg font-semibold text-black">{currentMatch.artworks}</p>
+                </div>
+                <div className="rounded-xl bg-neutral-50 border border-neutral-200 p-3">
+                  <p className="text-neutral-500">{language === 'ko' ? '거리' : 'Distance'}</p>
+                  <p className="text-lg font-semibold text-black">
+                    {currentMatch.distanceKm ? `${currentMatch.distanceKm}km` : language === 'ko' ? '근처' : 'Nearby'}
+                  </p>
+                </div>
+              </div>
 
-                <div className="flex gap-2">
-                  <Button variant="primary" className="flex-1" onClick={() => handleLike(match.id)}>
-                    <Heart className="w-4 h-4" />
-                    {language === 'ko' ? '좋아요' : 'Like'}
-                  </Button>
-                  <Button variant="ghost" onClick={() => handlePass(match.id)}>
-                    <X className="w-4 h-4" />
-                    {language === 'ko' ? '다음' : 'Pass'}
-                  </Button>
-                </div>
-              </Card>
-            ))}
+              <div className="flex items-center gap-3">
+                <Button variant="ghost" onClick={handlePrev} disabled={currentIndex === 0}>
+                  <X className="w-4 h-4 rotate-180" />
+                  {language === 'ko' ? '이전' : 'Prev'}
+                </Button>
+                <Button variant="primary" className="flex-1" onClick={() => handleLike(currentMatch.id)}>
+                  <Heart className="w-4 h-4" />
+                  {language === 'ko' ? '좋아요' : 'Like'}
+                </Button>
+                <Button variant="ghost" onClick={() => handlePass(currentMatch.id)} disabled={currentIndex === mockMatches.length - 1}>
+                  {language === 'ko' ? '다음' : 'Pass'}
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </Card>
           </div>
         )}
 
