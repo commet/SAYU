@@ -262,20 +262,22 @@ export const AudioGuideQuiz: React.FC = () => {
   
   return (
     <div className="audio-guide-quiz-container">
-      {/* Hidden Preload Images - Force browser to cache all backgrounds */}
+      {/* Hidden Preload Images - Force browser to cache backgrounds */}
       <div style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-        {Object.values(questionBackgrounds).map((bgData, idx) => 
-          Array.isArray(bgData.backgrounds) && bgData.backgrounds.map((url, bgIdx) => (
-            <img 
-              key={`preload-${idx}-${bgIdx}`}
-              src={url} 
+        {/* Preload first 5 backgrounds immediately */}
+        {[1, 2, 3, 4, 5].map(questionNum => {
+          const bgUrl = questionBackgrounds[questionNum];
+          return bgUrl ? (
+            <img
+              key={`preload-${questionNum}`}
+              src={bgUrl}
               alt=""
               loading="eager"
-              fetchPriority={idx === 0 && bgIdx < 2 ? "high" : "auto"}
+              fetchPriority={questionNum === 1 ? "high" : "auto"}
               style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px' }}
             />
-          ))
-        )}
+          ) : null;
+        })}
       </div>
 
       {/* Minimal Top Progress Bar */}
@@ -331,23 +333,25 @@ export const AudioGuideQuiz: React.FC = () => {
       <div className="gallery-room-experience relative min-h-screen overflow-hidden">
         {/* Background with smooth loading */}
         <div className="absolute inset-0">
-          {/* Blur placeholder while loading */}
+          {/* Static placeholder while loading - Museum entrance theme */}
           {!bgLoaded && (
-            <div 
-              className="absolute inset-0 animate-pulse"
+            <div
+              className="absolute inset-0"
               style={{
-                background: backgroundData.overlay.gradient || 
-                  'linear-gradient(135deg, #4a5568 0%, #2d3748 50%, #1a202c 100%)'
+                background: currentQuestion === 0
+                  ? 'linear-gradient(135deg, #e8dfd0 0%, #c9b8a0 50%, #a89578 100%)'
+                  : backgroundData.overlay.gradient ||
+                    'linear-gradient(135deg, #4a5568 0%, #2d3748 50%, #1a202c 100%)'
               }}
             />
           )}
-          
+
           {/* Actual background image with fade-in */}
           <motion.div
             className="absolute inset-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: bgLoaded ? 1 : 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
             style={{
               backgroundImage: bgSrc ? `url(${bgSrc})` : undefined,
               backgroundSize: 'cover',
@@ -367,57 +371,53 @@ export const AudioGuideQuiz: React.FC = () => {
         {/* Bottom Gradient for better text readability */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40 pointer-events-none" />
 
-        {/* Main Content */}
+        {/* Main Content - Frameless Floating Cards */}
         <div className="gallery-content">
           <AnimatePresence mode="wait">
             {!isTransitioning && (
               <motion.div
                 key={currentQuestion}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.05 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 transition={{ duration: 0.6 }}
-                className="quiz-content-wrapper"
+                className="max-w-3xl mx-auto space-y-6"
               >
-                {/* Main Question - Subtle Box */}
-                <motion.div
-                  className="max-w-2xl mx-auto mb-4 bg-white/60 backdrop-blur-md rounded-2xl p-5 shadow-lg"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.6 }}
-                >
-                  {/* Narrative Setup */}
-                  {(question.narrative.setup || question.narrative.transition) && (
-                    <motion.div
-                      className="mb-3"
-                      initial={{ opacity: 0 }}
-                      animate={{
-                        opacity: componentVisibility.setup ? 1 : 0
-                      }}
-                      transition={{
-                        duration: 0.5,
-                        ease: "easeOut"
-                      }}
-                    >
-                      <p className="text-sm leading-relaxed text-gray-900">
-                        {getTransitionText()}
-                      </p>
-                    </motion.div>
-                  )}
-
-                  {/* Question */}
-                  <motion.h2
-                    className="text-lg sm:text-xl font-bold text-center leading-tight text-black"
-                    initial={{ opacity: 0, y: 10 }}
+                {/* Narrative Setup - Light Floating Card */}
+                {(question.narrative.setup || question.narrative.transition) && (
+                  <motion.div
+                    className="bg-white/50 backdrop-blur-sm rounded-2xl px-6 py-4 shadow-sm"
+                    initial={{ opacity: 0, y: -10 }}
                     animate={{
-                      opacity: componentVisibility.question ? 1 : 0,
-                      y: componentVisibility.question ? 0 : 10
+                      opacity: componentVisibility.setup ? 1 : 0,
+                      y: componentVisibility.setup ? 0 : -10
                     }}
                     transition={{
                       duration: 0.5,
                       ease: "easeOut"
                     }}
                   >
+                    <p className="text-sm sm:text-base leading-relaxed text-gray-800 text-center font-normal">
+                      {getTransitionText()}
+                    </p>
+                  </motion.div>
+                )}
+
+                {/* Question - Emphasized Floating Card */}
+                <motion.div
+                  className="bg-white/80 backdrop-blur-md rounded-2xl px-6 py-8 shadow-lg"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{
+                    opacity: componentVisibility.question ? 1 : 0,
+                    y: componentVisibility.question ? 0 : 10
+                  }}
+                  transition={{
+                    duration: 0.5,
+                    ease: "easeOut",
+                    delay: 0.1
+                  }}
+                >
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center leading-tight text-gray-900">
                     {(language === 'ko' && question.question_ko ? question.question_ko : question.question)
                       .split('\n')
                       .map((line, index) => (
@@ -426,19 +426,20 @@ export const AudioGuideQuiz: React.FC = () => {
                           {index < (language === 'ko' && question.question_ko ? question.question_ko : question.question).split('\n').length - 1 && <br />}
                         </React.Fragment>
                       ))}
-                  </motion.h2>
+                  </h2>
                 </motion.div>
 
-                {/* Choice Buttons - 2 Column Compact */}
+                {/* Choice Buttons - Floating Cards */}
                 <motion.div
-                  className="grid md:grid-cols-2 gap-3 max-w-2xl mx-auto"
+                  className="grid md:grid-cols-2 gap-4"
                   initial={{ opacity: 0 }}
                   animate={{
                     opacity: componentVisibility.choices ? 1 : 0
                   }}
                   transition={{
                     duration: 0.4,
-                    ease: [0.4, 0, 0.2, 1]
+                    ease: [0.4, 0, 0.2, 1],
+                    delay: 0.2
                   }}
                 >
                   {question.options.map((option, index) => (
@@ -450,32 +451,32 @@ export const AudioGuideQuiz: React.FC = () => {
                         y: componentVisibility.choices ? 0 : 20
                       }}
                       transition={{
-                        delay: componentVisibility.choices ? index * 0.1 : 0,
+                        delay: componentVisibility.choices ? 0.2 + index * 0.1 : 0,
                         duration: 0.4,
                         ease: "easeOut"
                       }}
-                      whileHover={{ scale: 1.02 }}
+                      whileHover={{ scale: 1.02, y: -4 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => handleChoice(option.id)}
-                      className="w-full p-4 bg-white/70 backdrop-blur-md hover:bg-white/85 hover:shadow-xl text-left rounded-xl border border-white/40 hover:border-black/20 transition-all group"
+                      className="w-full p-5 bg-white/75 backdrop-blur-md hover:bg-white/90 hover:shadow-2xl text-left rounded-xl border border-white/60 hover:border-gray-300 transition-all group"
                     >
-                      <div className="flex flex-col gap-2.5">
+                      <div className="flex flex-col gap-3">
                         {/* Option Label */}
                         <div className="flex justify-between items-center">
-                          <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-black text-white font-bold text-sm">
+                          <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-900 text-white font-bold text-base">
                             {index === 0 ? 'A' : 'B'}
                           </span>
-                          <ChevronRight className="w-5 h-5 text-gray-600 group-hover:text-black group-hover:translate-x-1 transition-all" />
+                          <ChevronRight className="w-6 h-6 text-gray-500 group-hover:text-gray-900 group-hover:translate-x-1 transition-all" />
                         </div>
 
                         {/* Text Content */}
                         <div>
-                          <h4 className="text-lg font-semibold mb-1 text-black leading-snug">
+                          <h4 className="text-lg sm:text-xl font-semibold mb-2 text-gray-900 leading-snug">
                             {language === 'ko' && option.text_ko ? option.text_ko : option.text}
                           </h4>
 
                           {option.subtext && (
-                            <p className="text-base text-gray-700 leading-relaxed">
+                            <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
                               {language === 'ko' && option.subtext_ko ? option.subtext_ko : option.subtext}
                             </p>
                           )}

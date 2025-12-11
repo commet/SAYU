@@ -176,9 +176,9 @@
   background-size: 200% 100%;
 }
 
-/* Prevent layout shift */
+/* Prevent layout shift - Legacy class (no longer used with floating cards) */
 .quiz-content-wrapper {
-  min-height: 70vh;
+  min-height: auto;
   position: relative;
 }
 
