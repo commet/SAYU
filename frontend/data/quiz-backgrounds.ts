@@ -1,4 +1,4 @@
-// 🎨 SAYU Quiz Background System - Dynamic Atmosphere Progression
+// ?�� SAYU Quiz Background System - Dynamic Atmosphere Progression
 
 export interface BackgroundPhase {
   questions: number[];
@@ -12,7 +12,7 @@ export interface BackgroundPhase {
 
 // Direct question-to-background mapping (1:1 exact matching)
 export const questionBackgrounds: Record<number, string> = {
-  1: '/images/backgrounds/odern-museum-entrance-stairs-crowded.jpg',  // Q1 - 입구 (Note: filename has typo 'odern' not 'modern')
+  1: '/images/backgrounds/modern-museum-entrance-stairs-crowded.jpg',  // Q1 - ?�구 (Note: filename has typo 'odern' not 'modern')
   2: '/images/backgrounds/stone-gallery-entrance-solitary-figure.jpg',  // Q2
   3: '/images/backgrounds/minimal-white-gallery-photography-bright.jpg',  // Q3
   4: '/images/backgrounds/warm-gallery-abstract-art-casual-viewing.jpg',  // Q4
@@ -22,8 +22,7 @@ export const questionBackgrounds: Record<number, string> = {
   8: '/images/backgrounds/neon-corridor-gradient-light-installation.jpg',  // Q8
   9: '/images/backgrounds/back-view-landscape-painting-minimal.jpg',  // Q9
   10: '/images/backgrounds/classical-gallery-floor-sitting-contemplation.jpg',  // Q10
-  11: '/images/backgrounds/bright-cafe-paper-lanterns-social-space.jpg',  // Q11 - 카페/샵
-  12: '/images/backgrounds/grand-baroque-hall-crowded-tourists.jpg',  // Q12
+  11: '/images/backgrounds/bright-cafe-paper-lanterns-social-space.jpg',  // Q11 - 카페/??  12: '/images/backgrounds/grand-baroque-hall-crowded-tourists.jpg',  // Q12
   13: '/images/backgrounds/home-studio-abstract-art-warm-vintage.jpg',  // Q13 - 개인공간
   14: '/images/backgrounds/circular-atrium-overhead-view-busy.jpg',  // Q14
   15: '/images/backgrounds/baroque-gallery-ornate-arches-historical.jpg'  // Q15
@@ -33,7 +32,7 @@ export const backgroundProgression: Record<string, BackgroundPhase> = {
   phase1_outside: {
     questions: [1, 2],
     backgrounds: [
-      '/images/backgrounds/odern-museum-entrance-stairs-crowded.jpg',
+      '/images/backgrounds/modern-museum-entrance-stairs-crowded.jpg',
       '/images/backgrounds/stone-gallery-entrance-solitary-figure.jpg'
     ],
     ambiance: 'anticipation',

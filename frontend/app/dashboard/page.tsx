@@ -136,7 +136,46 @@ export default function DashboardPage() {
   }
 
   if (!user) {
-    return null;
+    return (
+      <div className="min-h-screen bg-white text-black">
+        <div className="max-w-5xl mx-auto px-6 py-16 space-y-8">
+          <div className="space-y-3">
+            <p className="text-sm uppercase tracking-[0.2em] text-neutral-600">Dashboard</p>
+            <h1 className="text-4xl font-bold">로그인하고 맞춤 대시보드를 확인하세요</h1>
+            <p className="text-neutral-700">
+              최근 본 작품, 저장한 전시, APT 기반 통계를 한곳에서 볼 수 있습니다. 로그인 후 개인화된 데이터를 불러올게요.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => router.push('/login?redirect=/dashboard')}
+              className="px-4 py-3 rounded-lg bg-black text-white font-semibold hover:bg-neutral-900 transition"
+            >
+              로그인
+            </button>
+            <button
+              onClick={() => router.push('/register?redirect=/dashboard')}
+              className="px-4 py-3 rounded-lg border border-neutral-200 text-neutral-800 font-semibold hover:bg-neutral-50 transition"
+            >
+              회원가입
+            </button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { label: '최근 본 작품', value: '—' },
+              { label: '저장한 전시', value: '—' },
+              { label: '발견한 작가', value: '—' },
+              { label: 'APT 통계', value: '로그인 필요' }
+            ].map((item) => (
+              <div key={item.label} className="rounded-xl border border-neutral-200 bg-neutral-50 p-4">
+                <p className="text-sm text-neutral-600">{item.label}</p>
+                <p className="text-2xl font-bold text-neutral-900 mt-2">{item.value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // Get quiz status and personality type
