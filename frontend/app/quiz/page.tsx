@@ -43,7 +43,7 @@ export default function QuizIntroPage() {
         <div className="bg-white/85 backdrop-blur-md rounded-3xl shadow-lg border border-white/60 p-6 md:p-10 space-y-8">
           <div className="text-center space-y-4">
             <p className="text-sm font-semibold uppercase tracking-[0.25em] text-neutral-600">
-              {language === 'ko' ? '5-7분 시나리오 테스트' : '5–7 min scenario test'}
+              {language === 'ko' ? '3-5분 시나리오 테스트' : '3–5 min scenario test'}
             </p>
             <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 leading-tight">
               {language === 'ko'
@@ -61,7 +61,7 @@ export default function QuizIntroPage() {
             {[
               {
                 icon: <Clock className="w-5 h-5" />,
-                title: language === 'ko' ? '5-7분' : '5–7 min',
+                title: language === 'ko' ? '3-5분' : '3–5 min',
                 desc: language === 'ko' ? '짧게 끝나는 시나리오' : 'Short, focused flow'
               },
               {

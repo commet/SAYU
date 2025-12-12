@@ -1,8 +1,8 @@
 ﻿'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { useResponsive } from '@/lib/responsive';
@@ -42,6 +42,61 @@ const featuredArtworks = [
   },
 ];
 
+const galleryArtworks = [
+  {
+    id: 1,
+    image:
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/The_Scream.jpg/1200px-The_Scream.jpg',
+    title: '절규',
+    artist: '에드바르 뭉크',
+  },
+  {
+    id: 2,
+    image:
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/1665_Girl_with_a_Pearl_Earring.jpg/1200px-1665_Girl_with_a_Pearl_Earring.jpg',
+    title: '진주 귀걸이를 한 소녀',
+    artist: '요하네스 페르메이르',
+  },
+  {
+    id: 3,
+    image:
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/The_Great_Wave_off_Kanagawa.jpg/1200px-The_Great_Wave_off_Kanagawa.jpg',
+    title: '가나가와 파도 아래',
+    artist: '가츠시카 호쿠사이',
+  },
+  {
+    id: 4,
+    image:
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Frida_Kahlo%2C_by_Guillermo_Kahlo.jpg/1200px-Frida_Kahlo%2C_by_Guillermo_Kahlo.jpg',
+    title: '자화상',
+    artist: '프리다 칼로',
+  },
+];
+
+const collectionArtworks = [
+  {
+    id: 1,
+    image:
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/A_Sunday_on_La_Grande_Jatte%2C_Georges_Seurat%2C_1884.jpg/1200px-A_Sunday_on_La_Grande_Jatte%2C_Georges_Seurat%2C_1884.jpg',
+    title: '그랑드자트 섬의 일요일',
+    artist: '조르주 쇠라',
+  },
+  {
+    id: 2,
+    image:
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/El_jard%C3%ADn_de_las_Delicias%2C_de_El_Bosco.jpg/1200px-El_jard%C3%ADn_de_las_Delicias%2C_de_El_Bosco.jpg',
+    title: '쾌락의 정원',
+    artist: '히에로니무스 보스',
+  },
+  {
+    id: 3,
+    image:
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Michelangelo_-_Creation_of_Adam_%28cropped%29.jpg/1200px-Michelangelo_-_Creation_of_Adam_%28cropped%29.jpg',
+    title: '아담의 창조',
+    artist: '미켈란젤로',
+  },
+];
+
 const aptSlides = [
   {
     id: 1,
@@ -63,9 +118,14 @@ const aptSlides = [
   {
     id: 3,
     type: 'recommendation' as const,
-    title: '당신에게 추천하는 작품',
+    title: 'Persona별 맞춤 추천',
     artworks: featuredArtworks.slice(0, 2),
-    exhibition: { name: '이불 개인전 · 서울시립미술관', location: '서소문본관 2층 미디어룸' },
+    exhibition: {
+      name: '이불 개인전',
+      museum: '리움미술관',
+      location: '서울 용산구 한남동',
+      reason: '감성적 해석 + 자유로운 관람 선호'
+    },
     tags: ['인상주의', '색채 중심', '감성적'],
   },
 ];
@@ -89,14 +149,34 @@ export default function HomePage() {
   const [currentAptSlide, setCurrentAptSlide] = useState(0);
   const [todayUsers] = useState(47);
 
+  // Refs for scroll-based animations
+  const heroRef = useRef<HTMLElement>(null);
+
+  // Scroll progress for hero section
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start end", "end start"]
+  });
+
+  // Map scroll progress to artwork index (0% -> 0, 33% -> 1, 66% -> 2)
+  const artworkProgress = useTransform(
+    scrollYProgress,
+    [0, 0.33, 0.66, 1],
+    [0, 0, 1, 2]
+  );
+
   // if (isMobile) return <MobileHomePage />;
 
+  // Update artwork based on scroll
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentArtwork((prev) => (prev + 1) % featuredArtworks.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
+    const unsubscribe = artworkProgress.on('change', (latest) => {
+      const index = Math.round(latest);
+      if (index >= 0 && index < featuredArtworks.length) {
+        setCurrentArtwork(index);
+      }
+    });
+    return () => unsubscribe();
+  }, [artworkProgress]);
 
   useEffect(() => {
     const aptTimer = setInterval(() => {
@@ -107,36 +187,8 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      {/* Navigation Bar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ backgroundColor: '#D4A520' }}>
-        <Container size="2xl">
-          <div className="flex items-center justify-between py-4">
-            <button onClick={() => router.push('/')} className="text-2xl font-bold text-white hover:opacity-80 transition-opacity">
-              SAYU
-            </button>
-            <div className="flex items-center gap-6">
-              <button onClick={() => router.push('/gallery')} className="text-white hover:text-white/80 transition-colors font-medium">
-                갤러리
-              </button>
-              <button onClick={() => router.push('/exhibitions')} className="text-white hover:text-white/80 transition-colors font-medium">
-                전시
-              </button>
-              <button onClick={() => router.push('/community')} className="text-white hover:text-white/80 transition-colors font-medium">
-                커뮤니티
-              </button>
-              <button
-                onClick={() => router.push('/quiz')}
-                className="px-4 py-2 bg-white text-black rounded-lg font-medium hover:bg-white/90 transition-colors"
-              >
-                APT 테스트
-              </button>
-            </div>
-          </div>
-        </Container>
-      </nav>
-
       {/* Hero */}
-      <section className="relative flex items-start pt-32 pb-20">
+      <section ref={heroRef} className="relative flex items-start pt-16 lg:pt-20 pb-20">
         <Container size="2xl">
           <div className="grid grid-cols-2 gap-16 items-center">
             {/* Left - Typography */}
@@ -246,7 +298,7 @@ export default function HomePage() {
                   발견하기
                 </h3>
                 <p className="text-lg leading-relaxed text-black mb-8">
-                  16가지 예술 성향 중 당신의 유형을 찾아보세요. 5분의 테스트로 당신이 어떤 방식으로 예술을 감상하고, 어떤 작품에 끌리는지 알 수 있습니다.
+                  16가지 예술 성향 중 당신의 유형을 찾아보세요. 3-5분의 테스트로 당신이 어떤 방식으로 예술을 감상하고, 어떤 작품에 끌리는지 알 수 있습니다.
                 </p>
                 <Button
                   variant="outline"
@@ -257,15 +309,16 @@ export default function HomePage() {
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
-              <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-xl">
+              <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-xl" style={{ perspective: '1000px' }}>
                 <AnimatePresence mode="wait">
                   {aptSlides.map((slide, index) => index === currentAptSlide && (
                     <motion.div
                       key={slide.id}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.5 }}
+                      initial={{ rotateY: 90, opacity: 0 }}
+                      animate={{ rotateY: 0, opacity: 1 }}
+                      exit={{ rotateY: -90, opacity: 0 }}
+                      transition={{ duration: 0.6, ease: 'easeInOut' }}
+                      style={{ backfaceVisibility: 'hidden', transformStyle: 'preserve-3d' }}
                       className={`absolute inset-0 flex flex-col p-8 ${
                         slide.type === 'recommendation' ? 'items-stretch justify-start gap-5' : 'items-center justify-center'
                       }`}
@@ -308,20 +361,34 @@ export default function HomePage() {
 
                       {slide.type === 'recommendation' && (
                         <div className="w-full space-y-5">
-                          <h4 className="text-2xl font-bold text-center text-black">{slide.title}</h4>
-                          <div className="grid grid-cols-2 gap-3">
-                            {slide.artworks.map((artwork) => (
-                              <div key={artwork.id} className="relative h-48 rounded-xl overflow-hidden border border-neutral-200">
-                                <Image src={artwork.image} alt={artwork.title} fill className="object-cover" />
-                              </div>
-                            ))}
-                          </div>
-                          <div className="bg-neutral-50 rounded-xl p-4 border border-neutral-200">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-lg bg-black flex items-center justify-center text-white text-lg">🏛️</div>
-                              <div className="flex-1 text-left">
-                                <p className="text-sm font-bold text-black">{slide.exhibition.name}</p>
-                                <p className="text-xs text-neutral-600">{slide.exhibition.location}</p>
+                          <h4 className="text-2xl font-bold text-center text-black">Persona별 맞춤 추천</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-xl overflow-hidden border border-neutral-200">
+                            {/* Left: 추천 작품 */} 
+                            <div className="bg-white p-4 space-y-3">
+                              <p className="text-sm font-semibold text-neutral-700">추천 작품</p>
+                              {slide.artworks.slice(0, 1).map((artwork) => (
+                                <div key={artwork.id} className="relative h-56 rounded-xl overflow-hidden border border-neutral-200">
+                                  <Image src={artwork.image} alt={artwork.title} fill className="object-cover" />
+                                  <div className="absolute bottom-2 left-2 text-white drop-shadow">
+                                    <p className="text-sm font-semibold">{artwork.title}</p>
+                                    <p className="text-xs text-white/80">{artwork.artist}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                            {/* Right: 추천 전시 */}
+                            <div className="bg-neutral-900 text-white p-4 space-y-3">
+                              <p className="text-sm font-semibold text-white">추천 전시</p>
+                              <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center text-white text-lg">🏛️</div>
+                                <div className="flex-1 text-left space-y-0.5">
+                                  <p className="text-base font-bold">{slide.exhibition.name}</p>
+                                  <p className="text-sm text-white/90">{slide.exhibition.museum}</p>
+                                  <p className="text-xs text-white/60">{slide.exhibition.location}</p>
+                                  <p className="text-xs text-[#D4A520] mt-5 pt-2 border-t border-white/10">
+                                    LAEF인 당신에게 추천하는 이유: {slide.exhibition.reason}
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -349,90 +416,116 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Feature 2 - Gallery */}
-            <div className="grid grid-cols-2 gap-16 items-center">
-              <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-sm p-6">
-                <div className="flex h-full flex-col gap-4">
-                  <div className="flex items-center justify-between">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-black text-white text-xs font-semibold rounded-full">
-                      갤러리
-                    </div>
-                    <div className="text-xs text-neutral-500">추천 · 10,000+ 작품</div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    {featuredArtworks.map((art) => (
-                      <div key={art.id} className="relative aspect-[3/4] rounded-xl overflow-hidden border border-neutral-200">
+          </div>
+        </Container>
+      </section>
+
+      {/* Gallery Section - DARK THEME FULL WIDTH */}
+      <section className="py-20 bg-neutral-950">
+        <Container size="2xl">
+          <div className="grid grid-cols-2 gap-16 items-center">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-900 shadow-sm p-6">
+              <div className="flex h-full flex-col gap-3">
+                <div className="relative flex-1 overflow-hidden">
+                  <motion.div
+                    className="flex gap-3"
+                    animate={{
+                      x: ['0%', '-33.33%'],
+                    }}
+                    transition={{
+                      x: {
+                        repeat: Infinity,
+                        repeatType: 'loop',
+                        duration: 15,
+                        ease: 'linear',
+                      },
+                    }}
+                  >
+                    {[...galleryArtworks, ...galleryArtworks, ...galleryArtworks].map((art, idx) => (
+                      <div key={`${art.id}-${idx}`} className="relative w-[200px] aspect-[3/4] rounded-xl overflow-hidden border border-neutral-800 flex-shrink-0">
                         <Image src={art.image} alt={art.title} fill className="object-cover" />
-                        <div className="absolute bottom-2 left-2 text-white text-xs drop-shadow">
-                          <p className="font-semibold">{art.title}</p>
-                          <p className="text-white/80">{art.artist}</p>
+                        <div className="absolute bottom-2 left-2 right-2 text-white text-xs drop-shadow">
+                          <p className="font-semibold truncate">{art.title}</p>
+                          <p className="text-white/80 truncate">{art.artist}</p>
                         </div>
                       </div>
                     ))}
-                  </div>
-                  <div className="flex gap-2 text-xs text-neutral-700 flex-wrap">
-                    <span className="px-2 py-1 rounded-full bg-neutral-100">인상주의</span>
-                    <span className="px-2 py-1 rounded-full bg-neutral-100">색채 중심</span>
-                    <span className="px-2 py-1 rounded-full bg-neutral-100">추천 98%</span>
-                  </div>
+                  </motion.div>
                 </div>
-              </div>
-              <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-black text-white text-xs font-medium mb-4 rounded-full">갤러리</div>
-                <h3 className="text-4xl font-bold mb-6 text-black">세계의 명작을 한곳에서</h3>
-                <p className="text-lg leading-relaxed text-black mb-8">10,000점 이상의 큐레이션된 작품을 탐험하세요. 당신의 Art Persona Type에 맞춰 추천되는 작품부터, 시대와 장르를 넘나드는 명작까지.</p>
-                <Button
-                  variant="outline"
-                  className="hover:bg-[#D4A520] hover:text-white hover:border-[#D4A520]"
-                  onClick={() => router.push('/gallery')}
-                >
-                  갤러리 둘러보기
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
+                <div className="flex justify-between items-center text-xs text-neutral-400">
+                  <div className="flex gap-2 flex-wrap">
+                    <span className="px-2 py-1 rounded-full bg-neutral-800">표현주의</span>
+                    <span className="px-2 py-1 rounded-full bg-neutral-800">바로크</span>
+                    <span className="px-2 py-1 rounded-full bg-neutral-800">우키요에</span>
+                  </div>
+                  <span className="text-neutral-500 whitespace-nowrap">추천 · 10,000+ 작품</span>
+                </div>
               </div>
             </div>
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#D4A520] text-white text-xs font-medium mb-4 rounded-full">갤러리</div>
+              <h3 className="text-4xl font-bold mb-6 text-white">세계의 명작을 한곳에서</h3>
+              <p className="text-lg leading-relaxed text-neutral-300 mb-8">10,000점 이상의 큐레이션된 작품을 탐험하세요. 당신의 Art Persona Type에 맞춰 추천되는 작품부터, 시대와 장르를 넘나드는 명작까지.</p>
+              <Button
+                variant="outline"
+                className="bg-white text-black border-white hover:bg-[#D4A520] hover:text-white hover:border-[#D4A520]"
+                onClick={() => router.push('/gallery')}
+              >
+                갤러리 둘러보기
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </Container>
+      </section>
 
-            {/* Feature 3 - Community */}
-            <div className="grid grid-cols-2 gap-16 items-center">
-              <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-black text-white text-xs font-medium mb-4 rounded-full">커뮤니티</div>
-                <h3 className="text-4xl font-bold mb-6 text-black">같은 취향의 사람들과 연결</h3>
-                <p className="text-lg leading-relaxed text-black mb-8">비슷한 Art Persona Type을 가진 사람들과 만나 작품을 공유하고, 전시를 함께 방문하며, 예술에 대한 대화를 나눠보세요.</p>
-                <Button
-                  variant="outline"
-                  className="hover:bg-[#D4A520] hover:text-white hover:border-[#D4A520]"
-                  onClick={() => router.push('/community')}
-                >
-                  커뮤니티 참여하기
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </div>
-              <div className="bg-neutral-50 border border-neutral-200 rounded-3xl p-6 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5 text-neutral-700" />
-                    <span className="text-sm font-semibold text-neutral-800">전시 동행 · 실시간</span>
-                  </div>
-                  <span className="text-xs text-neutral-500">APT 타입 매칭</span>
+      {/* Community Section */}
+      <section className="py-20">
+        <Container size="2xl">
+          <div className="grid grid-cols-2 gap-16 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-black text-white text-xs font-medium mb-4 rounded-full">커뮤니티</div>
+              <h3 className="text-4xl font-bold mb-6 text-black">같은 취향의 사람들과 연결</h3>
+              <p className="text-lg leading-relaxed text-black mb-8">비슷한 Art Persona Type을 가진 사람들과 만나 작품을 공유하고, 전시를 함께 방문하며, 예술에 대한 대화를 나눠보세요.</p>
+              <Button
+                variant="outline"
+                className="hover:bg-[#D4A520] hover:text-white hover:border-[#D4A520]"
+                onClick={() => router.push('/community')}
+              >
+                커뮤니티 참여하기
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="bg-neutral-50 border border-neutral-200 rounded-3xl p-6 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-neutral-700" />
+                  <span className="text-sm font-semibold text-neutral-800">전시 동행 · 실시간</span>
                 </div>
-                <div className="space-y-2">
-                  {communityFeeds.map((feed) => (
-                    <div key={feed.name} className="rounded-2xl bg-white border border-neutral-200 p-4 flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-semibold text-neutral-900">@{feed.name}</p>
-                        <p className="text-sm text-neutral-700">{feed.msg}</p>
-                      </div>
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${feed.tone}`}>{feed.badge}</span>
+                <span className="text-xs text-neutral-500">APT 타입 매칭</span>
+              </div>
+              <div className="space-y-2">
+                {communityFeeds.map((feed) => (
+                  <div key={feed.name} className="rounded-2xl bg-white border border-neutral-200 p-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-neutral-900">@{feed.name}</p>
+                      <p className="text-sm text-neutral-700">{feed.msg}</p>
                     </div>
-                  ))}
-                </div>
-                <div className="text-sm text-neutral-600 flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4" />
-                  지금 전시 동행 제안 보내기...
-                </div>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${feed.tone}`}>{feed.badge}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="text-sm text-neutral-600 flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                지금 전시 동행 제안 보내기...
               </div>
             </div>
+          </div>
 
+          {/* Divider */}
+          <div className="mt-16 mb-10 border-t border-neutral-200"></div>
+
+          <div className="space-y-12">
             {/* Featured Collection */}
             <div className="space-y-8">
               <div className="flex items-end justify-between">
@@ -449,10 +542,10 @@ export default function HomePage() {
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
-              <div className="grid grid-cols-4 gap-6">
-                {featuredArtworks.map((art) => (
+              <div className="grid grid-cols-3 gap-6">
+                {collectionArtworks.map((art) => (
                   <div key={art.id} className="group cursor-pointer">
-                    <div className="relative aspect-[3/4] bg-neutral-200 overflow-hidden mb-3 rounded-xl border border-neutral-200">
+                    <div className="relative aspect-[4/5] bg-neutral-200 overflow-hidden mb-3 rounded-xl border border-neutral-200">
                       <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-105 transition duration-500" />
                     </div>
                     <p className="font-semibold mb-1 text-black">{art.title}</p>
@@ -463,16 +556,16 @@ export default function HomePage() {
             </div>
 
             {/* Final CTA */}
-            <div className="text-center bg-neutral-50 border border-neutral-200 rounded-3xl py-16 px-8 space-y-4">
+            <div className="text-center py-16 px-8 space-y-6">
               <h2 className="text-6xl font-bold text-black">지금 시작하세요</h2>
-              <p className="text-xl text-neutral-700 leading-relaxed space-y-1">
-                5분이면 당신만의 Art Persona Type을 발견할 수 있습니다.
+              <p className="text-xl text-neutral-700 leading-relaxed">
+                3-5분이면 당신만의 Art Persona Type을 발견할 수 있습니다.
                 <br />
                 오늘 {todayUsers}명이 이미 발견했어요.
               </p>
               <Button
                 variant="primary"
-                className="bg-black text-white hover:bg-[#D4A520] hover:text-white"
+                className="bg-[#D4A520] text-white hover:bg-[#B8860B] transition-all duration-300"
                 onClick={() => router.push('/quiz')}
               >
                 무료로 시작하기

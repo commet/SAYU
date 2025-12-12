@@ -381,52 +381,64 @@ export const AudioGuideQuiz: React.FC = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.6 }}
-                className="max-w-3xl mx-auto space-y-6"
+                className="max-w-4xl mx-auto space-y-6"
               >
-                {/* Narrative Setup - Light Floating Card */}
-                {(question.narrative.setup || question.narrative.transition) && (
+                {/* Minimal White Card with Accent - Setup + Question */}
+                <motion.div
+                  className="bg-white/95 backdrop-blur-md rounded-2xl px-8 py-8 shadow-xl"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{
+                    opacity: componentVisibility.setup && componentVisibility.question ? 1 : 0,
+                    y: componentVisibility.setup && componentVisibility.question ? 0 : 10
+                  }}
+                  transition={{
+                    duration: 0.6,
+                    ease: [0.4, 0, 0.2, 1]
+                  }}
+                >
+                  {/* Narrative Setup - Left Gold Accent */}
+                  {(question.narrative.setup || question.narrative.transition) && (
+                    <motion.div
+                      className="border-l-3 pl-5 mb-8"
+                      style={{ borderLeftWidth: '3px', borderLeftColor: '#D4A520' }}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{
+                        opacity: componentVisibility.setup ? 1 : 0,
+                        x: componentVisibility.setup ? 0 : -10
+                      }}
+                      transition={{
+                        duration: 0.5,
+                        delay: 0.1
+                      }}
+                    >
+                      <p className="text-sm sm:text-base leading-relaxed text-gray-600 font-normal" style={{ fontFamily: 'var(--font-cormorant), serif' }}>
+                        {getTransitionText()}
+                      </p>
+                    </motion.div>
+                  )}
+
+                  {/* Question - Emphasized */}
                   <motion.div
-                    className="bg-amber-50/90 backdrop-blur-md rounded-2xl px-6 py-4 shadow-md"
-                    initial={{ opacity: 0, y: -10 }}
+                    initial={{ opacity: 0 }}
                     animate={{
-                      opacity: componentVisibility.setup ? 1 : 0,
-                      y: componentVisibility.setup ? 0 : -10
+                      opacity: componentVisibility.question ? 1 : 0
                     }}
                     transition={{
                       duration: 0.5,
-                      ease: "easeOut"
+                      delay: 0.2
                     }}
                   >
-                    <p className="text-sm sm:text-base leading-relaxed text-gray-900 text-center font-medium" style={{ fontFamily: 'var(--font-cormorant), serif' }}>
-                      {getTransitionText()}
-                    </p>
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-normal text-center leading-relaxed text-gray-900" style={{ fontFamily: 'var(--font-cormorant), serif' }}>
+                      {(language === 'ko' && question.question_ko ? question.question_ko : question.question)
+                        .split('\n')
+                        .map((line, index) => (
+                          <React.Fragment key={index}>
+                            {line}
+                            {index < (language === 'ko' && question.question_ko ? question.question_ko : question.question).split('\n').length - 1 && <br />}
+                          </React.Fragment>
+                        ))}
+                    </h2>
                   </motion.div>
-                )}
-
-                {/* Question - Emphasized Floating Card */}
-                <motion.div
-                  className="bg-white/80 backdrop-blur-md rounded-2xl px-6 py-8 shadow-lg"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{
-                    opacity: componentVisibility.question ? 1 : 0,
-                    y: componentVisibility.question ? 0 : 10
-                  }}
-                  transition={{
-                    duration: 0.5,
-                    ease: "easeOut",
-                    delay: 0.1
-                  }}
-                >
-                  <h2 className="text-lg sm:text-xl md:text-2xl font-normal text-center leading-relaxed text-gray-900" style={{ fontFamily: 'var(--font-cormorant), serif' }}>
-                    {(language === 'ko' && question.question_ko ? question.question_ko : question.question)
-                      .split('\n')
-                      .map((line, index) => (
-                        <React.Fragment key={index}>
-                          {line}
-                          {index < (language === 'ko' && question.question_ko ? question.question_ko : question.question).split('\n').length - 1 && <br />}
-                        </React.Fragment>
-                      ))}
-                  </h2>
                 </motion.div>
 
                 {/* Choice Buttons - Floating Cards */}
@@ -588,41 +600,47 @@ export const AudioGuideQuiz: React.FC = () => {
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             onClick={() => setShowExitConfirm(false)}
           >
-            <GlassCard
-              className="max-w-md w-full"
+            <motion.div
+              className="max-w-2xl w-full bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl px-10 py-10"
               onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              initial={{ scale: 0.9, opacity: 0 }}
+              initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
             >
               <div className="text-center">
-                <div className="mx-auto w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mb-4">
-                  <Home className="w-8 h-8 text-secondary" />
+                <div className="mx-auto w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mb-6">
+                  <Home className="w-10 h-10" style={{ color: '#D4A520' }} />
                 </div>
-                <h3 className="text-2xl font-bold mb-2">
+                <h3 className="text-2xl sm:text-3xl font-normal mb-4 text-gray-900" style={{ fontFamily: 'var(--font-cormorant), serif' }}>
                   {language === 'ko' ? '갤러리 투어를 종료하시겠습니까?' : 'End Gallery Tour?'}
                 </h3>
-                <p className="text-gray-600 mb-6">
+                <p className="text-base sm:text-lg text-gray-600 mb-8 leading-relaxed" style={{ fontFamily: 'var(--font-cormorant), serif' }}>
                   {language === 'ko' ? '진행 상황이 사라집니다. 정말 나가시겠습니까?' : 'Your progress will be lost. Are you sure you want to exit?'}
                 </p>
-                <div className="flex gap-3">
-                  <GlassButton
-                    variant="secondary"
-                    className="flex-1"
+                <div className="flex gap-4">
+                  <button
+                    className="flex-1 px-6 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium transition-colors"
                     onClick={() => router.push('/')}
+                    style={{ fontFamily: 'var(--font-cormorant), serif' }}
                   >
-                    {language === 'ko' ? '나가기' : 'Exit tour'}
-                  </GlassButton>
-                  <GlassButton
-                    variant="primary"
-                    className="flex-1"
+                    {language === 'ko' ? '나가기' : 'Exit Tour'}
+                  </button>
+                  <button
+                    className="flex-1 px-6 py-3 rounded-xl text-white font-medium transition-colors"
+                    style={{
+                      backgroundColor: '#D4A520',
+                      fontFamily: 'var(--font-cormorant), serif'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#B8860B'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#D4A520'}
                     onClick={() => setShowExitConfirm(false)}
                   >
                     {language === 'ko' ? '계속하기' : 'Continue'}
-                  </GlassButton>
+                  </button>
                 </div>
               </div>
-            </GlassCard>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

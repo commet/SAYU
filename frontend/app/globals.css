@@ -8,7 +8,7 @@
 
 /* Import SAYU Design System */
 @import url('../styles/sayu-design-system.css');
-@import url('../styles/force-fix.css');
+/* @import url('../styles/force-fix.css'); */
 
 /* Variable Font imports - 2024-2025 Trend */
 @font-face {

@@ -372,7 +372,7 @@ export default function FloatingNav() {
 
       {/* Breadcrumb / Page indicator */}
       {currentLabel && (
-        <div className="hidden lg:block fixed top-[74px] left-0 right-0 z-[990] bg-white/95 backdrop-blur-sm border-b border-neutral-200">
+        <div className="hidden lg:block fixed top-[70px] left-0 right-0 z-[990] bg-white/95 backdrop-blur-sm border-b border-neutral-200">
           <div className="mx-auto max-w-6xl px-6 h-11 flex items-center gap-2 text-sm text-neutral-700">
             <button
               onClick={() => router.push('/')}

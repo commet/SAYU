@@ -1,19 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/hooks/useAuth';
-import { useResponsive } from '@/lib/responsive';
-import { useGamificationV2 } from '@/hooks/useGamificationV2';
+import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import {
-  Trophy,
-  Settings,
   Sparkles,
-  User,
   Mail,
-  Heart,
   Palette,
   Calendar,
   Share2,
@@ -21,67 +14,103 @@ import {
   Award,
   TrendingUp,
   Users,
-  Eye,
+  Heart,
   Lock,
   Unlock,
-  X
+  Sun,
+  Moon
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/hooks/useAuth';
+import { useAuthGate } from '@/hooks/useAuthGate';
+import { useResponsive } from '@/lib/responsive';
+import { useGamificationV2 } from '@/hooks/useGamificationV2';
+import { getAnimalByType } from '@/data/personality-animals';
+import { getGradientStyle, personalityGradients } from '@/constants/personality-gradients';
+import { SAYUTypeCode } from '@/types/sayu-shared';
 import { Button } from '@/components/design-system/Button';
 import { Card } from '@/components/design-system/Card';
 import { Container } from '@/components/design-system/Container';
-import { getAnimalByType } from '@/data/personality-animals';
-import { personalityDescriptions } from '@/data/personality-descriptions';
 import ProfileSettingsModal from '@/components/profile/ProfileSettingsModal';
 import ShareModal from '@/components/share/ShareModal';
 import FeedbackButton from '@/components/feedback/FeedbackButton';
-import { useAuthGate } from '@/hooks/useAuthGate';
 
-const MobileProfile = dynamic(() => import('@/components/mobile/MobileProfile'), {
-  ssr: false
-});
+const MobileProfile = dynamic(() => import('@/components/mobile/MobileProfile'), { ssr: false });
 
-// Mock badges data
+const badgeCopy = {
+  firstVisit: {
+    ko: '첫 전시 방문 완료',
+    en: 'Completed your first visit'
+  },
+  artLover: {
+    ko: '작품 10개 좋아요',
+    en: 'Liked 10 artworks'
+  },
+  explorer: {
+    ko: '미술관 5곳 탐험',
+    en: 'Visited 5 museums'
+  },
+  collector: {
+    ko: '작품 50개 저장',
+    en: 'Saved 50 artworks'
+  }
+};
+
 const mockBadges = [
   {
     id: 'first-visit',
     name: { en: 'First Steps', ko: '첫 발걸음' },
-    description: { en: 'Complete your first museum visit', ko: '첫 미술관 방문을 완료하세요' },
-    icon: '🎨',
+    description: badgeCopy.firstVisit,
+    icon: '🎉',
     unlocked: true,
+    unlockedAt: '2024-01-10',
     progress: 1,
-    maxProgress: 1,
-    unlockedAt: '2024-01-10'
+    maxProgress: 1
   },
   {
     id: 'art-lover',
-    name: { en: 'Art Lover', ko: '예술 애호가' },
-    description: { en: 'Like 10 artworks', ko: '10개의 작품에 좋아요를 누르세요' },
-    icon: '❤️',
+    name: { en: 'Art Lover', ko: '아트 러버' },
+    description: badgeCopy.artLover,
+    icon: '💜',
     unlocked: true,
+    unlockedAt: '2024-01-15',
     progress: 10,
-    maxProgress: 10,
-    unlockedAt: '2024-01-15'
+    maxProgress: 10
   },
   {
     id: 'explorer',
     name: { en: 'Explorer', ko: '탐험가' },
-    description: { en: 'Visit 5 different museums', ko: '5개의 다른 미술관을 방문하세요' },
-    icon: '🗺️',
+    description: badgeCopy.explorer,
+    icon: '🧭',
     unlocked: false,
     progress: 2,
     maxProgress: 5
   },
   {
     id: 'collector',
-    name: { en: 'Collector', ko: '수집가' },
-    description: { en: 'Save 50 artworks', ko: '50개의 작품을 저장하세요' },
-    icon: '📚',
+    name: { en: 'Collector', ko: '컬렉터' },
+    description: badgeCopy.collector,
+    icon: '📦',
     unlocked: false,
     progress: 24,
     maxProgress: 50
   }
 ];
+
+const personalitySnippets: Record<string, { ko: string; en: string }> = {
+  LAEF: {
+    ko: '조용히 몰입하며 색과 감정에 깊게 공감하는 타입. 작품 앞에서 오래 머물며 자신만의 해석을 즐깁니다.',
+    en: 'Quietly immersive; you linger with color and emotion to find your own meaning.'
+  },
+  LREF: {
+    ko: '구조와 흐름을 차분히 읽고 맥락을 짚어내는 분석가형 감상가입니다.',
+    en: 'Calm and analytical; you read structure and flow to uncover context.'
+  },
+  SAMC: {
+    ko: '사람들과 함께 감상을 즐기며 활기찬 전시와 대화를 좋아합니다.',
+    en: 'Social and lively; you enjoy new shows and conversation with others.'
+  }
+};
 
 export default function ProfilePage() {
   const { language } = useLanguage();
@@ -89,14 +118,14 @@ export default function ProfilePage() {
   const { requireAuth } = useAuthGate();
   const router = useRouter();
   const { isMobile } = useResponsive();
-  const { stats: gameStats, loading: gameLoading } = useGamificationV2();
+  const { stats: gameStats } = useGamificationV2();
 
   const [isClient, setIsClient] = useState(false);
   const [renderMobile, setRenderMobile] = useState(false);
   const [userPersonalityType, setUserPersonalityType] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
-  const [followStats, setFollowStats] = useState({ followerCount: 12, followingCount: 8 });
+  const [followStats] = useState({ followerCount: 12, followingCount: 8 });
   const [profileVisitCount, setProfileVisitCount] = useState(8);
   const [isProfilePublic, setIsProfilePublic] = useState(true);
   const isGuest = !user;
@@ -109,15 +138,15 @@ export default function ProfilePage() {
   useEffect(() => {
     if (user?.personalityType) {
       setUserPersonalityType(user.personalityType);
-    } else {
-      const quizResults = localStorage.getItem('quizResults');
-      if (quizResults) {
-        try {
-          const results = JSON.parse(quizResults);
-          setUserPersonalityType(results.personalityType);
-        } catch (e) {
-          console.error('Error parsing quiz results:', e);
-        }
+      return;
+    }
+    const quizResults = localStorage.getItem('quizResults');
+    if (quizResults) {
+      try {
+        const results = JSON.parse(quizResults);
+        setUserPersonalityType(results.personalityType);
+      } catch (e) {
+        console.error('Error parsing quiz results:', e);
       }
     }
   }, [user]);
@@ -129,6 +158,21 @@ export default function ProfilePage() {
       setProfileVisitCount(savedVisits);
     }
   }, [user, isClient]);
+
+  const personaText = useMemo(() => {
+    if (!userPersonalityType) return null;
+    return personalitySnippets[userPersonalityType] || {
+      ko: '당신만의 감상 패턴을 발견하고 있어요.',
+      en: 'We are discovering your unique viewing style.'
+    };
+  }, [userPersonalityType]);
+
+  const getGradientByType = (type?: string | null) => {
+    if (!type) return 'linear-gradient(135deg, #111827, #1f2937)';
+    const map = personalityGradients[type as SAYUTypeCode];
+    if (map?.colors?.length) return `linear-gradient(135deg, ${map.colors.join(', ')})`;
+    return 'linear-gradient(135deg, #111827, #1f2937)';
+  };
 
   if (!isClient) {
     return (
@@ -143,58 +187,41 @@ export default function ProfilePage() {
   }
 
   const userAnimal = userPersonalityType ? getAnimalByType(userPersonalityType) : null;
-  const personalityDesc = userPersonalityType ? personalityDescriptions[userPersonalityType] : null;
 
-  const stats = [
+  const statGroups = [
     {
-      label: language === 'ko' ? '레벨' : 'Level',
-      value: gameStats?.level || 3,
-      icon: TrendingUp,
-      color: 'bg-black'
+      title: language === 'ko' ? '활동 리듬' : 'Activity',
+      items: [
+        { label: language === 'ko' ? '레벨' : 'Level', value: gameStats?.level || 3, icon: TrendingUp },
+        { label: language === 'ko' ? '포인트' : 'Points', value: gameStats?.total_points || 1250, icon: Award },
+        { label: language === 'ko' ? '전시 방문' : 'Exhibitions', value: profileVisitCount, icon: Calendar }
+      ]
     },
     {
-      label: language === 'ko' ? '포인트' : 'Points',
-      value: gameStats?.total_points || 1250,
-      icon: Award,
-      color: 'bg-neutral-900'
-    },
-    {
-      label: language === 'ko' ? '전시 관람' : 'Exhibitions',
-      value: profileVisitCount,
-      icon: Calendar,
-      color: 'bg-neutral-800'
-    },
-    {
-      label: language === 'ko' ? '팔로워' : 'Followers',
-      value: followStats.followerCount,
-      icon: Users,
-      color: 'bg-neutral-700'
-    },
-    {
-      label: language === 'ko' ? '팔로잉' : 'Following',
-      value: followStats.followingCount,
-      icon: Heart,
-      color: 'bg-neutral-600'
-    },
-    {
-      label: language === 'ko' ? '저장 작품' : 'Artworks',
-      value: 124,
-      icon: Palette,
-      color: 'bg-neutral-500'
+      title: language === 'ko' ? '커뮤니티 & 컬렉션' : 'Community & Collection',
+      items: [
+        { label: language === 'ko' ? '팔로워' : 'Followers', value: followStats.followerCount, icon: Users },
+        { label: language === 'ko' ? '팔로잉' : 'Following', value: followStats.followingCount, icon: Heart },
+        { label: language === 'ko' ? '저장 작품' : 'Saved Artworks', value: 124, icon: Palette }
+      ]
     }
   ];
 
-  const unlockedBadges = mockBadges.filter(b => b.unlocked);
-  const inProgressBadges = mockBadges.filter(b => !b.unlocked);
-
-  // APT Compatibility - mock data
+  const unlockedBadges = mockBadges.filter((b) => b.unlocked);
+  const inProgressBadges = mockBadges.filter((b) => !b.unlocked);
   const compatibleTypes = ['LAEF', 'SAMC', 'LREF'];
 
   return (
     <div className="min-h-screen bg-white">
       <Container size="2xl" className="py-12 space-y-8">
         {/* Profile Header */}
-        <Card className="p-8 border-neutral-200">
+        <Card
+          className="p-8 border-neutral-200 shadow-sm"
+          style={{
+            background:
+              'linear-gradient(135deg, rgba(212,165,32,0.12), rgba(212,165,32,0.06))'
+          }}
+        >
           <div className="flex flex-col md:flex-row gap-8">
             {/* Avatar */}
             <div className="flex justify-center md:justify-start">
@@ -204,10 +231,9 @@ export default function ProfilePage() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={user.avatar} alt={user.nickname || 'User'} className="w-full h-full object-cover" />
                   ) : (
-                    <span>{userAnimal?.emoji || '🎨'}</span>
+                    <span>{userAnimal?.emoji || '🦊'}</span>
                   )}
                 </div>
-                {/* AI Art Badge */}
                 <motion.div
                   className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-black flex items-center justify-center shadow-lg"
                   initial={{ scale: 0 }}
@@ -222,30 +248,31 @@ export default function ProfilePage() {
             {/* Info */}
             <div className="flex-1 text-center md:text-left">
               <div className="space-y-4">
-                {/* Name & Email */}
                 <div>
-                  <h1 className="text-3xl font-bold text-black mb-2">
-                    {user?.nickname || user?.auth?.email || 'SAYU Explorer'}
-                  </h1>
+                  <h1 className="text-3xl font-bold text-black mb-2">{user?.nickname || user?.auth?.email || 'SAYU Explorer'}</h1>
                   <div className="flex items-center gap-2 text-neutral-600 justify-center md:justify-start">
                     <Mail className="w-4 h-4" />
                     <span>{user?.auth?.email || 'user@sayu.app'}</span>
                   </div>
                 </div>
 
-                {/* APT Badge & Description */}
                 {userPersonalityType && (
                   <div className="space-y-3">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-full font-bold shadow-md">
+                    <div
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full font-bold shadow-md text-white"
+                      style={{
+                        background: getGradientByType(userPersonalityType),
+                        textShadow: '0 1px 2px rgba(0,0,0,0.35)',
+                      }}
+                    >
                       <Palette className="w-5 h-5" />
                       <span className="text-lg">{userPersonalityType}</span>
                       <span className="text-sm opacity-80">·</span>
                       <span className="text-sm">{userAnimal?.animal_ko || userAnimal?.animal}</span>
                     </div>
-
-                    {personalityDesc && (
-                      <p className="text-base text-neutral-700 max-w-2xl">
-                        {personalityDesc.description || personalityDesc.essence}
+                    {personaText && (
+                      <p className="text-base text-neutral-700 max-w-2xl leading-relaxed">
+                        {language === 'ko' ? personaText.ko : personaText.en}
                       </p>
                     )}
                   </div>
@@ -257,7 +284,7 @@ export default function ProfilePage() {
                     variant="primary"
                     onClick={() => {
                       if (isGuest) {
-                        requireAuth({ message: '프로필 편집은 회원 전용입니다. 로그인 후 이용해주세요.' });
+                        requireAuth({ message: '프로필을 편집하려면 로그인해 주세요.' });
                         return;
                       }
                       setShowSettings(true);
@@ -270,7 +297,7 @@ export default function ProfilePage() {
                     variant="outline"
                     onClick={() => {
                       if (isGuest) {
-                        requireAuth({ message: '프로필 공유는 로그인 후 이용할 수 있습니다.' });
+                        requireAuth({ message: '프로필을 공유하려면 로그인해 주세요.' });
                         return;
                       }
                       setShowShareModal(true);
@@ -283,7 +310,7 @@ export default function ProfilePage() {
                     variant="ghost"
                     onClick={() => {
                       if (isGuest) {
-                        requireAuth({ message: '공개 설정 변경은 로그인 후 이용해주세요.' });
+                        requireAuth({ message: '공개 설정을 변경하려면 로그인해 주세요.' });
                         return;
                       }
                       setIsProfilePublic(!isProfilePublic);
@@ -306,11 +333,8 @@ export default function ProfilePage() {
                 {isGuest && (
                   <div className="mt-4 inline-flex items-center gap-3 px-4 py-3 rounded-2xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-700">
                     <Lock className="w-4 h-4" />
-                    <span>데모 프로필입니다. 가입 후 내 APT 타입과 활동을 저장하세요.</span>
-                    <Button
-                      size="sm"
-                      onClick={() => requireAuth({ message: '회원가입 후 실제 프로필을 볼 수 있습니다.' })}
-                    >
+                    <span>게스트 모드입니다. APT 결과와 여정 기록을 저장하려면 가입해 주세요.</span>
+                    <Button size="sm" onClick={() => requireAuth({ message: '회원가입 후 전체 기능을 이용해 주세요.' })}>
                       {language === 'ko' ? '회원가입' : 'Sign up'}
                     </Button>
                   </div>
@@ -319,20 +343,24 @@ export default function ProfilePage() {
             </div>
 
             {/* Level & XP */}
-            <div className="flex flex-col items-center justify-center md:items-end gap-2 min-w-[120px]">
+            <div className="flex flex-col items-center justify-center md:items-end gap-2 min-w-[140px]">
               <div className="text-center md:text-right">
                 <p className="text-sm text-neutral-600">{language === 'ko' ? '레벨' : 'Level'}</p>
                 <p className="text-4xl font-bold text-black">{gameStats?.level || 3}</p>
               </div>
-              <div className="w-full max-w-[120px]">
+              <div className="w-full max-w-[140px]">
                 <div className="flex justify-between text-xs text-neutral-600 mb-1">
                   <span>XP</span>
-                  <span>{gameStats?.current_exp || 450} / {gameStats?.nextLevelExp || 1000}</span>
+                  <span>
+                    {gameStats?.current_exp || 450} / {gameStats?.nextLevelExp || 1000}
+                  </span>
                 </div>
                 <div className="h-2 bg-neutral-200 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-black transition-all"
-                    style={{ width: `${((gameStats?.current_exp || 450) / (gameStats?.nextLevelExp || 1000)) * 100}%` }}
+                    style={{
+                      width: `${((gameStats?.current_exp || 450) / (gameStats?.nextLevelExp || 1000)) * 100}%`
+                    }}
                   />
                 </div>
               </div>
@@ -340,115 +368,112 @@ export default function ProfilePage() {
           </div>
         </Card>
 
-        {/* Stats Grid */}
-        <div>
-          <h2 className="text-xl font-bold text-black mb-4">
-            {language === 'ko' ? '나의 통계' : 'My Stats'}
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                <Card className="p-5 border-neutral-200 text-center hover:shadow-md transition-shadow">
-                  <div className={`w-12 h-12 rounded-full ${stat.color} flex items-center justify-center mx-auto mb-3`}>
-                    <stat.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <p className="text-2xl font-bold text-black mb-1">{stat.value.toLocaleString()}</p>
-                  <p className="text-sm text-neutral-600">{stat.label}</p>
-                </Card>
-              </motion.div>
+        {/* Stats */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-black">{language === 'ko' ? '나의 통계' : 'My Stats'}</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {statGroups.map((group, groupIndex) => (
+              <Card key={group.title} className="p-5 border-neutral-200">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-semibold text-neutral-700">{group.title}</h3>
+                  <div className="h-px flex-1 bg-neutral-200 ml-4" />
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  {group.items.map((stat, index) => (
+                    <motion.div
+                      key={stat.label}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: (groupIndex * 3 + index) * 0.04 }}
+                      className="rounded-2xl bg-neutral-50 border border-neutral-200 p-3 text-center hover:shadow-sm transition-shadow"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center mx-auto mb-2">
+                        {(() => {
+                          const Icon = stat.icon || Palette;
+                          return <Icon className="w-5 h-5" />;
+                        })()}
+                      </div>
+                      <p className="text-xl font-bold text-black leading-tight">{stat.value.toLocaleString()}</p>
+                      <p className="text-xs text-neutral-600 mt-1">{stat.label}</p>
+                    </motion.div>
+                  ))}
+                </div>
+              </Card>
             ))}
           </div>
         </div>
 
         {/* Achievements & Badges */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-black">
-              {language === 'ko' ? '업적 & 배지' : 'Achievements & Badges'}
-            </h2>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-black">{language === 'ko' ? '업적 & 배지' : 'Achievements & Badges'}</h2>
             <div className="text-sm text-neutral-600">
-              {language === 'ko' ? '획득' : 'Unlocked'}: <span className="font-bold text-black">{unlockedBadges.length}</span> / {mockBadges.length}
+              {language === 'ko' ? '획득' : 'Unlocked'}:{' '}
+              <span className="font-bold text-black">{unlockedBadges.length}</span> / {mockBadges.length}
             </div>
           </div>
 
-          {/* Unlocked Badges */}
-          <div className="mb-6">
-            <p className="text-sm font-semibold text-neutral-700 mb-3">
-              {language === 'ko' ? '획득한 배지' : 'Unlocked Badges'}
-            </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {unlockedBadges.map((badge) => (
-                <Card key={badge.id} className="p-4 border-neutral-200 bg-neutral-50">
-                  <div className="text-center">
-                    <div className="text-4xl mb-2">{badge.icon}</div>
-                    <p className="font-semibold text-black text-sm mb-1">
-                      {language === 'ko' ? badge.name.ko : badge.name.en}
-                    </p>
-                    <p className="text-xs text-neutral-600">
-                      {language === 'ko' ? badge.description.ko : badge.description.en}
-                    </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Card className="p-4 border-neutral-200 bg-neutral-50">
+              <p className="text-sm font-semibold text-neutral-700 mb-3">
+                {language === 'ko' ? '획득한 배지' : 'Unlocked Badges'}
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {unlockedBadges.map((badge) => (
+                  <div key={badge.id} className="rounded-2xl bg-white border border-neutral-200 p-4 text-center shadow-sm">
+                    <div className="text-3xl mb-2">{badge.icon}</div>
+                    <p className="font-semibold text-black text-sm mb-1">{language === 'ko' ? badge.name.ko : badge.name.en}</p>
+                    <p className="text-xs text-neutral-600">{language === 'ko' ? badge.description.ko : badge.description.en}</p>
                     {badge.unlockedAt && (
-                      <p className="text-xs text-neutral-500 mt-2">
-                        {new Date(badge.unlockedAt).toLocaleDateString()}
-                      </p>
+                      <p className="text-[11px] text-neutral-500 mt-2">{new Date(badge.unlockedAt).toLocaleDateString()}</p>
                     )}
                   </div>
-                </Card>
-              ))}
-            </div>
-          </div>
+                ))}
+              </div>
+            </Card>
 
-          {/* In Progress Badges */}
-          <div>
-            <p className="text-sm font-semibold text-neutral-700 mb-3">
-              {language === 'ko' ? '진행 중' : 'In Progress'}
-            </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {inProgressBadges.map((badge) => (
-                <Card key={badge.id} className="p-4 border-neutral-200 opacity-75">
-                  <div className="text-center">
-                    <div className="text-4xl mb-2 grayscale">{badge.icon}</div>
-                    <p className="font-semibold text-black text-sm mb-1">
-                      {language === 'ko' ? badge.name.ko : badge.name.en}
-                    </p>
-                    <p className="text-xs text-neutral-600 mb-2">
-                      {language === 'ko' ? badge.description.ko : badge.description.en}
-                    </p>
-                    <div>
-                      <div className="flex justify-between text-xs text-neutral-600 mb-1">
-                        <span>{badge.progress}</span>
-                        <span>{badge.maxProgress}</span>
-                      </div>
-                      <div className="h-2 bg-neutral-200 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-neutral-400 transition-all"
-                          style={{ width: `${(badge.progress / badge.maxProgress) * 100}%` }}
-                        />
+            <Card className="p-4 border-neutral-200">
+              <p className="text-sm font-semibold text-neutral-700 mb-3">
+                {language === 'ko' ? '진행 중' : 'In Progress'}
+              </p>
+              <div className="space-y-3">
+                {inProgressBadges.map((badge) => (
+                  <div key={badge.id} className="rounded-2xl border border-dashed border-neutral-300 p-3 bg-neutral-50">
+                    <div className="flex items-center gap-3">
+                      <div className="text-2xl grayscale">{badge.icon}</div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-black text-sm">{language === 'ko' ? badge.name.ko : badge.name.en}</p>
+                        <p className="text-xs text-neutral-600 mb-1">
+                          {language === 'ko' ? badge.description.ko : badge.description.en}
+                        </p>
+                        <div className="flex items-center gap-2 text-xs text-neutral-600">
+                          <span>{badge.progress}</span>
+                          <div className="flex-1 h-1.5 bg-neutral-200 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-neutral-500"
+                              style={{ width: `${(badge.progress / badge.maxProgress) * 100}%` }}
+                            />
+                          </div>
+                          <span>{badge.maxProgress}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </Card>
-              ))}
-            </div>
+                ))}
+              </div>
+            </Card>
           </div>
         </div>
 
         {/* APT Compatibility */}
         {userPersonalityType && (
           <Card className="p-6 border-neutral-200 bg-neutral-50">
-            <div className="text-center">
-              <h3 className="text-lg font-bold text-black mb-2">
+            <div className="text-center space-y-3">
+              <h3 className="text-lg font-bold text-black">
                 {language === 'ko' ? '나와 잘 맞는 APT 타입' : 'Compatible APT Types'}
               </h3>
-              <p className="text-sm text-neutral-600 mb-4">
-                {language === 'ko'
-                  ? '이 타입들과 함께 전시를 보면 좋은 대화를 나눌 수 있어요'
-                  : 'Great conversation partners for museum visits'}
+              <p className="text-sm text-neutral-600">
+                {language === 'ko' ? '함께 전시를 보면 좋은 유형들을 추천해요.' : 'Great companions for museum visits.'}
               </p>
               <div className="flex gap-3 justify-center flex-wrap">
                 {compatibleTypes.map((type) => {
@@ -459,7 +484,7 @@ export default function ProfilePage() {
                       className="px-4 py-3 bg-white border-2 border-neutral-200 rounded-lg hover:border-black transition-colors cursor-pointer"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-2xl">{animal?.emoji || '🎨'}</span>
+                        <span className="text-2xl">{animal?.emoji || '🦊'}</span>
                         <div className="text-left">
                           <p className="font-bold text-black text-sm">{type}</p>
                           <p className="text-xs text-neutral-600">{animal?.animal_ko || animal?.animal}</p>
@@ -473,7 +498,6 @@ export default function ProfilePage() {
           </Card>
         )}
 
-        {/* Settings Modal */}
         <ProfileSettingsModal
           isOpen={showSettings}
           onClose={() => setShowSettings(false)}
@@ -482,12 +506,9 @@ export default function ProfilePage() {
             email: user?.auth?.email,
             personalityType: userPersonalityType
           }}
-          onUpdate={async (updates) => {
-            window.location.reload();
-          }}
+          onUpdate={async () => window.location.reload()}
         />
 
-        {/* Share Modal */}
         {showShareModal && userPersonalityType && (
           <ShareModal
             isOpen={showShareModal}

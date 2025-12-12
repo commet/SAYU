@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Camera, Palette, LogOut } from 'lucide-react';
+import { X, Camera, Palette, LogOut, RefreshCw, User, Mail } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 interface ProfileSettingsModalProps {
   isOpen: boolean;
@@ -15,32 +16,51 @@ interface ProfileSettingsModalProps {
     nickname?: string;
     email?: string;
     personalityType?: string | null;
+    gender?: string | null;
+    ageRange?: string | null;
+    region?: string | null;
   };
   onUpdate: (updates: any) => void;
 }
 
-export default function ProfileSettingsModal({ 
-  isOpen, 
-  onClose, 
+export default function ProfileSettingsModal({
+  isOpen,
+  onClose,
   userInfo,
-  onUpdate 
+  onUpdate,
 }: ProfileSettingsModalProps) {
   const { language } = useLanguage();
   const { signOut, updateProfile } = useAuth();
+  const router = useRouter();
   const [nickname, setNickname] = useState(userInfo.nickname || '');
+  const [gender, setGender] = useState(userInfo.gender || '');
+  const [ageRange, setAgeRange] = useState(userInfo.ageRange || '');
+  const [region, setRegion] = useState(userInfo.region || '');
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const personaLabel = useMemo(
+    () => (language === 'ko' ? 'Art Persona' : 'Art Persona'),
+    [language]
+  );
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  };
 
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      // 실제 데이터베이스 업데이트
-      await updateProfile({ nickname });
-      
-      onUpdate({ nickname });
+      await updateProfile({ nickname, gender, ageRange, region, avatarFile });
+      onUpdate({ nickname, gender, ageRange, region });
       toast.success(language === 'ko' ? '프로필이 업데이트되었습니다' : 'Profile updated successfully');
       onClose();
     } catch (error) {
-      toast.error(language === 'ko' ? '업데이트 실패' : 'Update failed');
+      toast.error(language === 'ko' ? '업데이트에 실패했습니다' : 'Update failed');
     } finally {
       setIsLoading(false);
     }
@@ -48,13 +68,11 @@ export default function ProfileSettingsModal({
 
   const handleLogout = async () => {
     try {
-      onClose(); // Close modal first
+      onClose();
       await signOut();
       toast.success(language === 'ko' ? '로그아웃되었습니다' : 'Logged out successfully');
-      // The useAuth hook will handle the redirect to '/' via onAuthStateChange
     } catch (error) {
-      console.error('Logout error:', error);
-      toast.error(language === 'ko' ? '로그아웃 실패' : 'Logout failed');
+      toast.error(language === 'ko' ? '로그아웃에 실패했습니다' : 'Logout failed');
     }
   };
 
@@ -62,16 +80,14 @@ export default function ProfileSettingsModal({
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
           />
 
-          {/* Modal */}
           <motion.div
             className="fixed inset-0 flex items-center justify-center z-50 p-4"
             initial={{ opacity: 0 }}
@@ -79,98 +95,148 @@ export default function ProfileSettingsModal({
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="sayu-liquid-glass rounded-2xl p-6 max-w-md w-full"
+              className="w-full max-w-lg rounded-2xl bg-white shadow-2xl border border-neutral-200 p-6"
               initial={{ scale: 0.95, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 20 }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Header */}
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">
-                  {language === 'ko' ? '프로필 설정' : 'Profile Settings'}
-                </h2>
+                <div>
+                  <p className="text-sm text-neutral-500">
+                    {language === 'ko' ? '프로필 설정' : 'Profile Settings'}
+                  </p>
+                  <h2 className="text-2xl font-bold text-black">
+                    {language === 'ko' ? '나의 정보' : 'My Profile'}
+                  </h2>
+                </div>
                 <button
                   onClick={onClose}
-                  className="p-2 rounded-full hover:bg-white/10 transition-colors text-white"
+                  className="p-2 rounded-full hover:bg-neutral-100 transition-colors text-neutral-600"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              {/* Content */}
               <div className="space-y-6">
-                {/* Profile Picture */}
-                <div className="text-center">
-                  <div className="relative inline-block">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-3xl font-bold">
-                      {nickname[0] || userInfo.email?.[0] || 'U'}
-                    </div>
-                    <button className="absolute bottom-0 right-0 p-2 rounded-full bg-purple-500 text-white hover:bg-purple-600 transition-colors">
-                      <Camera className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Nickname - Disabled for now */}
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-300">
-                    {language === 'ko' ? '닉네임' : 'Nickname'}
-                  </label>
+                {/* Avatar & Nickname */}
+                <div className="flex items-center gap-4">
                   <div className="relative">
+                    <div className="w-20 h-20 rounded-full bg-neutral-100 border border-neutral-200 overflow-hidden flex items-center justify-center text-3xl">
+                      {avatarPreview ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={avatarPreview} alt="avatar preview" className="w-full h-full object-cover" />
+                      ) : (
+                        (nickname && nickname[0]) || (userInfo.email && userInfo.email[0]) || 'U'
+                      )}
+                    </div>
+                    <label className="absolute -right-2 -bottom-2 bg-black text-white w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow">
+                      <Camera className="w-4 h-4" />
+                      <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+                    </label>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-neutral-500 flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      {language === 'ko' ? '닉네임' : 'Nickname'}
+                    </p>
                     <input
                       type="text"
                       value={nickname}
-                      disabled
-                      className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 cursor-not-allowed"
-                      placeholder={language === 'ko' ? '닉네임 변경 준비 중' : 'Nickname change coming soon'}
+                      onChange={(e) => setNickname(e.target.value)}
+                      className="mt-1 w-full rounded-lg border border-neutral-200 px-3 py-2 text-neutral-900 focus:outline-none focus:ring-2 focus:ring-black/10"
+                      placeholder={language === 'ko' ? '닉네임을 입력하세요' : 'Enter nickname'}
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
-                      {language === 'ko' ? '준비 중' : 'Coming Soon'}
-                    </span>
                   </div>
                 </div>
 
-                {/* Email (Read-only) */}
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-white">
+                {/* Persona & Email */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <label className="flex flex-col gap-1 text-sm text-neutral-600">
                     {language === 'ko' ? '이메일' : 'Email'}
+                    <div className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-neutral-700">
+                      <Mail className="w-4 h-4" />
+                      <span className="truncate">{userInfo.email || '-'}</span>
+                    </div>
                   </label>
-                  <input
-                    type="email"
-                    value={userInfo.email || ''}
-                    readOnly
-                    className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-gray-300 cursor-not-allowed"
-                  />
+
+                  {userInfo.personalityType && (
+                    <label className="flex flex-col gap-1 text-sm text-neutral-600">
+                      {personaLabel}
+                      <div className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-neutral-900">
+                        <Palette className="w-4 h-4" />
+                        <span className="font-semibold">{userInfo.personalityType}</span>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="ml-auto border border-neutral-300 bg-neutral-100 text-neutral-900 hover:bg-neutral-200 hover:text-neutral-900 focus-visible:text-neutral-900"
+                          onClick={() => router.push('/quiz/narrative')}
+                        >
+                          <RefreshCw className="w-3.5 h-3.5 mr-1" />
+                          {language === 'ko' ? '다시 검사' : 'Retake'}
+                        </Button>
+                      </div>
+                    </label>
+                  )}
                 </div>
 
-                {/* Personality Type */}
-                {userInfo.personalityType && (
-                  <div>
-                    <label className="block text-sm font-medium mb-2 text-white">
-                      {language === 'ko' ? '예술 성향' : 'Art Personality'}
-                    </label>
-                    <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 border border-white/20">
-                      <Palette className="w-5 h-5 text-purple-400" />
-                      <span className="text-white">{userInfo.personalityType}</span>
-                    </div>
-                  </div>
-                )}
+                {/* Additional fields */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <label className="flex flex-col gap-1 text-sm text-neutral-600">
+                    {language === 'ko' ? '성별' : 'Gender'}
+                    <select
+                      value={gender}
+                      onChange={(e) => setGender(e.target.value)}
+                      className="rounded-lg border border-neutral-200 px-3 py-2 text-neutral-900 focus:outline-none focus:ring-2 focus:ring-black/10"
+                    >
+                      <option value="">{language === 'ko' ? '선택 안 함' : 'Prefer not to say'}</option>
+                      <option value="female">{language === 'ko' ? '여성' : 'Female'}</option>
+                      <option value="male">{language === 'ko' ? '남성' : 'Male'}</option>
+                      <option value="other">{language === 'ko' ? '기타' : 'Other'}</option>
+                    </select>
+                  </label>
 
-                {/* Actions */}
-                <div className="space-y-3 pt-4">
-                  {/* Save button - disabled since nickname can't be changed */}
+                  <label className="flex flex-col gap-1 text-sm text-neutral-600">
+                    {language === 'ko' ? '나이대' : 'Age Range'}
+                    <select
+                      value={ageRange}
+                      onChange={(e) => setAgeRange(e.target.value)}
+                      className="rounded-lg border border-neutral-200 px-3 py-2 text-neutral-900 focus:outline-none focus:ring-2 focus:ring-black/10"
+                    >
+                      <option value="">{language === 'ko' ? '선택 안 함' : 'Prefer not to say'}</option>
+                      <option value="teens">10대</option>
+                      <option value="twenties">20대</option>
+                      <option value="thirties">30대</option>
+                      <option value="forties">40대</option>
+                      <option value="fifties">50대+</option>
+                    </select>
+                  </label>
+
+                  <label className="flex flex-col gap-1 text-sm text-neutral-600">
+                    {language === 'ko' ? '거주 지역' : 'Region'}
+                    <input
+                      type="text"
+                      value={region}
+                      onChange={(e) => setRegion(e.target.value)}
+                      className="rounded-lg border border-neutral-200 px-3 py-2 text-neutral-900 focus:outline-none focus:ring-2 focus:ring-black/10"
+                      placeholder={language === 'ko' ? '예: 서울, 경기' : 'e.g. Seoul, Busan'}
+                    />
+                  </label>
+                </div>
+
+                <div className="space-y-3 pt-2">
                   <Button
-                    disabled={true}
-                    className="w-full bg-gray-600 cursor-not-allowed opacity-50"
+                    onClick={handleSave}
+                    className="w-full bg-black text-white hover:bg-neutral-900"
+                    disabled={isLoading}
                   >
-                    {language === 'ko' ? '변경 가능한 항목 없음' : 'No editable fields'}
+                    {language === 'ko' ? '저장하기' : 'Save'}
                   </Button>
 
                   <Button
                     onClick={handleLogout}
-                    variant="outline"
-                    className="w-full border-red-500/50 text-red-400 hover:bg-red-500/10"
+                    variant="ghost"
+                    className="w-full border border-neutral-300 text-neutral-900 hover:bg-neutral-200 hover:text-neutral-900 focus-visible:text-neutral-900"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
                     {language === 'ko' ? '로그아웃' : 'Logout'}
