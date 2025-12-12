@@ -386,7 +386,7 @@ export const AudioGuideQuiz: React.FC = () => {
                 {/* Narrative Setup - Light Floating Card */}
                 {(question.narrative.setup || question.narrative.transition) && (
                   <motion.div
-                    className="bg-white/50 backdrop-blur-sm rounded-2xl px-6 py-4 shadow-sm"
+                    className="bg-amber-50/90 backdrop-blur-md rounded-2xl px-6 py-4 shadow-md"
                     initial={{ opacity: 0, y: -10 }}
                     animate={{
                       opacity: componentVisibility.setup ? 1 : 0,
@@ -397,7 +397,7 @@ export const AudioGuideQuiz: React.FC = () => {
                       ease: "easeOut"
                     }}
                   >
-                    <p className="text-sm sm:text-base leading-relaxed text-gray-800 text-center font-normal">
+                    <p className="text-sm sm:text-base leading-relaxed text-gray-900 text-center font-medium" style={{ fontFamily: 'var(--font-cormorant), serif' }}>
                       {getTransitionText()}
                     </p>
                   </motion.div>
@@ -417,7 +417,7 @@ export const AudioGuideQuiz: React.FC = () => {
                     delay: 0.1
                   }}
                 >
-                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center leading-tight text-gray-900">
+                  <h2 className="text-lg sm:text-xl md:text-2xl font-normal text-center leading-relaxed text-gray-900" style={{ fontFamily: 'var(--font-cormorant), serif' }}>
                     {(language === 'ko' && question.question_ko ? question.question_ko : question.question)
                       .split('\n')
                       .map((line, index) => (
@@ -471,7 +471,7 @@ export const AudioGuideQuiz: React.FC = () => {
 
                         {/* Text Content */}
                         <div>
-                          <h4 className="text-lg sm:text-xl font-semibold mb-2 text-gray-900 leading-snug">
+                          <h4 className="text-base sm:text-lg font-medium mb-2 text-gray-900 leading-relaxed" style={{ fontFamily: 'var(--font-cormorant), serif' }}>
                             {language === 'ko' && option.text_ko ? option.text_ko : option.text}
                           </h4>
 

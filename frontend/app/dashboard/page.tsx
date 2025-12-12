@@ -23,11 +23,6 @@ export default function DashboardPage() {
   const { user, loading } = useAuth();
   const { isMobile } = useResponsive();
 
-  // Render mobile component for mobile devices
-  if (isMobile) {
-    return <MobileDashboard />;
-  }
-
   const [currentTime, setCurrentTime] = useState(new Date());
   const [artworks, setArtworks] = useState<any[]>([]);
   const [dashboardStats, setDashboardStats] = useState<any>(null);
@@ -248,7 +243,7 @@ export default function DashboardPage() {
   if (!hasCompletedQuiz) {
     return (
       <div className="min-h-screen bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Quiz CTA Hero */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
@@ -343,74 +338,70 @@ export default function DashboardPage() {
     );
   }
 
+  // Render mobile component for mobile devices
+  if (isMobile) {
+    return <MobileDashboard />;
+  }
+
   // Quiz 완료 사용자를 위한 메인 Dashboard
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
-        {/* Welcome Hero */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        {/* Welcome Hero - Gallery Style */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-neutral-50 rounded-2xl p-8"
+          className="pt-16 pb-8"
         >
-          <h1 className="text-3xl font-bold text-black mb-2">
-            {greeting.title}, {user.username || user.displayName || user.email?.split('@')[0]}님
+          <p className="text-xs uppercase tracking-widest text-neutral-400 mb-4">
+            {currentTime.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
+          <h1 className="text-5xl font-light text-black mb-3 tracking-tight">
+            {greeting.title}
           </h1>
-          <p className="text-lg text-neutral-600">
+          <p className="text-lg text-neutral-500 font-light max-w-2xl">
             {greeting.subtitle}
           </p>
         </motion.section>
 
-        {/* Your Journey - Integrated Stats + Recent Activity */}
+        {/* Your Journey - Gallery Style */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="space-y-6"
+          className="space-y-8"
         >
-          <h2 className="text-2xl font-bold text-black">나의 여정</h2>
+          <div className="flex items-baseline gap-3">
+            <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">Your Journey</h2>
+            <div className="h-px flex-1 bg-neutral-200" />
+          </div>
 
-          {/* Quick Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white rounded-lg border border-neutral-200 p-6">
-              <div className="flex items-center justify-between mb-2">
-                <Eye className="w-5 h-5 text-neutral-400" />
-              </div>
-              <p className="text-3xl font-bold text-black">{journeyStats.artworksViewed}</p>
-              <p className="text-sm text-neutral-600 mt-1">탐험한 작품</p>
+          {/* Quick Stats - Minimal */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="border border-neutral-200 p-6 group hover:border-neutral-400 transition-colors">
+              <p className="text-4xl font-light text-black mb-2 tracking-tight">{journeyStats.artworksViewed}</p>
+              <p className="text-xs uppercase tracking-wider text-neutral-500">Artworks Explored</p>
             </div>
 
-            <div className="bg-white rounded-lg border border-neutral-200 p-6">
-              <div className="flex items-center justify-between mb-2">
-                <Heart className="w-5 h-5 text-neutral-400" />
-              </div>
-              <p className="text-3xl font-bold text-black">{journeyStats.savedArtworks}</p>
-              <p className="text-sm text-neutral-600 mt-1">저장한 작품</p>
+            <div className="border border-neutral-200 p-6 group hover:border-neutral-400 transition-colors">
+              <p className="text-4xl font-light text-black mb-2 tracking-tight">{journeyStats.savedArtworks}</p>
+              <p className="text-xs uppercase tracking-wider text-neutral-500">Saved</p>
             </div>
 
-            <div className="bg-white rounded-lg border border-neutral-200 p-6">
-              <div className="flex items-center justify-between mb-2">
-                <Palette className="w-5 h-5 text-neutral-400" />
-              </div>
-              <p className="text-3xl font-bold text-black">{journeyStats.artistsDiscovered}</p>
-              <p className="text-sm text-neutral-600 mt-1">발견한 아티스트</p>
+            <div className="border border-neutral-200 p-6 group hover:border-neutral-400 transition-colors">
+              <p className="text-4xl font-light text-black mb-2 tracking-tight">{journeyStats.artistsDiscovered}</p>
+              <p className="text-xs uppercase tracking-wider text-neutral-500">Artists Found</p>
             </div>
 
-            <div className="bg-white rounded-lg border border-neutral-200 p-6">
-              <div className="flex items-center justify-between mb-2">
-                <MapPin className="w-5 h-5 text-neutral-400" />
-              </div>
-              <p className="text-3xl font-bold text-black">{journeyStats.exhibitionsVisited}</p>
-              <p className="text-sm text-neutral-600 mt-1">방문한 전시</p>
+            <div className="border border-neutral-200 p-6 group hover:border-neutral-400 transition-colors">
+              <p className="text-4xl font-light text-black mb-2 tracking-tight">{journeyStats.exhibitionsVisited}</p>
+              <p className="text-xs uppercase tracking-wider text-neutral-500">Exhibitions</p>
             </div>
           </div>
 
-          {/* Recent Activity */}
-          <div className="bg-neutral-50 rounded-lg p-6">
-            <h3 className="text-lg font-bold text-black mb-4 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-neutral-600" />
-              최근 활동
-            </h3>
+          {/* Recent Activity - Minimal */}
+          <div className="border-t border-neutral-100 pt-6">
+            <h3 className="text-xs uppercase tracking-wider text-neutral-500 mb-4">Recent Activity</h3>
             <div className="space-y-3">
               {activitiesLoading ? (
                 [1, 2, 3].map(i => (
@@ -454,16 +445,21 @@ export default function DashboardPage() {
           </div>
         </motion.section>
 
-        {/* Today's Featured */}
+        {/* Today's Featured - Gallery Hero */}
         {featuredArtwork && (
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
+            className="space-y-6"
           >
-            <h2 className="text-2xl font-bold text-black mb-6">오늘의 작품</h2>
+            <div className="flex items-baseline gap-3">
+              <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">Featured Today</h2>
+              <div className="h-px flex-1 bg-neutral-200" />
+            </div>
+
             <div
-              className="relative aspect-[21/9] rounded-2xl overflow-hidden cursor-pointer group"
+              className="relative aspect-[21/9] overflow-hidden cursor-pointer group border border-neutral-200"
               onClick={() => router.push('/gallery')}
             >
               {featuredArtwork.cloudinaryUrl || featuredArtwork.primaryImage ? (
@@ -471,7 +467,7 @@ export default function DashboardPage() {
                   src={featuredArtwork.cloudinaryUrl || featuredArtwork.primaryImage}
                   alt={featuredArtwork.title || 'Featured Artwork'}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
                   sizes="100vw"
                   priority
                 />
@@ -480,19 +476,19 @@ export default function DashboardPage() {
                   <Palette className="w-24 h-24 text-neutral-300" />
                 </div>
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-8">
-                <p className="text-sm text-white/80 mb-2">오늘의 작품</p>
-                <h2 className="text-3xl font-bold text-white mb-2">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-10">
+                <p className="text-xs uppercase tracking-widest text-white/60 mb-3">Today's Selection</p>
+                <h2 className="text-4xl font-light text-white mb-2 tracking-tight">
                   {featuredArtwork.title || 'Untitled'}
                 </h2>
-                <p className="text-white/90 mb-4">
+                <p className="text-white/90 text-sm uppercase tracking-wider mb-4">
                   {featuredArtwork.artist || 'Unknown Artist'}
                 </p>
-                <p className="text-white/80 text-sm max-w-2xl">
+                <p className="text-white/70 text-sm max-w-2xl font-light">
                   {personalityType ?
-                    `${personalityType}인 당신의 감성과 이 작품의 색채가 오늘 특히 잘 어울립니다` :
-                    '오늘 아침의 분위기와 완벽하게 어울리는 작품입니다'
+                    `Curated for ${personalityType} — This piece resonates with your aesthetic` :
+                    'Selected to complement your morning atmosphere'
                   }
                 </p>
               </div>
@@ -524,31 +520,37 @@ export default function DashboardPage() {
           </div>
         </motion.section>
 
-        {/* For You */}
+        {/* For You - Gallery Grid */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
+          className="space-y-6"
         >
-          <h2 className="text-2xl font-bold text-black mb-6">당신을 위한 추천</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="flex items-baseline gap-3">
+            <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">Curated For You</h2>
+            <div className="h-px flex-1 bg-neutral-200" />
+            <span className="text-xs text-neutral-400">AI Selected</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Artwork cards */}
             {forYouArtworks.map((artwork, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5 + index * 0.05 }}
-                className="bg-white rounded-lg border border-neutral-200 overflow-hidden cursor-pointer hover:shadow-lg transition-all group"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 + index * 0.03 }}
+                className="group cursor-pointer"
                 onClick={() => router.push('/gallery')}
               >
-                <div className="aspect-[4/3] bg-neutral-100 relative">
+                <div className="aspect-[4/3] bg-neutral-100 relative border border-neutral-200 hover:border-neutral-900 transition-all overflow-hidden mb-3">
                   {artwork.cloudinaryUrl || artwork.primaryImage ? (
                     <Image
                       src={artwork.cloudinaryUrl || artwork.primaryImage}
                       alt={artwork.title || 'Artwork'}
                       fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                   ) : (
@@ -556,18 +558,18 @@ export default function DashboardPage() {
                       <Palette className="w-12 h-12 text-neutral-300" />
                     </div>
                   )}
-                  {/* Reason badge */}
-                  <div className="absolute top-2 left-2 bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full">
-                    <p className="text-xs text-black font-medium">
-                      {artwork.reason}
-                    </p>
-                  </div>
+                  {/* Subtle overlay */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
                 </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-black mb-1 line-clamp-1 group-hover:underline">
+
+                <div className="space-y-1">
+                  <p className="text-xs text-neutral-400 uppercase tracking-wider line-clamp-1">
+                    {artwork.reason}
+                  </p>
+                  <h3 className="text-sm font-medium text-black line-clamp-1">
                     {artwork.title || 'Untitled'}
                   </h3>
-                  <p className="text-sm text-neutral-600 line-clamp-1">
+                  <p className="text-xs text-neutral-500">
                     {artwork.artist || 'Unknown Artist'}
                   </p>
                 </div>

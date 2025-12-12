@@ -47,7 +47,7 @@ const navGroups: NavGroup[] = [
     label: { en: 'Main', ko: '메인' },
     items: [
       { path: '/', icon: Home, label: { en: 'Home', ko: '홈' } },
-      { path: '/quiz', icon: Sparkles, label: { en: 'Discover', ko: '탐색' } },
+      { path: '/quiz', icon: Sparkles, label: { en: 'Discover', ko: '발견' } },
       { path: '/mmca-kim-chang-yeol', icon: Calendar, label: { en: 'MMCA · Kim', ko: 'MMCA · 김창열' } },
     ],
   },
@@ -169,7 +169,8 @@ export default function FloatingNav() {
               {navGroups.map((group) => {
                 const isGroupActive = useIsActive(pathname, group);
                 const hasChildren = group.items.length > 1;
-                const isDisabled = false; // 페이지 진입은 누구나 가능
+                const isDisabled = false;
+
                 return (
                   <div
                     key={group.id}
@@ -185,8 +186,8 @@ export default function FloatingNav() {
                           setOpenGroup(openGroup === group.id ? null : group.id);
                         }
                       }}
-                      className={`flex items-center gap-1 rounded-full px-3 py-2 text-sm font-medium transition-colors ${
-                        isGroupActive ? 'bg-white text-black' : 'text-white hover:bg-white/10'
+                      className={`flex items-center justify-center gap-1 px-3 h-[40px] text-base font-semibold transition-all ${
+                        isGroupActive ? 'text-white' : 'text-white/90 hover:text-white'
                       } ${isDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
                     >
                       {group.label[language]}
@@ -197,21 +198,19 @@ export default function FloatingNav() {
                     <AnimatePresence>
                       {hasChildren && openGroup === group.id && !isDisabled && (
                         <motion.div
-                          initial={{ opacity: 0, y: 6 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 6 }}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
                           transition={{ duration: 0.15 }}
-                          className="absolute left-0 top-full mt-2 min-w-[220px] overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-lg"
+                          className="absolute left-0 top-[calc(100%+4px)] min-w-[220px] overflow-hidden shadow-lg"
+                          style={{ backgroundColor: '#D4A520' }}
                         >
                           {group.items.map((item) => {
-                            const isActive = useIsActive(pathname, item);
                             return (
                               <button
                                 key={item.path}
                                 onClick={() => handleNavigate(item)}
-                                className={`flex w-full items-center gap-3 px-4 py-3 text-left text-sm transition-colors ${
-                                  isActive ? 'bg-neutral-100 text-black' : 'text-neutral-800 hover:bg-neutral-50'
-                                }`}
+                                className="flex w-full items-center gap-3 px-4 py-3 text-left text-base font-semibold transition-colors text-white/90 hover:bg-white/25 hover:text-white"
                               >
                                 <item.icon className="h-4 w-4" />
                                 <span>{item.label[language]}</span>
@@ -227,10 +226,10 @@ export default function FloatingNav() {
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <button
                 onClick={toggleDarkMode}
-                className="hidden items-center rounded-full border border-white/20 px-2 py-2 text-white transition hover:bg-white/10 lg:flex"
+                className="hidden items-center rounded-full border border-white/20 px-3 py-2.5 text-white text-sm font-semibold transition hover:bg-white/10 lg:flex"
                 aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
               >
                 {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -238,7 +237,7 @@ export default function FloatingNav() {
               {user ? (
                 <button
                   onClick={handleSignOut}
-                  className="flex items-center gap-2 rounded-full border border-white/20 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+                  className="flex items-center gap-2 rounded-full border border-white/20 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
                 >
                   <LogOut className="h-4 w-4" />
                   {language === 'ko' ? '로그아웃' : 'Logout'}
@@ -257,9 +256,123 @@ export default function FloatingNav() {
         </div>
       </div>
 
+      {/* Mobile nav trigger */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-b border-neutral-200">
+        <div className="flex items-center justify-between px-4 py-3">
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="p-2 -ml-2 rounded-lg hover:bg-neutral-100 transition-colors touch-manipulation"
+            aria-label="Open menu"
+          >
+            <Menu className="w-6 h-6 text-neutral-700" />
+          </button>
+          <button onClick={() => router.push('/')} className="hover:opacity-80 transition-opacity touch-manipulation">
+            <div className="text-xl font-semibold tracking-tight text-black">SAYU</div>
+          </button>
+          <div className="w-10" />
+        </div>
+      </div>
+
+      {/* Mobile drawer */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 z-[9998] lg:hidden"
+              onClick={() => setMobileOpen(false)}
+            />
+            <motion.nav
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="fixed left-0 top-0 h-full w-80 max-w-[85vw] bg-white z-[9999] shadow-2xl border-r border-neutral-200 lg:hidden overflow-y-auto"
+            >
+              <div className="p-6 border-b border-neutral-200 flex items-center justify-between">
+                <h2 className="text-xl font-bold text-neutral-900">{language === 'ko' ? '메뉴' : 'Menu'}</h2>
+                <button
+                  onClick={() => setMobileOpen(false)}
+                  className="p-2 -mr-2 rounded-lg hover:bg-neutral-100 transition-colors touch-manipulation"
+                  aria-label="Close menu"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+
+              <div className="px-6 py-4 space-y-6">
+                {navGroups.map((section) => (
+                  <div key={section.id} className="space-y-2">
+                    <div className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                      {section.label[language]}
+                    </div>
+                    <div className="rounded-2xl border border-neutral-200 overflow-hidden">
+                      {section.items.map((item, idx) => {
+                        const isActive = pathname === item.path;
+                        const isDisabled = item.requiresAuth && !user;
+                        return (
+                          <button
+                            key={item.path}
+                            onClick={() => !isDisabled && handleNavigate(item)}
+                            disabled={isDisabled}
+                            className={`flex w-full items-center gap-3 px-4 py-3 text-left text-sm transition-colors ${
+                              isActive
+                                ? 'bg-neutral-100 text-black'
+                                : isDisabled
+                                  ? 'text-neutral-400'
+                                  : 'text-neutral-800 hover:bg-neutral-50'
+                            } ${idx !== section.items.length - 1 ? 'border-b border-neutral-200' : ''}`}
+                          >
+                            <item.icon className="h-4 w-4" />
+                            <span className="flex-1">{item.label[language]}</span>
+                            {isDisabled && <span className="text-xs text-neutral-400">Login</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+
+                <div className="flex items-center justify-between gap-3">
+                  <button
+                    onClick={toggleDarkMode}
+                    className="flex items-center gap-2 rounded-full border border-neutral-200 px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+                  >
+                    {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                    {isDarkMode ? 'Light' : 'Dark'}
+                  </button>
+                  {user ? (
+                    <button
+                      onClick={handleSignOut}
+                      className="flex-1 flex items-center justify-center gap-2 rounded-full border border-neutral-200 px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      {language === 'ko' ? '로그아웃' : 'Logout'}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setMobileOpen(false);
+                        router.push('/login');
+                      }}
+                      className="flex-1 flex items-center justify-center gap-2 rounded-full bg-black px-3 py-2 text-sm font-semibold text-white hover:bg-neutral-900"
+                    >
+                      <LogIn className="h-4 w-4" />
+                      {language === 'ko' ? '로그인' : 'Login'}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </motion.nav>
+          </>
+        )}
+      </AnimatePresence>
+
       {/* Breadcrumb / Page indicator */}
       {currentLabel && (
-        <div className="hidden lg:block fixed top-16 left-0 right-0 z-[990] bg-white/95 backdrop-blur-sm border-b border-neutral-200">
+        <div className="hidden lg:block fixed top-[74px] left-0 right-0 z-[990] bg-white/95 backdrop-blur-sm border-b border-neutral-200">
           <div className="mx-auto max-w-6xl px-6 h-11 flex items-center gap-2 text-sm text-neutral-700">
             <button
               onClick={() => router.push('/')}

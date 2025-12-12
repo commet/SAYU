@@ -9,29 +9,29 @@ import { SystemInitializer, PerformanceMonitor, SpatialPreloader } from '@/compo
 import { WelcomeModalV2 } from '@/components/onboarding/WelcomeModalV2'
 
 const inter = Inter({ subsets: ['latin'] })
-const playfair = Playfair_Display({ 
+const playfair = Playfair_Display({
   subsets: ['latin'],
   variable: '--font-playfair',
   display: 'swap'
 })
-const cormorant = Cormorant_Garamond({ 
+const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
   variable: '--font-cormorant',
   weight: ['300', '400', '500', '600', '700'],
   display: 'swap'
 })
-const abril = Abril_Fatface({ 
+const abril = Abril_Fatface({
   subsets: ['latin'],
   variable: '--font-abril',
   weight: '400',
   display: 'swap'
 })
-const dancing = Dancing_Script({ 
+const dancing = Dancing_Script({
   subsets: ['latin'],
   variable: '--font-dancing',
   display: 'swap'
 })
-const gamja = Gamja_Flower({ 
+const gamja = Gamja_Flower({
   subsets: ['latin'],
   variable: '--font-gamja',
   weight: '400',
@@ -106,22 +106,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Preload critical fonts */}
-        <link
-          rel="preload"
-          href="https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa2JL7SUc.woff2"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preload"
-          href="https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvXDXbtXK-F2qC0s.woff2"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
-        
+
         {/* Critical CSS inline */}
         <style
           dangerouslySetInnerHTML={{
