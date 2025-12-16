@@ -216,10 +216,10 @@ export default function ProfilePage() {
       <Container size="2xl" className="py-12 space-y-8">
         {/* Profile Header */}
         <Card
-          className="p-8 border-neutral-200 shadow-sm"
+          className="p-8 border-neutral-200 shadow-xl backdrop-blur-md"
           style={{
             background:
-              'linear-gradient(135deg, rgba(212,165,32,0.12), rgba(212,165,32,0.06))'
+              'linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9))'
           }}
         >
           <div className="flex flex-col md:flex-row gap-8">
@@ -373,7 +373,7 @@ export default function ProfilePage() {
           <h2 className="text-xl font-bold text-black">{language === 'ko' ? '나의 통계' : 'My Stats'}</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {statGroups.map((group, groupIndex) => (
-              <Card key={group.title} className="p-5 border-neutral-200">
+              <Card key={group.title} className="p-5 border-neutral-200 shadow-md hover:shadow-xl transition-shadow">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-semibold text-neutral-700">{group.title}</h3>
                   <div className="h-px flex-1 bg-neutral-200 ml-4" />
@@ -385,7 +385,7 @@ export default function ProfilePage() {
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: (groupIndex * 3 + index) * 0.04 }}
-                      className="rounded-2xl bg-neutral-50 border border-neutral-200 p-3 text-center hover:shadow-sm transition-shadow"
+                      className="rounded-2xl bg-neutral-50 border border-neutral-200 p-3 text-center shadow-sm hover:shadow-lg transition-shadow"
                     >
                       <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center mx-auto mb-2">
                         {(() => {
@@ -414,13 +414,13 @@ export default function ProfilePage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Card className="p-4 border-neutral-200 bg-neutral-50">
+            <Card className="p-4 border-neutral-200 bg-white/95 backdrop-blur-md shadow-md">
               <p className="text-sm font-semibold text-neutral-700 mb-3">
                 {language === 'ko' ? '획득한 배지' : 'Unlocked Badges'}
               </p>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {unlockedBadges.map((badge) => (
-                  <div key={badge.id} className="rounded-2xl bg-white border border-neutral-200 p-4 text-center shadow-sm">
+                  <div key={badge.id} className="rounded-2xl bg-white border border-neutral-200 p-4 text-center shadow-md hover:shadow-lg transition-shadow">
                     <div className="text-3xl mb-2">{badge.icon}</div>
                     <p className="font-semibold text-black text-sm mb-1">{language === 'ko' ? badge.name.ko : badge.name.en}</p>
                     <p className="text-xs text-neutral-600">{language === 'ko' ? badge.description.ko : badge.description.en}</p>
@@ -432,7 +432,7 @@ export default function ProfilePage() {
               </div>
             </Card>
 
-            <Card className="p-4 border-neutral-200">
+            <Card className="p-4 border-neutral-200 shadow-md">
               <p className="text-sm font-semibold text-neutral-700 mb-3">
                 {language === 'ko' ? '진행 중' : 'In Progress'}
               </p>
@@ -467,7 +467,7 @@ export default function ProfilePage() {
 
         {/* APT Compatibility */}
         {userPersonalityType && (
-          <Card className="p-6 border-neutral-200 bg-neutral-50">
+          <Card className="p-6 border-neutral-200 bg-white/95 backdrop-blur-md shadow-xl">
             <div className="text-center space-y-3">
               <h3 className="text-lg font-bold text-black">
                 {language === 'ko' ? '나와 잘 맞는 APT 타입' : 'Compatible APT Types'}
@@ -481,7 +481,7 @@ export default function ProfilePage() {
                   return (
                     <div
                       key={type}
-                      className="px-4 py-3 bg-white border-2 border-neutral-200 rounded-lg hover:border-black transition-colors cursor-pointer"
+                      className="px-4 py-3 bg-white border-2 border-neutral-200 rounded-lg shadow-md hover:shadow-xl hover:border-black transition-all cursor-pointer"
                     >
                       <div className="flex items-center gap-2">
                         <span className="text-2xl">{animal?.emoji || '🦊'}</span>

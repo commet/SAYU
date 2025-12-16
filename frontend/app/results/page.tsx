@@ -306,7 +306,7 @@ function ResultsContent() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
-          className="bg-neutral-50 rounded-2xl p-6 border border-neutral-200"
+          className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl p-6 border border-neutral-200"
         >
           <div className="text-center mb-6">
             <h2 className="text-sm font-medium text-neutral-600 mb-1">
@@ -336,7 +336,7 @@ function ResultsContent() {
         >
           <button
             onClick={() => setShowShareModal(true)}
-            className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 bg-black text-white rounded-lg hover:bg-neutral-800 transition-colors font-medium flex-1 sm:flex-none"
+            className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 bg-black text-white rounded-lg shadow-md hover:shadow-xl hover:bg-[#D4A520] transition-all duration-300 font-medium flex-1 sm:flex-none"
           >
             <Share2 size={16} className="sm:w-[18px] sm:h-[18px]" />
             <span className="text-[10px] sm:text-base">
@@ -346,7 +346,7 @@ function ResultsContent() {
 
           <button
             onClick={() => router.push('/profile/art-profile?from=quiz')}
-            className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 bg-black text-white rounded-lg hover:bg-neutral-800 transition-all font-medium flex-1 sm:flex-none"
+            className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 bg-black text-white rounded-lg shadow-md hover:shadow-xl hover:bg-[#D4A520] transition-all duration-300 font-medium flex-1 sm:flex-none"
           >
             <Sparkles size={16} className="sm:w-[18px] sm:h-[18px]" />
             <span className="text-[10px] sm:text-base">
@@ -356,7 +356,7 @@ function ResultsContent() {
 
           <button
             onClick={() => router.push(`/personality-overview?from=${results.personalityType}`)}
-            className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 border-2 border-black text-black hover:bg-black hover:text-white transition-colors font-medium flex-1 sm:flex-none"
+            className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 border-2 border-black text-black shadow-md hover:shadow-xl hover:bg-black hover:text-white transition-all duration-300 font-medium flex-1 sm:flex-none"
           >
             <Palette size={16} className="sm:w-[18px] sm:h-[18px]" />
             <span className="text-[10px] sm:text-base">
@@ -427,7 +427,7 @@ function ResultsContent() {
                     router.push('/artists');
                   }
                 }}
-                className="inline-flex items-center gap-2 px-5 py-2 border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-colors text-sm"
+                className="inline-flex items-center gap-2 px-5 py-2 border-2 border-black text-black rounded-lg shadow-md hover:shadow-xl hover:bg-black hover:text-white transition-all duration-300 text-sm"
               >
                 <Palette size={18} />
                 <span>{language === 'ko' ? '더 많은 작품 탐색하기' : 'Explore More Artworks'}</span>
@@ -447,7 +447,7 @@ function ResultsContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.5 }}
-                className="bg-white rounded-xl overflow-hidden border border-neutral-200 hover:border-black transition-all"
+                className="bg-white rounded-xl overflow-hidden border border-neutral-200 shadow-md hover:shadow-xl hover:border-black transition-all"
               >
                 <div className="h-32 bg-neutral-100 flex items-center justify-center">
                   <div className="text-5xl">🎨</div>
@@ -485,7 +485,7 @@ function ResultsContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.6 }}
-                className="bg-white rounded-xl overflow-hidden border border-neutral-200 hover:border-black transition-all"
+                className="bg-white rounded-xl overflow-hidden border border-neutral-200 shadow-md hover:shadow-xl hover:border-black transition-all"
               >
                 <div className="h-32 bg-neutral-100 flex items-center justify-center">
                   <div className="text-5xl">🏛️</div>
@@ -529,7 +529,7 @@ function ResultsContent() {
                     router.push('/exhibitions');
                   }
                 }}
-                className="inline-flex items-center gap-2 px-5 py-2 border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-colors text-sm"
+                className="inline-flex items-center gap-2 px-5 py-2 border-2 border-black text-black rounded-lg shadow-md hover:shadow-xl hover:bg-black hover:text-white transition-all duration-300 text-sm"
               >
                 <MapPin size={18} />
                 <span>{language === 'ko' ? '맞춤 전시회 추천받기' : 'Get Exhibition Recommendations'}</span>
@@ -757,7 +757,7 @@ function ResultsContent() {
                   });
                   router.push(`/login?${params.toString()}`);
                 }}
-                className="px-6 sm:px-8 py-3 sm:py-4 bg-black text-white rounded-lg hover:bg-neutral-800 transition-all font-medium text-base sm:text-lg flex items-center justify-center gap-2"
+                className="px-6 sm:px-8 py-3 sm:py-4 bg-black text-white rounded-lg shadow-md hover:shadow-xl hover:bg-[#D4A520] transition-all duration-300 font-medium text-base sm:text-lg flex items-center justify-center gap-2"
               >
                 {language === 'ko' ? '결과 저장하고 시작하기' : 'Save Results & Start'}
                 <ArrowRight className="w-5 h-5" />
