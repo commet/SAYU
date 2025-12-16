@@ -246,7 +246,7 @@ export default function HomePage() {
                   animate={{ opacity: currentArtwork === index ? 1 : 0 }}
                   transition={{ duration: 1 }}
                 >
-                  <div className="relative w-full h-full">
+                  <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-xl">
                     <Image
                       src={artwork.image}
                       alt={artwork.title}
@@ -263,7 +263,7 @@ export default function HomePage() {
                 </motion.div>
               ))}
 
-              <div className="absolute bottom-8 right-8 flex gap-2">
+              <div className="absolute bottom-8 right-8 flex gap-2 z-10">
                 {featuredArtworks.map((_, index) => (
                   <button
                     key={index}
@@ -309,7 +309,7 @@ export default function HomePage() {
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
-              <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-xl" style={{ perspective: '1000px' }}>
+              <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-neutral-200 bg-white/95 backdrop-blur-md shadow-xl" style={{ perspective: '1000px' }}>
                 <AnimatePresence mode="wait">
                   {aptSlides.map((slide, index) => index === currentAptSlide && (
                     <motion.div
@@ -424,7 +424,7 @@ export default function HomePage() {
       <section className="py-20 bg-neutral-950">
         <Container size="2xl">
           <div className="grid grid-cols-2 gap-16 items-center">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-900 shadow-sm p-6">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/95 backdrop-blur-md shadow-xl p-6">
               <div className="flex h-full flex-col gap-3">
                 <div className="relative flex-1 overflow-hidden">
                   <motion.div
@@ -442,7 +442,7 @@ export default function HomePage() {
                     }}
                   >
                     {[...galleryArtworks, ...galleryArtworks, ...galleryArtworks].map((art, idx) => (
-                      <div key={`${art.id}-${idx}`} className="relative w-[200px] aspect-[3/4] rounded-xl overflow-hidden border border-neutral-800 flex-shrink-0">
+                      <div key={`${art.id}-${idx}`} className="relative w-[200px] aspect-[3/4] rounded-xl overflow-hidden border border-neutral-800 shadow-lg flex-shrink-0">
                         <Image src={art.image} alt={art.title} fill className="object-cover" />
                         <div className="absolute bottom-2 left-2 right-2 text-white text-xs drop-shadow">
                           <p className="font-semibold truncate">{art.title}</p>
@@ -496,7 +496,7 @@ export default function HomePage() {
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
-            <div className="bg-neutral-50 border border-neutral-200 rounded-3xl p-6 space-y-3">
+            <div className="bg-white/95 backdrop-blur-md border border-neutral-200 rounded-2xl shadow-xl p-6 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <MessageSquare className="w-5 h-5 text-neutral-700" />
@@ -506,7 +506,7 @@ export default function HomePage() {
               </div>
               <div className="space-y-2">
                 {communityFeeds.map((feed) => (
-                  <div key={feed.name} className="rounded-2xl bg-white border border-neutral-200 p-4 flex items-center justify-between">
+                  <div key={feed.name} className="rounded-xl bg-white border border-neutral-200 shadow-md p-4 flex items-center justify-between hover:shadow-lg transition-shadow">
                     <div>
                       <p className="text-sm font-semibold text-neutral-900">@{feed.name}</p>
                       <p className="text-sm text-neutral-700">{feed.msg}</p>
@@ -545,7 +545,7 @@ export default function HomePage() {
               <div className="grid grid-cols-3 gap-6">
                 {collectionArtworks.map((art) => (
                   <div key={art.id} className="group cursor-pointer">
-                    <div className="relative aspect-[4/5] bg-neutral-200 overflow-hidden mb-3 rounded-xl border border-neutral-200">
+                    <div className="relative aspect-[4/5] bg-neutral-200 overflow-hidden mb-3 rounded-2xl border border-neutral-200 shadow-lg hover:shadow-xl transition-all duration-500">
                       <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-105 transition duration-500" />
                     </div>
                     <p className="font-semibold mb-1 text-black">{art.title}</p>
@@ -556,7 +556,7 @@ export default function HomePage() {
             </div>
 
             {/* Final CTA */}
-            <div className="text-center py-16 px-8 space-y-6">
+            <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl text-center py-16 px-8 space-y-6">
               <h2 className="text-6xl font-bold text-black">지금 시작하세요</h2>
               <p className="text-xl text-neutral-700 leading-relaxed">
                 3-5분이면 당신만의 Art Persona Type을 발견할 수 있습니다.
