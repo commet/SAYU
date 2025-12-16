@@ -336,172 +336,146 @@ export const MobileQuiz: React.FC = () => {
         </div>
       </div>
 
-      {/* 질문 콘텐츠 - Frame Style */}
-      <div className="pt-4 pb-8 px-4 min-h-screen flex flex-col justify-center">
+      {/* 질문 콘텐츠 - Floating Card Style (웹과 동일한 디자인) */}
+      <div className="pt-20 pb-8 px-4 min-h-screen flex flex-col justify-center">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentQuestion}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.05 }}
-            transition={{ duration: 0.3 }}
-            className="mx-auto max-w-md relative"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mx-auto max-w-md space-y-5"
           >
-            {/* Narrative Setup Box */}
-            {question.narrative && (question.narrative.setup || question.narrative.transition || question.narrative.setup_ko || question.narrative.transition_ko) && (
-              <motion.div
-                className="mb-6 mx-4 p-4 rounded-2xl backdrop-blur-md border border-white/20"
-                style={{ 
-                  background: currentQuestion >= 12 
-                    ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(134, 239, 172, 0.08) 100%)'
-                    : currentQuestion >= 3 && currentQuestion <= 7 
-                    ? 'linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(147, 197, 253, 0.15) 100%)'
-                    : 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(219, 39, 119, 0.1) 100%)',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
-                }}
-                initial={{ opacity: 0 }}
-                animate={{ 
-                  opacity: componentVisibility.setup ? 1 : 0
-                }}
-                transition={{ 
-                  duration: 0.5,
-                  ease: "easeOut"
-                }}
-              >
-                <p className="text-base leading-relaxed font-light text-white/90 italic text-center"
-                   style={{ letterSpacing: '-0.01em', lineHeight: '1.6', textShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
-                  {(language === 'ko' 
-                    ? (question.narrative.setup_ko || question.narrative.transition_ko)
-                    : (question.narrative.setup || question.narrative.transition))
-                    ?.split('\n')
-                    .map((line, index, array) => (
-                      <Fragment key={index}>
-                        {line}
-                        {index < array.length - 1 && <br />}
-                      </Fragment>
-                    ))}
-                </p>
-              </motion.div>
-            )}
-
-            {/* Main Question */}
-            <motion.h2 
-              className="font-bold text-center mb-6 leading-tight"
-              style={{ 
-                fontSize: '1.25rem', 
-                letterSpacing: '-0.03em',
-                background: currentQuestion >= 12
-                  ? 'linear-gradient(180deg, #ffffff 0%, #22c55e 100%)'
-                  : currentQuestion >= 3 && currentQuestion <= 7 
-                  ? 'linear-gradient(180deg, #ffffff 0%, #60a5fa 100%)'
-                  : 'linear-gradient(180deg, #ffffff 0%, #fbbf24 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                textShadow: currentQuestion >= 12
-                  ? '0 0 40px rgba(34, 197, 94, 0.6)'
-                  : currentQuestion >= 3 && currentQuestion <= 7
-                  ? '0 0 40px rgba(59, 130, 246, 0.6)'
-                  : '0 0 40px rgba(251, 191, 36, 0.5)',
-                filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))'
+            {/* Setup + Question Combined Card (웹 버전과 동일) */}
+            <motion.div
+              className="bg-white/95 backdrop-blur-md rounded-2xl px-5 py-6 shadow-xl"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{
+                opacity: componentVisibility.setup && componentVisibility.question ? 1 : 0,
+                y: componentVisibility.setup && componentVisibility.question ? 0 : 10
               }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ 
-                opacity: componentVisibility.question ? 1 : 0,
-                y: componentVisibility.question ? 0 : 20
-              }}
-              transition={{ 
-                duration: 0.5,
-                ease: "easeOut"
-              }}
-            >
-              {(language === 'ko' && question.question_ko ? question.question_ko : question.question)
-                .split('\n')
-                .map((line, index) => (
-                  <Fragment key={index}>
-                    {line}
-                    {index < (language === 'ko' && question.question_ko ? question.question_ko : question.question).split('\n').length - 1 && <br />}
-                  </Fragment>
-                ))}
-            </motion.h2>
-
-            {/* Choice Cards */}
-            <motion.div 
-              className="space-y-4 px-6"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ 
-                opacity: componentVisibility.choices ? 1 : 0,
-                scale: componentVisibility.choices ? 1 : 0.95
-              }}
-              transition={{ 
-                duration: 0.4,
+              transition={{
+                duration: 0.6,
                 ease: [0.4, 0, 0.2, 1]
               }}
             >
-              {question.options.map((option, index) => (
+              {/* Narrative Setup - Left Gold Accent */}
+              {question.narrative && (question.narrative.setup || question.narrative.transition || question.narrative.setup_ko || question.narrative.transition_ko) && (
                 <motion.div
+                  className="border-l-3 pl-4 mb-6"
+                  style={{ borderLeftWidth: '3px', borderLeftColor: '#D4A520' }}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{
+                    opacity: componentVisibility.setup ? 1 : 0,
+                    x: componentVisibility.setup ? 0 : -10
+                  }}
+                  transition={{
+                    duration: 0.5,
+                    delay: 0.1
+                  }}
+                >
+                  <p className="text-sm leading-relaxed text-gray-600 font-normal" style={{ fontFamily: 'var(--font-cormorant), serif' }}>
+                    {(language === 'ko'
+                      ? (question.narrative.setup_ko || question.narrative.transition_ko)
+                      : (question.narrative.setup || question.narrative.transition))
+                      ?.split('\n')
+                      .map((line, index, array) => (
+                        <Fragment key={index}>
+                          {line}
+                          {index < array.length - 1 && <br />}
+                        </Fragment>
+                      ))}
+                  </p>
+                </motion.div>
+              )}
+
+              {/* Question - Emphasized */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{
+                  opacity: componentVisibility.question ? 1 : 0
+                }}
+                transition={{
+                  duration: 0.5,
+                  delay: 0.2
+                }}
+              >
+                <h2 className="text-xl sm:text-2xl font-normal text-center leading-relaxed text-gray-900" style={{ fontFamily: 'var(--font-cormorant), serif' }}>
+                  {(language === 'ko' && question.question_ko ? question.question_ko : question.question)
+                    .split('\n')
+                    .map((line, index) => (
+                      <Fragment key={index}>
+                        {line}
+                        {index < (language === 'ko' && question.question_ko ? question.question_ko : question.question).split('\n').length - 1 && <br />}
+                      </Fragment>
+                    ))}
+                </h2>
+              </motion.div>
+            </motion.div>
+
+            {/* Choice Buttons - Floating Cards */}
+            <motion.div
+              className="space-y-3"
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: componentVisibility.choices ? 1 : 0
+              }}
+              transition={{
+                duration: 0.4,
+                ease: [0.4, 0, 0.2, 1],
+                delay: 0.2
+              }}
+            >
+              {question.options.map((option, index) => (
+                <motion.button
                   key={option.id}
                   initial={{ opacity: 0, y: 20 }}
-                  animate={{ 
+                  animate={{
                     opacity: componentVisibility.choices ? 1 : 0,
                     y: componentVisibility.choices ? 0 : 20
                   }}
-                  transition={{ 
-                    delay: componentVisibility.choices ? index * 0.15 : 0,
-                    duration: 0.3,
+                  transition={{
+                    delay: componentVisibility.choices ? 0.2 + index * 0.1 : 0,
+                    duration: 0.4,
                     ease: "easeOut"
                   }}
                   whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    if (!isTransitioning) {
+                      setSelectedOption(option.id);
+                      setTimeout(() => handleChoice(option.id), 200);
+                    }
+                  }}
+                  disabled={isTransitioning}
+                  className={cn(
+                    "w-full p-4 bg-white/75 backdrop-blur-md hover:bg-white/90 active:bg-white/95 text-left rounded-xl border border-white/60 transition-all group disabled:opacity-50",
+                    selectedOption === option.id && "bg-white/90 shadow-xl"
+                  )}
                 >
-                  <div
-                    className={cn(
-                      "cursor-pointer group relative overflow-hidden rounded-xl p-4 transition-all",
-                      "bg-white/70 backdrop-blur-md border-2",
-                      selectedOption === option.id ? "border-purple-500 bg-white/80" : "border-white/40",
-                      isTransitioning && "pointer-events-none opacity-50"
-                    )}
-                    onClick={() => {
-                      if (!isTransitioning) {
-                        setSelectedOption(option.id);
-                        setTimeout(() => handleChoice(option.id), 200);
-                      }
-                    }}
-                  >
-                    {/* Background Pattern */}
-                    <div className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity">
-                      <div className="absolute inset-0" style={{
-                        backgroundImage: `radial-gradient(circle at 2px 2px, #8b7355 1px, transparent 1px)`,
-                        backgroundSize: '20px 20px'
-                      }} />
+                  <div className="flex flex-col gap-3">
+                    {/* Option Label */}
+                    <div className="flex justify-between items-center">
+                      <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-900 text-white font-bold text-base">
+                        {index === 0 ? 'A' : 'B'}
+                      </span>
+                      <ChevronRight className="w-5 h-5 text-gray-500 group-hover:text-gray-900 transition-all flex-shrink-0" />
                     </div>
 
-                    <div className="relative z-10 flex items-center justify-between">
-                      <div className="flex items-center gap-3 flex-1">
-                        <span className="inline-flex items-center justify-center w-10 h-10 rounded-full text-white font-bold text-sm"
-                          style={{
-                            background: index === 0 
-                              ? 'linear-gradient(135deg, #1a1a1a 0%, #434343 100%)' 
-                              : 'linear-gradient(135deg, #8b7355 0%, #d4a574 100%)',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.2)',
-                            border: '1px solid rgba(255,255,255,0.1)'
-                          }}>
-                          {index === 0 ? 'A' : 'B'}
-                        </span>
-                        <div className="flex-1">
-                          <h4 className="text-[16px] font-normal mb-1 text-gray-800 leading-snug whitespace-pre-line" style={{ letterSpacing: '-0.025em' }}>
-                            {language === 'ko' && option.text_ko ? option.text_ko : option.text}
-                          </h4>
-                          {option.subtext && (
-                            <p className="text-gray-600 text-sm leading-snug whitespace-pre-line">
-                              {language === 'ko' && option.subtext_ko ? option.subtext_ko : option.subtext}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-gray-600 group-hover:text-gray-800 group-hover:translate-x-1 transition-all flex-shrink-0" />
+                    {/* Text Content */}
+                    <div>
+                      <h4 className="text-base font-medium mb-1 text-gray-900 leading-relaxed" style={{ fontFamily: 'var(--font-cormorant), serif' }}>
+                        {language === 'ko' && option.text_ko ? option.text_ko : option.text}
+                      </h4>
+
+                      {option.subtext && (
+                        <p className="text-sm text-gray-600 leading-relaxed">
+                          {language === 'ko' && option.subtext_ko ? option.subtext_ko : option.subtext}
+                        </p>
+                      )}
                     </div>
                   </div>
-                </motion.div>
+                </motion.button>
               ))}
             </motion.div>
 
