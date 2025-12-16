@@ -188,9 +188,9 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-white text-black">
       {/* Hero */}
-      <section ref={heroRef} className="relative flex items-start pt-16 lg:pt-20 pb-20">
+      <section ref={heroRef} className="relative flex items-start pt-8 md:pt-16 lg:pt-20 pb-12 md:pb-20">
         <Container size="2xl">
-          <div className="grid grid-cols-2 gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center">
             {/* Left - Typography */}
             <div>
               <motion.div
@@ -198,12 +198,12 @@ export default function HomePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
               >
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-[2px] bg-black" />
-                  <span className="text-xs font-medium tracking-[0.2em] uppercase text-black">Art Discovery Platform</span>
+                <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+                  <div className="w-8 md:w-12 h-[2px] bg-black" />
+                  <span className="text-[10px] md:text-xs font-medium tracking-[0.15em] md:tracking-[0.2em] uppercase text-black">Art Discovery Platform</span>
                 </div>
 
-                <h1 className="text-7xl font-bold leading-[1.1] tracking-tight mb-8" style={{ color: '#000000' }}>
+                <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold leading-[1.1] tracking-tight mb-6 md:mb-8" style={{ color: '#000000' }}>
                   예술과 함께
                   <br />
                   나만의 취향을
@@ -211,33 +211,33 @@ export default function HomePage() {
                   찾아가는 시간
                 </h1>
 
-                <p className="text-xl leading-relaxed mb-10 text-black max-w-lg">
+                <p className="text-sm md:text-lg lg:text-xl leading-relaxed mb-6 md:mb-10 text-black max-w-lg">
                   당신만의 예술적 성향을 발견하고, 세계의 명작들을 탐험하며, 같은 취향의 사람들과 연결되세요.
                 </p>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3 md:gap-4 flex-wrap">
                   <button
                     onClick={() => router.push('/quiz')}
-                    className="px-6 py-3 bg-black text-white rounded-xl font-medium flex items-center gap-2 transition-all duration-300 hover:bg-[#D4A520] hover:text-white"
+                    className="px-4 md:px-6 py-2.5 md:py-3 bg-black text-white rounded-lg md:rounded-xl font-medium flex items-center gap-2 transition-all duration-300 hover:bg-[#D4A520] hover:text-white text-sm md:text-base"
                   >
-                    <Sparkles className="w-5 h-5" />
+                    <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
                     APT 테스트 시작
                   </button>
                   <button
                     onClick={() => router.push('/gallery')}
-                    className="text-base font-medium text-black hover:text-neutral-600 transition-colors flex items-center gap-2"
+                    className="text-sm md:text-base font-medium text-black hover:text-neutral-600 transition-colors flex items-center gap-2"
                   >
                     둘러보기
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4" />
                   </button>
                 </div>
 
-                <div className="mt-12 text-sm text-black">오늘 {todayUsers}명이 발견했어요.</div>
+                <div className="mt-8 md:mt-12 text-xs md:text-sm text-black">오늘 {todayUsers}명이 발견했어요.</div>
               </motion.div>
             </div>
 
             {/* Right - Artwork */}
-            <div className="relative h-[600px]">
+            <div className="relative h-[300px] md:h-[400px] lg:h-[600px]">
               {featuredArtworks.map((artwork, index) => (
                 <motion.div
                   key={artwork.id}
@@ -278,26 +278,26 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 border-t border-neutral-200">
+      <section className="py-12 md:py-20 border-t border-neutral-200">
         <Container size="2xl">
-          <div className="text-center mb-20">
-            <h2 className="text-5xl font-bold mb-4 text-black">SAYU가 제공하는 경험</h2>
-            <p className="text-xl text-black">예술을 통한 자기 발견의 여정</p>
+          <div className="text-center mb-12 md:mb-20">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4 text-black">SAYU가 제공하는 경험</h2>
+            <p className="text-base md:text-lg lg:text-xl text-black">예술을 통한 자기 발견의 여정</p>
           </div>
 
-          <div className="space-y-24">
+          <div className="space-y-16 md:space-y-24">
             {/* Feature 1 - APT Test */}
-            <div className="grid grid-cols-2 gap-16 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center">
               <div>
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-black text-white text-xs font-medium mb-4 rounded-full">
                   <Sparkles className="w-3 h-3" />APT 테스트
                 </div>
-                <h3 className="text-4xl font-bold mb-6 text-black">
+                <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6 text-black">
                   나만의 Art Persona
                   <br />
                   발견하기
                 </h3>
-                <p className="text-lg leading-relaxed text-black mb-8">
+                <p className="text-sm md:text-base lg:text-lg leading-relaxed text-black mb-6 md:mb-8">
                   16가지 예술 성향 중 당신의 유형을 찾아보세요. 3-5분의 테스트로 당신이 어떤 방식으로 예술을 감상하고, 어떤 작품에 끌리는지 알 수 있습니다.
                 </p>
                 <Button
@@ -421,9 +421,9 @@ export default function HomePage() {
       </section>
 
       {/* Gallery Section - DARK THEME FULL WIDTH */}
-      <section className="py-20 bg-neutral-950">
+      <section className="py-12 md:py-20 bg-neutral-950">
         <Container size="2xl">
-          <div className="grid grid-cols-2 gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center">
             <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/95 backdrop-blur-md shadow-xl p-6">
               <div className="flex h-full flex-col gap-3">
                 <div className="relative flex-1 overflow-hidden">
@@ -464,8 +464,8 @@ export default function HomePage() {
             </div>
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#D4A520] text-white text-xs font-medium mb-4 rounded-full">갤러리</div>
-              <h3 className="text-4xl font-bold mb-6 text-white">세계의 명작을 한곳에서</h3>
-              <p className="text-lg leading-relaxed text-neutral-300 mb-8">10,000점 이상의 큐레이션된 작품을 탐험하세요. 당신의 Art Persona Type에 맞춰 추천되는 작품부터, 시대와 장르를 넘나드는 명작까지.</p>
+              <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6 text-white">세계의 명작을 한곳에서</h3>
+              <p className="text-sm md:text-base lg:text-lg leading-relaxed text-neutral-300 mb-6 md:mb-8">10,000점 이상의 큐레이션된 작품을 탐험하세요. 당신의 Art Persona Type에 맞춰 추천되는 작품부터, 시대와 장르를 넘나드는 명작까지.</p>
               <Button
                 variant="outline"
                 className="bg-white text-black border-white hover:bg-[#D4A520] hover:text-white hover:border-[#D4A520]"
@@ -556,9 +556,9 @@ export default function HomePage() {
             </div>
 
             {/* Final CTA */}
-            <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl text-center py-16 px-8 space-y-6">
-              <h2 className="text-6xl font-bold text-black">지금 시작하세요</h2>
-              <p className="text-xl text-neutral-700 leading-relaxed">
+            <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl text-center py-8 md:py-12 lg:py-16 px-4 md:px-8 space-y-4 md:space-y-6">
+              <h2 className="text-3xl md:text-4xl lg:text-6xl font-bold text-black">지금 시작하세요</h2>
+              <p className="text-sm md:text-base lg:text-xl text-neutral-700 leading-relaxed">
                 3-5분이면 당신만의 Art Persona Type을 발견할 수 있습니다.
                 <br />
                 오늘 {todayUsers}명이 이미 발견했어요.
