@@ -1,24 +1,20 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, Fragment } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthGate } from '@/hooks/useAuthGate';
 import { useActivityTracker } from '@/hooks/useActivityTracker';
 import toast from 'react-hot-toast';
-import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 import {
-  Calendar,
-  MapPin,
-  Clock,
   Search,
   Eye,
   Heart,
   Sparkles,
-  Map as MapIcon,
-  Ticket,
+  Clock,
   AlertCircle,
   Loader2,
   TrendingUp,
@@ -27,19 +23,6 @@ import {
   ChevronDown,
   ChevronUp
 } from 'lucide-react';
-
-// Dynamic import for map component (client-side only)
-const ExhibitionMap = dynamic(
-  () => import('@/components/exhibitions/ExhibitionMap'),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="w-full h-[400px] bg-neutral-100 flex items-center justify-center rounded-lg">
-        <Loader2 className="w-8 h-8 animate-spin text-neutral-400" />
-      </div>
-    )
-  }
-);
 
 interface TransformedExhibition {
   id: string;
@@ -60,15 +43,11 @@ interface TransformedExhibition {
 
 // Skeleton loader component
 const ExhibitionSkeleton = () => (
-  <div className="bg-white rounded-lg border border-neutral-200 overflow-hidden shadow-sm animate-pulse">
-    <div className="p-4 space-y-3">
-      <div className="h-5 bg-neutral-200 rounded w-3/4" />
-      <div className="space-y-2">
-        <div className="h-3 bg-neutral-200 rounded w-1/2" />
-        <div className="h-3 bg-neutral-200 rounded w-2/3" />
-      </div>
-      <div className="h-6 bg-neutral-200 rounded w-16" />
-    </div>
+  <div className="animate-pulse">
+    <div className="aspect-[3/4] bg-neutral-200 mb-5" />
+    <div className="h-4 bg-neutral-200 rounded w-3/4 mb-2" />
+    <div className="h-3 bg-neutral-200 rounded w-1/2 mb-2" />
+    <div className="h-3 bg-neutral-200 rounded w-1/3" />
   </div>
 );
 
@@ -79,7 +58,7 @@ export default function ExhibitionsPage() {
   const { trackExhibitionView } = useActivityTracker();
 
   // State management
-  const [activeTab, setActiveTab] = useState<'discover' | 'near' | 'trending' | 'all'>('discover');
+  const [filter, setFilter] = useState('all');
   const [exhibitions, setExhibitions] = useState<TransformedExhibition[]>([]);
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -291,7 +270,7 @@ export default function ExhibitionsPage() {
     }
 
     // Search filter (for All tab)
-    if (searchQuery && activeTab === 'all') {
+    if (searchQuery && filter === 'all') {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(ex =>
         ex.title.toLowerCase().includes(query) ||
@@ -301,7 +280,7 @@ export default function ExhibitionsPage() {
     }
 
     return filtered;
-  }, [exhibitions, selectedCity, searchQuery, activeTab]);
+  }, [exhibitions, selectedCity, searchQuery, filter]);
 
   // Extract unique cities
   const cities = useMemo(() => {
@@ -309,173 +288,168 @@ export default function ExhibitionsPage() {
     return Array.from(locs);
   }, [exhibitions]);
 
-  // Stats
-  const stats = useMemo(() => {
-    const ongoing = exhibitions.filter(ex => ex.status === 'ongoing').length;
-    const upcoming = exhibitions.filter(ex => ex.status === 'upcoming').length;
-    return { ongoing, upcoming };
-  }, [exhibitions]);
-
   // Exhibition Card Component
-  const ExhibitionCard = ({ exhibition, showBadge }: { exhibition: TransformedExhibition; showBadge?: 'new' | 'ending' | null }) => {
+  const ExhibitionCard = ({ exhibition, index }: { exhibition: TransformedExhibition; index: number }) => {
     const daysLeft = getDaysUntilEnd(exhibition.endDate);
+    const isNew = isNewExhibition(exhibition.startDate);
 
     return (
       <motion.div
+        key={exhibition.id}
         initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ delay: index * 0.05, duration: 0.5 }}
+        whileHover={{ y: -8 }}
         onClick={() => handleExhibitionClick(exhibition)}
-        className="bg-white rounded-lg border border-neutral-200 overflow-hidden hover:shadow-lg transition-all cursor-pointer group"
+        className="group cursor-pointer"
       >
-        <div className="p-4">
-          {/* Header with badges and save button */}
-          <div className="flex justify-between items-start mb-3">
-            <div className="flex gap-2">
-              {showBadge === 'new' && (
-                <span className="inline-flex items-center gap-1 bg-black text-white px-2 py-1 rounded text-xs font-medium">
-                  <Sparkles className="w-3 h-3" />
-                  NEW
-                </span>
+        {/* Poster Image */}
+        <div className="aspect-[3/4] border border-neutral-200 group-hover:border-neutral-900 transition-colors duration-500 overflow-hidden mb-5 relative bg-neutral-50">
+          {exhibition.image ? (
+            <Image
+              src={exhibition.image}
+              alt={exhibition.title}
+              fill
+              className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-out"
+            />
+          ) : (
+            <div className="w-full h-full bg-neutral-200 grayscale group-hover:grayscale-0 transition-all duration-700" />
+          )}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-700" />
+        </div>
+
+        {/* Info */}
+        <div className="space-y-2 px-1">
+          <div className="flex justify-between items-start">
+            <div className="flex items-center gap-2">
+              <p className="text-[10px] md:text-xs uppercase tracking-wider text-neutral-400">
+                {exhibition.status}
+              </p>
+              {isNew && (
+                <span className="text-[10px] md:text-xs uppercase tracking-wider text-blue-500 font-medium">New</span>
               )}
-              {showBadge === 'ending' && daysLeft > 0 && (
-                <span className="inline-flex items-center gap-1 bg-red-500 text-white px-2 py-1 rounded text-xs font-medium">
-                  <Clock className="w-3 h-3" />
-                  D-{daysLeft}
-                </span>
-              )}
-              {exhibition.featured && (
-                <span className="inline-flex items-center gap-1 bg-neutral-100 text-black px-2 py-1 rounded text-xs font-medium">
-                  <Star className="w-3 h-3" />
-                  추천
-                </span>
+              {daysLeft > 0 && daysLeft <= 14 && (
+                <span className="text-[10px] md:text-xs uppercase tracking-wider text-red-500 font-medium">D-{daysLeft}</span>
               )}
             </div>
-            <button
-              onClick={(e) => handleSaveExhibition(exhibition, e)}
-              className="p-1 hover:bg-neutral-100 rounded-full transition-colors"
-            >
-              <Heart
-                className={cn(
-                  "w-4 h-4 transition-colors",
-                  savedExhibitions.has(exhibition.id)
-                    ? "fill-red-500 text-red-500"
-                    : "text-neutral-400 group-hover:text-red-500"
-                )}
-              />
-            </button>
+            <p className="text-[10px] md:text-xs text-neutral-400 font-light">
+              {new Date(exhibition.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(exhibition.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            </p>
           </div>
-
-          <h3 className="font-bold text-lg text-black mb-2 line-clamp-2 group-hover:underline">
+          
+          <h3 className="text-base md:text-lg font-medium text-black line-clamp-2 group-hover:text-neutral-600 transition-colors duration-300">
             {exhibition.title}
           </h3>
-
-          <div className="space-y-1 text-sm text-neutral-600 mb-3">
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4" />
-              <span className="truncate">{exhibition.venue}</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              <span className="text-xs">
-                {new Date(exhibition.startDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })} ~
-                {new Date(exhibition.endDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
-              </span>
-            </div>
-
-            {exhibition.price && (
-              <div className="flex items-center gap-2">
-                <Ticket className="w-4 h-4" />
-                <span className="text-xs">{exhibition.price}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Stats */}
-          <div className="flex items-center gap-4 pt-3 border-t border-neutral-100 text-xs text-neutral-500">
-            <div className="flex items-center gap-1">
-              <Eye className="w-3 h-3" />
-              <span>{exhibition.viewCount?.toLocaleString() || 0}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Heart className="w-3 h-3" />
-              <span>{exhibition.likeCount || 0}</span>
-            </div>
+          
+          <div className="pt-1">
+            <p className="text-sm text-neutral-600 font-medium">
+              {exhibition.venue}
+            </p>
+            <p className="text-xs text-neutral-400 font-light mt-0.5">
+              {exhibition.location}
+            </p>
           </div>
         </div>
+
+        {/* Animated Underline */}
+        <div className="h-px bg-neutral-900 mt-6 scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-left" />
       </motion.div>
     );
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="bg-white border-b border-neutral-200 sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-black">전시 탐색</h1>
-              <p className="mt-1 text-sm text-neutral-600">
-                현재 <span className="font-semibold text-black">{stats.ongoing}개</span>의 전시가 진행 중이고,
-                <span className="font-semibold text-black"> {stats.upcoming}개</span>가 예정되어 있습니다
-              </p>
-            </div>
+    <div className="min-h-screen bg-white pt-24 pb-20 px-4 md:px-8 lg:px-12">
+      {/* 1. Page Header */}
+      <div className="max-w-7xl mx-auto mb-12 md:mb-20">
+        <motion.p 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-xs md:text-sm uppercase tracking-widest text-neutral-400 mb-3 md:mb-4"
+        >
+          Exhibitions
+        </motion.p>
+        <motion.h1 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="text-4xl md:text-5xl lg:text-7xl font-light text-black mb-4 md:mb-6 tracking-tight"
+        >
+          Current Exhibitions
+        </motion.h1>
+        <motion.p 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="text-base md:text-lg text-neutral-500 font-light max-w-2xl leading-relaxed"
+        >
+          Discover curated exhibitions happening now. <br className="hidden md:block" />
+          Immerse yourself in the world of art.
+        </motion.p>
+      </div>
 
-            {/* My Saved button */}
-            <button
-              onClick={() => router.push('/exhibitions/saved')}
-              className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-neutral-800 transition-colors"
-            >
-              <Heart className="w-4 h-4" />
-              <span className="hidden sm:inline">관심 전시</span>
-              {savedExhibitions.size > 0 && (
-                <span className="ml-1 px-2 py-0.5 bg-neutral-700 rounded-full text-xs">
-                  {savedExhibitions.size}
-                </span>
-              )}
-            </button>
+      {/* 2. Featured Exhibition (Hero) */}
+      <div className="max-w-7xl mx-auto mb-16 md:mb-24">
+        <div className="flex items-baseline gap-3 mb-6">
+          <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">Featured</h2>
+          <div className="h-px flex-1 bg-neutral-200" />
+        </div>
+        
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="relative aspect-[4/3] md:aspect-[21/9] border border-neutral-200 overflow-hidden group cursor-pointer"
+        >
+          <div className="absolute inset-0 bg-neutral-100">
+            <div className="w-full h-full bg-neutral-300 grayscale group-hover:grayscale-0 transition-all duration-1000" />
           </div>
-
-          {/* Tabs */}
-          <div className="mt-6 border-b border-neutral-200">
-            <div className="flex gap-8">
-              {[
-                { id: 'discover', label: 'Discover', icon: Sparkles },
-                { id: 'near', label: 'Near You', icon: MapIcon },
-                { id: 'trending', label: 'Trending', icon: TrendingUp },
-                { id: 'all', label: 'All', icon: Search }
-              ].map(tab => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
-                    className={cn(
-                      "pb-4 font-medium transition-colors relative flex items-center gap-2",
-                      activeTab === tab.id ? "text-black" : "text-neutral-600 hover:text-black"
-                    )}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {tab.label}
-                    {activeTab === tab.id && (
-                      <motion.div
-                        layoutId="activeTab"
-                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-black"
-                      />
-                    )}
-                  </button>
-                );
-              })}
+          
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-90" />
+          
+          <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-700">
+            <p className="text-xs uppercase tracking-widest text-white/70 mb-2 md:mb-3">Featured Exhibition</p>
+            <h2 className="text-3xl md:text-5xl lg:text-6xl font-light text-white mb-2 md:mb-4 tracking-tight">
+              The Space Between
+            </h2>
+            <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-4 text-white/90">
+              <p className="text-xs md:text-sm uppercase tracking-wider font-medium">Lee Ufan</p>
+              <span className="hidden md:inline text-white/40">|</span>
+              <p className="text-xs md:text-sm font-light">Guggenheim Museum · Until Sep 2025</p>
             </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* 3. Filter Tabs */}
+      <div className="max-w-7xl mx-auto mb-12">
+        <div className="border-b border-neutral-200 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-8 md:gap-12 min-w-max px-1">
+            {['all', 'ongoing', 'upcoming', 'past'].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setFilter(tab)}
+                className={`pb-4 text-xs md:text-sm uppercase tracking-widest transition-colors relative ${
+                  filter === tab ? 'text-black font-medium' : 'text-neutral-400 font-light hover:text-neutral-600'
+                }`}
+              >
+                {tab}
+                {filter === tab && (
+                  <motion.div 
+                    layoutId="activeTab"
+                    className="absolute bottom-0 left-0 right-0 h-px bg-black" 
+                  />
+                )}
+              </button>
+            ))}
           </div>
         </div>
       </div>
 
       {/* Main content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto">
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-12 md:gap-y-16">
             {[...Array(8)].map((_, i) => (
               <ExhibitionSkeleton key={i} />
             ))}
@@ -484,217 +458,13 @@ export default function ExhibitionsPage() {
           <div className="text-center py-12">
             <AlertCircle className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
             <p className="text-neutral-600">{error}</p>
-            <button
-              onClick={() => fetchExhibitions()}
-              className="mt-4 px-4 py-2 bg-black text-white rounded-lg hover:bg-neutral-800"
-            >
-              다시 시도
-            </button>
           </div>
         ) : (
-          <>
-            {/* Discover Tab */}
-            {activeTab === 'discover' && (
-              <div className="space-y-12">
-                {/* New Exhibitions */}
-                {categorizedExhibitions.new.length > 0 && (
-                  <section>
-                    <div className="flex items-center gap-2 mb-6">
-                      <Sparkles className="w-6 h-6 text-black" />
-                      <h2 className="text-2xl font-bold text-black">이번 주 새로 시작</h2>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {categorizedExhibitions.new.map(exhibition => (
-                        <ExhibitionCard key={exhibition.id} exhibition={exhibition} showBadge="new" />
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {/* Ending Soon */}
-                {categorizedExhibitions.endingSoon.length > 0 && (
-                  <section>
-                    <div className="flex items-center gap-2 mb-6">
-                      <Clock className="w-6 h-6 text-red-500" />
-                      <h2 className="text-2xl font-bold text-black">곧 끝나는 전시</h2>
-                      <span className="text-sm text-neutral-600">놓치지 마세요!</span>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {categorizedExhibitions.endingSoon.map(exhibition => (
-                        <ExhibitionCard key={exhibition.id} exhibition={exhibition} showBadge="ending" />
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {/* APT Recommended */}
-                {categorizedExhibitions.aptRecommended.length > 0 && (
-                  <section>
-                    <div className="flex items-center gap-2 mb-6">
-                      <Star className="w-6 h-6 text-black" />
-                      <h2 className="text-2xl font-bold text-black">
-                        {user?.personalityType ? `${user.personalityType}인 당신을 위한 추천` : '당신을 위한 추천'}
-                      </h2>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                      {categorizedExhibitions.aptRecommended.map(exhibition => (
-                        <ExhibitionCard key={exhibition.id} exhibition={exhibition} />
-                      ))}
-                    </div>
-                  </section>
-                )}
-              </div>
-            )}
-
-            {/* Near You Tab */}
-            {activeTab === 'near' && (
-              <div className="space-y-6">
-                {/* Region filters */}
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => setSelectedCity('all')}
-                    className={cn(
-                      "px-4 py-2 rounded-full text-sm font-medium transition-colors",
-                      selectedCity === 'all'
-                        ? "bg-black text-white"
-                        : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
-                    )}
-                  >
-                    전체
-                  </button>
-                  {cities.map(city => (
-                    <button
-                      key={city}
-                      onClick={() => setSelectedCity(city)}
-                      className={cn(
-                        "px-4 py-2 rounded-full text-sm font-medium transition-colors",
-                        selectedCity === city
-                          ? "bg-black text-white"
-                          : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
-                      )}
-                    >
-                      {city}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Map toggle */}
-                <button
-                  onClick={() => setShowMap(!showMap)}
-                  className="flex items-center gap-2 px-4 py-2 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
-                >
-                  <MapIcon className="w-4 h-4" />
-                  <span className="text-sm font-medium">지도로 보기</span>
-                  {showMap ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                </button>
-
-                {/* Map */}
-                {showMap && (
-                  <div className="h-[400px] rounded-lg overflow-hidden border border-neutral-200">
-                    <ExhibitionMap
-                      userAPT={user?.personalityType || 'LRMC'}
-                      onExhibitionSelect={(exhibition) => {
-                        handleExhibitionClick(exhibition as any);
-                      }}
-                    />
-                  </div>
-                )}
-
-                {/* Exhibition grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {filteredExhibitions.map(exhibition => (
-                    <ExhibitionCard key={exhibition.id} exhibition={exhibition} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Trending Tab */}
-            {activeTab === 'trending' && (
-              <div className="space-y-8">
-                <div className="bg-neutral-50 rounded-lg p-6 text-center">
-                  <p className="text-neutral-600">
-                    전시 처음이신가요? 많은 사람들이 관심있는 전시부터 시작해보세요
-                  </p>
-                </div>
-
-                {/* Most Viewed */}
-                <section>
-                  <div className="flex items-center gap-2 mb-6">
-                    <Flame className="w-6 h-6 text-red-500" />
-                    <h2 className="text-2xl font-bold text-black">지금 가장 많이 본 전시</h2>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {categorizedExhibitions.trending.slice(0, 8).map(exhibition => (
-                      <ExhibitionCard key={exhibition.id} exhibition={exhibition} />
-                    ))}
-                  </div>
-                </section>
-
-                {/* Most Saved */}
-                <section>
-                  <div className="flex items-center gap-2 mb-6">
-                    <Heart className="w-6 h-6 text-red-500" />
-                    <h2 className="text-2xl font-bold text-black">가장 많이 저장된 전시</h2>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {categorizedExhibitions.mostSaved.slice(0, 8).map(exhibition => (
-                      <ExhibitionCard key={exhibition.id} exhibition={exhibition} />
-                    ))}
-                  </div>
-                </section>
-              </div>
-            )}
-
-            {/* All Tab */}
-            {activeTab === 'all' && (
-              <div className="space-y-6">
-                {/* Search and filters */}
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5" />
-                    <input
-                      type="text"
-                      placeholder="전시회 검색..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
-                    />
-                  </div>
-
-                  <select
-                    value={selectedCity}
-                    onChange={(e) => setSelectedCity(e.target.value)}
-                    className="px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
-                  >
-                    <option value="all">모든 지역</option>
-                    {cities.map(city => (
-                      <option key={city} value={city}>{city}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Results count */}
-                <p className="text-sm text-neutral-600">
-                  총 <span className="font-semibold text-black">{filteredExhibitions.length}개</span>의 전시
-                </p>
-
-                {/* Exhibition grid */}
-                {filteredExhibitions.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {filteredExhibitions.map(exhibition => (
-                      <ExhibitionCard key={exhibition.id} exhibition={exhibition} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <Search className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
-                    <p className="text-neutral-600">검색 결과가 없습니다</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-12 md:gap-y-16">
+            {filteredExhibitions.map((exhibition, index) => (
+              <ExhibitionCard key={exhibition.id} exhibition={exhibition} index={index} />
+            ))}
+          </div>
         )}
       </div>
     </div>

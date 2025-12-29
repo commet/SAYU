@@ -8,6 +8,7 @@ import dynamic from 'next/dynamic';
 import { useResponsive } from '@/lib/responsive';
 import { Container, Button } from '@/components/design-system';
 import { Sparkles, ArrowRight, MessageSquare, TrendingUp } from 'lucide-react';
+import { Hero3DSection } from '@/components/hero/Hero3DSection';
 
 const MobileHomePage = dynamic(() => import('./MobileHomePageFixed'), {
   ssr: false,
@@ -145,38 +146,10 @@ const communityFeeds = [
 export default function HomePage() {
   const router = useRouter();
   const { isMobile } = useResponsive();
-  const [currentArtwork, setCurrentArtwork] = useState(0);
   const [currentAptSlide, setCurrentAptSlide] = useState(0);
   const [todayUsers] = useState(47);
 
-  // Refs for scroll-based animations
-  const heroRef = useRef<HTMLElement>(null);
-
-  // Scroll progress for hero section
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start end", "end start"]
-  });
-
-  // Map scroll progress to artwork index (0% -> 0, 33% -> 1, 66% -> 2)
-  const artworkProgress = useTransform(
-    scrollYProgress,
-    [0, 0.33, 0.66, 1],
-    [0, 0, 1, 2]
-  );
-
   // if (isMobile) return <MobileHomePage />;
-
-  // Update artwork based on scroll
-  useEffect(() => {
-    const unsubscribe = artworkProgress.on('change', (latest) => {
-      const index = Math.round(latest);
-      if (index >= 0 && index < featuredArtworks.length) {
-        setCurrentArtwork(index);
-      }
-    });
-    return () => unsubscribe();
-  }, [artworkProgress]);
 
   useEffect(() => {
     const aptTimer = setInterval(() => {
@@ -187,95 +160,8 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      {/* Hero */}
-      <section ref={heroRef} className="relative flex items-start pt-8 md:pt-16 lg:pt-20 pb-12 md:pb-20">
-        <Container size="2xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center">
-            {/* Left - Typography */}
-            <div>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
-                  <div className="w-8 md:w-12 h-[2px] bg-black" />
-                  <span className="text-[10px] md:text-xs font-medium tracking-[0.15em] md:tracking-[0.2em] uppercase text-black">Art Discovery Platform</span>
-                </div>
-
-                <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold leading-[1.1] tracking-tight mb-6 md:mb-8" style={{ color: '#000000' }}>
-                  예술과 함께
-                  <br />
-                  나만의 취향을
-                  <br />
-                  찾아가는 시간
-                </h1>
-
-                <p className="text-sm md:text-lg lg:text-xl leading-relaxed mb-6 md:mb-10 text-black max-w-lg">
-                  당신만의 예술적 성향을 발견하고, 세계의 명작들을 탐험하며, 같은 취향의 사람들과 연결되세요.
-                </p>
-
-                <div className="flex items-center gap-3 md:gap-4 flex-wrap">
-                  <button
-                    onClick={() => router.push('/quiz')}
-                    className="px-4 md:px-6 py-2.5 md:py-3 bg-black text-white rounded-lg md:rounded-xl font-medium flex items-center gap-2 transition-all duration-300 hover:bg-[#D4A520] hover:text-white text-sm md:text-base"
-                  >
-                    <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
-                    APT 테스트 시작
-                  </button>
-                  <button
-                    onClick={() => router.push('/gallery')}
-                    className="text-sm md:text-base font-medium text-black hover:text-neutral-600 transition-colors flex items-center gap-2"
-                  >
-                    둘러보기
-                    <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                  </button>
-                </div>
-
-                <div className="mt-8 md:mt-12 text-xs md:text-sm text-black">오늘 {todayUsers}명이 발견했어요.</div>
-              </motion.div>
-            </div>
-
-            {/* Right - Artwork */}
-            <div className="relative h-[300px] md:h-[400px] lg:h-[600px]">
-              {featuredArtworks.map((artwork, index) => (
-                <motion.div
-                  key={artwork.id}
-                  className="absolute inset-0"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: currentArtwork === index ? 1 : 0 }}
-                  transition={{ duration: 1 }}
-                >
-                  <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-xl">
-                    <Image
-                      src={artwork.image}
-                      alt={artwork.title}
-                      fill
-                      className="object-cover"
-                      priority={index === 0}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    <div className="absolute bottom-8 left-8 text-white">
-                      <p className="text-sm mb-1 text-white/80">{artwork.artist}</p>
-                      <p className="text-2xl font-bold text-white">{artwork.title}</p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-
-              <div className="absolute bottom-8 right-8 flex gap-2 z-10">
-                {featuredArtworks.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentArtwork(index)}
-                    className={`h-1 transition-all ${currentArtwork === index ? 'w-8 bg-white' : 'w-1 bg-white/50'}`}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </Container>
-      </section>
+      {/* 3D Hero Section */}
+      <Hero3DSection />
 
       {/* Features Section */}
       <section className="py-12 md:py-20 border-t border-neutral-200">
