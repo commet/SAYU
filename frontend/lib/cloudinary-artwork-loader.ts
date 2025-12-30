@@ -3,7 +3,7 @@
  * 1000개 이상의 Artvee 작품을 로드하고 관리
  */
 
-import cloudinaryData from '@/../../artvee-crawler/data/cloudinary-urls.json';
+import cloudinaryData from '@/data/cloudinary-urls.json';
 
 export interface CloudinaryArtwork {
   id: string;

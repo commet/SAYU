@@ -4,10 +4,6 @@ import './globals.css'
 import '@/styles/anti-flicker.css'
 import { Providers } from './providers'
 
-import { SystemInitializer, PerformanceMonitor, SpatialPreloader } from '@/components/system/SystemInitializer'
-
-import { WelcomeModalV2 } from '@/components/onboarding/WelcomeModalV2'
-
 const inter = Inter({ subsets: ['latin'] })
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -118,16 +114,9 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} ${playfair.variable} ${cormorant.variable} ${abril.variable} ${dancing.variable} ${gamja.variable} min-h-screen bg-white text-black container-stable`}>
         <Providers>
-          {/* <SystemInitializer /> */}
-          {/* Temporarily disabled for debugging
-          <PerformanceMonitor />
-          <SpatialPreloader />
-          */}
-
           <main className="pb-20 safe-area-bottom lg:pt-4 lg:pb-4 bg-white">
             {children}
           </main>
-          {/* WelcomeModalV2 제거 - 프로필 페이지의 JourneySection에서 필요시 표시 */}
         </Providers>
       </body>
     </html>

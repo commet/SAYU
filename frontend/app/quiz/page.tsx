@@ -40,7 +40,7 @@ export default function QuizIntroPage() {
         transition={{ duration: 0.4, ease: 'easeOut' }}
         className="relative z-10 max-w-5xl mx-auto px-4 py-16 md:py-24"
       >
-        <div className="bg-white/85 backdrop-blur-md rounded-3xl shadow-lg border border-white/60 p-6 md:p-10 space-y-8">
+        <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-white/60 p-6 md:p-10 space-y-8">
           <div className="text-center space-y-4">
             <p className="text-sm font-semibold uppercase tracking-[0.25em] text-neutral-600">
               {language === 'ko' ? '3-5분 시나리오 테스트' : '3–5 min scenario test'}
@@ -82,7 +82,7 @@ export default function QuizIntroPage() {
             ].map((item) => (
               <div
                 key={item.title}
-                className="rounded-2xl border border-neutral-200 bg-white/80 p-4 flex flex-col gap-1 text-neutral-800"
+                className="rounded-2xl border border-neutral-200 bg-white/80 shadow-md hover:shadow-lg transition-shadow p-4 flex flex-col gap-1 text-neutral-800"
               >
                 <div className="w-10 h-10 rounded-full bg-neutral-900 text-white flex items-center justify-center">
                   {item.icon}
@@ -96,7 +96,7 @@ export default function QuizIntroPage() {
           <div className="text-center space-y-3">
             <button
               onClick={startQuiz}
-              className="mx-auto flex items-center justify-center gap-2 px-10 md:px-14 py-4 md:py-5 text-lg font-semibold bg-neutral-900 text-white rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition"
+              className="mx-auto flex items-center justify-center gap-2 px-10 md:px-14 py-4 md:py-5 text-lg font-semibold bg-neutral-900 text-white rounded-xl shadow-md hover:shadow-xl hover:bg-[#D4A520] hover:-translate-y-0.5 transition-all duration-300"
             >
               <Sparkles className="w-6 h-6" />
               {language === 'ko' ? '지금 시작하기' : 'Start now'}

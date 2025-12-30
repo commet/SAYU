@@ -8,6 +8,7 @@ import dynamic from 'next/dynamic';
 import { useResponsive } from '@/lib/responsive';
 import { Container, Button } from '@/components/design-system';
 import { Sparkles, ArrowRight, MessageSquare, TrendingUp } from 'lucide-react';
+import { Hero3DSection } from '@/components/hero/Hero3DSection';
 
 const MobileHomePage = dynamic(() => import('./MobileHomePageFixed'), {
   ssr: false,
@@ -145,38 +146,10 @@ const communityFeeds = [
 export default function HomePage() {
   const router = useRouter();
   const { isMobile } = useResponsive();
-  const [currentArtwork, setCurrentArtwork] = useState(0);
   const [currentAptSlide, setCurrentAptSlide] = useState(0);
   const [todayUsers] = useState(47);
 
-  // Refs for scroll-based animations
-  const heroRef = useRef<HTMLElement>(null);
-
-  // Scroll progress for hero section
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start end", "end start"]
-  });
-
-  // Map scroll progress to artwork index (0% -> 0, 33% -> 1, 66% -> 2)
-  const artworkProgress = useTransform(
-    scrollYProgress,
-    [0, 0.33, 0.66, 1],
-    [0, 0, 1, 2]
-  );
-
   // if (isMobile) return <MobileHomePage />;
-
-  // Update artwork based on scroll
-  useEffect(() => {
-    const unsubscribe = artworkProgress.on('change', (latest) => {
-      const index = Math.round(latest);
-      if (index >= 0 && index < featuredArtworks.length) {
-        setCurrentArtwork(index);
-      }
-    });
-    return () => unsubscribe();
-  }, [artworkProgress]);
 
   useEffect(() => {
     const aptTimer = setInterval(() => {
@@ -187,117 +160,30 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      {/* Hero */}
-      <section ref={heroRef} className="relative flex items-start pt-16 lg:pt-20 pb-20">
-        <Container size="2xl">
-          <div className="grid grid-cols-2 gap-16 items-center">
-            {/* Left - Typography */}
-            <div>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-[2px] bg-black" />
-                  <span className="text-xs font-medium tracking-[0.2em] uppercase text-black">Art Discovery Platform</span>
-                </div>
-
-                <h1 className="text-7xl font-bold leading-[1.1] tracking-tight mb-8" style={{ color: '#000000' }}>
-                  예술과 함께
-                  <br />
-                  나만의 취향을
-                  <br />
-                  찾아가는 시간
-                </h1>
-
-                <p className="text-xl leading-relaxed mb-10 text-black max-w-lg">
-                  당신만의 예술적 성향을 발견하고, 세계의 명작들을 탐험하며, 같은 취향의 사람들과 연결되세요.
-                </p>
-
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => router.push('/quiz')}
-                    className="px-6 py-3 bg-black text-white rounded-xl font-medium flex items-center gap-2 transition-all duration-300 hover:bg-[#D4A520] hover:text-white"
-                  >
-                    <Sparkles className="w-5 h-5" />
-                    APT 테스트 시작
-                  </button>
-                  <button
-                    onClick={() => router.push('/gallery')}
-                    className="text-base font-medium text-black hover:text-neutral-600 transition-colors flex items-center gap-2"
-                  >
-                    둘러보기
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="mt-12 text-sm text-black">오늘 {todayUsers}명이 발견했어요.</div>
-              </motion.div>
-            </div>
-
-            {/* Right - Artwork */}
-            <div className="relative h-[600px]">
-              {featuredArtworks.map((artwork, index) => (
-                <motion.div
-                  key={artwork.id}
-                  className="absolute inset-0"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: currentArtwork === index ? 1 : 0 }}
-                  transition={{ duration: 1 }}
-                >
-                  <div className="relative w-full h-full">
-                    <Image
-                      src={artwork.image}
-                      alt={artwork.title}
-                      fill
-                      className="object-cover"
-                      priority={index === 0}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    <div className="absolute bottom-8 left-8 text-white">
-                      <p className="text-sm mb-1 text-white/80">{artwork.artist}</p>
-                      <p className="text-2xl font-bold text-white">{artwork.title}</p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-
-              <div className="absolute bottom-8 right-8 flex gap-2">
-                {featuredArtworks.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentArtwork(index)}
-                    className={`h-1 transition-all ${currentArtwork === index ? 'w-8 bg-white' : 'w-1 bg-white/50'}`}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </Container>
-      </section>
+      {/* 3D Hero Section */}
+      <Hero3DSection />
 
       {/* Features Section */}
-      <section className="py-20 border-t border-neutral-200">
+      <section className="py-12 md:py-20 border-t border-neutral-200">
         <Container size="2xl">
-          <div className="text-center mb-20">
-            <h2 className="text-5xl font-bold mb-4 text-black">SAYU가 제공하는 경험</h2>
-            <p className="text-xl text-black">예술을 통한 자기 발견의 여정</p>
+          <div className="text-center mb-12 md:mb-20">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4 text-black">SAYU가 제공하는 경험</h2>
+            <p className="text-base md:text-lg lg:text-xl text-black">예술을 통한 자기 발견의 여정</p>
           </div>
 
-          <div className="space-y-24">
+          <div className="space-y-16 md:space-y-24">
             {/* Feature 1 - APT Test */}
-            <div className="grid grid-cols-2 gap-16 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center">
               <div>
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-black text-white text-xs font-medium mb-4 rounded-full">
                   <Sparkles className="w-3 h-3" />APT 테스트
                 </div>
-                <h3 className="text-4xl font-bold mb-6 text-black">
+                <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6 text-black">
                   나만의 Art Persona
                   <br />
                   발견하기
                 </h3>
-                <p className="text-lg leading-relaxed text-black mb-8">
+                <p className="text-sm md:text-base lg:text-lg leading-relaxed text-black mb-6 md:mb-8">
                   16가지 예술 성향 중 당신의 유형을 찾아보세요. 3-5분의 테스트로 당신이 어떤 방식으로 예술을 감상하고, 어떤 작품에 끌리는지 알 수 있습니다.
                 </p>
                 <Button
@@ -309,7 +195,7 @@ export default function HomePage() {
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
-              <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-xl" style={{ perspective: '1000px' }}>
+              <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-neutral-200 bg-white/95 backdrop-blur-md shadow-xl" style={{ perspective: '1000px' }}>
                 <AnimatePresence mode="wait">
                   {aptSlides.map((slide, index) => index === currentAptSlide && (
                     <motion.div
@@ -421,10 +307,10 @@ export default function HomePage() {
       </section>
 
       {/* Gallery Section - DARK THEME FULL WIDTH */}
-      <section className="py-20 bg-neutral-950">
+      <section className="py-12 md:py-20 bg-neutral-950">
         <Container size="2xl">
-          <div className="grid grid-cols-2 gap-16 items-center">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-900 shadow-sm p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/95 backdrop-blur-md shadow-xl p-6">
               <div className="flex h-full flex-col gap-3">
                 <div className="relative flex-1 overflow-hidden">
                   <motion.div
@@ -442,7 +328,7 @@ export default function HomePage() {
                     }}
                   >
                     {[...galleryArtworks, ...galleryArtworks, ...galleryArtworks].map((art, idx) => (
-                      <div key={`${art.id}-${idx}`} className="relative w-[200px] aspect-[3/4] rounded-xl overflow-hidden border border-neutral-800 flex-shrink-0">
+                      <div key={`${art.id}-${idx}`} className="relative w-[200px] aspect-[3/4] rounded-xl overflow-hidden border border-neutral-800 shadow-lg flex-shrink-0">
                         <Image src={art.image} alt={art.title} fill className="object-cover" />
                         <div className="absolute bottom-2 left-2 right-2 text-white text-xs drop-shadow">
                           <p className="font-semibold truncate">{art.title}</p>
@@ -464,8 +350,8 @@ export default function HomePage() {
             </div>
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#D4A520] text-white text-xs font-medium mb-4 rounded-full">갤러리</div>
-              <h3 className="text-4xl font-bold mb-6 text-white">세계의 명작을 한곳에서</h3>
-              <p className="text-lg leading-relaxed text-neutral-300 mb-8">10,000점 이상의 큐레이션된 작품을 탐험하세요. 당신의 Art Persona Type에 맞춰 추천되는 작품부터, 시대와 장르를 넘나드는 명작까지.</p>
+              <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6 text-white">세계의 명작을 한곳에서</h3>
+              <p className="text-sm md:text-base lg:text-lg leading-relaxed text-neutral-300 mb-6 md:mb-8">10,000점 이상의 큐레이션된 작품을 탐험하세요. 당신의 Art Persona Type에 맞춰 추천되는 작품부터, 시대와 장르를 넘나드는 명작까지.</p>
               <Button
                 variant="outline"
                 className="bg-white text-black border-white hover:bg-[#D4A520] hover:text-white hover:border-[#D4A520]"
@@ -496,7 +382,7 @@ export default function HomePage() {
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
-            <div className="bg-neutral-50 border border-neutral-200 rounded-3xl p-6 space-y-3">
+            <div className="bg-white/95 backdrop-blur-md border border-neutral-200 rounded-2xl shadow-xl p-6 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <MessageSquare className="w-5 h-5 text-neutral-700" />
@@ -506,7 +392,7 @@ export default function HomePage() {
               </div>
               <div className="space-y-2">
                 {communityFeeds.map((feed) => (
-                  <div key={feed.name} className="rounded-2xl bg-white border border-neutral-200 p-4 flex items-center justify-between">
+                  <div key={feed.name} className="rounded-xl bg-white border border-neutral-200 shadow-md p-4 flex items-center justify-between hover:shadow-lg transition-shadow">
                     <div>
                       <p className="text-sm font-semibold text-neutral-900">@{feed.name}</p>
                       <p className="text-sm text-neutral-700">{feed.msg}</p>
@@ -545,7 +431,7 @@ export default function HomePage() {
               <div className="grid grid-cols-3 gap-6">
                 {collectionArtworks.map((art) => (
                   <div key={art.id} className="group cursor-pointer">
-                    <div className="relative aspect-[4/5] bg-neutral-200 overflow-hidden mb-3 rounded-xl border border-neutral-200">
+                    <div className="relative aspect-[4/5] bg-neutral-200 overflow-hidden mb-3 rounded-2xl border border-neutral-200 shadow-lg hover:shadow-xl transition-all duration-500">
                       <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-105 transition duration-500" />
                     </div>
                     <p className="font-semibold mb-1 text-black">{art.title}</p>
@@ -556,9 +442,9 @@ export default function HomePage() {
             </div>
 
             {/* Final CTA */}
-            <div className="text-center py-16 px-8 space-y-6">
-              <h2 className="text-6xl font-bold text-black">지금 시작하세요</h2>
-              <p className="text-xl text-neutral-700 leading-relaxed">
+            <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl text-center py-8 md:py-12 lg:py-16 px-4 md:px-8 space-y-4 md:space-y-6">
+              <h2 className="text-3xl md:text-4xl lg:text-6xl font-bold text-black">지금 시작하세요</h2>
+              <p className="text-sm md:text-base lg:text-xl text-neutral-700 leading-relaxed">
                 3-5분이면 당신만의 Art Persona Type을 발견할 수 있습니다.
                 <br />
                 오늘 {todayUsers}명이 이미 발견했어요.

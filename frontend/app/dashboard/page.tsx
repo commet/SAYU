@@ -144,7 +144,7 @@ export default function DashboardPage() {
           <div className="flex flex-wrap gap-3">
             <button
               onClick={() => router.push('/login?redirect=/dashboard')}
-              className="px-4 py-3 rounded-lg bg-black text-white font-semibold hover:bg-neutral-900 transition"
+              className="px-4 py-3 rounded-lg bg-black text-white font-semibold shadow-md hover:shadow-xl hover:bg-[#D4A520] transition-all duration-300"
             >
               로그인
             </button>
@@ -162,7 +162,7 @@ export default function DashboardPage() {
               { label: '발견한 작가', value: '—' },
               { label: 'APT 통계', value: '로그인 필요' }
             ].map((item) => (
-              <div key={item.label} className="rounded-xl border border-neutral-200 bg-neutral-50 p-4">
+              <div key={item.label} className="rounded-xl border border-neutral-200 bg-neutral-50 shadow-md p-4">
                 <p className="text-sm text-neutral-600">{item.label}</p>
                 <p className="text-2xl font-bold text-neutral-900 mt-2">{item.value}</p>
               </div>
@@ -248,7 +248,7 @@ export default function DashboardPage() {
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-neutral-50 rounded-2xl p-12 text-center mb-12"
+            className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl p-12 text-center mb-12"
           >
             <Sparkles className="w-16 h-16 text-black mx-auto mb-6" />
             <h1 className="text-4xl font-bold text-black mb-4">
@@ -261,7 +261,7 @@ export default function DashboardPage() {
             </p>
             <button
               onClick={() => router.push('/quiz')}
-              className="bg-black text-white px-8 py-4 rounded-lg font-medium hover:bg-neutral-800 transition-colors"
+              className="bg-black text-white px-8 py-4 rounded-lg font-medium shadow-md hover:shadow-xl hover:bg-[#D4A520] transition-all duration-300"
             >
               테스트 시작하기
             </button>
@@ -279,7 +279,7 @@ export default function DashboardPage() {
               {randomArtworks.slice(0, 6).map((artwork, index) => (
                 <div
                   key={index}
-                  className="bg-white rounded-lg border border-neutral-200 overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+                  className="bg-white rounded-lg border border-neutral-200 overflow-hidden cursor-pointer shadow-md hover:shadow-xl transition-shadow"
                   onClick={() => router.push('/gallery')}
                 >
                   <div className="aspect-[4/3] bg-neutral-100 relative">

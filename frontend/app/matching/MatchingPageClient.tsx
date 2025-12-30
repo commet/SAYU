@@ -102,45 +102,57 @@ export default function MatchingPageClient() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
       <div className="container mx-auto py-8 px-4">
-        {/* 헤더 */}
+        {/* 헤더 - Gallery Style */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
+          className="mb-8 md:mb-12"
         >
-          <h1 className="text-4xl font-bold mb-2 flex items-center justify-center gap-3">
-            <Heart className="w-8 h-8 text-primary" />
-            예술로 만나는 인연
-          </h1>
-          <p className="text-muted-foreground">
-            당신의 {userProfile.aptType} 성향과 어울리는 특별한 만남을 찾아보세요
-          </p>
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="text-xs md:text-sm uppercase tracking-widest text-neutral-500 mb-2 md:mb-3">Art Companion Matching</p>
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-black mb-1 tracking-tight">Exhibition Partners</h1>
+              <p className="text-sm md:text-base text-neutral-600 mt-2 md:mt-3">
+                당신의 <span className="font-medium">{userProfile.aptType}</span> 성향과 어울리는 특별한 만남을 찾아보세요
+              </p>
+            </div>
+          </div>
         </motion.div>
 
-        {/* 탭 네비게이션 */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-2 lg:grid-cols-5 gap-2 h-auto">
-            <TabsTrigger value="profile" className="gap-2">
-              <Shield className="w-4 h-4" />
-              프로필
-            </TabsTrigger>
-            <TabsTrigger value="artwork" className="gap-2">
-              <Palette className="w-4 h-4" />
-              작품 대화
-            </TabsTrigger>
-            <TabsTrigger value="exhibition" className="gap-2">
-              <Calendar className="w-4 h-4" />
-              전시 동행
-            </TabsTrigger>
-            <TabsTrigger value="collection" className="gap-2">
-              <Images className="w-4 h-4" />
-              컬렉션
-            </TabsTrigger>
-            <TabsTrigger value="compatibility" className="gap-2">
-              <Sparkles className="w-4 h-4" />
-              호환성
-            </TabsTrigger>
-          </TabsList>
+        {/* 탭 네비게이션 - Gallery Style */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6 md:space-y-8">
+          <div className="border-b border-neutral-200">
+            <div className="flex gap-6 md:gap-12 overflow-x-auto scrollbar-hide">
+              {[
+                { id: 'profile', label: 'Profile', icon: Shield },
+                { id: 'artwork', label: 'Artwork', icon: Palette },
+                { id: 'exhibition', label: 'Exhibition', icon: Calendar },
+                { id: 'collection', label: 'Collection', icon: Images },
+                { id: 'compatibility', label: 'Chemistry', icon: Sparkles },
+              ].map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`pb-3 md:pb-4 text-xs md:text-sm uppercase tracking-widest transition-colors relative whitespace-nowrap ${
+                      activeTab === tab.id
+                        ? "text-black font-medium"
+                        : "text-neutral-400 hover:text-neutral-600 font-light"
+                    }`}
+                  >
+                    {tab.label}
+                    {activeTab === tab.id && (
+                      <motion.div
+                        layoutId="activeMatchingTab"
+                        className="absolute bottom-0 left-0 right-0 h-px bg-black"
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
           {/* 프로필 탭 */}
           <TabsContent value="profile">

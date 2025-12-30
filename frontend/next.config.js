@@ -116,9 +116,12 @@ const nextConfig = {
     } : false,
   },
   
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
+    const path = require('path');
+
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
+      '@': path.resolve(__dirname),
       'zod/v4/core': require.resolve('zod/v4/core'),
       'zod/v4': require.resolve('zod/v4'),
     };
