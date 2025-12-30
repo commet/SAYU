@@ -1,9 +1,9 @@
 {
-  "buildCommand": "cd frontend && npm run build:vercel",
+  "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/.next",
   "installCommand": "npm install --legacy-peer-deps && cd frontend && npm install --legacy-peer-deps",
   "devCommand": "cd frontend && npm run dev",
-  "framework": "nextjs",
+  "framework": null,
   "env": {
     "NEXT_PUBLIC_API_URL": "",
     "SKIP_ENV_VALIDATION": "true",
