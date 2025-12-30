@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import cloudinaryData from '@/../../artvee-crawler/data/cloudinary-urls.json';
-import famousArtists from '@/../../artvee-crawler/data/famous-artists-artworks.json';
+import cloudinaryData from '@/data/cloudinary-urls.json';
+import famousArtists from '@/data/famous-artists-artworks.json';
 
 // 캐시 설정
 let cachedArtworks: any[] | null = null;
