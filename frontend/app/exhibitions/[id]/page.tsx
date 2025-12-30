@@ -3,8 +3,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Calendar, MapPin, Heart, Eye, Clock, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Heart, Eye, Clock } from 'lucide-react';
 import Link from 'next/link';
+
+// 기록 시스템 컴포넌트
+import StartVisitButton from '@/components/exhibition/StartVisitButton';
+import VisitProgressHeader from '@/components/exhibition/VisitProgressHeader';
+import FloatingRecordButton from '@/components/exhibition/FloatingRecordButton';
+import ArtworkSearchModal from '@/components/exhibition/ArtworkSearchModal';
+import { useVisitStore } from '@/lib/stores/visit-store';
 
 interface Exhibition {
   id: string;
@@ -33,6 +40,21 @@ export default function ExhibitionDetailPage() {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
 
+  // 기록 시스템 상태
+  const {
+    currentVisit,
+    isRecording,
+    elapsedSeconds,
+    recordedArtworks,
+    openRecordModal,
+    closeRecordModal,
+    isRecordModalOpen,
+  } = useVisitStore();
+
+  // 현재 전시의 관람이 진행 중인지 확인
+  const isCurrentExhibitionVisit =
+    isRecording && currentVisit?.exhibition_id === (params?.id as string);
+
   useEffect(() => {
     if (params?.id) {
       fetchExhibition(params.id as string);
@@ -47,7 +69,7 @@ export default function ExhibitionDetailPage() {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to fetch exhibition');
       }
-      
+
       const result = await response.json();
       if (result.success && result.data) {
         setExhibition(result.data);
@@ -65,7 +87,7 @@ export default function ExhibitionDetailPage() {
 
   const handleLike = async () => {
     if (!exhibition) return;
-    
+
     try {
       const response = await fetch(`/api/exhibitions/${exhibition.id}/like`, {
         method: 'POST',
@@ -73,7 +95,7 @@ export default function ExhibitionDetailPage() {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (response.ok) {
         const result = await response.json();
         if (result.success) {
@@ -90,7 +112,7 @@ export default function ExhibitionDetailPage() {
     return new Date(dateString).toLocaleDateString('ko-KR', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
@@ -118,6 +140,23 @@ export default function ExhibitionDetailPage() {
       default:
         return status;
     }
+  };
+
+  // 관람 시작 핸들러
+  const handleVisitStarted = (visitId: string) => {
+    console.log('Visit started:', visitId);
+  };
+
+  // 관람 종료 핸들러
+  const handleVisitEnded = () => {
+    console.log('Visit ended');
+    router.push('/exhibitions/history'); // 방문 기록 페이지로 이동
+  };
+
+  // 작품 선택 핸들러
+  const handleArtworkSelected = (artwork: any) => {
+    console.log('Artwork recorded:', artwork);
+    // 토스트 알림 표시 등
   };
 
   if (loading) {
@@ -151,6 +190,18 @@ export default function ExhibitionDetailPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+      {/* 관람 진행 헤더 (관람 중일 때만 표시) */}
+      {isCurrentExhibitionVisit && currentVisit && (
+        <div className="sticky top-0 z-30">
+          <VisitProgressHeader
+            visit={currentVisit}
+            elapsedSeconds={elapsedSeconds}
+            recordCount={recordedArtworks.length}
+            onEndVisit={handleVisitEnded}
+          />
+        </div>
+      )}
+
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <motion.div
@@ -179,7 +230,9 @@ export default function ExhibitionDetailPage() {
               <div className="text-center">
                 <div className="text-6xl mb-4">🎨</div>
                 <div className="absolute top-4 right-4">
-                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(exhibition.status)}`}>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(exhibition.status)}`}
+                  >
                     {getStatusText(exhibition.status)}
                   </span>
                 </div>
@@ -195,13 +248,15 @@ export default function ExhibitionDetailPage() {
                 <h1 className="text-3xl md:text-4xl font-bold text-white mb-6">
                   {exhibition.title}
                 </h1>
-                
+
                 <div className="space-y-4 mb-6">
                   <div className="flex items-center gap-3 text-white/80">
                     <Calendar className="w-5 h-5" />
-                    <span>{formatDate(exhibition.startDate)} - {formatDate(exhibition.endDate)}</span>
+                    <span>
+                      {formatDate(exhibition.startDate)} - {formatDate(exhibition.endDate)}
+                    </span>
                   </div>
-                  
+
                   <div className="flex items-center gap-3 text-white/80">
                     <Clock className="w-5 h-5" />
                     <span>상태: {getStatusText(exhibition.status)}</span>
@@ -209,9 +264,7 @@ export default function ExhibitionDetailPage() {
                 </div>
 
                 <div className="prose prose-invert max-w-none">
-                  <p className="text-white/80 leading-relaxed">
-                    {exhibition.description}
-                  </p>
+                  <p className="text-white/80 leading-relaxed">{exhibition.description}</p>
                 </div>
 
                 {/* Category */}
@@ -261,6 +314,7 @@ export default function ExhibitionDetailPage() {
 
                 {/* Actions */}
                 <div className="space-y-3">
+                  {/* 좋아요 버튼 */}
                   <button
                     onClick={handleLike}
                     className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg font-semibold transition-all ${
@@ -273,14 +327,23 @@ export default function ExhibitionDetailPage() {
                     {liked ? '좋아요 취소' : '좋아요'}
                   </button>
 
+                  {/* 관람 시작 버튼 (진행 중이 아닐 때만 표시) */}
+                  {!isCurrentExhibitionVisit && exhibition.status === 'ongoing' && (
+                    <div className="pt-2">
+                      <StartVisitButton
+                        exhibitionId={exhibition.id}
+                        exhibitionTitle={exhibition.title}
+                        onStarted={handleVisitStarted}
+                        className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Admission */}
                 <div className="bg-white/10 rounded-xl p-6">
                   <h3 className="text-lg font-semibold text-white mb-4">입장료</h3>
-                  <p className="text-white/80">
-                    {exhibition.price || '정보 없음'}
-                  </p>
+                  <p className="text-white/80">{exhibition.price || '정보 없음'}</p>
                 </div>
               </div>
             </div>
@@ -302,6 +365,26 @@ export default function ExhibitionDetailPage() {
           </Link>
         </motion.div>
       </div>
+
+      {/* 플로팅 기록 버튼 (관람 중일 때만 표시) */}
+      {isCurrentExhibitionVisit && currentVisit && (
+        <FloatingRecordButton
+          visitId={currentVisit.id}
+          onClick={openRecordModal}
+          recordCount={recordedArtworks.length}
+        />
+      )}
+
+      {/* 작품 검색 및 기록 모달 */}
+      {isCurrentExhibitionVisit && currentVisit && (
+        <ArtworkSearchModal
+          isOpen={isRecordModalOpen}
+          onClose={closeRecordModal}
+          exhibitionId={exhibition.id}
+          visitId={currentVisit.id}
+          onArtworkSelected={handleArtworkSelected}
+        />
+      )}
     </div>
   );
 }
