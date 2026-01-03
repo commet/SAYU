@@ -37,7 +37,9 @@
       "mcp__serena__find_symbol",
       "mcp__serena__search_for_pattern",
       "Bash(npm search mcp-server)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "WebSearch",
+      "Skill(bmad:bmm:workflows:create-product-brief)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
