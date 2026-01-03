@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Square, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useVisitStore, getElapsedText } from '@/lib/stores/visit-store';
 import type { EndVisitButtonProps } from '@/shared/exhibition-recording-types';
 
@@ -27,7 +28,10 @@ export default function EndVisitButton({
     setIsEnding(true);
 
     try {
-      // API 호출
+      // API 호출 (타임아웃 10초)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
       const response = await fetch(`/api/visits/${visitId}/end`, {
         method: 'POST',
         headers: {
@@ -37,7 +41,15 @@ export default function EndVisitButton({
           visitId,
           endedAt: new Date().toISOString(),
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
+
+      // HTTP 상태 체크
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
 
       const data = await response.json();
 
@@ -45,14 +57,37 @@ export default function EndVisitButton({
         // Zustand Store 업데이트
         endVisit();
 
+        // 성공 알림
+        toast.success(
+          `관람을 종료했습니다. ${recordedArtworks.length}개의 작품을 기록했어요!`,
+          {
+            duration: 3000,
+            icon: '✅',
+          }
+        );
+
         // 콜백 호출
         onEnded?.();
       } else {
-        alert(`관람 종료 실패: ${data.error}`);
+        throw new Error(data.error || '관람 종료에 실패했습니다');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('End visit error:', error);
-      alert('관람 종료 중 오류가 발생했습니다.');
+
+      // 에러 타입별 처리
+      if (error.name === 'AbortError') {
+        toast.error('요청 시간이 초과되었습니다. 네트워크를 확인해주세요.', {
+          duration: 4000,
+        });
+      } else if (error.message?.includes('Failed to fetch')) {
+        toast.error('네트워크 연결을 확인해주세요', {
+          duration: 4000,
+        });
+      } else {
+        toast.error(error.message || '관람 종료 중 오류가 발생했습니다', {
+          duration: 4000,
+        });
+      }
     } finally {
       setIsEnding(false);
       setShowConfirm(false);

@@ -8,6 +8,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { useVisitStore } from '@/lib/stores/visit-store';
 import type { StartVisitButtonProps } from '@/shared/exhibition-recording-types';
 
@@ -19,15 +22,32 @@ export default function StartVisitButton({
   className = '',
 }: StartVisitButtonProps) {
   const [isStarting, setIsStarting] = useState(false);
+  const { user, loading: authLoading } = useAuth();
   const { startVisit } = useVisitStore();
+  const router = useRouter();
 
   const handleStart = async () => {
     if (disabled || isStarting) return;
 
+    // 1. 인증 확인
+    if (!user) {
+      toast.error('로그인이 필요합니다', {
+        duration: 3000,
+        icon: '🔒',
+      });
+      // 현재 페이지 URL을 저장하고 로그인 페이지로 이동
+      const currentUrl = window.location.pathname;
+      router.push(`/login?redirect=${encodeURIComponent(currentUrl)}`);
+      return;
+    }
+
     setIsStarting(true);
 
     try {
-      // API 호출
+      // 2. API 호출 (타임아웃 10초)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
       const response = await fetch('/api/visits/start', {
         method: 'POST',
         headers: {
@@ -41,10 +61,19 @@ export default function StartVisitButton({
             screenSize: `${window.screen.width}x${window.screen.height}`,
           },
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
+
+      // 3. HTTP 상태 체크
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
 
       const data = await response.json();
 
+      // 4. 응답 데이터 검증
       if (data.success && data.data) {
         // Zustand Store에 저장
         startVisit({
@@ -59,14 +88,46 @@ export default function StartVisitButton({
           updated_at: data.data.startedAt,
         });
 
+        // 성공 알림
+        toast.success(
+          `${exhibitionTitle ? `"${exhibitionTitle}" ` : ''}관람을 시작했습니다!`,
+          {
+            duration: 2000,
+            icon: '🎨',
+          }
+        );
+
         // 콜백 호출
         onStarted?.(data.data.visitId);
       } else {
-        alert(`관람 시작 실패: ${data.error}`);
+        throw new Error(data.error || '관람 시작에 실패했습니다');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Start visit error:', error);
-      alert('관람 시작 중 오류가 발생했습니다.');
+
+      // 5. 에러 타입별 처리
+      if (error.name === 'AbortError') {
+        toast.error('요청 시간이 초과되었습니다. 네트워크를 확인해주세요.', {
+          duration: 4000,
+        });
+      } else if (error.message?.includes('Failed to fetch')) {
+        toast.error('네트워크 연결을 확인해주세요', {
+          duration: 4000,
+        });
+      } else if (error.message?.includes('HTTP 401')) {
+        toast.error('인증이 만료되었습니다. 다시 로그인해주세요.', {
+          duration: 4000,
+        });
+        router.push('/login');
+      } else if (error.message?.includes('HTTP 404')) {
+        toast.error('전시를 찾을 수 없습니다', {
+          duration: 4000,
+        });
+      } else {
+        toast.error(error.message || '관람 시작 중 오류가 발생했습니다', {
+          duration: 4000,
+        });
+      }
     } finally {
       setIsStarting(false);
     }

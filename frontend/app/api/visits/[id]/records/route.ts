@@ -25,7 +25,7 @@ export async function POST(
       return NextResponse.json<AddRecordResponse>(
         {
           success: false,
-          error: 'Unauthorized',
+          error: '로그인이 필요합니다',
         },
         { status: 401 }
       );
@@ -43,12 +43,47 @@ export async function POST(
       recordedAt,
     } = body;
 
+    // UUID 형식 검증
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
     // 유효성 검증
-    if (!artworkId || !emotions || emotions.length === 0) {
+    if (!artworkId || typeof artworkId !== 'string') {
       return NextResponse.json<AddRecordResponse>(
         {
           success: false,
-          error: 'Artwork ID and emotions are required',
+          error: '작품 ID가 필요합니다',
+        },
+        { status: 400 }
+      );
+    }
+
+    if (!uuidRegex.test(artworkId) || !uuidRegex.test(visitId)) {
+      return NextResponse.json<AddRecordResponse>(
+        {
+          success: false,
+          error: '잘못된 ID 형식입니다',
+        },
+        { status: 400 }
+      );
+    }
+
+    if (!emotions || !Array.isArray(emotions) || emotions.length === 0) {
+      return NextResponse.json<AddRecordResponse>(
+        {
+          success: false,
+          error: '감정을 하나 이상 선택해주세요',
+        },
+        { status: 400 }
+      );
+    }
+
+    // 감정 최대 3개 제한
+    if (emotions.length > 3) {
+      return NextResponse.json<AddRecordResponse>(
+        {
+          success: false,
+          error: '감정은 최대 3개까지 선택할 수 있습니다',
         },
         { status: 400 }
       );
@@ -66,7 +101,7 @@ export async function POST(
       return NextResponse.json<AddRecordResponse>(
         {
           success: false,
-          error: 'Visit not found or unauthorized',
+          error: '관람 기록을 찾을 수 없습니다',
         },
         { status: 404 }
       );
@@ -76,7 +111,7 @@ export async function POST(
       return NextResponse.json<AddRecordResponse>(
         {
           success: false,
-          error: 'Visit is not in progress',
+          error: '현재 진행 중인 관람이 아닙니다',
         },
         { status: 400 }
       );
@@ -93,7 +128,7 @@ export async function POST(
       return NextResponse.json<AddRecordResponse>(
         {
           success: false,
-          error: 'Artwork not found',
+          error: '작품을 찾을 수 없습니다',
         },
         { status: 404 }
       );

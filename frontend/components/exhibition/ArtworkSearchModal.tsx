@@ -8,6 +8,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import EmotionSelector from './EmotionSelector';
 import type {
   ArtworkSearchModalProps,
@@ -40,9 +41,20 @@ export default function ArtworkSearchModal({
       setIsSearching(true);
 
       try {
+        // 타임아웃 5초
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+
         const response = await fetch(
-          `/api/artworks/search?exhibitionId=${exhibitionId}&query=${encodeURIComponent(query)}&limit=10`
+          `/api/artworks/search?exhibitionId=${exhibitionId}&query=${encodeURIComponent(query)}&limit=10`,
+          { signal: controller.signal }
         );
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
 
         const data = await response.json();
 
@@ -51,10 +63,27 @@ export default function ArtworkSearchModal({
         } else {
           console.error('Search failed:', data.error);
           setSearchResults([]);
+          // 사용자에게 알림 (조용한 실패)
+          if (query.length > 2) {
+            toast.error('작품을 찾을 수 없습니다', {
+              duration: 2000,
+            });
+          }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Search error:', error);
         setSearchResults([]);
+
+        // 에러 알림 (네트워크 에러만)
+        if (error.name === 'AbortError') {
+          toast.error('검색 시간이 초과되었습니다', {
+            duration: 3000,
+          });
+        } else if (error.message?.includes('Failed to fetch')) {
+          toast.error('네트워크 연결을 확인해주세요', {
+            duration: 3000,
+          });
+        }
       } finally {
         setIsSearching(false);
       }
@@ -85,11 +114,21 @@ export default function ArtworkSearchModal({
 
   // 기록 저장
   const handleSubmit = async () => {
-    if (!selectedArtwork || selectedEmotions.length === 0) return;
+    if (!selectedArtwork || selectedEmotions.length === 0) {
+      toast.error('감정을 하나 이상 선택해주세요', {
+        duration: 2000,
+        icon: '😊',
+      });
+      return;
+    }
 
     setIsSubmitting(true);
 
     try {
+      // 타임아웃 10초
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
       const response = await fetch(`/api/visits/${visitId}/records`, {
         method: 'POST',
         headers: {
@@ -102,20 +141,50 @@ export default function ArtworkSearchModal({
           recognitionMethod: 'search',
           recordedAt: new Date().toISOString(),
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
 
       const data = await response.json();
 
       if (data.success) {
+        // 성공 알림
+        toast.success(
+          `"${selectedArtwork.title}" 기록 완료!`,
+          {
+            duration: 2000,
+            icon: '🎨',
+          }
+        );
+
         // 성공 시 콜백 호출 및 모달 닫기
         onArtworkSelected(selectedArtwork);
         handleClose();
       } else {
-        alert(`기록 저장 실패: ${data.error}`);
+        throw new Error(data.error || '기록 저장에 실패했습니다');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Submit error:', error);
-      alert('기록 저장 중 오류가 발생했습니다.');
+
+      // 에러 타입별 처리
+      if (error.name === 'AbortError') {
+        toast.error('요청 시간이 초과되었습니다. 다시 시도해주세요.', {
+          duration: 4000,
+        });
+      } else if (error.message?.includes('Failed to fetch')) {
+        toast.error('네트워크 연결을 확인해주세요', {
+          duration: 4000,
+        });
+      } else {
+        toast.error(error.message || '기록 저장 중 오류가 발생했습니다', {
+          duration: 4000,
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }

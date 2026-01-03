@@ -21,21 +21,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json<StartVisitResponse>(
         {
           success: false,
-          error: 'Unauthorized',
+          error: '로그인이 필요합니다',
         },
         { status: 401 }
       );
     }
 
-    // 요청 body 파싱
+    // 요청 body 파싱 및 검증
     const body: StartVisitRequest = await request.json();
     const { exhibitionId, deviceInfo } = body;
 
-    if (!exhibitionId) {
+    // Exhibition ID 필수 체크
+    if (!exhibitionId || typeof exhibitionId !== 'string') {
       return NextResponse.json<StartVisitResponse>(
         {
           success: false,
-          error: 'Exhibition ID is required',
+          error: '전시 ID가 필요합니다',
+        },
+        { status: 400 }
+      );
+    }
+
+    // UUID 형식 검증
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(exhibitionId)) {
+      return NextResponse.json<StartVisitResponse>(
+        {
+          success: false,
+          error: '잘못된 전시 ID 형식입니다',
         },
         { status: 400 }
       );
@@ -44,7 +58,7 @@ export async function POST(request: NextRequest) {
     // 전시 정보 조회
     const { data: exhibition, error: exhibitionError } = await supabase
       .from('exhibitions')
-      .select('id, title, venue')
+      .select('id, title_local, venue_name')
       .eq('id', exhibitionId)
       .single();
 
@@ -52,7 +66,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json<StartVisitResponse>(
         {
           success: false,
-          error: 'Exhibition not found',
+          error: '전시를 찾을 수 없습니다',
         },
         { status: 404 }
       );
@@ -76,8 +90,8 @@ export async function POST(request: NextRequest) {
           startedAt: new Date().toISOString(),
           exhibition: {
             id: exhibition.id,
-            title: exhibition.title,
-            venue: exhibition.venue_name,
+            title: exhibition.title_local || '',
+            venue: exhibition.venue_name || '',
           },
         },
       });
@@ -103,7 +117,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json<StartVisitResponse>(
         {
           success: false,
-          error: 'Failed to start visit',
+          error: '관람 시작에 실패했습니다',
         },
         { status: 500 }
       );
@@ -116,8 +130,8 @@ export async function POST(request: NextRequest) {
         startedAt: newVisit.started_at,
         exhibition: {
           id: exhibition.id,
-          title: exhibition.title,
-          venue: exhibition.venue,
+          title: exhibition.title_local || '',
+          venue: exhibition.venue_name || '',
         },
       },
     });
@@ -126,7 +140,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json<StartVisitResponse>(
       {
         success: false,
-        error: 'Internal server error',
+        error: '서버 오류가 발생했습니다',
       },
       { status: 500 }
     );
