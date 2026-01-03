@@ -18,7 +18,8 @@
     "dev:frontend": "cd frontend && npm run dev",
     "dev:backend": "cd backend && npm run dev",
     "dev:shared": "npm run dev --workspace=@sayu/shared",
-    "health-check": "npm run typecheck && npm run lint && npm run test"
+    "health-check": "npm run typecheck && npm run lint && npm run test",
+    "seed:exhibition-artworks": "npx tsx scripts/insert-exhibition-sample-data.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
