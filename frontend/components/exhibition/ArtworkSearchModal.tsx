@@ -9,6 +9,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import EmotionSelector from './EmotionSelector';
 import type {
   ArtworkSearchModalProps,
@@ -22,6 +23,7 @@ export default function ArtworkSearchModal({
   visitId,
   onArtworkSelected,
 }: ArtworkSearchModalProps) {
+  const { personalityType } = useUserProfile();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<ExhibitionArtwork[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -374,6 +376,7 @@ export default function ArtworkSearchModal({
                     selectedEmotions={selectedEmotions}
                     onEmotionsChange={setSelectedEmotions}
                     maxSelections={3}
+                    userAPT={personalityType}
                   />
 
                   {/* 메모 (선택사항) */}

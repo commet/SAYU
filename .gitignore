@@ -161,3 +161,17 @@ artvee-crawler/test-page.html
 **/public/sw.js.map
 **/public/workbox-*.js.map
 **/public/worker-*.js.map
+
+# Legacy/Archive directories (optional - uncomment to exclude from git)
+# docs/archive/
+# scripts/legacy/
+# data/legacy/
+
+# Temporary files
+*.tmp
+*.temp
+temp.txt
+nul
+
+# Old project folders (archived)
+data/old-projects/

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, Playfair_Display, Cormorant_Garamond, Abril_Fatface, Dancing_Script, Gamja_Flower } from 'next/font/google'
+import ToasterProvider from '@/components/ToasterProvider'
 import './globals.css'
 import '@/styles/anti-flicker.css'
 import { Providers } from './providers'
@@ -113,6 +114,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} ${playfair.variable} ${cormorant.variable} ${abril.variable} ${dancing.variable} ${gamja.variable} min-h-screen bg-white text-black container-stable`}>
+        <ToasterProvider />
         <Providers>
           <main className="pb-20 safe-area-bottom lg:pt-4 lg:pb-4 bg-white">
             {children}
