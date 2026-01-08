@@ -153,6 +153,9 @@ artvee-crawler/images-complete/
 artvee-crawler/temp-images/
 artvee-crawler/data/test-crawl-result.json
 artvee-crawler/test-page.html
+data/crawlers/artvee-crawler/images/
+data/crawlers/artvee-crawler/images-complete/
+data/crawlers/artvee-crawler/temp-images/
 
 # PWA files
 **/public/sw.js
@@ -175,3 +178,9 @@ nul
 
 # Old project folders (archived)
 data/old-projects/
+
+# Development tool outputs
+_bmad-output/
+
+# Serena CLI tool (separate git repo)
+serena/

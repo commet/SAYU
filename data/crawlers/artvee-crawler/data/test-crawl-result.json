@@ -1,0 +1,30 @@
+{
+  "url": "https://artvee.com/dl/molens-oliemolen-de-zeemeeuw-westzaandam/",
+  "crawledAt": "2025-07-13T11:35:32.782Z",
+  "artwork": {
+    "title": "molens; oliemolen De Zeemeeuw, Westzaandam (1930-1945)",
+    "artist": "Unknown",
+    "imageUrl": null,
+    "tags": [],
+    "description": "",
+    "metadata": {}
+  },
+  "sayuMatching": {
+    "LAEF": {
+      "score": 0,
+      "reasons": []
+    },
+    "LAEC": {
+      "score": 0,
+      "reasons": []
+    },
+    "LAMF": {
+      "score": 0,
+      "reasons": []
+    },
+    "LAMC": {
+      "score": 0,
+      "reasons": []
+    }
+  }
+}
