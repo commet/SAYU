@@ -6,8 +6,8 @@ import {
   inferGenresFromKeywords,
   getRecommendationMessage,
   ExhibitionFeatures
-} from '../../../../shared/apt-exhibition-matching';
-import { APT_PROMPT_PROFILES } from '../../../../shared/apt-ai-prompt-mapping';
+} from '@/shared/apt-exhibition-matching';
+import { APT_PROMPT_PROFILES } from '@/shared/apt-ai-prompt-mapping';
 
 // Supabase 클라이언트 초기화
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

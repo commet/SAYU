@@ -4,8 +4,8 @@ import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Download, Share2, Copy, Check, Instagram, Twitter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { SAYU_TYPES } from '@/../../shared/SAYUTypeDefinitions';
-import { ART_STYLES } from '@/../../shared/apt-ai-prompt-mapping';
+import { SAYU_TYPES } from '@/shared/SAYUTypeDefinitions';
+import { ART_STYLES } from '@/shared/apt-ai-prompt-mapping';
 import toast from 'react-hot-toast';
 
 interface ArtProfileShareCardProps {
