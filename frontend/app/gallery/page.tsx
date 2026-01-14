@@ -21,12 +21,20 @@ function GalleryContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [activeTab, setActiveTab] = useState<TabType>('collections');
+  const tabParam = searchParams?.get('tab') as TabType | null;
+  const [activeTab, setActiveTab] = useState<TabType>(tabParam || 'collections');
   const [stats, setStats] = useState({
     artworks: 0,
     exhibitions: 0,
     collections: 0
   });
+
+  // URL의 tab 파라미터가 변경되면 activeTab 업데이트
+  useEffect(() => {
+    if (tabParam && ['collections', 'timeline', 'map', 'emotions', 'discover'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
   useEffect(() => {
     if (user) {

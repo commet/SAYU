@@ -8,9 +8,14 @@ const supabase = createClient();
 // ============================================
 
 export async function createArtMemory(data: Partial<ArtMemory>) {
+  // Get current user
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('로그인이 필요합니다');
+
   const { data: memory, error } = await supabase
     .from('art_memories')
     .insert({
+      user_id: user.id,
       type: data.type,
       timestamp: data.timestamp || new Date().toISOString(),
       emotion_tags: data.emotionTags || [],
@@ -31,7 +36,10 @@ export async function createArtMemory(data: Partial<ArtMemory>) {
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error('Supabase createArtMemory error:', error.message, error.code, error.details);
+    throw new Error(error.message || 'Failed to create art memory');
+  }
   return transformMemoryFromDB(memory);
 }
 

@@ -297,7 +297,7 @@ export const Hero3DSection: React.FC = () => {
               </button>
 
               <button
-                onClick={() => router.push('/gallery')}
+                onClick={() => router.push('/gallery?tab=discover')}
                 className="group px-8 py-4 bg-white/5 backdrop-blur-md text-white border border-white/20 rounded-2xl font-semibold hover:bg-white/10 hover:border-white/30 transition-all duration-300 flex items-center gap-2 justify-center"
               >
                 <Play size={18} className="group-hover:scale-110 transition-transform" />

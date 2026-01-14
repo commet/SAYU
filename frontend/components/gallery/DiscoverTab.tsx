@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Bookmark } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Bookmark, X, Calendar, Palette, MapPin } from 'lucide-react';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -25,6 +25,7 @@ export default function DiscoverTab({ onStatsUpdate }: DiscoverTabProps) {
 
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [collections, setCollections] = useState<any[]>([]);
+  const [selectedArtwork, setSelectedArtwork] = useState<any | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -42,6 +43,11 @@ export default function DiscoverTab({ onStatsUpdate }: DiscoverTabProps) {
   };
 
   const handleSave = async (artwork: any) => {
+    if (!user) {
+      toast.error('로그인이 필요합니다');
+      return;
+    }
+
     try {
       // 1. Create Art Memory
       const memory = await createArtMemory({
@@ -69,9 +75,9 @@ export default function DiscoverTab({ onStatsUpdate }: DiscoverTabProps) {
       setSavedIds(prev => new Set(prev).add(artwork.id));
       toast.success('💾 저장되었습니다!');
       onStatsUpdate();
-    } catch (error) {
-      console.error('Failed to save artwork:', error);
-      toast.error('저장에 실패했습니다');
+    } catch (error: any) {
+      console.error('Failed to save artwork:', error?.message || error?.code || JSON.stringify(error));
+      toast.error(error?.message || '저장에 실패했습니다');
     }
   };
 
@@ -101,7 +107,10 @@ export default function DiscoverTab({ onStatsUpdate }: DiscoverTabProps) {
             transition={{ delay: index * 0.03 }}
             className="group relative"
           >
-            <div className="aspect-square bg-neutral-100 relative border border-neutral-200 hover:border-neutral-900 transition-all overflow-hidden">
+            <div
+              className="aspect-square bg-neutral-100 relative border border-neutral-200 hover:border-neutral-900 transition-all overflow-hidden cursor-pointer"
+              onClick={() => setSelectedArtwork(artwork)}
+            >
               {artwork.imageUrl && (
                 <Image
                   src={artwork.imageUrl}
@@ -117,7 +126,7 @@ export default function DiscoverTab({ onStatsUpdate }: DiscoverTabProps) {
 
               {/* Save Button - Minimal */}
               <button
-                onClick={() => handleSave(artwork)}
+                onClick={(e) => { e.stopPropagation(); handleSave(artwork); }}
                 disabled={savedIds.has(artwork.id)}
                 className={cn(
                   "absolute top-3 right-3 p-2 backdrop-blur-sm border transition-all",
@@ -148,6 +157,111 @@ export default function DiscoverTab({ onStatsUpdate }: DiscoverTabProps) {
           </motion.div>
         ))}
       </div>
+
+      {/* Artwork Detail Modal */}
+      <AnimatePresence>
+        {selectedArtwork && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            onClick={() => setSelectedArtwork(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 25 }}
+              className="relative bg-white max-w-3xl w-full max-h-[90vh] overflow-hidden rounded-lg shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setSelectedArtwork(null)}
+                className="absolute top-4 right-4 z-10 p-2 bg-white/90 rounded-full hover:bg-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="flex flex-col md:flex-row">
+                {/* Image */}
+                <div className="relative w-full md:w-1/2 aspect-square bg-neutral-100">
+                  {selectedArtwork.imageUrl && (
+                    <Image
+                      src={selectedArtwork.imageUrl}
+                      alt={selectedArtwork.title}
+                      fill
+                      className="object-contain"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                    />
+                  )}
+                </div>
+
+                {/* Info */}
+                <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col">
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold text-black mb-1">
+                      {selectedArtwork.title}
+                    </h2>
+                    <p className="text-lg text-neutral-600 mb-4">
+                      {selectedArtwork.artist}
+                    </p>
+
+                    <div className="space-y-3 mb-6">
+                      {selectedArtwork.year && (
+                        <div className="flex items-center gap-2 text-sm text-neutral-500">
+                          <Calendar className="w-4 h-4" />
+                          <span>{selectedArtwork.year}</span>
+                        </div>
+                      )}
+                      {selectedArtwork.style && (
+                        <div className="flex items-center gap-2 text-sm text-neutral-500">
+                          <Palette className="w-4 h-4" />
+                          <span>{selectedArtwork.style}</span>
+                        </div>
+                      )}
+                      {selectedArtwork.museum && (
+                        <div className="flex items-center gap-2 text-sm text-neutral-500">
+                          <MapPin className="w-4 h-4" />
+                          <span>{selectedArtwork.museum}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {selectedArtwork.description && (
+                      <p className="text-sm text-neutral-600 leading-relaxed">
+                        {selectedArtwork.description}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Save Button */}
+                  <button
+                    onClick={() => {
+                      handleSave(selectedArtwork);
+                      setSelectedArtwork(null);
+                    }}
+                    disabled={savedIds.has(selectedArtwork.id)}
+                    className={cn(
+                      "mt-6 w-full py-3 flex items-center justify-center gap-2 font-medium transition-all",
+                      savedIds.has(selectedArtwork.id)
+                        ? "bg-neutral-100 text-neutral-400 cursor-not-allowed"
+                        : "bg-black text-white hover:bg-neutral-800"
+                    )}
+                  >
+                    <Bookmark className={cn(
+                      "w-5 h-5",
+                      savedIds.has(selectedArtwork.id) && "fill-current"
+                    )} />
+                    {savedIds.has(selectedArtwork.id) ? '저장됨' : '내 갤러리에 저장'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
