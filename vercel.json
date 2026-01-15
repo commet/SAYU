@@ -6,11 +6,6 @@
   "env": {
     "NEXT_TELEMETRY_DISABLED": "1"
   },
-  "functions": {
-    "frontend/app/api/**/*.ts": {
-      "maxDuration": 60
-    }
-  },
   "github": {
     "silent": true
   }
