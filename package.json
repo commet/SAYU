@@ -8,7 +8,7 @@
     "shared"
   ],
   "scripts": {
-    "build": "npm run build:shared && echo 'Build completed'",
+    "build": "npm run build:shared && npm run build --workspace=frontend",
     "build:shared": "npm run build --workspace=@sayu/shared",
     "start": "cd backend && node sayu-living-server.js",
     "typecheck": "cd frontend && npm exec -- tsc --noEmit",
