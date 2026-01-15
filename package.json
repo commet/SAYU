@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "@railway/cli": "^4.5.3",
-    "conventional-changelog-cli": "^5.0.0"
+    "conventional-changelog-cli": "^5.0.0",
+    "typescript": "^5.3.3"
   }
 }
