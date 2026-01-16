@@ -2,7 +2,7 @@
   "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/.next",
   "framework": "nextjs",
-  "installCommand": "npm install --legacy-peer-deps && mkdir -p frontend/node_modules && cp -rL node_modules/typescript frontend/node_modules/ && cp -rL node_modules/@types frontend/node_modules/",
+  "installCommand": "npm install --legacy-peer-deps && npm install typescript @types/react @types/node --legacy-peer-deps --save-dev && mkdir -p frontend/node_modules && cp -rL node_modules/typescript frontend/node_modules/ && cp -rL node_modules/@types frontend/node_modules/",
   "env": {
     "NEXT_TELEMETRY_DISABLED": "1"
   },
