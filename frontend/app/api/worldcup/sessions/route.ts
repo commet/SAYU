@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import type { RoundType, WorldcupSession } from '@/shared/exhibition-worldcup-types';
+import type { RoundType, WorldcupSession } from '@sayu/shared/exhibition-worldcup-types';
 
 /**
  * POST /api/worldcup/sessions

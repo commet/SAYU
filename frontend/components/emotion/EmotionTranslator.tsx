@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   EmotionColor,
   WeatherMetaphor,
   AbstractShape,
-  SoundTexture 
-} from '@/shared';
+  SoundTexture
+} from '@sayu/shared';
 import { EmotionInput } from '@/types/emotion-translation';
 import EmotionColorPicker from './EmotionColorPicker';
 import { Card } from '@/components/ui/card';

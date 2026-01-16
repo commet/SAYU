@@ -1,10 +1,10 @@
 // API 응답 타입 가드 함수들
 
-import { 
-  EmotionInterpretation, 
+import {
+  EmotionInterpretation,
   ArtworkMatch,
-  EmotionInput 
-} from '@/shared';
+  EmotionInput
+} from '@sayu/shared';
 
 // 감정 해석 결과 타입 가드
 export function isEmotionInterpretation(data: unknown): data is EmotionInterpretation {

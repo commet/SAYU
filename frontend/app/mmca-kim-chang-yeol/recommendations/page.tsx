@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Sparkles, Heart, Info, Trophy } from 'lucide-react';
 import { MMCA_ARTWORKS } from '@/data/mmca-tour-data';
-import { SAYUTypeCode } from '@/shared/SAYUTypeDefinitions';
+import { SAYUTypeCode } from '@sayu/shared/SAYUTypeDefinitions';
 import { useAuth } from '@/hooks/useAuth';
 import { createClient } from '@/lib/supabase/client';
 

@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build --workspace=frontend",
+  "buildCommand": "npm run build --workspace=@sayu/shared && npm run build --workspace=frontend",
   "outputDirectory": "frontend/.next",
   "framework": "nextjs",
   "installCommand": "npm install --legacy-peer-deps",

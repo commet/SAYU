@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getArtworkById } from '@/data/mmca-tour-data';
 import { MMCATourMemberStatus } from '@/types/mmca-tour';
-import { SAYUTypeCode } from '@/shared/SAYUTypeDefinitions';
+import { SAYUTypeCode } from '@sayu/shared/SAYUTypeDefinitions';
 
 /**
  * GET /api/mmca-tour/team-status

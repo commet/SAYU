@@ -4,8 +4,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useWorldcupStore } from '@/lib/stores/worldcup-store';
-import type { WorldcupMatch } from '@/shared/exhibition-worldcup-types';
-import { getRoundLabel } from '@/shared/exhibition-worldcup-types';
+import type { WorldcupMatch } from '@sayu/shared/exhibition-worldcup-types';
+import { getRoundLabel } from '@sayu/shared/exhibition-worldcup-types';
 
 interface MatchViewProps {
   match: WorldcupMatch;

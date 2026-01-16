@@ -5,12 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Share2, Download, RefreshCw, Info, Palette } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import toast from 'react-hot-toast';
-import { SAYU_TYPES } from '@/shared/SAYUTypeDefinitions';
+import { SAYU_TYPES } from '@sayu/shared/SAYUTypeDefinitions';
 import {
   ART_STYLES,
   getRecommendedStylesForAPT,
   getArtProfileDescription
-} from '@/shared/apt-ai-prompt-mapping';
+} from '@sayu/shared/apt-ai-prompt-mapping';
 
 interface APTArtProfileGeneratorProps {
   aptCode: string;

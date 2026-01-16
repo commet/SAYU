@@ -11,7 +11,7 @@ import type {
   VisitState,
   LocalVisitState,
   STORAGE_KEYS,
-} from '@/shared/exhibition-recording-types';
+} from '@sayu/shared/exhibition-recording-types';
 
 interface VisitStore extends VisitState {
   // Actions

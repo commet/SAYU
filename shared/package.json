@@ -4,9 +4,43 @@
   "description": "Shared types and utilities for SAYU platform",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./SAYUTypeDefinitions": {
+      "types": "./dist/SAYUTypeDefinitions.d.ts",
+      "default": "./dist/SAYUTypeDefinitions.js"
+    },
+    "./apt-ai-prompt-mapping": {
+      "types": "./dist/apt-ai-prompt-mapping.d.ts",
+      "default": "./dist/apt-ai-prompt-mapping.js"
+    },
+    "./apt-exhibition-matching": {
+      "types": "./dist/apt-exhibition-matching.d.ts",
+      "default": "./dist/apt-exhibition-matching.js"
+    },
+    "./exhibition-recording-types": {
+      "types": "./dist/exhibition-recording-types.d.ts",
+      "default": "./dist/exhibition-recording-types.js"
+    },
+    "./exhibition-worldcup-types": {
+      "types": "./dist/exhibition-worldcup-types.d.ts",
+      "default": "./dist/exhibition-worldcup-types.js"
+    },
+    "./easterEggDefinitions": {
+      "types": "./dist/easterEggDefinitions.d.ts",
+      "default": "./dist/easterEggDefinitions.js"
+    },
+    "./artist-types": {
+      "types": "./dist/artist-types.d.ts",
+      "default": "./dist/artist-types.js"
+    }
+  },
   "scripts": {
-    "build": "../node_modules/.bin/tsc",
-    "dev": "../node_modules/.bin/tsc --watch",
+    "build": "npx tsc",
+    "dev": "npx tsc --watch",
     "clean": "rm -rf dist"
   },
   "keywords": ["sayu", "shared", "types"],

@@ -523,44 +523,4 @@ export const CONFIG = {
   SYNC_RETRY_DELAY_MS: 2000,
 } as const;
 
-// ============================================================================
-// Export all types
-// ============================================================================
-
-export type {
-  // Database entities
-  ExhibitionArtwork,
-  ExhibitionVisit,
-  ArtworkRecord,
-
-  // State
-  VisitState,
-  LocalVisitState,
-  LocalArtworkRecord,
-
-  // API
-  StartVisitRequest,
-  StartVisitResponse,
-  EndVisitRequest,
-  EndVisitResponse,
-  AddRecordRequest,
-  AddRecordResponse,
-  SearchArtworksRequest,
-  SearchArtworksResponse,
-  RecognizeArtworkRequest,
-  RecognizeArtworkResponse,
-
-  // UI Props
-  StartVisitButtonProps,
-  EndVisitButtonProps,
-  FloatingRecordButtonProps,
-  ArtworkSearchModalProps,
-  EmotionSelectorProps,
-  VisitProgressHeaderProps,
-  ArtworkRecordCardProps,
-
-  // Utility
-  Emotion,
-  VisitStats,
-  VisitSummary,
-};
+// Note: All types are exported inline with their definitions above

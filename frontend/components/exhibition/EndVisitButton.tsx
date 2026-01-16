@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Square, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useVisitStore, getElapsedText } from '@/lib/stores/visit-store';
-import type { EndVisitButtonProps } from '@/shared/exhibition-recording-types';
+import type { EndVisitButtonProps } from '@sayu/shared/exhibition-recording-types';
 
 export default function EndVisitButton({
   visitId,

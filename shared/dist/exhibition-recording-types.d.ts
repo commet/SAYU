@@ -374,5 +374,4 @@ export declare const CONFIG: {
     readonly SYNC_RETRY_ATTEMPTS: 3;
     readonly SYNC_RETRY_DELAY_MS: 2000;
 };
-export type { ExhibitionArtwork, ExhibitionVisit, ArtworkRecord, VisitState, LocalVisitState, LocalArtworkRecord, StartVisitRequest, StartVisitResponse, EndVisitRequest, EndVisitResponse, AddRecordRequest, AddRecordResponse, SearchArtworksRequest, SearchArtworksResponse, RecognizeArtworkRequest, RecognizeArtworkResponse, StartVisitButtonProps, EndVisitButtonProps, FloatingRecordButtonProps, ArtworkSearchModalProps, EmotionSelectorProps, VisitProgressHeaderProps, ArtworkRecordCardProps, Emotion, VisitStats, VisitSummary, };
 //# sourceMappingURL=exhibition-recording-types.d.ts.map

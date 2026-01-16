@@ -95,3 +95,4 @@ exports.CONFIG = {
     SYNC_RETRY_ATTEMPTS: 3,
     SYNC_RETRY_DELAY_MS: 2000,
 };
+// Note: All types are exported inline with their definitions above

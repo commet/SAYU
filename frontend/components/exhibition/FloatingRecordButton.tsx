@@ -8,7 +8,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
-import type { FloatingRecordButtonProps } from '@/shared/exhibition-recording-types';
+import type { FloatingRecordButtonProps } from '@sayu/shared/exhibition-recording-types';
 
 export default function FloatingRecordButton({
   visitId,

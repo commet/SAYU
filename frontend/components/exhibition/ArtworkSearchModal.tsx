@@ -14,7 +14,7 @@ import EmotionSelector from './EmotionSelector';
 import type {
   ArtworkSearchModalProps,
   ExhibitionArtwork,
-} from '@/shared/exhibition-recording-types';
+} from '@sayu/shared/exhibition-recording-types';
 
 export default function ArtworkSearchModal({
   isOpen,

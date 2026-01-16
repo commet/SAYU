@@ -12,7 +12,7 @@ import {
   RefreshCw,
   UserCircle
 } from 'lucide-react';
-import { SAYU_TYPES, SAYUTypeCode } from '@/shared/SAYUTypeDefinitions';
+import { SAYU_TYPES, SAYUTypeCode } from '@sayu/shared/SAYUTypeDefinitions';
 import { MMCATourMemberStatus } from '@/types/mmca-tour';
 
 // 데모 데이터 (DB 연결 전 테스트용)

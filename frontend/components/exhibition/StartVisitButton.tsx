@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useVisitStore } from '@/lib/stores/visit-store';
-import type { StartVisitButtonProps } from '@/shared/exhibition-recording-types';
+import type { StartVisitButtonProps } from '@sayu/shared/exhibition-recording-types';
 
 export default function StartVisitButton({
   exhibitionId,

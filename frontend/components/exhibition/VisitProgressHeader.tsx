@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
 import { Clock, FileText } from 'lucide-react';
 import { formatElapsedTime, getElapsedText } from '@/lib/stores/visit-store';
 import EndVisitButton from './EndVisitButton';
-import type { VisitProgressHeaderProps } from '@/shared/exhibition-recording-types';
+import type { VisitProgressHeaderProps } from '@sayu/shared/exhibition-recording-types';
 
 export default function VisitProgressHeader({
   visit,

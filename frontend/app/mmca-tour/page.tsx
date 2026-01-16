@@ -13,7 +13,7 @@ import {
   BookOpen,
   Heart
 } from 'lucide-react';
-import { SAYU_TYPES, SAYUTypeCode } from '@/shared/SAYUTypeDefinitions';
+import { SAYU_TYPES, SAYUTypeCode } from '@sayu/shared/SAYUTypeDefinitions';
 import { RecommendedArtwork, MMCAExhibition } from '@/types/mmca-tour';
 
 export default function MMCATourPage() {

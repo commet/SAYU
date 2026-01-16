@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import type { ParticipantSourceType } from '@/shared/exhibition-worldcup-types';
+import type { ParticipantSourceType } from '@sayu/shared/exhibition-worldcup-types';
 
 interface RouteParams {
   params: Promise<{ id: string }>;

@@ -6,7 +6,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Sparkles, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import APTArtProfileGenerator from '@/components/art-profile/APTArtProfileGenerator';
-import { SAYU_TYPES } from '@/shared/SAYUTypeDefinitions';
+import { SAYU_TYPES } from '@sayu/shared/SAYUTypeDefinitions';
 
 function ArtProfileContent() {
   const searchParams = useSearchParams();

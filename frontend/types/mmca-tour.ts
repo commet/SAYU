@@ -3,7 +3,7 @@
  * 국립현대미술관 투어 기능을 위한 타입 정의
  */
 
-import { SAYUTypeCode } from '@/shared/SAYUTypeDefinitions';
+import { SAYUTypeCode } from '@sayu/shared/SAYUTypeDefinitions';
 
 // ==================== 전시 (Exhibition) ====================
 export interface MMCAExhibition {

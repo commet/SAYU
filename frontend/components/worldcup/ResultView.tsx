@@ -12,7 +12,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { WorldcupParticipant, WorldcupRanking } from '@/shared/exhibition-worldcup-types';
+import type { WorldcupParticipant, WorldcupRanking } from '@sayu/shared/exhibition-worldcup-types';
 
 interface ResultViewProps {
   sessionId: string;

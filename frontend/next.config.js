@@ -11,6 +11,10 @@ const nextConfig = {
   poweredByHeader: false, // X-Powered-By 헤더 제거
   compress: true, // gzip 압축 활성화
   productionBrowserSourceMaps: false, // 프로덕션 소스맵 비활성화
+
+  // Transpile shared workspace package
+  transpilePackages: ['@sayu/shared'],
+
   typescript: {
     ignoreBuildErrors: true
   },
@@ -122,7 +126,6 @@ const nextConfig = {
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       '@': path.resolve(__dirname),
-      '@/shared': path.resolve(__dirname, '../shared'),
       'zod/v4/core': require.resolve('zod/v4/core'),
       'zod/v4': require.resolve('zod/v4'),
     };

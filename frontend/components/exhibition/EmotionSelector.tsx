@@ -7,8 +7,8 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { EmotionSelectorProps } from '@/shared/exhibition-recording-types';
-import { EMOTIONS } from '@/shared/exhibition-recording-types';
+import type { EmotionSelectorProps } from '@sayu/shared/exhibition-recording-types';
+import { EMOTIONS } from '@sayu/shared/exhibition-recording-types';
 
 export default function EmotionSelector({
   selectedEmotions,

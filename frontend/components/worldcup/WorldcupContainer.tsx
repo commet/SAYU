@@ -6,7 +6,7 @@ import { useWorldcupStore } from '@/lib/stores/worldcup-store';
 import { SetupPhase } from './SetupPhase';
 import { MatchView } from './MatchView';
 import { ResultView } from './ResultView';
-import type { RoundType } from '@/shared/exhibition-worldcup-types';
+import type { RoundType } from '@sayu/shared/exhibition-worldcup-types';
 
 type Phase = 'setup' | 'tournament' | 'result';
 

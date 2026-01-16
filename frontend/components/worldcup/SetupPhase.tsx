@@ -8,7 +8,7 @@ import type {
   WorldcupSession,
   WorldcupParticipant,
   RoundType,
-} from '@/shared/exhibition-worldcup-types';
+} from '@sayu/shared/exhibition-worldcup-types';
 
 interface SetupPhaseProps {
   session: WorldcupSession | null;

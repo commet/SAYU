@@ -14,7 +14,7 @@ import {
   MapPin,
   Sparkles
 } from 'lucide-react';
-import { SAYU_TYPES, SAYUTypeCode } from '@/shared/SAYUTypeDefinitions';
+import { SAYU_TYPES, SAYUTypeCode } from '@sayu/shared/SAYUTypeDefinitions';
 import { MMCAArtwork, MMCAExhibition, MMCAArtist, EMOTION_TAG_PRESETS } from '@/types/mmca-tour';
 
 interface EnrichedImpression {

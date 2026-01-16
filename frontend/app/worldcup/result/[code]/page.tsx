@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import type { WorldcupRanking, WorldcupSession } from '@/shared/exhibition-worldcup-types';
+import type { WorldcupRanking, WorldcupSession } from '@sayu/shared/exhibition-worldcup-types';
 
 interface ShareResult {
   session: WorldcupSession;

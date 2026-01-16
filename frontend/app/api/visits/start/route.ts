@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import type { StartVisitRequest, StartVisitResponse } from '@/shared/exhibition-recording-types';
+import type { StartVisitRequest, StartVisitResponse } from '@sayu/shared/exhibition-recording-types';
 
 export async function POST(request: NextRequest) {
   try {

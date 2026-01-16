@@ -13,13 +13,13 @@ import type {
   PendingParticipant,
   RoundType,
   WORLDCUP_STORAGE_KEYS,
-} from '@/shared/exhibition-worldcup-types';
+} from '@sayu/shared/exhibition-worldcup-types';
 import {
   calculateTotalMatches,
   getParticipantImageUrl,
   getParticipantTitle,
   ROUND_TYPE_CONFIG,
-} from '@/shared/exhibition-worldcup-types';
+} from '@sayu/shared/exhibition-worldcup-types';
 
 interface WorldcupStore extends WorldcupState {
   // Setup Actions

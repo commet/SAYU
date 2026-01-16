@@ -6,7 +6,7 @@ import {
   getArtProfileDescription,
   ART_STYLES,
   APT_PROMPT_PROFILES
-} from '@/shared/apt-ai-prompt-mapping';
+} from '@sayu/shared/apt-ai-prompt-mapping';
 
 // Vercel/Edge timeout 설정 (최대 60초)
 export const maxDuration = 60;

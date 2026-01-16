@@ -27,12 +27,6 @@
     "paths": {
       "@/*": [
         "./*"
-      ],
-      "@/shared": [
-        "../shared/index"
-      ],
-      "@/shared/*": [
-        "../shared/*"
       ]
     },
     "strictNullChecks": true

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { recommendArtworks, getAllExhibitions } from '@/lib/mmca-tour/recommendation';
-import { SAYUTypeCode, isValidSAYUType } from '@/shared/SAYUTypeDefinitions';
+import { SAYUTypeCode, isValidSAYUType } from '@sayu/shared/SAYUTypeDefinitions';
 
 /**
  * GET /api/mmca-tour/recommendations

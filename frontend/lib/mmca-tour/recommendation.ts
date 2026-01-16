@@ -3,7 +3,7 @@
  * APT 유형 기반 작품 추천 로직
  */
 
-import { SAYUTypeCode, SAYU_TYPES } from '@/shared/SAYUTypeDefinitions';
+import { SAYUTypeCode, SAYU_TYPES } from '@sayu/shared/SAYUTypeDefinitions';
 import {
   MMCAArtwork,
   MMCAExhibition,
