@@ -27,6 +27,9 @@
   },
   "dependencies": {
     "@sayu/shared": "*",
+    "typescript": "^5",
+    "@types/react": "^18",
+    "@types/node": "^20",
     "@clerk/nextjs": "^6.32.0",
     "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^5.1.1",
