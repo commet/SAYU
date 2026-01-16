@@ -122,6 +122,7 @@ const nextConfig = {
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       '@': path.resolve(__dirname),
+      '@/shared': path.resolve(__dirname, '../shared'),
       'zod/v4/core': require.resolve('zod/v4/core'),
       'zod/v4': require.resolve('zod/v4'),
     };
