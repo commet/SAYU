@@ -126,6 +126,7 @@ export default function ExhibitionsPage() {
   }, [user]);
 
   const handleSaveExhibition = useCallback(async (exhibitionId: string, e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     const gate = requireAuth({ message: 'Login to save exhibitions.' });
     if (!gate.allowed) return;
