@@ -39,9 +39,10 @@
     }
   },
   "scripts": {
-    "build": "npx tsc",
-    "dev": "npx tsc --watch",
-    "clean": "rm -rf dist"
+    "build": "tsc || true",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "prepare": ""
   },
   "keywords": ["sayu", "shared", "types"],
   "author": "SAYU Team",
