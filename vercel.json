@@ -2,7 +2,7 @@
   "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/.next",
   "framework": "nextjs",
-  "installCommand": "npm install --legacy-peer-deps && mkdir -p frontend/node_modules && ln -sf /vercel/path0/node_modules/typescript frontend/node_modules/typescript && ln -sf /vercel/path0/node_modules/@types frontend/node_modules/@types",
+  "installCommand": "cd frontend && npm install --legacy-peer-deps",
   "env": {
     "NEXT_TELEMETRY_DISABLED": "1"
   },
