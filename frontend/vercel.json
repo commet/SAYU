@@ -1,24 +1,15 @@
 {
-  "buildCommand": "cd frontend && echo 'Cache bust v2' && rm -rf .next node_modules/.cache && npm run build",
-  "outputDirectory": "frontend/.next",
   "framework": "nextjs",
-  "installCommand": "npm install --force --legacy-peer-deps",
-  "devCommand": "cd frontend && npm run dev",
+  "installCommand": "npm install --legacy-peer-deps",
   "env": {
     "NEXT_TELEMETRY_DISABLED": "1"
   },
   "functions": {
-    "frontend/app/api/**/*.ts": {
+    "app/api/**/*.ts": {
       "maxDuration": 60
     }
   },
   "github": {
     "silent": true
-  },
-  "rewrites": [
-    {
-      "source": "/:path*",
-      "destination": "/frontend/:path*"
-    }
-  ]
+  }
 }
