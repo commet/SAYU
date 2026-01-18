@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     const styleConfig = STYLE_CONFIGS[styleId as keyof typeof STYLE_CONFIGS] || STYLE_CONFIGS['anime-style'];
 
     // Prepare input for Replicate
-    const input: any = {
+    const input: Record<string, unknown> = {
       image: base64Image,
       prompt: `${styleConfig.prompt}, masterpiece, best quality, highly detailed`,
       negative_prompt: 'lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality',

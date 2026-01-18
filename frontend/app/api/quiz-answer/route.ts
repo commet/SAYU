@@ -24,11 +24,11 @@ export async function POST(request: NextRequest) {
       data: data
     });
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json({
       success: false,
       proxy: true,
-      error: error.message
+      error: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }

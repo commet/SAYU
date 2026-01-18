@@ -46,7 +46,18 @@ export async function GET(request: Request) {
   }
 }
 
-function transformCloudinaryData(resources: any[], userType: string) {
+interface CloudinaryResource {
+  public_id: string;
+  secure_url: string;
+  context?: {
+    custom?: {
+      year?: string;
+      style?: string;
+    };
+  };
+}
+
+function transformCloudinaryData(resources: CloudinaryResource[], userType: string) {
   return resources.map(resource => {
     const publicId = resource.public_id;
     const filename = publicId.split('/').pop();

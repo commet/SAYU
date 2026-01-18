@@ -443,7 +443,16 @@ function isDateOrPrice(text: string): boolean {
          text.includes('무료');
 }
 
-function calculateConfidence(data: any): number {
+interface ConfidenceData {
+  title: string | null;
+  venue: string | null;
+  dates: { start_date: string | null; end_date: string | null };
+  price: string;
+  artists: string[];
+  text: string;
+}
+
+function calculateConfidence(data: ConfidenceData): number {
   let score = 0;
   
   // 필수 항목

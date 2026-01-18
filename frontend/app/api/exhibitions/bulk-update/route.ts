@@ -21,11 +21,43 @@ interface ExhibitionData {
   website_url?: string
 }
 
+interface ExhibitionMaster {
+  id: string;
+  venue_id: string;
+  start_date: string;
+  end_date: string;
+  status: string;
+  exhibition_type: string;
+  genre: string;
+  ticket_price_adult: number;
+  ticket_price_student: number;
+  view_count: number;
+  like_count: number;
+  review_count: number;
+  is_featured: boolean;
+}
+
+interface ExhibitionTranslation {
+  exhibition_id: string;
+  language: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  curator: string;
+  poster_url: string | null;
+  website_url: string | null;
+}
+
+interface VenueInfo {
+  id: string;
+  name: string;
+}
+
 interface ParsedExhibition {
-  master: any
-  translation_ko: any
-  translation_en?: any
-  venue: any
+  master: ExhibitionMaster;
+  translation_ko: ExhibitionTranslation;
+  translation_en?: ExhibitionTranslation | null;
+  venue: VenueInfo;
 }
 
 interface BulkUpdateResult {

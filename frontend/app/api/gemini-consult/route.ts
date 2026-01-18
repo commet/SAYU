@@ -26,11 +26,11 @@ export async function POST(request: NextRequest) {
       response: text 
     });
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Gemini API error:', error);
-    return NextResponse.json({ 
-      success: false, 
-      error: error.message 
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
   */

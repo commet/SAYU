@@ -136,7 +136,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Feedback ID is required' }, { status: 400 });
     }
 
-    const updateData: any = {
+    const updateData: Record<string, string | null> = {
       updated_at: new Date().toISOString()
     };
 

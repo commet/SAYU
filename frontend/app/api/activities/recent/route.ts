@@ -1,8 +1,21 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
+interface FormattedActivity {
+  id: string;
+  type: string;
+  targetId: string;
+  title: string;
+  subtitle: string;
+  image: string;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+  formattedTime: string;
+  icon: string;
+}
+
 // Simple in-memory cache (for demo - use Redis in production)
-const cache = new Map<string, { data: any; timestamp: number }>();
+const cache = new Map<string, { data: FormattedActivity[]; timestamp: number }>();
 const CACHE_TTL = 60000; // 1 minute
 
 export async function GET(request: Request) {

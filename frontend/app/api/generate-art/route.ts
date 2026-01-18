@@ -173,8 +173,23 @@ function getNegativePromptForStyle(styleId: string): string {
   return negativePrompts[styleId] || 'different person, different identity, different pose, different composition, changing the subject, new elements, low quality';
 }
 
+interface ModelConfig {
+  name: string;
+  version: string;
+  supportNegativePrompt: boolean;
+  baseInput: {
+    width: number;
+    height: number;
+    num_inference_steps: number;
+    guidance_scale: number;
+    prompt_strength: number;
+    num_outputs: number;
+    scheduler: string;
+  };
+}
+
 // 스타일별 모델 설정 - IMG2IMG 전용 검증된 모델
-function getReplicateModelForStyle(styleId: string): any {
+function getReplicateModelForStyle(styleId: string): ModelConfig {
   // 경량 SD 1.5 IMG2IMG 모델 - 극도로 메모리 효율적
   const verifiedImg2ImgModel = {
     name: 'Stable Diffusion 1.5 (Ultra Lightweight)',

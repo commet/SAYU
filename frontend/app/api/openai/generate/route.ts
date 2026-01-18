@@ -31,10 +31,10 @@ export async function POST(request: NextRequest) {
       imageUrl: response.data[0].url 
     });
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('OpenAI API error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to generate image' },
+      { error: error instanceof Error ? error.message : 'Failed to generate image' },
       { status: 500 }
     );
   }

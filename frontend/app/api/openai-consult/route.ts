@@ -38,11 +38,11 @@ export async function POST(request: NextRequest) {
       model: data.model
     });
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('OpenAI API error:', error);
-    return NextResponse.json({ 
-      success: false, 
-      error: error.message 
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }
