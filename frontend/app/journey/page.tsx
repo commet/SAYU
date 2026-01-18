@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { usePersonalizedTheme } from '@/hooks/usePersonalizedTheme';
 import { useAchievements } from '@/hooks/useAchievements';
-import { useOnboarding } from '@/contexts/OnboardingContext';
+import { useOnboardingV2 } from '@/contexts/OnboardingContextV2';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ThemeIndicator } from '@/components/ui/theme-showcase';
@@ -28,7 +28,7 @@ export default function JourneyPage() {
   const { user, loading } = useAuth();
   const { theme, isLoading: themeLoading } = usePersonalizedTheme();
   const { trackDailyLogin, trackExplorationDay } = useAchievements();
-  const { isNewUser } = useOnboarding();
+  const { isNewUser } = useOnboardingV2();
 
   useEffect(() => {
     if (!loading && !user) {

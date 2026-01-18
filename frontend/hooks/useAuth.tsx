@@ -1,4 +1,4 @@
-import { useEffect, useState, createContext, useContext, useMemo } from 'react';
+import { useEffect, useState, createContext, useContext, useMemo, useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { Database } from '@/lib/supabase/database.types';
@@ -595,13 +595,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  
+
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
-  
+
   return context;
 }
+
+/**
+ * Selector hook for auth state - prevents unnecessary re-renders
+ * Components only re-render when selected value changes
+ *
+ * Usage:
+ *   const userId = useAuthSelector(auth => auth.user?.id);
+ *   const isLoggedIn = useAuthSelector(auth => !!auth.user);
+ */
+export function useAuthSelector<T>(selector: (auth: AuthContextType) => T): T {
+  const auth = useAuth();
+  const selectorRef = useRef(selector);
+  selectorRef.current = selector;
+
+  return useMemo(() => selectorRef.current(auth), [
+    auth.user?.id,
+    auth.profile?.id,
+    auth.session?.access_token,
+    auth.loading
+  ]);
+}
+
+// Pre-built selectors for common use cases
+export const authSelectors = {
+  user: (auth: AuthContextType) => auth.user,
+  userId: (auth: AuthContextType) => auth.user?.id,
+  isLoggedIn: (auth: AuthContextType) => !!auth.user,
+  isLoading: (auth: AuthContextType) => auth.loading,
+  profile: (auth: AuthContextType) => auth.profile,
+  personalityType: (auth: AuthContextType) => auth.user?.personalityType,
+  hasProfile: (auth: AuthContextType) => auth.user?.hasProfile ?? false,
+  quizCompleted: (auth: AuthContextType) => auth.user?.quizCompleted ?? false,
+} as const;
 
 // Export a helper to get fresh session
 export async function getFreshSession() {

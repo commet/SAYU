@@ -112,7 +112,7 @@ function ArtworkCard({
             alt={artwork.title}
             fill
             className="object-cover"
-            unoptimized
+            sizes="(max-width: 768px) 50vw, 33vw"
           />
           {/* Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />

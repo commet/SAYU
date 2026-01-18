@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { Home, Palette, Users, User, MessageSquare, GalleryVerticalEnd, Settings, Sun, Moon } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthSelector, authSelectors } from '@/hooks/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useDarkMode } from '@/contexts/DarkModeContext';
 import { cn } from '@/lib/utils';
@@ -56,7 +56,8 @@ const getNavItemsWithAdmin = (user: any) => {
 export default function GlobalNav() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useAuth();
+  // Selector pattern: only re-renders when user changes
+  const user = useAuthSelector(authSelectors.user);
   const { language } = useLanguage();
   const { isDarkMode, toggleDarkMode } = useDarkMode();
 

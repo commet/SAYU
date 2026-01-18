@@ -75,6 +75,10 @@ export function ArtworkCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleClick}
+      onKeyDown={(e) => e.key === 'Enter' && handleClick()}
+      tabIndex={0}
+      role="button"
+      aria-label={`${title} by ${artist}, ${year}`}
     >
       <div className={cn(
         "overflow-hidden bg-sayu-bg-card border border-sayu-powder-blue/20 shadow-md hover:shadow-lg transition-all duration-300",

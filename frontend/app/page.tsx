@@ -8,7 +8,21 @@ import dynamic from 'next/dynamic';
 import { useResponsive } from '@/lib/responsive';
 import { Container, Button } from '@/components/design-system';
 import { Sparkles, ArrowRight, MessageSquare, TrendingUp } from 'lucide-react';
-import { Hero3DSection } from '@/components/hero/Hero3DSection';
+// Dynamic import for heavy 3D hero section
+const Hero3DSection = dynamic(
+  () => import('@/components/hero/Hero3DSection').then(mod => ({ default: mod.Hero3DSection })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-screen bg-gradient-to-b from-neutral-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-pulse w-64 h-64 bg-neutral-200 rounded-2xl mx-auto mb-4" />
+          <div className="animate-pulse w-48 h-6 bg-neutral-200 rounded mx-auto" />
+        </div>
+      </div>
+    ),
+  }
+);
 
 const MobileHomePage = dynamic(() => import('./MobileHomePageFixed'), {
   ssr: false,

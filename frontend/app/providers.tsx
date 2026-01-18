@@ -4,7 +4,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SessionProvider } from 'next-auth/react';
 import { AuthProvider } from '@/hooks/useAuth';
 import { ThemeProvider } from '@/hooks/usePersonalizedTheme';
-import { OnboardingProvider } from '@/contexts/OnboardingContext';
 import { OnboardingProviderV2 } from '@/contexts/OnboardingContextV2';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { AnimalCursorProvider } from '@/contexts/AnimalCursorContext';
@@ -54,21 +53,19 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <LanguageProvider>
               <DarkModeProvider>
                 <ThemeProvider>
-                  <OnboardingProvider>
-                    <OnboardingProviderV2>
-                      <AnimalCursorProvider>
-                        <EasterEggProvider>
-                          <ArtworkViewingProvider>
-                            <ClientLayout>
-                              {children}
-                            </ClientLayout>
-                            <PersonalizedToaster />
-                            <SmartChatbot />
-                          </ArtworkViewingProvider>
-                        </EasterEggProvider>
-                      </AnimalCursorProvider>
-                    </OnboardingProviderV2>
-                  </OnboardingProvider>
+                  <OnboardingProviderV2>
+                    <AnimalCursorProvider>
+                      <EasterEggProvider>
+                        <ArtworkViewingProvider>
+                          <ClientLayout>
+                            {children}
+                          </ClientLayout>
+                          <PersonalizedToaster />
+                          <SmartChatbot />
+                        </ArtworkViewingProvider>
+                      </EasterEggProvider>
+                    </AnimalCursorProvider>
+                  </OnboardingProviderV2>
                 </ThemeProvider>
               </DarkModeProvider>
             </LanguageProvider>

@@ -22,7 +22,7 @@ const nextConfig = {
     ignoreDuringBuilds: true
   },
   images: {
-    unoptimized: true,  // 이미지 최적화 비활성화 - 프로덕션 404 에러 해결
+    // unoptimized 제거 - Next.js 이미지 최적화 활성화 (AVIF/WebP 변환, 리사이징)
     domains: ['www.sayu.my', 'sayu.my', 'localhost'],
     // Next.js는 remotePatterns를 최대 50개까지만 허용 - 필수 도메인만 포함
     remotePatterns: [
@@ -135,6 +135,37 @@ const nextConfig = {
   // Force cache invalidation
   generateBuildId: async () => {
     return 'build-' + Date.now()
+  },
+
+  // Security headers
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on'
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN'
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin'
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(self)'
+          }
+        ]
+      }
+    ];
   }
 }
 

@@ -2,14 +2,15 @@
 
 import { useCallback, useEffect, useMemo } from 'react';
 import { getActivityTracker, ActivityType, trackActivityImmediate } from '@/lib/activity-tracker';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthSelector, authSelectors } from '@/hooks/useAuth';
 
 export interface TrackingOptions {
   immediate?: boolean; // Send immediately instead of batching
 }
 
 export function useActivityTracker() {
-  const { user } = useAuth();
+  // Selector pattern: only re-renders when user changes
+  const user = useAuthSelector(authSelectors.user);
   const tracker = useMemo(() => getActivityTracker(), []);
 
   // Track generic activity
@@ -117,78 +118,66 @@ export function useActivityTracker() {
 }
 
 // Hook to fetch recent activities
-import useSWR from 'swr';
+import { useQuery } from '@tanstack/react-query';
 
 export function useRecentActivities(limit: number = 20) {
-  const { user } = useAuth();
-  
-  const { data, error, mutate } = useSWR(
-    user ? `/api/activities/recent?limit=${limit}` : null,
-    async (url) => {
-      console.log('Fetching activities for user:', user?.id);
-      const res = await fetch(url, {
-        credentials: 'include', // Include cookies for authentication
+  const user = useAuthSelector(authSelectors.user);
+
+  const { data, error, isLoading, refetch } = useQuery({
+    queryKey: ['activities', 'recent', limit, user?.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/activities/recent?limit=${limit}`, {
+        credentials: 'include',
       });
-      
+
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
-        console.error('Activities fetch failed:', res.status, errorData);
         throw new Error(errorData.error || 'Failed to fetch activities');
       }
-      
+
       return res.json();
     },
-    {
-      refreshInterval: 60000, // Refresh every minute
-      revalidateOnFocus: false,
-      dedupingInterval: 10000,
-      onError: (error) => {
-        console.error('SWR Error fetching activities:', error);
-      }
-    }
-  );
+    enabled: !!user,
+    refetchInterval: 60000,
+    refetchOnWindowFocus: false,
+    staleTime: 10000,
+  });
 
   return {
     activities: data || [],
-    isLoading: !error && !data,
-    isError: error,
-    refresh: mutate
+    isLoading,
+    isError: !!error,
+    refresh: refetch
   };
 }
 
 // Hook to fetch activity statistics
 export function useActivityStats() {
-  const { user } = useAuth();
-  
-  const { data, error } = useSWR(
-    user ? '/api/activities/recent' : null,
-    async (url) => {
-      console.log('Fetching activity stats for user:', user?.id);
-      const res = await fetch(url, { 
+  const user = useAuthSelector(authSelectors.user);
+
+  const { data, error, isLoading } = useQuery({
+    queryKey: ['activities', 'stats', user?.id],
+    queryFn: async () => {
+      const res = await fetch('/api/activities/recent', {
         method: 'POST',
-        credentials: 'include', // Include cookies for authentication
+        credentials: 'include',
       });
-      
+
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
-        console.error('Activity stats fetch failed:', res.status, errorData);
         throw new Error(errorData.error || 'Failed to fetch stats');
       }
-      
+
       return res.json();
     },
-    {
-      refreshInterval: 300000, // Refresh every 5 minutes
-      revalidateOnFocus: false,
-      onError: (error) => {
-        console.error('SWR Error fetching activity stats:', error);
-      }
-    }
-  );
+    enabled: !!user,
+    refetchInterval: 300000,
+    refetchOnWindowFocus: false,
+  });
 
   return {
     stats: data || { total: 0, byType: {} },
-    isLoading: !error && !data,
-    isError: error
+    isLoading,
+    isError: !!error
   };
 }

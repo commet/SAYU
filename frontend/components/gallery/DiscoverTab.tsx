@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bookmark, X, Calendar, Palette, MapPin } from 'lucide-react';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthSelector, authSelectors } from '@/hooks/useAuth';
 import { useCloudinaryArtworks } from '@/hooks/useCloudinaryArtworks';
 import { createArtMemory, getCollections, addMemoryToCollection } from '@/lib/supabase/gallery';
 import { cn } from '@/lib/utils';
@@ -14,10 +14,93 @@ interface DiscoverTabProps {
   onStatsUpdate: () => void;
 }
 
+interface ArtworkGridItemProps {
+  artwork: any;
+  index: number;
+  isSaved: boolean;
+  onSave: (artwork: any) => void;
+  onSelect: (artwork: any) => void;
+}
+
+// Memoized grid item to prevent unnecessary re-renders
+const ArtworkGridItem = memo(function ArtworkGridItem({
+  artwork,
+  index,
+  isSaved,
+  onSave,
+  onSelect
+}: ArtworkGridItemProps) {
+  return (
+    <motion.div
+      key={artwork.id}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.03 }}
+      className="group relative"
+    >
+      <div
+        className="aspect-square bg-neutral-100 relative border border-neutral-200 hover:border-neutral-900 transition-all overflow-hidden cursor-pointer"
+        onClick={() => onSelect(artwork)}
+        onKeyDown={(e) => e.key === 'Enter' && onSelect(artwork)}
+        tabIndex={0}
+        role="button"
+        aria-label={`View ${artwork.title} by ${artwork.artist}`}
+      >
+        {artwork.imageUrl && (
+          <Image
+            src={artwork.imageUrl}
+            alt={artwork.title}
+            fill
+            className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+            sizes="(max-width: 768px) 100vw, 25vw"
+          />
+        )}
+
+        {/* Subtle overlay */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+
+        {/* Save Button - Minimal */}
+        <button
+          onClick={(e) => { e.stopPropagation(); onSave(artwork); }}
+          disabled={isSaved}
+          aria-label={isSaved ? `${artwork.title} saved` : `Save ${artwork.title}`}
+          className={cn(
+            "absolute top-3 right-3 p-2 backdrop-blur-sm border transition-all",
+            isSaved
+              ? "bg-black border-black"
+              : "bg-white/90 border-white/90 opacity-0 group-hover:opacity-100"
+          )}
+        >
+          <Bookmark className={cn(
+            "w-4 h-4 transition-colors",
+            isSaved ? "text-white fill-white" : "text-neutral-600"
+          )} />
+        </button>
+      </div>
+
+      {/* Info below */}
+      <div className="mt-3 space-y-0.5">
+        <h3 className="text-sm font-medium text-black line-clamp-1">
+          {artwork.title}
+        </h3>
+        <p className="text-xs text-neutral-500 line-clamp-1">
+          {artwork.artist}
+        </p>
+        <p className="text-xs text-neutral-400">
+          {artwork.year}
+        </p>
+      </div>
+    </motion.div>
+  );
+});
+
 export default function DiscoverTab({ onStatsUpdate }: DiscoverTabProps) {
-  const { user } = useAuth();
+  // Selector pattern: only re-renders when user or personalityType changes
+  const user = useAuthSelector(authSelectors.user);
+  const personalityType = useAuthSelector(authSelectors.personalityType);
+
   const { artworks, loading } = useCloudinaryArtworks({
-    userType: user?.personalityType || user?.aptType || 'SREF',
+    userType: personalityType || user?.aptType || 'SREF',
     limit: 30,
     random: true,
     autoLoad: true
@@ -42,7 +125,7 @@ export default function DiscoverTab({ onStatsUpdate }: DiscoverTabProps) {
     }
   };
 
-  const handleSave = async (artwork: any) => {
+  const handleSave = useCallback(async (artwork: any) => {
     if (!user) {
       toast.error('로그인이 필요합니다');
       return;
@@ -79,7 +162,11 @@ export default function DiscoverTab({ onStatsUpdate }: DiscoverTabProps) {
       console.error('Failed to save artwork:', error?.message || error?.code || JSON.stringify(error));
       toast.error(error?.message || '저장에 실패했습니다');
     }
-  };
+  }, [user, collections, onStatsUpdate]);
+
+  const handleSelectArtwork = useCallback((artwork: any) => {
+    setSelectedArtwork(artwork);
+  }, []);
 
   if (loading) {
     return (
@@ -100,61 +187,14 @@ export default function DiscoverTab({ onStatsUpdate }: DiscoverTabProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {artworks.map((artwork, index) => (
-          <motion.div
+          <ArtworkGridItem
             key={artwork.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.03 }}
-            className="group relative"
-          >
-            <div
-              className="aspect-square bg-neutral-100 relative border border-neutral-200 hover:border-neutral-900 transition-all overflow-hidden cursor-pointer"
-              onClick={() => setSelectedArtwork(artwork)}
-            >
-              {artwork.imageUrl && (
-                <Image
-                  src={artwork.imageUrl}
-                  alt={artwork.title}
-                  fill
-                  className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
-                  sizes="(max-width: 768px) 100vw, 25vw"
-                />
-              )}
-
-              {/* Subtle overlay */}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
-
-              {/* Save Button - Minimal */}
-              <button
-                onClick={(e) => { e.stopPropagation(); handleSave(artwork); }}
-                disabled={savedIds.has(artwork.id)}
-                className={cn(
-                  "absolute top-3 right-3 p-2 backdrop-blur-sm border transition-all",
-                  savedIds.has(artwork.id)
-                    ? "bg-black border-black"
-                    : "bg-white/90 border-white/90 opacity-0 group-hover:opacity-100"
-                )}
-              >
-                <Bookmark className={cn(
-                  "w-4 h-4 transition-colors",
-                  savedIds.has(artwork.id) ? "text-white fill-white" : "text-neutral-600"
-                )} />
-              </button>
-            </div>
-
-            {/* Info below */}
-            <div className="mt-3 space-y-0.5">
-              <h3 className="text-sm font-medium text-black line-clamp-1">
-                {artwork.title}
-              </h3>
-              <p className="text-xs text-neutral-500 line-clamp-1">
-                {artwork.artist}
-              </p>
-              <p className="text-xs text-neutral-400">
-                {artwork.year}
-              </p>
-            </div>
-          </motion.div>
+            artwork={artwork}
+            index={index}
+            isSaved={savedIds.has(artwork.id)}
+            onSave={handleSave}
+            onSelect={handleSelectArtwork}
+          />
         ))}
       </div>
 

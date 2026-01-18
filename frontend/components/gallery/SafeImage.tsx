@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Palette } from 'lucide-react';
 
 interface SafeImageProps {
@@ -14,26 +15,26 @@ interface SafeImageProps {
   height?: number;
 }
 
-export function SafeImage({ 
-  src, 
-  alt, 
-  className = '', 
+export function SafeImage({
+  src,
+  alt,
+  className = '',
   priority = false,
   fill = false,
-  sizes,
+  sizes = '(max-width: 768px) 100vw, 50vw',
   width = 400,
-  height = 300 
+  height = 300
 }: SafeImageProps) {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Fallback to a working Renoir image
-  const fallbackImage = 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Pierre-Auguste_Renoir%2C_Le_Moulin_de_la_Galette.jpg/400px-Pierre-Auguste_Renoir%2C_Le_Moulin_de_la_Galette.jpg';
-
-  if (!src) {
+  // Empty src fallback
+  if (!src || error) {
     return (
-      <div className={`${fill ? 'absolute inset-0' : ''} bg-gradient-to-br from-purple-900/20 to-pink-900/20 flex items-center justify-center ${className}`}
-           style={!fill ? { width, height } : undefined}>
+      <div
+        className={`${fill ? 'absolute inset-0' : ''} bg-gradient-to-br from-purple-900/20 to-pink-900/20 flex items-center justify-center ${className}`}
+        style={!fill ? { width, height } : undefined}
+      >
         <div className="text-center p-4">
           <Palette className="w-12 h-12 text-purple-400 mx-auto mb-2" />
           <p className="text-xs text-gray-400 line-clamp-1">{alt}</p>
@@ -42,41 +43,24 @@ export function SafeImage({
     );
   }
 
-  // Debug log
-  console.log(`🖼️ SafeImage rendering: ${alt}`, { src, error });
-
-  // Use regular img tag for better compatibility
   return (
-    <>
+    <div className={`relative ${fill ? 'absolute inset-0' : ''}`} style={!fill ? { width, height } : undefined}>
       {loading && (
-        <div className={`${fill ? 'absolute inset-0' : ''} bg-gradient-to-br from-slate-800 to-slate-900 animate-pulse ${className}`}
-             style={!fill ? { width, height } : undefined} />
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900 animate-pulse" />
       )}
-      <img
-        src={src}  // Always use original src, no fallback
+      <Image
+        src={src}
         alt={alt}
-        className={className}
-        loading={priority ? 'eager' : 'lazy'}
-        onError={(e) => {
-          console.error(`❌ Image failed to load: ${alt}`, src);
-          // Don't use fallback, just log error
-        }}
-        onLoad={() => {
-          console.log(`✅ Image loaded successfully: ${alt}`);
-          setLoading(false);
-        }}
-        style={fill ? { 
-          position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover'
-        } : {
-          width,
-          height,
-          objectFit: 'cover'
-        }}
+        className={`${className} ${loading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+        priority={priority}
+        fill={fill}
+        sizes={sizes}
+        width={!fill ? width : undefined}
+        height={!fill ? height : undefined}
+        onError={() => setError(true)}
+        onLoad={() => setLoading(false)}
+        style={{ objectFit: 'cover' }}
       />
-    </>
+    </div>
   );
 }
