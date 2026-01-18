@@ -34,10 +34,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(data);
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Quiz analysis proxy error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to analyze quiz' },
+      { error: error instanceof Error ? error.message : 'Failed to analyze quiz' },
       { status: 500 }
     );
   }

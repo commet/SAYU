@@ -1,33 +1,61 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
-// Cache for exhibitions data
-let exhibitionsCache: any = null;
-let cacheTimestamp: number = 0;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+// Types for exhibition data
+interface ExhibitionRow {
+  id: string;
+  title_local?: string;
+  title_en?: string;
+  title?: string;
+  venue_name?: string;
+  venue?: string;
+  venue_city?: string;
+  location?: string;
+  start_date: string;
+  end_date: string;
+  description?: string;
+  image_url?: string;
+  category?: string;
+  price?: string;
+  admission_fee?: string;
+  view_count?: number;
+  like_count?: number;
+  featured?: boolean;
+}
+
+interface TransformedExhibition {
+  id: string;
+  title: string;
+  venue: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  description?: string;
+  image?: string;
+  category: string;
+  price: string;
+  status: 'ongoing' | 'upcoming' | 'ended';
+  viewCount: number;
+  likeCount: number;
+  featured: boolean;
+}
+
+interface ExhibitionStats {
+  ongoing: number;
+  upcoming: number;
+  ended: number;
+  total: number;
+}
+
+// Cache duration: 5 minutes (in seconds for HTTP cache headers)
+const CACHE_MAX_AGE = 300;
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '20');
     const offset = parseInt(searchParams.get('offset') || '0');
-    const useCache = searchParams.get('cache') !== 'false';
-    
-    // Check cache for first page only
-    if (useCache && offset === 0 && exhibitionsCache) {
-      const now = Date.now();
-      if (now - cacheTimestamp < CACHE_DURATION) {
-        const cachedData = exhibitionsCache.slice(0, limit);
-        return NextResponse.json({
-          success: true,
-          data: cachedData,
-          total: exhibitionsCache.length,
-          cached: true,
-          timestamp: new Date(cacheTimestamp).toISOString()
-        });
-      }
-    }
-    
+
     // Check environment variables
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       return NextResponse.json({
@@ -77,11 +105,17 @@ export async function GET(request: NextRequest) {
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => reject(new Error('Query timeout')), 5000);
     });
-    
-    const { data: exhibitions, error, count } = await Promise.race([
+
+    const queryResult = await Promise.race([
       query,
       timeoutPromise
-    ]) as any;
+    ]);
+
+    const { data: exhibitions, error, count } = queryResult as {
+      data: ExhibitionRow[] | null;
+      error: { message: string } | null;
+      count: number | null;
+    };
 
     if (error) {
       console.error('Supabase query error:', error);
@@ -130,7 +164,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform data efficiently
-    const transformedData = (exhibitions || []).map((ex: any) => ({
+    const transformedData: TransformedExhibition[] = (exhibitions || []).map((ex) => ({
       id: ex.id,
       title: ex.title_local || ex.title_en || ex.title || `${ex.venue_name || '미지의 장소'} 전시`,
       venue: ex.venue_name || ex.venue || '미지의 장소',
@@ -147,22 +181,22 @@ export async function GET(request: NextRequest) {
       featured: ex.featured || false
     }));
     
-    // Update cache for first page
-    if (offset === 0) {
-      exhibitionsCache = transformedData;
-      cacheTimestamp = Date.now();
-    }
-    
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       data: transformedData,
       total: count || transformedData.length,
       totalStats: totalStats,
       timestamp: new Date().toISOString()
     });
-    
-  } catch (error: any) {
-    console.error('Exhibitions API error:', error.message);
+
+    // Set HTTP cache headers for CDN/browser caching
+    response.headers.set('Cache-Control', `public, s-maxage=${CACHE_MAX_AGE}, stale-while-revalidate=60`);
+
+    return response;
+
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Exhibitions API error:', errorMessage);
     
     // Return fallback data on error
     const fallbackData = [

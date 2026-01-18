@@ -1,8 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
 
+interface ChatContext {
+  page?: string;
+  userBehavior?: {
+    currentMood?: string;
+    engagementLevel?: string;
+  };
+}
+
+interface ConversationMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 // APT 유형별 시스템 프롬프트 생성
-function createSystemPrompt(userType: string, context: any): string {
+function createSystemPrompt(userType: string, context: ChatContext): string {
   return `당신은 SAYU 플랫폼의 ${userType} 유형 AI 큐레이터입니다.
 사용자의 예술적 취향과 성격을 이해하고 맞춤형 예술 경험을 제공합니다.
 
@@ -63,8 +76,8 @@ export async function POST(request: NextRequest) {
         content: createSystemPrompt(userType, context || {})
       },
       // 최근 대화 히스토리 (최대 5개)
-      ...(conversationHistory || []).map((msg: any) => ({
-        role: msg.role === 'user' ? 'user' : 'assistant',
+      ...(conversationHistory || []).map((msg: ConversationMessage) => ({
+        role: msg.role === 'user' ? 'user' as const : 'assistant' as const,
         content: msg.content
       })),
       {
@@ -74,7 +87,7 @@ export async function POST(request: NextRequest) {
     ];
     
     const completion = await groq.chat.completions.create({
-      messages: messages as any,
+      messages: messages as Groq.Chat.ChatCompletionMessageParam[],
       model: 'llama3-8b-8192', // 빠르고 무료인 Llama 3 8B 모델
       temperature: 0.7,
       max_tokens: 500, // 토큰 제한

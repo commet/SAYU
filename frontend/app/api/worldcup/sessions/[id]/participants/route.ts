@@ -6,6 +6,23 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
+interface WorldcupParticipant {
+  id: string;
+  session_id: string;
+  seed_position?: number;
+  title?: string;
+  artist?: string;
+  image_url?: string;
+  temp_image_url?: string;
+  artwork?: {
+    id: string;
+    title?: string;
+    artist?: string;
+    image_url?: string;
+    thumbnail_url?: string;
+  };
+}
+
 /**
  * POST /api/worldcup/sessions/[id]/participants
  * 참가자 추가
@@ -98,10 +115,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         maxCount,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Add participant error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     );
   }
@@ -134,7 +151,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     // 참가자 정보 보강
-    const enrichedParticipants = (participants || []).map((p: any) => ({
+    const enrichedParticipants = ((participants || []) as WorldcupParticipant[]).map((p) => ({
       ...p,
       title: p.title || p.artwork?.title,
       artist: p.artist || p.artwork?.artist,
@@ -146,10 +163,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       success: true,
       data: { participants: enrichedParticipants },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Fetch participants error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     );
   }
@@ -223,10 +240,10 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       success: true,
       data: { deleted: true },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Delete participant error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     );
   }

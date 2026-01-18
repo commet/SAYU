@@ -1,6 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+interface WorldcupParticipant {
+  id: string;
+  final_rank: number | null;
+  title?: string;
+  artist?: string;
+  image_url?: string;
+  temp_image_url?: string;
+  source_type?: string;
+  wins?: number;
+  total_matches?: number;
+  artwork?: {
+    id: string;
+    title?: string;
+    artist?: string;
+    image_url?: string;
+    thumbnail_url?: string;
+  };
+}
+
+interface Ranking {
+  rank: number | null;
+  participant_id: string;
+  title?: string;
+  artist?: string;
+  image_url?: string;
+  source_type?: string;
+  wins?: number;
+  total_matches?: number;
+}
+
 /**
  * POST /api/worldcup/share
  * 공유 URL 생성
@@ -91,10 +121,10 @@ export async function POST(request: NextRequest) {
         share_url: shareUrl,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Share creation error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     );
   }
@@ -157,7 +187,7 @@ export async function GET(request: NextRequest) {
       .order('final_rank', { ascending: true });
 
     // 참가자 정보 보강
-    const rankings = (participants || []).map((p: any) => ({
+    const rankings: Ranking[] = ((participants || []) as WorldcupParticipant[]).map((p) => ({
       rank: p.final_rank,
       participant_id: p.id,
       title: p.title || p.artwork?.title,
@@ -168,7 +198,7 @@ export async function GET(request: NextRequest) {
       total_matches: p.total_matches,
     }));
 
-    const winner = rankings.find((r: any) => r.rank === 1);
+    const winner = rankings.find((r) => r.rank === 1);
 
     return NextResponse.json({
       success: true,
@@ -179,10 +209,10 @@ export async function GET(request: NextRequest) {
         rankings,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Share fetch error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     );
   }

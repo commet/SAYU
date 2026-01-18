@@ -5,6 +5,23 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
+interface WorldcupParticipant {
+  id: string;
+  session_id: string;
+  seed_position?: number;
+  title?: string;
+  artist?: string;
+  image_url?: string;
+  temp_image_url?: string;
+  artwork?: {
+    id: string;
+    title?: string;
+    artist?: string;
+    image_url?: string;
+    thumbnail_url?: string;
+  };
+}
+
 /**
  * POST /api/worldcup/sessions/[id]/start
  * 토너먼트 시작 (브래킷 생성)
@@ -124,7 +141,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     // 참가자 정보 보강
-    const enrichedParticipants = shuffled.map((p: any, index: number) => ({
+    const enrichedParticipants = (shuffled as WorldcupParticipant[]).map((p, index) => ({
       ...p,
       seed_position: index + 1,
       title: p.title || p.artwork?.title,
@@ -142,10 +159,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         firstMatch: createdMatches?.[0] || null,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Start tournament error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     );
   }

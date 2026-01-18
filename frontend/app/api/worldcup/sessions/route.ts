@@ -53,10 +53,10 @@ export async function POST(request: NextRequest) {
       success: true,
       data: { session },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Worldcup sessions API error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     );
   }
@@ -110,10 +110,10 @@ export async function GET(request: NextRequest) {
       success: true,
       data: { sessions },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Worldcup sessions API error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     );
   }

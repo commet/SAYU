@@ -38,8 +38,13 @@ const PAGE_CONTEXTS: Record<string, string> = {
   default: '예술과 문화에 대한 일반적인 대화를 나눕니다'
 }
 
+interface APTPersonality {
+  name: string;
+  tone: string;
+}
+
 // APT 유형별 챗봇 성격
-const APT_PERSONALITIES: Record<string, any> = {
+const APT_PERSONALITIES: Record<string, APTPersonality> = {
   'LAEF': { name: '여우', tone: '몽환적이고 시적인' },
   'LAEC': { name: '고양이', tone: '우아하고 선택적인' },
   'LAMF': { name: '올빼미', tone: '직관적이고 통찰력 있는' },
@@ -216,8 +221,8 @@ export async function POST(request: NextRequest) {
       }
     })
     
-  } catch (error: any) {
-    console.error('🔴 Chatbot API error:', error)
+  } catch (error) {
+    console.error('🔴 Chatbot API error:', error instanceof Error ? error.message : error)
     
     const personalityFallbacks = {
       'LAEF': "마음이 복잡해지네요... 잠시 색채 속에서 답을 찾고 있어요.",
@@ -241,8 +246,31 @@ export async function POST(request: NextRequest) {
   }
 }
 
+interface PageContext {
+  page: string;
+  artwork?: ArtworkInfo;
+  exhibition?: { id: string; title?: string };
+  dynamicData?: Record<string, unknown>;
+  userBehavior: {
+    pageVisitCount: number;
+    timeOnPage: number;
+    scrollDepth: number;
+    clickedElements: string[];
+    recentArtworks: string[];
+    lastActivity: number;
+    engagementLevel: string;
+    currentMood: string;
+  };
+}
+
+interface ArtworkInfo {
+  id?: string;
+  title?: string;
+  artist?: string;
+}
+
 // 동적 제안 생성 함수
-function generateDynamicSuggestions(context: any, userType: string, artwork?: any): string[] {
+function generateDynamicSuggestions(context: PageContext, userType: string, artwork?: ArtworkInfo): string[] {
   const suggestions: string[] = []
   const { userBehavior, page } = context
 

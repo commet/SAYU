@@ -5,6 +5,23 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
+interface WorldcupParticipant {
+  id: string;
+  session_id: string;
+  seed_position?: number;
+  title?: string;
+  artist?: string;
+  image_url?: string;
+  temp_image_url?: string;
+  artwork?: {
+    id: string;
+    title?: string;
+    artist?: string;
+    image_url?: string;
+    thumbnail_url?: string;
+  };
+}
+
 /**
  * GET /api/worldcup/sessions/[id]
  * 세션 상세 조회 (참가자, 매치 포함)
@@ -55,7 +72,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     // 참가자 정보 보강 (artwork 정보 병합)
-    const enrichedParticipants = (participants || []).map((p: any) => ({
+    const enrichedParticipants = ((participants || []) as WorldcupParticipant[]).map((p) => ({
       ...p,
       title: p.title || p.artwork?.title,
       artist: p.artist || p.artwork?.artist,
@@ -71,10 +88,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         matches: matches || [],
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Worldcup session API error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     );
   }
@@ -91,7 +108,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const supabase = await createClient();
 
     const allowedFields = ['status', 'current_match_index', 'winner_participant_id'];
-    const updates: Record<string, any> = {};
+    const updates: Record<string, string | number | null> = {};
 
     for (const field of allowedFields) {
       if (body[field] !== undefined) {
@@ -122,10 +139,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       success: true,
       data: { session },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Worldcup session PATCH error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     );
   }
@@ -157,10 +174,10 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       success: true,
       data: { deleted: true },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Worldcup session DELETE error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     );
   }
