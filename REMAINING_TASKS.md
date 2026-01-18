@@ -1,7 +1,7 @@
 # SAYU 남은 작업 목록
 
 > 이 문서는 2026-01-19 보안/성능/코드품질 감사 후 작성됨
-> 마지막 커밋: `83bca36` (refactor: remove all any types from API routes)
+> 마지막 커밋: `c49c652` (perf: add HTTP Cache-Control headers to API routes)
 
 ---
 
@@ -160,9 +160,9 @@ npx @next/bundle-analyzer
 | 엔드포인트 | 현재 | 권장 |
 |------------|------|------|
 | `/api/exhibitions` | ✅ 5분 | 완료 |
-| `/api/personality-types` | ❌ | 1시간 (정적 데이터) |
-| `/api/gallery/artworks` | ❌ | 10분 |
-| `/api/museums` | ❌ | 1시간 (정적 데이터) |
+| `/api/personality-types` | ✅ 1시간 | 완료 |
+| `/api/gallery/artworks` | ✅ 10분 | 완료 |
+| `/api/museum-image` | ✅ 24시간 | 완료 |
 
 ---
 
@@ -226,7 +226,7 @@ npm run lint
 | 보안 취약점 | 4 | 2 | 2 (키교체, RLS적용) |
 | any 타입 (API) | 50+ | **50+** ✅ | **0** |
 | any 타입 (컴포넌트) | ~10 | 0 | ~10 |
-| 성능 이슈 | 5 | 4 | 1 |
+| 성능 이슈 | 5 | 5 | **0** ✅ |
 | 인덱스 누락 | 10 | 0 | 10 (SQL 준비됨) |
 | 미사용 코드 | 3 | **3** ✅ | **0** |
 
