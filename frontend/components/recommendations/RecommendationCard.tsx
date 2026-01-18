@@ -48,15 +48,15 @@ const RecommendationCard = memo(function RecommendationCard({
 
   const handleLike = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsLiked(!isLiked);
+    setIsLiked(prev => !prev);
     onLike?.(recommendation.id);
-  }, [isLiked, onLike, recommendation.id]);
+  }, [onLike, recommendation.id]);
 
   const handleBookmark = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsBookmarked(!isBookmarked);
+    setIsBookmarked(prev => !prev);
     onBookmark?.(recommendation.id);
-  }, [isBookmarked, onBookmark, recommendation.id]);
+  }, [onBookmark, recommendation.id]);
 
   const handleCardClick = useCallback(() => {
     onView?.(recommendation.id);
