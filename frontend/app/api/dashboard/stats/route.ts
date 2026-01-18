@@ -9,6 +9,25 @@ const CACHE_HEADERS = {
   'Cache-Control': `public, max-age=${CACHE_DURATION}, stale-while-revalidate=${CACHE_DURATION * 2}`
 };
 
+interface RecentActivity {
+  type: string;
+  title: string;
+  artist: string;
+  timeAgo: string;
+  timestamp?: string;
+}
+
+interface TrendingArtist {
+  name: string;
+  change: string;
+}
+
+interface CommunityHighlight {
+  title: string;
+  participants: string;
+  type: string;
+}
+
 interface DashboardStats {
   artworksViewed: number;
   artistsDiscovered: number;
@@ -18,9 +37,9 @@ interface DashboardStats {
   ongoingExhibitions: number;
   upcomingExhibitions: number;
   totalUsers: number;
-  recentActivities: any[];
-  trendingArtists: any[];
-  communityHighlights: any[];
+  recentActivities: RecentActivity[];
+  trendingArtists: TrendingArtist[];
+  communityHighlights: CommunityHighlight[];
 }
 
 // Simple in-memory cache for dashboard stats

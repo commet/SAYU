@@ -1,6 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+interface UploadedImage {
+  id: string;
+  storage_path: string;
+  storage_url: string;
+  original_filename: string;
+  file_size_bytes: number;
+  expires_at: string;
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return 'Unknown error occurred';
+}
+
 /**
  * POST /api/worldcup/upload
  * 이미지 업로드 (Supabase Storage)
@@ -49,7 +63,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const uploadedImages: any[] = [];
+    const uploadedImages: UploadedImage[] = [];
     const errors: string[] = [];
 
     for (const file of files) {
@@ -128,9 +142,9 @@ export async function POST(request: NextRequest) {
           file_size_bytes: file.size,
           expires_at: expiresAt,
         });
-      } catch (fileError: any) {
+      } catch (fileError: unknown) {
         console.error('File processing error:', fileError);
-        errors.push(`${file.name}: ${fileError.message}`);
+        errors.push(`${file.name}: ${getErrorMessage(fileError)}`);
       }
     }
 
@@ -142,10 +156,10 @@ export async function POST(request: NextRequest) {
       },
       errors: errors.length > 0 ? errors : undefined,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Upload API error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: getErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -197,10 +211,10 @@ export async function DELETE(request: NextRequest) {
       success: true,
       data: { deleted: true },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Delete upload error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: getErrorMessage(error) },
       { status: 500 }
     );
   }

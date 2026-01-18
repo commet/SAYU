@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { universalReplicateService } from '@/lib/replicate-universal-service';
+import { universalReplicateService, StyleType, ImageType } from '@/lib/replicate-universal-service';
 
 export const maxDuration = 30;
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return 'An error occurred';
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,9 +40,9 @@ export async function POST(request: NextRequest) {
     // 범용 스타일 변환 실행 (Base64 데이터 전달)
     const result = await universalReplicateService.transformStyleFromBase64(
       base64,
-      style as any,
+      style as StyleType,
       {
-        imageType: imageType as any,
+        imageType: imageType as ImageType,
         quality: 'balanced',
         fileName: imageFile.name,
         onProgress: (p) => console.log(`Progress: ${p}%`)
@@ -46,12 +51,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result);
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Universal transform error:', error);
-    
-    if (error.message?.includes('token not configured')) {
+    const errorMsg = getErrorMessage(error);
+
+    if (errorMsg.includes('token not configured')) {
       return NextResponse.json(
-        { 
+        {
           error: 'Service not configured',
           message: 'Please configure Replicate API token'
         },
@@ -60,9 +66,9 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { 
+      {
         error: 'Transform failed',
-        message: error.message || 'An error occurred'
+        message: errorMsg
       },
       { status: 500 }
     );

@@ -3,6 +3,18 @@ import { createClient } from '@/lib/supabase/server'
 import { generateGroqResponse, generateExhibitionRecommendation } from '@/lib/groq-client'
 import { chatbotRateLimiter } from '@/lib/rate-limiter'
 
+interface UserBehavior {
+  engagementLevel?: string;
+  currentMood?: string;
+  timeOnPage?: number;
+  [key: string]: unknown;
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return '';
+}
+
 // 페이지별 컨텍스트
 const PAGE_CONTEXTS: Record<string, string> = {
   home: '홈페이지에서 사용자를 환영하고 SAYU 플랫폼을 소개합니다',
@@ -140,13 +152,13 @@ export async function POST(request: NextRequest) {
       }
     })
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Chatbot error:', error)
-    
+
     return NextResponse.json({
       success: true,
       data: {
-        response: getErrorResponse(error),
+        response: getErrorResponseMessage(error),
         sessionId: `error-${Date.now()}`,
         suggestions: ["다시 질문해주세요", "다른 주제로 대화해보세요"],
         timestamp: new Date().toISOString()
@@ -156,7 +168,7 @@ export async function POST(request: NextRequest) {
 }
 
 // 동적 제안 생성
-function generateSuggestions(page: string, userType: string, userBehavior: any): string[] {
+function generateSuggestions(page: string, _userType: string, _userBehavior: UserBehavior): string[] {
   const suggestions: string[] = []
   
   if (page === 'exhibitions') {
@@ -205,11 +217,12 @@ function getPersonality(userType: string): string {
 }
 
 // 에러 응답
-function getErrorResponse(error: any): string {
-  if (error.message?.includes('rate limit')) {
+function getErrorResponseMessage(error: unknown): string {
+  const errorMsg = getErrorMessage(error);
+  if (errorMsg.includes('rate limit')) {
     return "요청이 너무 많습니다. 잠시 후 다시 시도해주세요."
   }
-  
+
   return "잠시 연결이 불안정합니다. 다시 한 번 말씀해주시겠어요?"
 }
 

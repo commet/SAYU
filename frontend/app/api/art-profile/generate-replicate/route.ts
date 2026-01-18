@@ -4,6 +4,19 @@ import { replicateArtService } from '@/lib/replicate-art-service';
 // Vercel timeout 설정
 export const maxDuration = 60;
 
+interface ErrorWithResponse extends Error {
+  response?: { status?: number };
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return 'An unexpected error occurred';
+}
+
+function hasResponse(error: unknown): error is ErrorWithResponse {
+  return error instanceof Error && 'response' in error;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -48,13 +61,14 @@ export async function POST(request: NextRequest) {
       message: 'Art profile generated successfully'
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Art generation error:', error);
-    
+    const errorMsg = getErrorMessage(error);
+
     // Replicate API 토큰 미설정 에러
-    if (error.message?.includes('API token not configured')) {
+    if (errorMsg.includes('API token not configured')) {
       return NextResponse.json(
-        { 
+        {
           error: 'Replicate API not configured',
           message: 'Please add REPLICATE_API_TOKEN to your environment variables',
           instructions: 'Get your token from https://replicate.com/account/api-tokens'
@@ -64,9 +78,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Rate limit 에러
-    if (error.response?.status === 429) {
+    if (hasResponse(error) && error.response?.status === 429) {
       return NextResponse.json(
-        { 
+        {
           error: 'Rate limit exceeded',
           message: 'Too many requests. Please try again later.'
         },
@@ -75,9 +89,9 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to generate art profile',
-        message: error.message || 'An unexpected error occurred'
+        message: errorMsg
       },
       { status: 500 }
     );

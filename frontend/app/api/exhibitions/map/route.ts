@@ -1,6 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+interface SeoulVenue {
+  id: string;
+  name: string;
+  name_en: string;
+  lat: number;
+  lng: number;
+  district: string;
+  type: string;
+  address: string;
+  website: string;
+  apt_compatibility: Record<string, number>;
+}
+
+interface Exhibition {
+  id: string;
+  external_id?: string;
+  title?: string;
+  venue?: string;
+  venue_address?: string;
+  start_date: string;
+  end_date: string;
+  description?: string;
+  image_url?: string;
+  ticket_url?: string;
+  category?: string;
+  recommended_apt?: string[];
+  apt_weights?: Record<string, number>;
+  status?: string;
+  venue_coordinates?: { lat: number; lng: number };
+  venue_district?: string;
+  venue_type?: string;
+  source?: string;
+  created_at?: string;
+}
+
 // Seoul venue coordinates with enhanced APT compatibility
 const SEOUL_VENUES = [
   {
@@ -306,8 +341,8 @@ export async function GET(request: NextRequest) {
 }
 
 // Helper function to find matching venue
-function findMatchingVenue(venueName: string, venues: any[]) {
-  if (!venueName) return null;
+function findMatchingVenue(venueName: string, venues: SeoulVenue[]): SeoulVenue | undefined {
+  if (!venueName) return undefined;
   
   const cleanName = venueName.toLowerCase()
     .replace(/[^\w가-힣]/g, '')
@@ -325,7 +360,7 @@ function findMatchingVenue(venueName: string, venues: any[]) {
 }
 
 // Generate APT recommendations based on exhibition content
-function generateAPTRecommendations(exhibition: any, venue: any) {
+function generateAPTRecommendations(exhibition: Exhibition, venue: SeoulVenue | undefined): string[] {
   const recommendations = new Set<string>();
   const title = exhibition.title?.toLowerCase() || '';
   const description = exhibition.description?.toLowerCase() || '';
@@ -374,7 +409,7 @@ function generateAPTRecommendations(exhibition: any, venue: any) {
 }
 
 // Generate exhibition tags
-function generateExhibitionTags(exhibition: any) {
+function generateExhibitionTags(exhibition: Exhibition): string[] {
   const tags = [];
   const title = exhibition.title?.toLowerCase() || '';
   const description = exhibition.description?.toLowerCase() || '';

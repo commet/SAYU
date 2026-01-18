@@ -7,15 +7,27 @@ export const maxDuration = 30;
 // Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
+interface AIResponse {
+  success: boolean;
+  response?: string;
+  model?: string;
+  error?: string;
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return 'Unknown error';
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { question, context } = await request.json();
-    
+
     console.log('🤖 AI Council Session Starting...');
     console.log('Question:', question);
-    
+
     // Prepare the council
-    const responses: Record<string, any> = {};
+    const responses: Record<string, AIResponse> = {};
     
     // 1. Ask Gemini
     try {
@@ -27,9 +39,9 @@ export async function POST(request: NextRequest) {
         response: geminiResult.response.text(),
         model: 'gemini-pro'
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Gemini error:', error);
-      responses.gemini = { success: false, error: error.message };
+      responses.gemini = { success: false, error: getErrorMessage(error) };
     }
     
     // 2. Ask ChatGPT
@@ -62,9 +74,9 @@ export async function POST(request: NextRequest) {
       } else {
         throw new Error(`OpenAI API error: ${openaiResponse.statusText}`);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('ChatGPT error:', error);
-      responses.chatgpt = { success: false, error: error.message };
+      responses.chatgpt = { success: false, error: getErrorMessage(error) };
     }
     
     // 3. Claude's perspective (from the request context)
@@ -111,11 +123,11 @@ Please provide a balanced synthesis that:
       timestamp: new Date().toISOString()
     });
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('AI Council error:', error);
-    return NextResponse.json({ 
-      success: false, 
-      error: error.message 
+    return NextResponse.json({
+      success: false,
+      error: getErrorMessage(error)
     }, { status: 500 });
   }
 }

@@ -1,5 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { SupabaseClient } from '@supabase/supabase-js';
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return 'Unknown error occurred';
+}
+
+interface ExhibitionDuplicateItem {
+  id: string;
+  exhibitions_translations: Array<{
+    exhibition_title?: string;
+  }>;
+}
 
 interface ExhibitionToSave {
   exhibition_title: string;
@@ -40,11 +53,11 @@ export async function POST(request: NextRequest) {
           data: result,
           exhibition_title: exhibition.exhibition_title
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error(`Failed to save exhibition "${exhibition.exhibition_title}":`, error);
         results.push({
           success: false,
-          error: error.message,
+          error: getErrorMessage(error),
           exhibition_title: exhibition.exhibition_title
         });
       }
@@ -63,7 +76,7 @@ export async function POST(request: NextRequest) {
       }
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Batch save error:', error);
     return NextResponse.json({
       success: false,
@@ -72,7 +85,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function saveExhibition(supabase: any, exhibition: ExhibitionToSave) {
+async function saveExhibition(supabase: SupabaseClient, exhibition: ExhibitionToSave) {
   // 1. 미술관/갤러리 확인 또는 생성
   const venue = await ensureVenueExists(supabase, exhibition.venue_name);
   
@@ -95,7 +108,7 @@ async function saveExhibition(supabase: any, exhibition: ExhibitionToSave) {
   };
 }
 
-async function ensureVenueExists(supabase: any, venueName: string) {
+async function ensureVenueExists(supabase: SupabaseClient, venueName: string) {
   // 기존 미술관 찾기
   const { data: existingVenue } = await supabase
     .from('venues_simple')
@@ -137,7 +150,7 @@ function inferVenueType(venueName: string): string {
   return 'gallery'; // 기본값
 }
 
-async function checkDuplicate(supabase: any, exhibition: ExhibitionToSave, venueId: string) {
+async function checkDuplicate(supabase: SupabaseClient, exhibition: ExhibitionToSave, venueId: string): Promise<boolean> {
   // 같은 미술관의 비슷한 제목과 날짜로 중복 체크
   const { data } = await supabase
     .from('exhibitions_master')
@@ -155,7 +168,7 @@ async function checkDuplicate(supabase: any, exhibition: ExhibitionToSave, venue
   }
   
   // 제목 유사도 체크 (간단한 문자열 포함 검사)
-  const similarTitle = data.some((item: any) => {
+  const similarTitle = (data as ExhibitionDuplicateItem[]).some((item) => {
     const existingTitle = item.exhibitions_translations[0]?.exhibition_title || '';
     return calculateTitleSimilarity(existingTitle, exhibition.exhibition_title) > 0.8;
   });
@@ -174,7 +187,7 @@ function calculateTitleSimilarity(title1: string, title2: string): number {
   return commonWords.length / totalWords;
 }
 
-async function saveMasterRecord(supabase: any, exhibition: ExhibitionToSave, venueId: string): Promise<string> {
+async function saveMasterRecord(supabase: SupabaseClient, exhibition: ExhibitionToSave, venueId: string): Promise<string> {
   const masterData = {
     venue_id: venueId,
     start_date: exhibition.start_date,
@@ -200,7 +213,7 @@ async function saveMasterRecord(supabase: any, exhibition: ExhibitionToSave, ven
   return data.id;
 }
 
-async function saveTranslationRecord(supabase: any, masterId: string, exhibition: ExhibitionToSave) {
+async function saveTranslationRecord(supabase: SupabaseClient, masterId: string, exhibition: ExhibitionToSave): Promise<void> {
   const translationData = {
     exhibition_id: masterId,
     language_code: 'ko',

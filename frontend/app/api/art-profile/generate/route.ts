@@ -4,6 +4,11 @@ import { API_CONFIG, getApiUrl } from '@/config/api';
 // Route segment config for Vercel
 export const maxDuration = 30;
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return 'Failed to generate art profile';
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Get auth token from cookies
@@ -34,10 +39,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(data);
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Art profile generation proxy error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to generate art profile' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     );
   }

@@ -2,8 +2,60 @@ import { NextRequest, NextResponse } from 'next/server';
 import cloudinaryData from '@/data/cloudinary-urls.json';
 import famousArtists from '@/data/famous-artists-artworks.json';
 
+interface CloudinaryImage {
+  url?: string;
+  secure_url?: string;
+  publicId?: string;
+  format?: string;
+  width?: number;
+  height?: number;
+  bytes?: number;
+}
+
+interface CloudinaryArtworkData {
+  full?: CloudinaryImage;
+  thumbnail?: CloudinaryImage;
+  artwork?: {
+    title?: string;
+    artist?: string;
+    sayuType?: string;
+  };
+}
+
+interface FamousArtist {
+  url?: string;
+  artist?: string;
+  artistSlug?: string;
+  sayuType?: string;
+  title?: string;
+  thumbnail?: string | null;
+  artveeId?: string;
+  description?: string;
+}
+
+interface ProcessedArtwork {
+  id: string;
+  title: string;
+  artist: string;
+  year: string;
+  imageUrl?: string;
+  thumbnail?: string;
+  fullImage?: string;
+  width?: number;
+  height?: number;
+  aspectRatio: number;
+  sayuType?: string;
+  style: string;
+  museum: string;
+  description: string;
+  curatorNote: string;
+  matchPercent: number;
+  tags: string[];
+  matchScore?: number;
+}
+
 // 캐시 설정
-let cachedArtworks: any[] | null = null;
+let cachedArtworks: ProcessedArtwork[] | null = null;
 let cacheTime = 0;
 const CACHE_DURATION = 60 * 60 * 1000; // 1시간
 
@@ -50,15 +102,14 @@ export async function GET(request: NextRequest) {
   }
 }
 
-function processArtworks() {
-  const artworks = [];
-  
+function processArtworks(): ProcessedArtwork[] {
+  const artworks: ProcessedArtwork[] = [];
+
   // Cloudinary URLs 처리
-  for (const [id, data] of Object.entries(cloudinaryData as any)) {
-    const artwork = data as any;
-    
+  const cloudinaryEntries = cloudinaryData as Record<string, CloudinaryArtworkData>;
+  for (const [id, artwork] of Object.entries(cloudinaryEntries)) {
     // Famous artists 데이터와 매칭
-    const artistData = famousArtists.find((fa: any) => fa.artveeId === id);
+    const artistData = (famousArtists as FamousArtist[]).find((fa) => fa.artveeId === id);
     
     artworks.push({
       id,
@@ -87,7 +138,7 @@ function processArtworks() {
   return artworks;
 }
 
-function filterByUserType(artworks: any[], userType: string) {
+function filterByUserType(artworks: ProcessedArtwork[], userType: string): ProcessedArtwork[] {
   // 유형별 선호도 매핑
   const preferences: Record<string, { artists: string[], styles: string[], tags: string[] }> = {
     'LAEF': {
@@ -252,7 +303,7 @@ function detectStyle(artist?: string): string {
   return 'Modern Art';
 }
 
-function generateDescription(artwork: any, artistData: any): string {
+function generateDescription(artwork: CloudinaryArtworkData, artistData: FamousArtist | undefined): string {
   const descriptions = [
     '빛과 색채의 조화가 인상적인 작품으로, 작가의 독특한 시각이 돋보입니다.',
     '섬세한 붓터치와 대담한 구성이 만나 깊은 감동을 전달하는 걸작입니다.',
@@ -264,7 +315,7 @@ function generateDescription(artwork: any, artistData: any): string {
   return artistData?.description || descriptions[Math.floor(Math.random() * descriptions.length)];
 }
 
-function generateCuratorNote(userType: string, artwork: any, artistData: any): string {
+function generateCuratorNote(userType: string, _artwork: CloudinaryArtworkData, _artistData: FamousArtist | undefined): string {
   const notes: Record<string, string[]> = {
     'LAEF': [
       '자유로운 붓질과 대담한 색채가 여우의 독립적이고 모험적인 정신과 완벽하게 공명합니다.',
@@ -296,7 +347,7 @@ function generateCuratorNote(userType: string, artwork: any, artistData: any): s
   return typeNotes[Math.floor(Math.random() * typeNotes.length)];
 }
 
-function extractTags(artwork: any, artistData: any): string[] {
+function extractTags(artwork: CloudinaryArtworkData, _artistData: FamousArtist | undefined): string[] {
   const tags = [];
   
   // 작가 기반 태그
