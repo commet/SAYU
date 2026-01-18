@@ -1,7 +1,7 @@
 # SAYU 남은 작업 목록
 
 > 이 문서는 2026-01-19 보안/성능/코드품질 감사 후 작성됨
-> 마지막 커밋: `c49c652` (perf: add HTTP Cache-Control headers to API routes)
+> 마지막 커밋: `a8e8de0` (refactor: remove any types from 6 core component/hook files)
 
 ---
 
@@ -107,15 +107,17 @@ grep -r ": any" frontend/components --include="*.tsx"
 grep -r ": any" frontend/src --include="*.tsx"
 ```
 
-#### 컴포넌트/훅
-| 파일 | any 위치 | 수정 방법 |
-|------|----------|-----------|
-| `AnimeJSEnhanced.tsx` | anime 라이브러리 | `@types/animejs` 설치 또는 declare |
-| `AchievementBadge.tsx` | achievements 배열 | Achievement 인터페이스 정의 |
-| `pages/_error.tsx` | props, contextData | NextPageContext 타입 사용 |
-| `supabase-auth-form.tsx` | error 핸들링 | AuthError 타입 사용 |
-| `useAuth.tsx` | metadata 파라미터 | UserMetadata 인터페이스 정의 |
-| `migration-helper.tsx` | t 함수 | i18n 타입 정의 |
+#### 컴포넌트/훅 (핵심 6개 완료 ✅)
+| 파일 | any 위치 | 상태 |
+|------|----------|------|
+| `AnimeJSEnhanced.tsx` | anime 라이브러리 | ✅ AnimeInstance 인터페이스 정의 |
+| `AchievementBadge.tsx` | achievements 배열 | ✅ Achievement 인터페이스 정의 |
+| `pages/_error.tsx` | props, contextData | ✅ ErrorProps, NextPageContext 사용 |
+| `supabase-auth-form.tsx` | error 핸들링 | ✅ error: unknown 패턴 적용 |
+| `useAuth.tsx` | metadata 파라미터 | ✅ Record<string, unknown> 사용 |
+| `migration-helper.tsx` | t 함수 | ✅ TFunction 타입 정의 |
+
+> 참고: 전체 컴포넌트에 ~120개 `any` 타입이 남아있으나, 대부분 외부 라이브러리 관련
 
 ### 4. 미사용 코드 정리
 
@@ -225,7 +227,7 @@ npm run lint
 |----------|------|------|------|
 | 보안 취약점 | 4 | 2 | 2 (키교체, RLS적용) |
 | any 타입 (API) | 50+ | **50+** ✅ | **0** |
-| any 타입 (컴포넌트) | ~10 | 0 | ~10 |
+| any 타입 (컴포넌트) | ~10 (핵심) | **6** ✅ | 4 (외부 라이브러리) |
 | 성능 이슈 | 5 | 5 | **0** ✅ |
 | 인덱스 누락 | 10 | 0 | 10 (SQL 준비됨) |
 | 미사용 코드 | 3 | **3** ✅ | **0** |
