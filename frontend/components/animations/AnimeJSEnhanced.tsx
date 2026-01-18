@@ -1,8 +1,34 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+
+// anime.js type declarations for dynamic import
+interface AnimeInstance {
+  (params: AnimeParams): AnimeTimeline;
+  set: (targets: AnimeTarget, params: Record<string, unknown>) => void;
+  stagger: (value: number, options?: Record<string, unknown>) => unknown;
+  random: (min: number, max: number) => number;
+  timeline: (params?: Record<string, unknown>) => AnimeTimeline;
+}
+
+interface AnimeParams {
+  targets?: AnimeTarget;
+  duration?: number;
+  delay?: number | unknown;
+  easing?: string;
+  loop?: boolean;
+  direction?: string;
+  [key: string]: unknown;
+}
+
+interface AnimeTimeline {
+  add: (params: AnimeParams, offset?: number) => AnimeTimeline;
+}
+
+type AnimeTarget = string | Element | Element[] | NodeListOf<Element>;
+
 // Dynamically import anime.js to avoid SSR issues
-let anime: any = null;
+let anime: AnimeInstance | null = null;
 
 // Dynamically load anime.js on client side
 if (typeof window !== 'undefined') {
@@ -63,7 +89,7 @@ export function AnimeJSTextReveal({ text, className = '', delay = 0, duration = 
 }
 
 interface AnimeJSGalleryProps {
-  items: any[];
+  items: React.ReactNode[];
   className?: string;
 }
 
@@ -286,23 +312,23 @@ export function useAnimeJS() {
 
   return {
     // Stagger animation utility
-    stagger: (targets: string | Element | Element[], options: any = {}) => {
+    stagger: (targets: string | Element | Element[], options: Record<string, unknown> = {}) => {
       return anime({
         targets,
-        delay: anime.stagger(options.delay || 100, options.staggerOptions || {}),
+        delay: anime.stagger((options.delay as number) || 100, (options.staggerOptions as Record<string, unknown>) || {}),
         ...options
       });
     },
-    
+
     // Timeline utility
-    timeline: (options: any = {}) => {
+    timeline: (options: Record<string, unknown> = {}) => {
       return anime.timeline(options);
     },
-    
+
     // Random utility
     random: (min: number, max: number) => anime.random(min, max),
-    
+
     // Animate utility
-    animate: (options: any) => anime(options)
+    animate: (options: AnimeParams) => anime(options)
   };
 }

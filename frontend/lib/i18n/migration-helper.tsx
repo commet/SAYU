@@ -23,7 +23,7 @@ export const LocalizedText = ({
 export const useLocalizedData = () => {
   const { language } = useTranslation();
   
-  return <T extends Record<string, any>>(data: T): string => {
+  return <T extends Record<string, unknown>>(data: T): string => {
     if (typeof data === 'string') return data;
     
     // 언어별 키 확인
@@ -46,9 +46,12 @@ export const useConditionalText = (koText: string, enText: string) => {
   return language === 'ko' ? koText : enText;
 };
 
+// TFunction type for translation function
+type TFunction = (key: string, options?: Record<string, unknown>) => string;
+
 // 점진적 마이그레이션을 위한 래퍼
 export const withI18n = <P extends object>(
-  Component: React.ComponentType<P & { t: any; language: string }>
+  Component: React.ComponentType<P & { t: TFunction; language: string }>
 ) => {
   const WrappedComponent = (props: P) => {
     const { t, language } = useTranslation();

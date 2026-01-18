@@ -11,7 +11,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, metadata?: any) => Promise<void>;
+  signUp: (email: string, password: string, metadata?: Record<string, unknown>) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -28,7 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabase = useMemo(() => createClient(), []);
 
   // Helper function to create AuthUser from Supabase User and UserProfile
-  const createAuthUser = (supabaseUser: User, userProfile: UserProfile | null, quizData?: any): AuthUser => {
+  const createAuthUser = (supabaseUser: User, userProfile: UserProfile | null, quizData?: { personality_type?: string; quiz_completed?: boolean } | null): AuthUser => {
     // Get display name from various sources in priority order:
     // 1. Profile username (if user set a custom nickname)
     // 2. OAuth provider name (Instagram, Facebook, etc.)
@@ -430,7 +430,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string, metadata?: any) => {
+  const signUp = async (email: string, password: string, metadata?: Record<string, unknown>) => {
     console.log('🔑 Starting signUp process...');
     console.log('📧 Email:', email);
     

@@ -44,8 +44,9 @@ export function SupabaseAuthForm({ mode }: AuthFormProps) {
         router.push('/dashboard')
         router.refresh()
       }
-    } catch (error: any) {
-      toast.error(error.message || '오류가 발생했습니다.')
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '오류가 발생했습니다.'
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -60,8 +61,9 @@ export function SupabaseAuthForm({ mode }: AuthFormProps) {
         },
       })
       if (error) throw error
-    } catch (error: any) {
-      toast.error(error.message || '오류가 발생했습니다.')
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '오류가 발생했습니다.'
+      toast.error(errorMessage)
     }
   }
 

@@ -170,7 +170,19 @@ export function AchievementBadge({
   );
 }
 
-export function AchievementGrid({ achievements }: { achievements: any[] }) {
+interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  badge_icon: string;
+  badge_color: string;
+  rarity: string;
+  points: number;
+  unlocked: boolean;
+  unlocked_at?: string;
+}
+
+export function AchievementGrid({ achievements }: { achievements: Achievement[] }) {
   return (
     <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4">
       {achievements.map((achievement, index) => (
