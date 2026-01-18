@@ -40,32 +40,42 @@ const ARTWORKS = [
   },
 ];
 
-// Floating particles component
+// Floating particles component - CSS 애니메이션으로 GPU 가속
+const PARTICLE_POSITIONS = Array.from({ length: 30 }, (_, i) => ({
+  left: `${(i * 37) % 100}%`,
+  top: `${(i * 53) % 100}%`,
+  delay: `${(i * 0.15) % 2}s`,
+  duration: `${3 + (i % 3)}s`,
+}));
+
 function FloatingParticles() {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {[...Array(30)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-1 h-1 bg-[#d4a520] rounded-full"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-          }}
-          animate={{
-            y: [0, -30, 0],
-            opacity: [0.3, 0.8, 0.3],
-            scale: [1, 1.5, 1],
-          }}
-          transition={{
-            duration: 3 + Math.random() * 2,
-            repeat: Infinity,
-            delay: Math.random() * 2,
-            ease: "easeInOut",
-          }}
-        />
-      ))}
-    </div>
+    <>
+      <style jsx>{`
+        @keyframes float-particle {
+          0%, 100% { transform: translateY(0) scale(1); opacity: 0.3; }
+          50% { transform: translateY(-30px) scale(1.5); opacity: 0.8; }
+        }
+        .particle {
+          animation: float-particle var(--duration) ease-in-out infinite;
+          animation-delay: var(--delay);
+        }
+      `}</style>
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {PARTICLE_POSITIONS.map((pos, i) => (
+          <div
+            key={i}
+            className="particle absolute w-1 h-1 bg-[#d4a520] rounded-full"
+            style={{
+              left: pos.left,
+              top: pos.top,
+              '--delay': pos.delay,
+              '--duration': pos.duration,
+            } as React.CSSProperties}
+          />
+        ))}
+      </div>
+    </>
   );
 }
 
