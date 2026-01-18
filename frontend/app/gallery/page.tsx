@@ -44,21 +44,16 @@ function GalleryContent() {
 
   const loadStats = async () => {
     try {
-      // Get total artworks
-      const { total: artworksCount } = await getArtMemories({ limit: 1 });
-
-      // Get exhibition visits
-      const { total: exhibitionsCount } = await getArtMemories({
-        type: 'exhibition_visit',
-        limit: 1
-      });
-
-      // Get collections
-      const collections = await getCollectionsWithCovers();
+      // 병렬로 모든 데이터 로드 (Promise.all)
+      const [artworksResult, exhibitionsResult, collections] = await Promise.all([
+        getArtMemories({ limit: 1 }),
+        getArtMemories({ type: 'exhibition_visit', limit: 1 }),
+        getCollectionsWithCovers()
+      ]);
 
       setStats({
-        artworks: artworksCount,
-        exhibitions: exhibitionsCount,
+        artworks: artworksResult.total,
+        exhibitions: exhibitionsResult.total,
         collections: collections.length
       });
     } catch (error) {

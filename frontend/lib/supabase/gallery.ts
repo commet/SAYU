@@ -262,34 +262,40 @@ export async function removeMemoryFromCollection(collectionId: string, memoryId:
 // ============================================
 
 export async function getCollectionsWithCovers() {
-  const collections = await getCollections();
+  // 단일 JOIN 쿼리로 N+1 문제 해결
+  const { data, error } = await supabase
+    .from('collections')
+    .select(`
+      *,
+      collection_items (
+        memory_id,
+        added_at,
+        art_memories (artwork_data)
+      )
+    `)
+    .order('created_at', { ascending: false });
 
-  const collectionsWithCovers = await Promise.all(
-    collections.map(async (col) => {
-      // Get first 4 memories for cover
-      const { data: items } = await supabase
-        .from('collection_items')
-        .select(`
-          memory_id,
-          art_memories (artwork_data)
-        `)
-        .eq('collection_id', col.id)
-        .order('added_at', { ascending: false })
-        .limit(4);
+  if (error) throw error;
 
-      // @ts-ignore
-      const coverImages = items
-        ?.map(item => item.art_memories?.artwork_data?.imageUrl)
-        .filter(Boolean) || [];
+  // 클라이언트에서 커버 이미지 추출
+  return data?.map(col => {
+    // @ts-ignore - Supabase nested select typing
+    const sortedItems = (col.collection_items || [])
+      .sort((a: any, b: any) =>
+        new Date(b.added_at).getTime() - new Date(a.added_at).getTime()
+      )
+      .slice(0, 4);
 
-      return {
-        ...col,
-        coverImages
-      };
-    })
-  );
+    const coverImages = sortedItems
+      .map((item: any) => item.art_memories?.artwork_data?.imageUrl)
+      .filter(Boolean);
 
-  return collectionsWithCovers;
+    const { collection_items, ...collectionData } = col;
+    return {
+      ...transformCollectionFromDB(collectionData),
+      coverImages
+    };
+  }) || [];
 }
 
 // ============================================
