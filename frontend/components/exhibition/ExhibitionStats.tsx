@@ -1,35 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-} from 'chart.js';
-import { Doughnut, Bar, Line } from 'react-chartjs-2';
-
-// Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-);
+  PieChart, Pie, Cell,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  AreaChart, Area,
+  ResponsiveContainer, Legend
+} from 'recharts';
 
 interface Insight {
   id: string;
@@ -69,49 +47,42 @@ export default function ExhibitionStats({ exhibitions }: ExhibitionStatsProps) {
   // Filter exhibitions by period
   const filteredExhibitions = exhibitions.filter(exhibition => {
     if (selectedPeriod === 'all') return true;
-    
+
     const now = new Date();
     const exhibitionDate = new Date(exhibition.date);
     const monthsAgo = selectedPeriod === '3months' ? 3 : selectedPeriod === '6months' ? 6 : 12;
     const cutoffDate = new Date(now.setMonth(now.getMonth() - monthsAgo));
-    
+
     return exhibitionDate >= cutoffDate;
   });
 
   // Calculate statistics
   const totalInsights = filteredExhibitions.reduce((sum, ex) => sum + ex.insights.length, 0);
-  const avgInsightsPerExhibition = filteredExhibitions.length > 0 
-    ? (totalInsights / filteredExhibitions.length).toFixed(1) 
+  const avgInsightsPerExhibition = filteredExhibitions.length > 0
+    ? (totalInsights / filteredExhibitions.length).toFixed(1)
     : '0';
 
-  // Emotion distribution data
+  // Emotion distribution data for Recharts
   const getEmotionDistribution = () => {
     const emotionCounts: Record<string, number> = {};
-    
+
     filteredExhibitions.forEach(exhibition => {
       exhibition.insights.forEach(insight => {
         emotionCounts[insight.emotion] = (emotionCounts[insight.emotion] || 0) + 1;
       });
     });
 
-    const labels = emotions.map(e => e.name);
-    const data = emotions.map(e => emotionCounts[e.id] || 0);
-    const backgroundColors = emotions.map(e => e.color);
-
-    return {
-      labels,
-      datasets: [{
-        data,
-        backgroundColor: backgroundColors,
-        borderWidth: 0
-      }]
-    };
+    return emotions.map(e => ({
+      name: e.name,
+      value: emotionCounts[e.id] || 0,
+      color: e.color
+    })).filter(e => e.value > 0);
   };
 
-  // Time distribution data
+  // Time distribution data for Recharts
   const getTimeDistribution = () => {
     const hourCounts = new Array(24).fill(0);
-    
+
     filteredExhibitions.forEach(exhibition => {
       exhibition.insights.forEach(insight => {
         const hour = new Date(insight.timestamp).getHours();
@@ -119,45 +90,27 @@ export default function ExhibitionStats({ exhibitions }: ExhibitionStatsProps) {
       });
     });
 
-    return {
-      labels: Array.from({ length: 24 }, (_, i) => `${i}시`),
-      datasets: [{
-        label: '인사이트 작성 시간',
-        data: hourCounts,
-        backgroundColor: 'rgba(147, 51, 234, 0.5)',
-        borderColor: 'rgba(147, 51, 234, 1)',
-        borderWidth: 2
-      }]
-    };
+    return hourCounts.map((count, hour) => ({
+      hour: `${hour}시`,
+      count
+    }));
   };
 
-  // Monthly trend data
+  // Monthly trend data for Recharts
   const getMonthlyTrend = () => {
     const monthlyData: Record<string, number> = {};
-    
+
     filteredExhibitions.forEach(exhibition => {
-      const monthKey = new Date(exhibition.date).toLocaleDateString('ko-KR', { 
-        year: 'numeric', 
-        month: 'short' 
+      const monthKey = new Date(exhibition.date).toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'short'
       });
       monthlyData[monthKey] = (monthlyData[monthKey] || 0) + exhibition.insights.length;
     });
 
-    const sortedMonths = Object.keys(monthlyData).sort((a, b) => 
-      new Date(a).getTime() - new Date(b).getTime()
-    );
-
-    return {
-      labels: sortedMonths,
-      datasets: [{
-        label: '월별 인사이트',
-        data: sortedMonths.map(month => monthlyData[month]),
-        fill: true,
-        backgroundColor: 'rgba(147, 51, 234, 0.2)',
-        borderColor: 'rgba(147, 51, 234, 1)',
-        tension: 0.4
-      }]
-    };
+    return Object.entries(monthlyData)
+      .sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
+      .map(([month, count]) => ({ month, count }));
   };
 
   // Most emotional exhibitions
@@ -173,21 +126,9 @@ export default function ExhibitionStats({ exhibitions }: ExhibitionStatsProps) {
       .slice(0, 5);
   };
 
-  // Chart options
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        labels: {
-          color: 'white',
-          font: {
-            size: 12
-          }
-        }
-      }
-    }
-  };
+  const emotionData = getEmotionDistribution();
+  const timeData = getTimeDistribution();
+  const trendData = getMonthlyTrend();
 
   return (
     <div className="space-y-8">
@@ -203,7 +144,7 @@ export default function ExhibitionStats({ exhibitions }: ExhibitionStatsProps) {
                 : 'bg-white/20 text-white hover:bg-white/30'
             }`}
           >
-            {period === 'all' ? '전체' : 
+            {period === 'all' ? '전체' :
              period === '3months' ? '3개월' :
              period === '6months' ? '6개월' : '1년'}
           </button>
@@ -247,7 +188,7 @@ export default function ExhibitionStats({ exhibitions }: ExhibitionStatsProps) {
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Emotion Distribution */}
+        {/* Emotion Distribution - Donut Chart */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -256,29 +197,37 @@ export default function ExhibitionStats({ exhibitions }: ExhibitionStatsProps) {
         >
           <h3 className="text-xl font-bold text-white mb-4">감정 분포</h3>
           <div className="h-80">
-            <Doughnut 
-              data={getEmotionDistribution()} 
-              options={{
-                ...chartOptions,
-                plugins: {
-                  ...chartOptions.plugins,
-                  legend: {
-                    position: 'bottom' as const,
-                    labels: {
-                      color: 'white',
-                      padding: 20,
-                      font: {
-                        size: 12
-                      }
-                    }
-                  }
-                }
-              }} 
-            />
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={emotionData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={2}
+                  dataKey="value"
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  labelLine={{ stroke: 'white', strokeWidth: 1 }}
+                >
+                  {emotionData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: 'white'
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
         </motion.div>
 
-        {/* Time Distribution */}
+        {/* Time Distribution - Bar Chart */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -287,36 +236,36 @@ export default function ExhibitionStats({ exhibitions }: ExhibitionStatsProps) {
         >
           <h3 className="text-xl font-bold text-white mb-4">시간대별 활동</h3>
           <div className="h-80">
-            <Bar 
-              data={getTimeDistribution()} 
-              options={{
-                ...chartOptions,
-                scales: {
-                  x: {
-                    ticks: {
-                      color: 'white',
-                      maxRotation: 45,
-                      minRotation: 45
-                    },
-                    grid: {
-                      color: 'rgba(255, 255, 255, 0.1)'
-                    }
-                  },
-                  y: {
-                    ticks: {
-                      color: 'white'
-                    },
-                    grid: {
-                      color: 'rgba(255, 255, 255, 0.1)'
-                    }
-                  }
-                }
-              }} 
-            />
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={timeData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                <XAxis
+                  dataKey="hour"
+                  tick={{ fill: 'white', fontSize: 10 }}
+                  angle={-45}
+                  textAnchor="end"
+                  interval={2}
+                />
+                <YAxis tick={{ fill: 'white', fontSize: 12 }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: 'white'
+                  }}
+                />
+                <Bar
+                  dataKey="count"
+                  fill="rgba(147, 51, 234, 0.7)"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </motion.div>
 
-        {/* Monthly Trend */}
+        {/* Monthly Trend - Area Chart */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -325,30 +274,38 @@ export default function ExhibitionStats({ exhibitions }: ExhibitionStatsProps) {
         >
           <h3 className="text-xl font-bold text-white mb-4">월별 추이</h3>
           <div className="h-80">
-            <Line 
-              data={getMonthlyTrend()} 
-              options={{
-                ...chartOptions,
-                scales: {
-                  x: {
-                    ticks: {
-                      color: 'white'
-                    },
-                    grid: {
-                      color: 'rgba(255, 255, 255, 0.1)'
-                    }
-                  },
-                  y: {
-                    ticks: {
-                      color: 'white'
-                    },
-                    grid: {
-                      color: 'rgba(255, 255, 255, 0.1)'
-                    }
-                  }
-                }
-              }} 
-            />
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={trendData}>
+                <defs>
+                  <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="rgba(147, 51, 234, 0.8)" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="rgba(147, 51, 234, 0.1)" stopOpacity={0.1}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fill: 'white', fontSize: 12 }}
+                />
+                <YAxis tick={{ fill: 'white', fontSize: 12 }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: 'white'
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="count"
+                  stroke="rgba(147, 51, 234, 1)"
+                  strokeWidth={2}
+                  fillOpacity={1}
+                  fill="url(#colorCount)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </motion.div>
       </div>
