@@ -1,7 +1,7 @@
 # SAYU 남은 작업 목록
 
 > 이 문서는 2026-01-19 보안/성능/코드품질 감사 후 작성됨
-> 마지막 커밋: `eda9f94` (refactor: remove any types and improve exhibition cache)
+> 마지막 커밋: `83bca36` (refactor: remove all any types from API routes)
 
 ---
 
@@ -26,17 +26,14 @@
 
 ### 코드 품질
 - [x] useAuth 의존성 배열 수정 (`[router]` → `[router, supabase]`)
-- [x] `any` 타입 제거 (10개 API 라우트)
-  - exhibitions/route.ts
-  - chatbot/route.ts
-  - groq/generate/route.ts
-  - quiz/analyze/route.ts
-  - worldcup/sessions/route.ts
-  - worldcup/share/route.ts
-  - worldcup/sessions/[id]/route.ts
-  - worldcup/sessions/[id]/start/route.ts
-  - worldcup/sessions/[id]/participants/route.ts
-  - worldcup/sessions/[id]/matches/[matchId]/result/route.ts
+- [x] `any` 타입 제거 - **모든 API 라우트 완료** ✅
+  - Phase 1: 10개 라우트 (exhibitions, chatbot, groq, quiz, worldcup 관련)
+  - Phase 2: 13개 라우트 추가 (ai-council, art-profile/*, chatbot-groq, dashboard/stats, exhibitions/map, gallery/artworks, worldcup/upload, openai/*, art-transform, generate-art, replicate/*, etc.)
+- [x] 미사용 백업 파일 삭제
+  - `frontend/app/api/exhibitions/route-optimized.ts`
+  - `frontend/app/api/chatbot/route-optimized.ts`
+  - `frontend/app/api/gallery/collection/route-optimized.ts`
+- [x] ArtCounselorChat.tsx 문법 오류 수정 (이스케이프된 따옴표 47개)
 
 ---
 
@@ -101,38 +98,14 @@ idx_exhibition_worldcup_participants_session
 
 ### 3. 남은 `any` 타입 제거
 
-**확인 명령:**
-```bash
-# API 라우트에서 any 찾기
-grep -r ": any" frontend/app/api --include="*.ts"
+**✅ API 라우트: 완료** (0개 남음)
 
+**컴포넌트/훅에서 확인:**
+```bash
 # 컴포넌트에서 any 찾기
 grep -r ": any" frontend/components --include="*.tsx"
+grep -r ": any" frontend/src --include="*.tsx"
 ```
-
-#### API 라우트 (우선순위 높음)
-| 파일 | any 개수 | 설명 |
-|------|----------|------|
-| `worldcup/upload/route.ts` | 4 | 업로드 이미지 배열, 에러 핸들링 |
-| `generate-art/route.ts` | 1 | Replicate 모델 반환 타입 |
-| `art-profile/generate/route.ts` | 2+ | AI 생성 관련 |
-| `art-profile/universal/route.ts` | 2+ | 범용 프로필 생성 |
-| `openai/generate/route.ts` | 1+ | OpenAI 응답 타입 |
-| `openai-consult/route.ts` | 1+ | 상담 API |
-| `chatbot-groq/route.ts` | 2+ | Groq 챗봇 |
-| `exhibitions/confirm-save/route.ts` | 1+ | 저장 확인 |
-| `art-transform/route.ts` | 1+ | 아트 변환 |
-| `ai-council/route.ts` | 1+ | AI 위원회 |
-| `personality-types/route.ts` | 1+ | 성격 유형 |
-| `quiz-answer/route.ts` | 1+ | 퀴즈 답변 |
-
-#### 비활성 코드 (우선순위 낮음)
-| 파일 | 상태 |
-|------|------|
-| `gemini-consult/route.ts` | 비활성화됨 (billing 이슈) |
-| `exhibitions/route-optimized.ts` | 백업 파일 |
-| `chatbot/route-optimized.ts` | 백업 파일 |
-| `gallery/collection/route-optimized.ts` | 백업 파일 |
 
 #### 컴포넌트/훅
 | 파일 | any 위치 | 수정 방법 |
@@ -146,16 +119,14 @@ grep -r ": any" frontend/components --include="*.tsx"
 
 ### 4. 미사용 코드 정리
 
-**삭제 후보:**
-```
-frontend/app/api/exhibitions/route-optimized.ts  (백업)
-frontend/app/api/chatbot/route-optimized.ts      (백업)
-frontend/app/api/gallery/collection/route-optimized.ts (백업)
-```
+**✅ 완료됨**
 
-**확인 필요:**
-- [ ] `route-optimized.ts` 파일들이 실제로 사용되지 않는지 확인
-- [ ] 삭제 전 git에서 복구 가능한지 확인
+백업 파일 3개 삭제됨:
+- ~~`frontend/app/api/exhibitions/route-optimized.ts`~~
+- ~~`frontend/app/api/chatbot/route-optimized.ts`~~
+- ~~`frontend/app/api/gallery/collection/route-optimized.ts`~~
+
+*git에서 복구 가능 (커밋 246eac1 이전)*
 
 ---
 
@@ -253,9 +224,11 @@ npm run lint
 | 카테고리 | 발견 | 해결 | 남음 |
 |----------|------|------|------|
 | 보안 취약점 | 4 | 2 | 2 (키교체, RLS적용) |
-| any 타입 | 50+ | 20+ | 30+ |
+| any 타입 (API) | 50+ | **50+** ✅ | **0** |
+| any 타입 (컴포넌트) | ~10 | 0 | ~10 |
 | 성능 이슈 | 5 | 4 | 1 |
 | 인덱스 누락 | 10 | 0 | 10 (SQL 준비됨) |
+| 미사용 코드 | 3 | **3** ✅ | **0** |
 
 ---
 
