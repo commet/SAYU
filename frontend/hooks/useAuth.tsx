@@ -355,7 +355,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       subscription.unsubscribe();
       clearInterval(refreshInterval);
     };
-  }, [router]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router, supabase]);
 
   const signIn = async (email: string, password: string) => {
     console.log('🔑 Starting signIn process...');

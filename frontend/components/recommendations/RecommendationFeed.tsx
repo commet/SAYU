@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RefreshCw, Filter, Settings, Sparkles } from 'lucide-react';
+import { RefreshCw, Filter, Sparkles } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import RecommendationCard from './RecommendationCard';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -27,7 +28,8 @@ export default function RecommendationFeed({
   compact = false,
   limit = 10
 }: RecommendationFeedProps) {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
+  const router = useRouter();
   const [recommendations, setRecommendations] = useState(initialRecommendations);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
@@ -64,7 +66,7 @@ export default function RecommendationFeed({
 
       const response = await fetch(`/api/recommendations/exhibitions?${queryParams}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          ...(session?.access_token && { 'Authorization': `Bearer ${session.access_token}` })
         }
       });
       
@@ -90,7 +92,7 @@ export default function RecommendationFeed({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          ...(session?.access_token && { 'Authorization': `Bearer ${session.access_token}` })
         },
         body: JSON.stringify({
           recommendationId,
@@ -108,7 +110,7 @@ export default function RecommendationFeed({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          ...(session?.access_token && { 'Authorization': `Bearer ${session.access_token}` })
         },
         body: JSON.stringify({
           recommendationId
@@ -125,7 +127,7 @@ export default function RecommendationFeed({
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        ...(session?.access_token && { 'Authorization': `Bearer ${session.access_token}` })
       },
       body: JSON.stringify({
         recommendationId
@@ -133,7 +135,7 @@ export default function RecommendationFeed({
     }).catch(console.error);
 
     // 상세 페이지로 이동
-    window.location.href = `/exhibitions/${recommendationId}`;
+    router.push(`/exhibitions/${recommendationId}`);
   };
 
   const applyFilters = (newFilters: Partial<FilterOptions>) => {

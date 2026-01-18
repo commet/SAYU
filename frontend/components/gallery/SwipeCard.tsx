@@ -48,9 +48,7 @@ export function SwipeCard({
           rotate: 30,
           opacity: 0,
           transition: { duration: 0.3 }
-        }).then(() => {
-          onSwipeRight();
-        });
+        }).then(onSwipeRight).catch(() => onSwipeRight());
       } else {
         // Swiped left - pass
         setExitDirection('left');
@@ -59,9 +57,7 @@ export function SwipeCard({
           rotate: -30,
           opacity: 0,
           transition: { duration: 0.3 }
-        }).then(() => {
-          onSwipeLeft();
-        });
+        }).then(onSwipeLeft).catch(() => onSwipeLeft());
       }
     } else {
       // Snap back to center
@@ -81,9 +77,7 @@ export function SwipeCard({
       opacity: 0,
       scale: 0.8,
       transition: { duration: 0.4 }
-    }).then(() => {
-      onSwipeRight();
-    });
+    }).then(onSwipeRight).catch(() => onSwipeRight());
   };
 
   const handlePass = () => {
@@ -94,9 +88,7 @@ export function SwipeCard({
       opacity: 0,
       scale: 0.8,
       transition: { duration: 0.4 }
-    }).then(() => {
-      onSwipeLeft();
-    });
+    }).then(onSwipeLeft).catch(() => onSwipeLeft());
   };
 
   return (

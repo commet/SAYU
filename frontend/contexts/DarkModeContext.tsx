@@ -16,9 +16,11 @@ export function DarkModeProvider({ children }: { children: React.ReactNode }) {
 
   // Initialize dark mode from localStorage or system preference
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     // Check localStorage first
     const savedTheme = localStorage.getItem('darkMode');
-    
+
     if (savedTheme !== null) {
       const isDark = savedTheme === 'true';
       setIsDarkMode(isDark);
@@ -29,14 +31,16 @@ export function DarkModeProvider({ children }: { children: React.ReactNode }) {
       setIsDarkMode(prefersDark);
       applyDarkMode(prefersDark);
     }
-    
+
     setIsInitialized(true);
   }, []);
 
   // Listen for system theme changes
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
+
     const handleChange = (e: MediaQueryListEvent) => {
       // Only apply system preference if user hasn't manually set a preference
       const savedTheme = localStorage.getItem('darkMode');
