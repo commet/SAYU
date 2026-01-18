@@ -91,7 +91,7 @@ export function ArtCounselorChat({
         const welcomeMessage: Message = {
           id: Date.now().toString(),
           type: 'counselor',
-          content: data.data.welcomeMessage || \"Hello! I'm your AI art companion. I'm here to explore art and emotions with you in a safe, supportive way. How are you feeling today?\",
+          content: data.data.welcomeMessage || "Hello! I'm your AI art companion. I'm here to explore art and emotions with you in a safe, supportive way. How are you feeling today?",
           timestamp: new Date()
         };
         setMessages([welcomeMessage]);
@@ -270,31 +270,31 @@ export function ArtCounselorChat({
   };
 
   return (
-    <div className=\"flex flex-col h-full\">
+    <div className="flex flex-col h-full">
       {/* Chat Header */}
-      <div className=\"bg-blue-50 border-b border-blue-200 p-4 flex items-center justify-between\">
-        <div className=\"flex items-center\">
-          <div className=\"w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center mr-3\">
-            <Palette className=\"w-5 h-5 text-white\" />
+      <div className="bg-blue-50 border-b border-blue-200 p-4 flex items-center justify-between">
+        <div className="flex items-center">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center mr-3">
+            <Palette className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h3 className=\"font-semibold text-gray-900\">SAYU Art Companion</h3>
-            <p className=\"text-sm text-gray-600 flex items-center\">
-              <Shield className=\"w-3 h-3 mr-1 text-green-500\" />
+            <h3 className="font-semibold text-gray-900">SAYU Art Companion</h3>
+            <p className="text-sm text-gray-600 flex items-center">
+              <Shield className="w-3 h-3 mr-1 text-green-500" />
               Safe space for art and emotions
             </p>
           </div>
         </div>
 
         {sessionEnded && (
-          <div className=\"text-sm text-amber-600 bg-amber-50 px-3 py-1 rounded-full\">
+          <div className="text-sm text-amber-600 bg-amber-50 px-3 py-1 rounded-full">
             Session Ended
           </div>
         )}
       </div>
 
       {/* Messages */}
-      <div className=\"flex-1 overflow-y-auto p-4 space-y-4\">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
         <AnimatePresence>
           {messages.map((message) => (
             <motion.div
@@ -321,12 +321,12 @@ export function ArtCounselorChat({
                 >
                   {/* Crisis Resources */}
                   {message.isCrisisIntervention && message.crisisResources && (
-                    <div className=\"mb-4 p-3 bg-red-100 rounded-lg\">
-                      <h4 className=\"font-semibold text-red-900 mb-2 flex items-center\">
-                        <Phone className=\"w-4 h-4 mr-2\" />
+                    <div className="mb-4 p-3 bg-red-100 rounded-lg">
+                      <h4 className="font-semibold text-red-900 mb-2 flex items-center">
+                        <Phone className="w-4 h-4 mr-2" />
                         Immediate Help Available
                       </h4>
-                      <div className=\"text-sm space-y-1\">
+                      <div className="text-sm space-y-1">
                         <p><strong>Crisis Hotline:</strong> {message.crisisResources.hotline}</p>
                         {message.crisisResources.text && (
                           <p><strong>Text:</strong> {message.crisisResources.text}</p>
@@ -336,12 +336,12 @@ export function ArtCounselorChat({
                     </div>
                   )}
 
-                  <p className=\"whitespace-pre-wrap\">{message.content}</p>
+                  <p className="whitespace-pre-wrap">{message.content}</p>
 
                   {/* Safety Disclaimer for AI responses */}
                   {message.type === 'counselor' && !message.isRedirection && (
-                    <div className=\"mt-3 pt-3 border-t border-gray-200 text-xs text-gray-500\">
-                      <Shield className=\"w-3 h-3 inline mr-1\" />
+                    <div className="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-500">
+                      <Shield className="w-3 h-3 inline mr-1" />
                       AI companion • Not a replacement for professional therapy
                     </div>
                   )}
@@ -349,13 +349,13 @@ export function ArtCounselorChat({
 
                 {/* Timestamp and Status */}
                 <div className={`flex items-center mt-1 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className=\"flex items-center space-x-2 text-xs text-gray-500\">
+                  <div className="flex items-center space-x-2 text-xs text-gray-500">
                     {message.type !== 'user' && (
-                      <div className=\"flex items-center\">
+                      <div className="flex items-center">
                         {message.type === 'system' ? (
-                          <AlertTriangle className=\"w-3 h-3 mr-1\" />
+                          <AlertTriangle className="w-3 h-3 mr-1" />
                         ) : (
-                          <Bot className=\"w-3 h-3 mr-1\" />
+                          <Bot className="w-3 h-3 mr-1" />
                         )}
                       </div>
                     )}
@@ -369,11 +369,11 @@ export function ArtCounselorChat({
                 message.type === 'user' ? 'bg-blue-600 order-2 ml-2' : 'bg-gray-300 order-1 mr-2'
               }`}>
                 {message.type === 'user' ? (
-                  <User className=\"w-4 h-4 text-white\" />
+                  <User className="w-4 h-4 text-white" />
                 ) : message.type === 'system' ? (
-                  <AlertTriangle className=\"w-4 h-4 text-gray-600\" />
+                  <AlertTriangle className="w-4 h-4 text-gray-600" />
                 ) : (
-                  <Palette className=\"w-4 h-4 text-gray-600\" />
+                  <Palette className="w-4 h-4 text-gray-600" />
                 )}
               </div>
             </motion.div>
@@ -381,14 +381,14 @@ export function ArtCounselorChat({
         </AnimatePresence>
 
         {isLoading && (
-          <div className=\"flex justify-start\">
-            <div className=\"flex items-center space-x-2 bg-gray-100 rounded-lg p-4\">
-              <div className=\"flex space-x-1\">
-                <div className=\"w-2 h-2 bg-gray-400 rounded-full animate-bounce\" style={{ animationDelay: '0ms' }} />
-                <div className=\"w-2 h-2 bg-gray-400 rounded-full animate-bounce\" style={{ animationDelay: '150ms' }} />
-                <div className=\"w-2 h-2 bg-gray-400 rounded-full animate-bounce\" style={{ animationDelay: '300ms' }} />
+          <div className="flex justify-start">
+            <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-4">
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
-              <span className=\"text-sm text-gray-600\">Thinking...</span>
+              <span className="text-sm text-gray-600">Thinking...</span>
             </div>
           </div>
         )}
@@ -397,47 +397,47 @@ export function ArtCounselorChat({
       </div>
 
       {/* Input Area */}
-      <div className=\"border-t border-gray-200 p-4\">
+      <div className="border-t border-gray-200 p-4">
         {sessionEnded ? (
-          <div className=\"text-center py-4\">
-            <div className=\"bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4\">
-              <Clock className=\"w-6 h-6 text-amber-600 mx-auto mb-2\" />
-              <p className=\"text-amber-800 font-medium\">Session Complete</p>
-              <p className=\"text-sm text-amber-700 mt-1\">
+          <div className="text-center py-4">
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+              <Clock className="w-6 h-6 text-amber-600 mx-auto mb-2" />
+              <p className="text-amber-800 font-medium">Session Complete</p>
+              <p className="text-sm text-amber-700 mt-1">
                 Take a break for your wellbeing. You can start a new session anytime.
               </p>
             </div>
             <button
               onClick={() => window.location.reload()}
-              className=\"px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors\"
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               Start New Session
             </button>
           </div>
         ) : (
-          <div className=\"flex items-end space-x-3\">
-            <div className=\"flex-1\">
+          <div className="flex items-end space-x-3">
+            <div className="flex-1">
               <textarea
                 value={currentMessage}
                 onChange={(e) => setCurrentMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder=\"Share your thoughts about art, emotions, or how you're feeling...\"
-                className=\"w-full px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500\"
+                placeholder="Share your thoughts about art, emotions, or how you're feeling..."
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 rows={1}
                 style={{ minHeight: '44px', maxHeight: '120px' }}
                 disabled={isLoading}
               />
-              <div className=\"mt-1 text-xs text-gray-500 flex items-center\">
-                <Heart className=\"w-3 h-3 mr-1\" />
+              <div className="mt-1 text-xs text-gray-500 flex items-center">
+                <Heart className="w-3 h-3 mr-1" />
                 This is a safe space focused on art and emotional wellness
               </div>
             </div>
             <button
               onClick={sendMessage}
               disabled={!currentMessage.trim() || isLoading}
-              className=\"px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center\"
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
             >
-              <Send className=\"w-4 h-4\" />
+              <Send className="w-4 h-4" />
             </button>
           </div>
         )}
