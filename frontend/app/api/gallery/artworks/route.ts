@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
     // 페이지네이션
     const paginatedArtworks = filteredArtworks.slice(offset, offset + limit);
     
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       data: paginatedArtworks,
       total: filteredArtworks.length,
@@ -92,6 +92,10 @@ export async function GET(request: NextRequest) {
       limit,
       offset
     });
+
+    // Cache for 10 minutes (artwork data changes occasionally)
+    response.headers.set('Cache-Control', 'public, max-age=600, s-maxage=600, stale-while-revalidate=1200');
+    return response;
     
   } catch (error) {
     console.error('Error fetching artworks:', error);

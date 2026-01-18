@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
         }, { status: 404 });
       }
       
-      return NextResponse.json({
+      const response = NextResponse.json({
         success: true,
         data: {
           personalityData: {
@@ -48,6 +48,10 @@ export async function GET(request: NextRequest) {
           }
         }
       });
+
+      // Static data - cache for 1 hour
+      response.headers.set('Cache-Control', 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=7200');
+      return response;
     } else {
       // Return all personality types
       const allTypes = (Object.keys(personalityDescriptions) as SAYUTypeCode[]).map(key => {
@@ -63,10 +67,14 @@ export async function GET(request: NextRequest) {
         };
       });
       
-      return NextResponse.json({
+      const response = NextResponse.json({
         success: true,
         data: allTypes
       });
+
+      // Static data - cache for 1 hour
+      response.headers.set('Cache-Control', 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=7200');
+      return response;
     }
     
   } catch (error: unknown) {
