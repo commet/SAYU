@@ -14,7 +14,40 @@
     "community": "Community",
     "profile": "Profile",
     "enterSAYU": "Enter SAYU",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "retry": "Retry",
+    "all": "All",
+    "ongoing": "Ongoing",
+    "upcoming": "Upcoming",
+    "ended": "Ended"
+  },
+
+  "gallery": {
+    "personalArchive": "Personal Archive",
+    "artMemories": "Art Memories",
+    "works": "Works",
+    "visits": "Visits",
+    "collections": "Collections",
+    "timeline": "Timeline",
+    "map": "Map",
+    "emotions": "Emotions",
+    "discover": "Discover",
+    "noArtworks": "No artworks yet",
+    "startCollecting": "Start collecting art memories"
+  },
+
+  "exhibitions": {
+    "title": "Exhibitions",
+    "currentExhibitions": "Current Exhibitions",
+    "subtitle": "Discover curated exhibitions from galleries and museums, updated daily.",
+    "featured": "Featured",
+    "featuredExhibition": "Featured Exhibition",
+    "searchPlaceholder": "Search title or venue...",
+    "endsIn": "Ends in {{days}}d",
+    "noExhibitions": "No exhibitions found for this filter.",
+    "addedToSaved": "Added to saved",
+    "removedFromSaved": "Removed from saved",
+    "loginToSave": "Login to save exhibitions."
   },
   
   "auth": {

@@ -2,7 +2,7 @@
   "common": {
     "welcome": "환영합니다",
     "login": "로그인",
-    "logout": "로그아웃", 
+    "logout": "로그아웃",
     "register": "회원가입",
     "save": "저장",
     "cancel": "취소",
@@ -14,7 +14,40 @@
     "community": "커뮤니티",
     "profile": "프로필",
     "enterSAYU": "SAYU 입장하기",
-    "loading": "로딩 중..."
+    "loading": "로딩 중...",
+    "retry": "다시 시도",
+    "all": "전체",
+    "ongoing": "진행중",
+    "upcoming": "예정",
+    "ended": "종료"
+  },
+
+  "gallery": {
+    "personalArchive": "개인 아카이브",
+    "artMemories": "나의 예술 기억",
+    "works": "작품",
+    "visits": "방문",
+    "collections": "컬렉션",
+    "timeline": "타임라인",
+    "map": "지도",
+    "emotions": "감정",
+    "discover": "발견",
+    "noArtworks": "아직 작품이 없습니다",
+    "startCollecting": "예술 기억을 수집해보세요"
+  },
+
+  "exhibitions": {
+    "title": "전시",
+    "currentExhibitions": "현재 전시",
+    "subtitle": "매일 업데이트되는 갤러리와 미술관의 큐레이팅된 전시를 발견하세요.",
+    "featured": "추천",
+    "featuredExhibition": "추천 전시",
+    "searchPlaceholder": "전시명 또는 장소 검색...",
+    "endsIn": "{{days}}일 후 종료",
+    "noExhibitions": "이 필터에 해당하는 전시가 없습니다.",
+    "addedToSaved": "저장되었습니다",
+    "removedFromSaved": "저장 취소되었습니다",
+    "loginToSave": "전시를 저장하려면 로그인이 필요합니다."
   },
   
   "auth": {

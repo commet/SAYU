@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthGate } from '@/hooks/useAuthGate';
 import { useActivityTracker } from '@/hooks/useActivityTracker';
+import { useLanguage } from '@/contexts/LanguageContext';
 import toast from 'react-hot-toast';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
@@ -16,6 +17,48 @@ import {
   AlertCircle,
   Loader2,
 } from 'lucide-react';
+
+// Translations
+const t = {
+  en: {
+    title: 'Exhibitions',
+    currentExhibitions: 'Current Exhibitions',
+    subtitle: 'Discover curated exhibitions from galleries and museums, updated daily.',
+    featured: 'Featured',
+    featuredExhibition: 'Featured Exhibition',
+    all: 'All',
+    ongoing: 'Ongoing',
+    upcoming: 'Upcoming',
+    ended: 'Ended',
+    searchPlaceholder: 'Search title or venue...',
+    endsIn: (days: number) => `Ends in ${days}d`,
+    noExhibitions: 'No exhibitions found for this filter.',
+    retry: 'Retry',
+    error: 'An error occurred while fetching exhibitions.',
+    addedToSaved: 'Added to saved',
+    removedFromSaved: 'Removed from saved',
+    loginToSave: 'Login to save exhibitions.',
+  },
+  ko: {
+    title: '전시',
+    currentExhibitions: '현재 전시',
+    subtitle: '매일 업데이트되는 갤러리와 미술관의 큐레이팅된 전시를 발견하세요.',
+    featured: '추천',
+    featuredExhibition: '추천 전시',
+    all: '전체',
+    ongoing: '진행중',
+    upcoming: '예정',
+    ended: '종료',
+    searchPlaceholder: '전시명 또는 장소 검색...',
+    endsIn: (days: number) => `${days}일 후 종료`,
+    noExhibitions: '이 필터에 해당하는 전시가 없습니다.',
+    retry: '다시 시도',
+    error: '전시 정보를 불러오는 중 오류가 발생했습니다.',
+    addedToSaved: '저장되었습니다',
+    removedFromSaved: '저장 취소되었습니다',
+    loginToSave: '전시를 저장하려면 로그인이 필요합니다.',
+  },
+};
 
 const ExhibitionMap = dynamic(
   () => import('@/components/exhibitions/ExhibitionMap'),
@@ -62,6 +105,8 @@ export default function ExhibitionsPage() {
   const { user } = useAuth();
   const { requireAuth } = useAuthGate();
   const { trackExhibitionView } = useActivityTracker();
+  const { language } = useLanguage();
+  const texts = t[language];
 
   const [activeTab, setActiveTab] = useState<'all' | 'ongoing' | 'upcoming'>('all');
   const [exhibitions, setExhibitions] = useState<TransformedExhibition[]>([]);
@@ -99,7 +144,7 @@ export default function ExhibitionsPage() {
       setExhibitions(result.data || result.exhibitions || []);
     } catch (err) {
       console.error('Error fetching exhibitions:', err);
-      setError('An error occurred while fetching exhibitions.');
+      setError(texts.error);
     } finally {
       setLoading(false);
     }
@@ -128,17 +173,17 @@ export default function ExhibitionsPage() {
   const handleSaveExhibition = useCallback(async (exhibitionId: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const gate = requireAuth({ message: 'Login to save exhibitions.' });
+    const gate = requireAuth({ message: texts.loginToSave });
     if (!gate.allowed) return;
-    
+
     const newSet = new Set(savedExhibitions);
     const isSaved = savedExhibitions.has(exhibitionId);
     if (isSaved) {
       newSet.delete(exhibitionId);
-      toast.success('Removed from saved');
+      toast.success(texts.removedFromSaved);
     } else {
       newSet.add(exhibitionId);
-      toast.success('Added to saved');
+      toast.success(texts.addedToSaved);
     }
     setSavedExhibitions(newSet);
     localStorage.setItem('savedExhibitions', JSON.stringify(Array.from(newSet)));
@@ -175,14 +220,15 @@ export default function ExhibitionsPage() {
   }, [exhibitions, activeTab, searchQuery, featuredExhibition]);
 
   const ExhibitionCard = ({ exhibition }: { exhibition: TransformedExhibition }) => {
-    const dates = `${new Date(exhibition.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(exhibition.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
-    
+    const dateLocale = language === 'ko' ? 'ko-KR' : 'en-US';
+    const dates = `${new Date(exhibition.startDate).toLocaleDateString(dateLocale, { month: 'short', day: 'numeric' })} - ${new Date(exhibition.endDate).toLocaleDateString(dateLocale, { month: 'short', day: 'numeric' })}`;
+
     let statusText: string;
     if (exhibition.status === 'ongoing') {
       const daysLeft = Math.ceil((new Date(exhibition.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-      statusText = (daysLeft > 0 && daysLeft <= 14) ? `Ends in ${daysLeft}d` : 'Ongoing';
+      statusText = (daysLeft > 0 && daysLeft <= 14) ? texts.endsIn(daysLeft) : texts.ongoing;
     } else {
-      statusText = exhibition.status === 'upcoming' ? 'Upcoming' : 'Ended';
+      statusText = exhibition.status === 'upcoming' ? texts.upcoming : texts.ended;
     }
 
     return (
@@ -231,15 +277,15 @@ export default function ExhibitionsPage() {
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <header className="py-12 md:py-16">
-          <p className="text-sm uppercase tracking-widest text-neutral-500 mb-4">Exhibitions</p>
-          <h1 className="text-5xl md:text-6xl font-light text-black mb-3 tracking-tight">Current Exhibitions</h1>
-          <p className="text-lg text-neutral-500 font-light max-w-3xl">Discover curated exhibitions from galleries and museums, updated daily.</p>
+          <p className="text-sm uppercase tracking-widest text-neutral-500 mb-4">{texts.title}</p>
+          <h1 className="text-5xl md:text-6xl font-light text-black mb-3 tracking-tight">{texts.currentExhibitions}</h1>
+          <p className="text-lg text-neutral-500 font-light max-w-3xl">{texts.subtitle}</p>
         </header>
 
         {featuredExhibition && (
           <section className="mb-12 md:mb-16 group" onClick={() => handleExhibitionClick(featuredExhibition)}>
             <div className="flex items-baseline gap-3 mb-6">
-              <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">Featured</h2>
+              <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">{texts.featured}</h2>
               <div className="h-px flex-1 bg-neutral-200" />
             </div>
             <div className="relative aspect-[16/7] border border-neutral-200 group-hover:border-neutral-900 transition-colors duration-300 overflow-hidden cursor-pointer">
@@ -254,7 +300,7 @@ export default function ExhibitionsPage() {
               }
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 text-white">
-                <p className="text-xs uppercase tracking-widest text-white/70 mb-2">Featured Exhibition</p>
+                <p className="text-xs uppercase tracking-widest text-white/70 mb-2">{texts.featuredExhibition}</p>
                 <h3 className="text-3xl md:text-4xl font-light text-white mb-2 tracking-tight">{featuredExhibition.title}</h3>
                 <p className="text-sm uppercase tracking-wider text-white/90">{featuredExhibition.venue}</p>
               </div>
@@ -265,14 +311,18 @@ export default function ExhibitionsPage() {
         <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md pt-4 pb-4 border-b border-neutral-200 mb-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex gap-8 sm:gap-12">
-              {(['all', 'ongoing', 'upcoming'] as const).map(tab => (
+              {([
+                { id: 'all', label: texts.all },
+                { id: 'ongoing', label: texts.ongoing },
+                { id: 'upcoming', label: texts.upcoming },
+              ] as const).map(tab => (
                 <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
                   className="pb-2 text-sm uppercase tracking-widest font-light hover:text-black transition-colors relative"
                 >
-                  <span className={activeTab === tab ? "text-black font-medium" : "text-neutral-400"}>{tab}</span>
-                  {activeTab === tab &&
+                  <span className={activeTab === tab.id ? "text-black font-medium" : "text-neutral-400"}>{tab.label}</span>
+                  {activeTab === tab.id &&
                     <motion.div className="absolute bottom-0 left-0 right-0 h-px bg-black" layoutId="activeExhibitionTab" />
                   }
                 </button>
@@ -282,7 +332,7 @@ export default function ExhibitionsPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4" />
               <input
                 type="text"
-                placeholder="Search title or venue..."
+                placeholder={texts.searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full sm:w-64 bg-transparent pl-9 pr-4 py-2 border-b border-neutral-200 focus:outline-none focus:border-black transition-colors"
@@ -300,7 +350,7 @@ export default function ExhibitionsPage() {
             <div className="text-center py-12">
               <AlertCircle className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
               <p className="text-neutral-600">{error}</p>
-              <button onClick={() => fetchExhibitions()} className="mt-4 px-4 py-2 bg-black text-white rounded-lg text-sm hover:bg-neutral-800">Retry</button>
+              <button onClick={() => fetchExhibitions()} className="mt-4 px-4 py-2 bg-black text-white rounded-lg text-sm hover:bg-neutral-800">{texts.retry}</button>
             </div>
           ) : (
             <AnimatePresence>
@@ -316,7 +366,7 @@ export default function ExhibitionsPage() {
           )}
           {(!loading && filteredExhibitions.length === 0 && !error) &&
              <div className="text-center py-20">
-                <p className="text-neutral-500">No exhibitions found for this filter.</p>
+                <p className="text-neutral-500">{texts.noExhibitions}</p>
              </div>
           }
         </main>

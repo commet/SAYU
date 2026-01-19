@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { getArtMemories, getCollectionsWithCovers } from '@/lib/supabase/gallery';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Tabs
 import CollectionsTab from '@/components/gallery/CollectionsTab';
@@ -15,6 +16,34 @@ import EmotionsTab from '@/components/gallery/EmotionsTab';
 import DiscoverTab from '@/components/gallery/DiscoverTab';
 
 type TabType = 'collections' | 'timeline' | 'map' | 'emotions' | 'discover';
+
+// Translations
+const t = {
+  en: {
+    personalArchive: 'Personal Archive',
+    artMemories: 'Art Memories',
+    works: 'Works',
+    visits: 'Visits',
+    collections: 'Collections',
+    timeline: 'Timeline',
+    map: 'Map',
+    emotions: 'Emotions',
+    discover: 'Discover',
+    loading: 'Loading...',
+  },
+  ko: {
+    personalArchive: '개인 아카이브',
+    artMemories: '나의 예술 기억',
+    works: '작품',
+    visits: '방문',
+    collections: '컬렉션',
+    timeline: '타임라인',
+    map: '지도',
+    emotions: '감정',
+    discover: '발견',
+    loading: '로딩 중...',
+  },
+};
 
 interface GalleryClientProps {
   initialStats: {
@@ -26,7 +55,9 @@ interface GalleryClientProps {
 
 export default function GalleryClient({ initialStats }: GalleryClientProps) {
   const { user, loading } = useAuth();
+  const { language } = useLanguage();
   const searchParams = useSearchParams();
+  const texts = t[language];
 
   const tabParam = searchParams?.get('tab') as TabType | null;
   const [activeTab, setActiveTab] = useState<TabType>(tabParam || 'discover');
@@ -63,7 +94,7 @@ export default function GalleryClient({ initialStats }: GalleryClientProps) {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-neutral-200 border-t-black mx-auto mb-4"></div>
-          <p className="text-neutral-600 text-sm">로딩 중...</p>
+          <p className="text-neutral-600 text-sm">{texts.loading}</p>
         </div>
       </div>
     );
@@ -80,25 +111,25 @@ export default function GalleryClient({ initialStats }: GalleryClientProps) {
         >
           <div className="flex items-end justify-between">
             <div>
-              <p className="text-sm uppercase tracking-widest text-neutral-500 mb-3">Personal Archive</p>
-              <h1 className="text-5xl font-light text-black mb-1 tracking-tight">Art Memories</h1>
+              <p className="text-sm uppercase tracking-widest text-neutral-500 mb-3">{texts.personalArchive}</p>
+              <h1 className="text-5xl font-light text-black mb-1 tracking-tight">{texts.artMemories}</h1>
             </div>
 
             {/* Stats - Minimal */}
             <div className="flex gap-8 pb-2">
               <div className="text-right">
                 <p className="text-2xl font-light text-black tracking-tight">{stats.artworks}</p>
-                <p className="text-xs uppercase tracking-wider text-neutral-400">Works</p>
+                <p className="text-xs uppercase tracking-wider text-neutral-400">{texts.works}</p>
               </div>
               <div className="h-12 w-px bg-neutral-200" />
               <div className="text-right">
                 <p className="text-2xl font-light text-black tracking-tight">{stats.exhibitions}</p>
-                <p className="text-xs uppercase tracking-wider text-neutral-400">Visits</p>
+                <p className="text-xs uppercase tracking-wider text-neutral-400">{texts.visits}</p>
               </div>
               <div className="h-12 w-px bg-neutral-200" />
               <div className="text-right">
                 <p className="text-2xl font-light text-black tracking-tight">{stats.collections}</p>
-                <p className="text-xs uppercase tracking-wider text-neutral-400">Collections</p>
+                <p className="text-xs uppercase tracking-wider text-neutral-400">{texts.collections}</p>
               </div>
             </div>
           </div>
@@ -113,11 +144,11 @@ export default function GalleryClient({ initialStats }: GalleryClientProps) {
         >
           <div className="flex gap-12">
             {[
-              { id: 'collections', label: 'Collections' },
-              { id: 'timeline', label: 'Timeline' },
-              { id: 'map', label: 'Map' },
-              { id: 'emotions', label: 'Emotions' },
-              { id: 'discover', label: 'Discover' },
+              { id: 'collections', label: texts.collections },
+              { id: 'timeline', label: texts.timeline },
+              { id: 'map', label: texts.map },
+              { id: 'emotions', label: texts.emotions },
+              { id: 'discover', label: texts.discover },
             ].map((tab) => (
               <button
                 key={tab.id}
