@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import Image from 'next/image';
 import {
@@ -9,6 +9,8 @@ import {
   Star,
   Sparkles,
   MapPin,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthGate } from '@/hooks/useAuthGate';
@@ -33,6 +35,9 @@ const t = {
     newMember: 'New member',
     verified: 'Verified',
     superLike: 'Super Like',
+    swipeHint: 'Swipe to connect',
+    swipeLeft: 'Pass',
+    swipeRight: 'Like',
   },
   ko: {
     community: 'Community',
@@ -50,6 +55,9 @@ const t = {
     newMember: '신규 멤버',
     verified: '인증됨',
     superLike: 'Super Like',
+    swipeHint: '스와이프하여 연결하기',
+    swipeLeft: '패스',
+    swipeRight: '좋아요',
   },
 };
 
@@ -214,6 +222,15 @@ export default function CommunityPage() {
   const texts = t[language];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [exitDirection, setExitDirection] = useState<'left' | 'right' | null>(null);
+  const [showSwipeGuide, setShowSwipeGuide] = useState(false);
+
+  // Check if user has seen the swipe guide before
+  useEffect(() => {
+    const hasSeenGuide = localStorage.getItem('community-swipe-guide-seen');
+    if (!hasSeenGuide) {
+      setShowSwipeGuide(true);
+    }
+  }, []);
 
   // Localized mock users
   const localizedUsers = useMemo(() =>
@@ -224,9 +241,14 @@ export default function CommunityPage() {
   , [language]);
 
   const handleSwipe = useCallback((action: 'like' | 'pass' | 'superlike') => {
+    // Hide swipe guide after first swipe
+    if (showSwipeGuide) {
+      setShowSwipeGuide(false);
+      localStorage.setItem('community-swipe-guide-seen', 'true');
+    }
     const dir = action === 'pass' ? 'left' : 'right';
     setExitDirection(dir);
-  }, []);
+  }, [showSwipeGuide]);
 
   const handleExitComplete = useCallback(() => {
     setCurrentIndex((prev) => prev + 1);
@@ -381,6 +403,56 @@ export default function CommunityPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Swipe Guide Overlay */}
+                <AnimatePresence>
+                  {showSwipeGuide && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-10 rounded-3xl"
+                      onClick={() => {
+                        setShowSwipeGuide(false);
+                        localStorage.setItem('community-swipe-guide-seen', 'true');
+                      }}
+                    >
+                      <p className="text-white text-lg font-medium mb-8">{texts.swipeHint}</p>
+                      <div className="flex items-center gap-16">
+                        {/* Left swipe indicator */}
+                        <motion.div
+                          className="flex flex-col items-center gap-2"
+                          animate={{ x: [-5, -15, -5] }}
+                          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                        >
+                          <div className="w-14 h-14 rounded-full bg-white/20 border-2 border-white flex items-center justify-center">
+                            <X className="w-7 h-7 text-white" />
+                          </div>
+                          <div className="flex items-center gap-1 text-white/80">
+                            <ChevronLeft className="w-4 h-4" />
+                            <span className="text-sm">{texts.swipeLeft}</span>
+                          </div>
+                        </motion.div>
+
+                        {/* Right swipe indicator */}
+                        <motion.div
+                          className="flex flex-col items-center gap-2"
+                          animate={{ x: [5, 15, 5] }}
+                          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                        >
+                          <div className="w-14 h-14 rounded-full bg-rose-500/80 border-2 border-rose-400 flex items-center justify-center">
+                            <Heart className="w-7 h-7 text-white fill-white" />
+                          </div>
+                          <div className="flex items-center gap-1 text-white/80">
+                            <span className="text-sm">{texts.swipeRight}</span>
+                            <ChevronRight className="w-4 h-4" />
+                          </div>
+                        </motion.div>
+                      </div>
+                      <p className="text-white/50 text-xs mt-8">Tap to dismiss</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             ) : activeUser && exitDirection ? (
               <motion.div
