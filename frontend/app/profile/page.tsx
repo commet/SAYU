@@ -89,6 +89,13 @@ export default function ProfilePage() {
   const [showSettings, setShowSettings] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [isProfilePublic, setIsProfilePublic] = useState(true);
+  const [savedArtworks, setSavedArtworks] = useState<Array<{
+    id: string | number;
+    title: string;
+    artist: string;
+    imageUrl?: string;
+  }>>([]);
+  const [artworksLoading, setArtworksLoading] = useState(true);
   const isGuest = !user;
 
   useEffect(() => {
@@ -111,6 +118,33 @@ export default function ProfilePage() {
     }
   }, [user]);
 
+  // Fetch saved artworks
+  useEffect(() => {
+    const fetchSavedArtworks = async () => {
+      if (!user?.id) {
+        setArtworksLoading(false);
+        return;
+      }
+      try {
+        const res = await fetch(`/api/gallery/collection?userId=${user.id}`);
+        const data = await res.json();
+        if (data.success && data.items?.length > 0) {
+          setSavedArtworks(data.items.slice(0, 4).map((item: any) => ({
+            id: item.id,
+            title: item.title,
+            artist: item.artist,
+            imageUrl: item.imageUrl,
+          })));
+        }
+      } catch (e) {
+        console.error('Error fetching saved artworks:', e);
+      } finally {
+        setArtworksLoading(false);
+      }
+    };
+    fetchSavedArtworks();
+  }, [user?.id]);
+
   if (!isClient) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -132,13 +166,16 @@ export default function ProfilePage() {
     { label: texts.exhibitionsVisited, value: gameStats?.level || 3 },
     { label: texts.followers, value: 8 },
   ];
-  
-  const savedArtworks = [
-    { id: 1, title: '별이 빛나는 밤', artist: 'Vincent van Gogh', image: 'https://images.unsplash.com/photo-1583573636253-12a883d644c2?w=500' },
-    { id: 2, title: '진주 귀걸이를 한 소녀', artist: 'Johannes Vermeer', image: 'https://images.unsplash.com/photo-1579602934133-7c536b0ce5c6?w=500' },
-    { id: 3, title: '절규', artist: 'Edvard Munch', image: 'https://images.unsplash.com/photo-1569919253754-b382b35c3a8e?w=500' },
-    { id: 4, title: '게르니카', artist: 'Pablo Picasso', image: 'https://images.unsplash.com/photo-1618995961955-22b6c2075a44?w=500' },
+
+  // Placeholder artworks (shown when user has no saved artworks)
+  const placeholderArtworks = [
+    { id: 'p1', title: '구성', artist: '김창열', imageUrl: '/mmca-tour-kcy/artwork/구성_1.jpg' },
+    { id: 'p2', title: '물방울', artist: '김창열', imageUrl: '/mmca-tour-kcy/artwork/물방울_00.jpg' },
+    { id: 'p3', title: 'Il Pleut', artist: '김창열', imageUrl: '/mmca-tour-kcy/artwork/il pleut.png' },
+    { id: 'p4', title: '드로잉', artist: '김창열', imageUrl: '/mmca-tour-kcy/artwork/드로잉_1.png' },
   ];
+
+  const displayArtworks = savedArtworks.length > 0 ? savedArtworks : placeholderArtworks;
 
   return (
     <div className="min-h-screen bg-white text-neutral-900">
@@ -215,23 +252,39 @@ export default function ProfilePage() {
             </span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {savedArtworks.map((artwork) => (
-              <motion.div key={artwork.id} whileHover={{ y: -4 }} className="group cursor-pointer">
-                <div className="aspect-square border border-neutral-200 hover:border-neutral-900 transition-all overflow-hidden mb-3 relative bg-neutral-50">
-                  <Image
-                    src={artwork.image}
-                    alt={artwork.title}
-                    fill
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                    className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
-                  />
+            {artworksLoading ? (
+              [...Array(4)].map((_, i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="aspect-square bg-neutral-100 mb-3" />
+                  <div className="h-4 bg-neutral-100 w-3/4 mb-1" />
+                  <div className="h-3 bg-neutral-100 w-1/2" />
                 </div>
-                <div className="space-y-0.5">
-                  <h3 className="text-sm font-medium text-black line-clamp-1">{artwork.title}</h3>
-                  <p className="text-xs text-neutral-500 font-light">{artwork.artist}</p>
-                </div>
-              </motion.div>
-            ))}
+              ))
+            ) : (
+              displayArtworks.map((artwork) => (
+                <motion.div key={artwork.id} whileHover={{ y: -4 }} className="group cursor-pointer">
+                  <div className="aspect-square border border-neutral-200 hover:border-neutral-900 transition-all overflow-hidden mb-3 relative bg-neutral-50">
+                    {artwork.imageUrl ? (
+                      <Image
+                        src={artwork.imageUrl}
+                        alt={artwork.title}
+                        fill
+                        sizes="(max-width: 768px) 50vw, 25vw"
+                        className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-neutral-100 text-neutral-400">
+                        <Palette className="w-8 h-8" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-0.5">
+                    <h3 className="text-sm font-medium text-black line-clamp-1">{artwork.title}</h3>
+                    <p className="text-xs text-neutral-500 font-light">{artwork.artist}</p>
+                  </div>
+                </motion.div>
+              ))
+            )}
           </div>
         </section>
 
