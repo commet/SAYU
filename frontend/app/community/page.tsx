@@ -225,8 +225,9 @@ export default function CommunityPage() {
   // Motion values for drag
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-25, 25]);
-  const likeOpacity = useTransform(x, [0, 100], [0, 1]);
-  const nopeOpacity = useTransform(x, [-100, 0], [1, 0]);
+  // Clamp opacity values to only show when actually dragging in that direction
+  const likeOpacity = useTransform(x, (latest) => Math.max(0, Math.min(1, latest / 100)));
+  const nopeOpacity = useTransform(x, (latest) => Math.max(0, Math.min(1, -latest / 100)));
 
   // Localized mock users
   const localizedUsers = useMemo(() =>
