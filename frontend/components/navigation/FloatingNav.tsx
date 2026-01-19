@@ -97,7 +97,7 @@ function useIsActive(pathname: string | null, item: NavLeaf | NavGroup) {
 export default function FloatingNav() {
   const pathname = usePathname();
   const router = useRouter();
-  const { language } = useLanguage();
+  const { language, toggleLanguage } = useLanguage();
   const { user, signOut } = useAuth();
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const { isNewUser, currentJourney, getCompletionPercentage, isOnboardingComplete } = useOnboardingV2();
@@ -227,6 +227,20 @@ export default function FloatingNav() {
 
             {/* Actions */}
             <div className="flex items-center gap-3">
+              {/* Language Toggle */}
+              <button
+                onClick={toggleLanguage}
+                className="hidden lg:flex items-center text-sm tracking-wider text-white/80 hover:text-white transition-colors"
+                aria-label="Toggle language"
+              >
+                <span className={`px-1.5 py-1 ${language === 'en' ? 'text-white font-medium' : 'text-white/50'}`}>
+                  EN
+                </span>
+                <span className="text-white/30">|</span>
+                <span className={`px-1.5 py-1 ${language === 'ko' ? 'text-white font-medium' : 'text-white/50'}`}>
+                  KR
+                </span>
+              </button>
               <button
                 onClick={toggleDarkMode}
                 className="hidden items-center rounded-full border border-white/20 px-3 py-2.5 text-white text-sm font-semibold transition hover:bg-white/10 lg:flex"
@@ -336,6 +350,20 @@ export default function FloatingNav() {
                 ))}
 
                 <div className="flex items-center justify-between gap-3">
+                  {/* Language Toggle - Mobile */}
+                  <button
+                    onClick={toggleLanguage}
+                    className="flex items-center text-sm tracking-wider text-neutral-600"
+                    aria-label="Toggle language"
+                  >
+                    <span className={`px-1.5 py-1 ${language === 'en' ? 'text-black font-medium' : 'text-neutral-400'}`}>
+                      EN
+                    </span>
+                    <span className="text-neutral-300">|</span>
+                    <span className={`px-1.5 py-1 ${language === 'ko' ? 'text-black font-medium' : 'text-neutral-400'}`}>
+                      KR
+                    </span>
+                  </button>
                   <button
                     onClick={toggleDarkMode}
                     className="flex items-center gap-2 rounded-full border border-neutral-200 px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
