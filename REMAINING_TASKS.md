@@ -1,7 +1,7 @@
 # SAYU 남은 작업 목록
 
 > 이 문서는 2026-01-19 보안/성능/코드품질 감사 후 작성됨
-> 마지막 커밋: `a8e8de0` (refactor: remove any types from 6 core component/hook files)
+> 마지막 커밋: `2389eba` (refactor: move 189 additional unused files to _deprecated)
 
 ---
 
@@ -121,14 +121,33 @@ grep -r ": any" frontend/src --include="*.tsx"
 
 ### 4. 미사용 코드 정리
 
-**✅ 완료됨**
+**✅ 완료됨 - 총 289개 파일 정리**
 
-백업 파일 3개 삭제됨:
+#### Phase 1: API 백업 파일 삭제
 - ~~`frontend/app/api/exhibitions/route-optimized.ts`~~
 - ~~`frontend/app/api/chatbot/route-optimized.ts`~~
 - ~~`frontend/app/api/gallery/collection/route-optimized.ts`~~
 
-*git에서 복구 가능 (커밋 246eac1 이전)*
+#### Phase 2: frontend/_deprecated로 이동 (100개 파일)
+| 카테고리 | 파일 수 | 설명 |
+|----------|---------|------|
+| app/pages | 6 | page-broken, page-current 등 |
+| app/mobile | 2 | MobileHome 변형 |
+| app/modern | 8폴더 | modern-* 실험 페이지 |
+| components/ui-demos | 57 | *-demo.tsx 데모 파일 |
+| components/unused | 18 | Enhanced, Optimized, V2 등 |
+| misc | 9 | 테스트/데모 파일 |
+
+#### Phase 3: _deprecated/ (루트)로 이동 (189개 파일)
+| 경로 | 파일 수 | 크기 | 설명 |
+|------|---------|------|------|
+| backend/temp-frontend | 91 | 981KB | 프론트엔드 중복 폴더 |
+| data/legacy | 88 | 3.8MB | 옛날 SQL/JSON 마이그레이션 |
+| backend/backups | 1 | 61KB | 2025-07-15 전시회 백업 |
+| serena-memories | 8 | 15KB | Serena AI 메모리 |
+| artvee-backups | 2 | - | Cloudinary URL 백업 |
+
+*git에서 복구 가능 (커밋 246eac1, ab82ed7, f108f96, 2389eba)*
 
 ---
 
@@ -230,7 +249,7 @@ npm run lint
 | any 타입 (컴포넌트) | ~10 (핵심) | **6** ✅ | 4 (외부 라이브러리) |
 | 성능 이슈 | 5 | 5 | **0** ✅ |
 | 인덱스 누락 | 10 | 0 | 10 (SQL 준비됨) |
-| 미사용 코드 | 3 | **3** ✅ | **0** |
+| 미사용 코드 | **289** | **289** ✅ | **0** |
 
 ---
 
@@ -241,6 +260,8 @@ supabase/migrations/20260118000000_security_performance_fixes.sql  # RLS + 인�
 frontend/hooks/usePersonalityData.ts                                # 지연 로딩 훅
 frontend/app/api/image-proxy/route.ts                              # SSRF 수정됨
 frontend/contexts/DarkModeContext.tsx                              # Hydration 수정됨
+frontend/_deprecated/                                               # 프론트엔드 미사용 코드 (100개)
+_deprecated/                                                        # 루트 미사용 코드 (189개)
 ```
 
 ---
