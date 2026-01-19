@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import Image from 'next/image';
 import {
   Heart,
@@ -9,10 +9,9 @@ import {
   Star,
   Sparkles,
   MapPin,
-  Eye,
   MessageCircle,
-  Users,
-  ChevronRight,
+  Palette,
+  Clock,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthGate } from '@/hooks/useAuthGate';
@@ -27,19 +26,19 @@ const t = {
   en: {
     community: 'Community',
     connectShare: 'Connect & Share',
-    subtitle: 'Discover art lovers and share your perspective.',
-    profilesLeft: (count: number) => `${count} Profiles Left`,
+    subtitle: 'Meet people who share your art taste.',
+    profilesLeft: (count: number) => `${count} profiles left`,
     exhibitions: 'Exhibitions',
     artworks: 'Artworks',
     followers: 'Followers',
-    connect: 'CONNECT',
-    skip: 'SKIP',
-    noMoreProfiles: 'No more profiles',
-    reviewAgain: 'Review Again',
-    // Mock user bios
-    bio1: 'Loves capturing sensory moments. Currently fascinated by Impressionism and Abstract Expressionism.',
-    bio2: 'Enjoys observing changes in color and light. A slow, deep appreciator of art.',
-    bio3: 'Values deep interpretation and context. Highly interested in the curatorial concepts of exhibitions.',
+    match: 'Match',
+    noMoreProfiles: 'No more profiles to show',
+    checkBackLater: 'Check back later for new art lovers!',
+    reviewAgain: 'Start Over',
+    recentlyActive: 'Recently active',
+    newMember: 'New member',
+    verified: 'Verified',
+    superLike: 'Super Like',
   },
   ko: {
     community: 'Community',
@@ -49,48 +48,168 @@ const t = {
     exhibitions: '전시',
     artworks: '작품',
     followers: '팔로워',
-    connect: 'CONNECT',
-    skip: 'SKIP',
+    match: '매치',
     noMoreProfiles: '더 이상 프로필이 없습니다',
-    reviewAgain: '다시 보기',
-    // Mock user bios
-    bio1: '감각적인 순간을 포착하는 것을 좋아합니다. 현재 인상주의와 추상표현주의에 매료되어 있어요.',
-    bio2: '색과 빛의 변화를 관찰하는 것을 즐깁니다. 천천히 깊이 있게 예술을 감상하는 편이에요.',
-    bio3: '깊은 해석과 맥락을 중요시합니다. 전시의 큐레이토리얼 컨셉에 큰 관심이 있어요.',
+    checkBackLater: '나중에 다시 확인해보세요!',
+    reviewAgain: '처음부터',
+    recentlyActive: '최근 활동',
+    newMember: '신규 멤버',
+    verified: '인증됨',
+    superLike: 'Super Like',
   },
 };
 
-// Simplified mock data to match the new design
-const mockUsers = [
+// Extended mock users with more realistic data
+const mockUsersData = [
   {
     id: '1',
     nickname: 'sohee.moment',
     age: 28,
     personalityType: 'SAEF',
-    bio: 'Loves capturing sensory moments. Currently fascinated by Impressionism and Abstract Expressionism.',
+    location: 'Seoul, Gangnam',
+    bio_en: 'Loves capturing sensory moments. Currently fascinated by Impressionism and Abstract Expressionism. Always hunting for hidden gem galleries.',
+    bio_ko: '감각적인 순간을 포착하는 것을 좋아해요. 인상주의와 추상표현주의에 빠져 있고, 숨겨진 갤러리를 찾아다니는 중이에요.',
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&h=800&fit=crop&crop=face',
     stats: { exhibitions: 42, artworks: 156, followers: 128 },
     compatibility: 95,
+    isVerified: true,
+    isActive: true,
+    isNew: false,
   },
   {
     id: '2',
     nickname: 'woojin.archive',
     age: 32,
     personalityType: 'LREF',
-    bio: 'Enjoys observing changes in color and light. A slow, deep appreciator of art.',
+    location: 'Seoul, Itaewon',
+    bio_en: 'Enjoys observing changes in color and light. A slow, deep appreciator of art. Coffee enthusiast who loves museum cafes.',
+    bio_ko: '색과 빛의 변화를 관찰하는 것을 즐겨요. 천천히 깊이 있게 예술을 감상하는 편이에요. 미술관 카페 러버.',
     avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=800&h=800&fit=crop&crop=face',
     stats: { exhibitions: 38, artworks: 142, followers: 98 },
     compatibility: 88,
+    isVerified: true,
+    isActive: true,
+    isNew: false,
   },
   {
     id: '3',
     nickname: 'minjee.curator',
     age: 25,
     personalityType: 'LAMF',
-    bio: 'Values deep interpretation and context. Highly interested in the curatorial concepts of exhibitions.',
+    location: 'Seoul, Hongdae',
+    bio_en: 'Values deep interpretation and context. Highly interested in curatorial concepts. Dreaming of running my own gallery someday.',
+    bio_ko: '깊은 해석과 맥락을 중요시해요. 전시 기획에 큰 관심이 있고, 언젠가 나만의 갤러리를 꿈꾸고 있어요.',
     avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&h=800&fit=crop&crop=face',
     stats: { exhibitions: 28, artworks: 89, followers: 204 },
-    compatibility: 74,
+    compatibility: 82,
+    isVerified: false,
+    isActive: true,
+    isNew: true,
+  },
+  {
+    id: '4',
+    nickname: 'jiwon.lens',
+    age: 29,
+    personalityType: 'SRMF',
+    location: 'Seoul, Seongsu',
+    bio_en: 'Photographer by day, art lover by night. Love the intersection of photography and contemporary art. DM for gallery recommendations!',
+    bio_ko: '낮에는 사진작가, 밤에는 예술 애호가. 사진과 현대미술의 교차점을 사랑해요. 갤러리 추천은 DM으로!',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=800&fit=crop&crop=face',
+    stats: { exhibitions: 67, artworks: 234, followers: 312 },
+    compatibility: 91,
+    isVerified: true,
+    isActive: false,
+    isNew: false,
+  },
+  {
+    id: '5',
+    nickname: 'yuna.artwalker',
+    age: 26,
+    personalityType: 'LAEF',
+    location: 'Seoul, Samcheong',
+    bio_en: 'Weekend gallery hopper. Loves discussing art over wine. Looking for companions to explore new exhibitions together.',
+    bio_ko: '주말마다 갤러리 탐방하는 사람. 와인 마시며 예술 이야기 나누는 걸 좋아해요. 전시 같이 볼 동행 찾아요.',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&h=800&fit=crop&crop=face',
+    stats: { exhibitions: 51, artworks: 178, followers: 156 },
+    compatibility: 94,
+    isVerified: true,
+    isActive: true,
+    isNew: false,
+  },
+  {
+    id: '6',
+    nickname: 'hyunwoo.canvas',
+    age: 31,
+    personalityType: 'SREC',
+    location: 'Seoul, Hannam',
+    bio_en: 'Art collector in the making. Fascinated by emerging Korean artists. Let\'s discover the next big thing together.',
+    bio_ko: '아트 컬렉터 지망생. 신진 한국 작가들에게 매료되어 있어요. 함께 새로운 아티스트를 발굴해봐요.',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&h=800&fit=crop&crop=face',
+    stats: { exhibitions: 73, artworks: 289, followers: 421 },
+    compatibility: 79,
+    isVerified: true,
+    isActive: true,
+    isNew: false,
+  },
+  {
+    id: '7',
+    nickname: 'subin.palette',
+    age: 24,
+    personalityType: 'SAMC',
+    location: 'Seoul, Apgujeong',
+    bio_en: 'Art student with a passion for color theory. Love both classic masterpieces and bold contemporary works.',
+    bio_ko: '색채 이론에 빠진 미대생. 클래식한 명작부터 과감한 현대 작품까지 모두 좋아해요.',
+    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=800&h=800&fit=crop&crop=face',
+    stats: { exhibitions: 23, artworks: 67, followers: 89 },
+    compatibility: 86,
+    isVerified: false,
+    isActive: true,
+    isNew: true,
+  },
+  {
+    id: '8',
+    nickname: 'dongwook.frame',
+    age: 35,
+    personalityType: 'LRMC',
+    location: 'Seoul, Jamsil',
+    bio_en: 'Architecture meets art. Love spatial installations and immersive experiences. Always looking for art that transforms space.',
+    bio_ko: '건축과 예술의 만남. 공간 설치와 몰입형 경험을 좋아해요. 공간을 변화시키는 예술을 찾아다녀요.',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=800&h=800&fit=crop&crop=face',
+    stats: { exhibitions: 45, artworks: 134, followers: 178 },
+    compatibility: 72,
+    isVerified: true,
+    isActive: false,
+    isNew: false,
+  },
+  {
+    id: '9',
+    nickname: 'nari.muse',
+    age: 27,
+    personalityType: 'LAMC',
+    location: 'Seoul, Bukchon',
+    bio_en: 'Inspired by traditional Korean art. Love finding contemporary artists who honor our heritage. Tea ceremony enthusiast.',
+    bio_ko: '한국 전통 미술에서 영감을 받아요. 전통을 현대적으로 해석하는 작가를 찾아다녀요. 다도 애호가.',
+    avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&h=800&fit=crop&crop=face',
+    stats: { exhibitions: 36, artworks: 112, followers: 234 },
+    compatibility: 89,
+    isVerified: true,
+    isActive: true,
+    isNew: false,
+  },
+  {
+    id: '10',
+    nickname: 'taehyung.vision',
+    age: 30,
+    personalityType: 'SREF',
+    location: 'Seoul, Yeouido',
+    bio_en: 'Digital art enthusiast. Exploring NFTs and the future of art ownership. Open to discussing tech meets creativity.',
+    bio_ko: '디지털 아트 매니아. NFT와 예술 소유의 미래를 탐구 중이에요. 기술과 창의성의 만남을 논해봐요.',
+    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&h=800&fit=crop&crop=face',
+    stats: { exhibitions: 29, artworks: 203, followers: 567 },
+    compatibility: 77,
+    isVerified: true,
+    isActive: true,
+    isNew: false,
   },
 ];
 
@@ -101,68 +220,60 @@ export default function CommunityPage() {
   const texts = t[language];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<'left' | 'right' | null>(null);
+  const [superLiked, setSuperLiked] = useState(false);
+
+  // Motion values for drag
+  const x = useMotionValue(0);
+  const rotate = useTransform(x, [-200, 200], [-25, 25]);
+  const likeOpacity = useTransform(x, [0, 100], [0, 1]);
+  const nopeOpacity = useTransform(x, [-100, 0], [1, 0]);
 
   // Localized mock users
-  const localizedUsers = useMemo(() => [
-    {
-      id: '1',
-      nickname: 'sohee.moment',
-      age: 28,
-      personalityType: 'SAEF',
-      bio: texts.bio1,
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&h=800&fit=crop&crop=face',
-      stats: { exhibitions: 42, artworks: 156, followers: 128 },
-      compatibility: 95,
-    },
-    {
-      id: '2',
-      nickname: 'woojin.archive',
-      age: 32,
-      personalityType: 'LREF',
-      bio: texts.bio2,
-      avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=800&h=800&fit=crop&crop=face',
-      stats: { exhibitions: 38, artworks: 142, followers: 98 },
-      compatibility: 88,
-    },
-    {
-      id: '3',
-      nickname: 'minjee.curator',
-      age: 25,
-      personalityType: 'LAMF',
-      bio: texts.bio3,
-      avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&h=800&fit=crop&crop=face',
-      stats: { exhibitions: 28, artworks: 89, followers: 204 },
-      compatibility: 74,
-    },
-  ], [texts.bio1, texts.bio2, texts.bio3]);
+  const localizedUsers = useMemo(() =>
+    mockUsersData.map(user => ({
+      ...user,
+      bio: language === 'ko' ? user.bio_ko : user.bio_en,
+    }))
+  , [language]);
 
-  const handleSwipe = (action: 'like' | 'pass') => {
-    setDirection(action === 'like' ? 'right' : 'left');
+  const handleSwipe = (action: 'like' | 'pass' | 'superlike') => {
+    if (action === 'superlike') {
+      setSuperLiked(true);
+      setTimeout(() => setSuperLiked(false), 500);
+    }
+    setDirection(action === 'pass' ? 'left' : 'right');
     setTimeout(() => {
       setCurrentIndex((prev) => prev + 1);
       setDirection(null);
-    }, 200);
+      x.set(0);
+    }, 300);
   };
 
   const activeUser = localizedUsers[currentIndex];
+  const remainingCount = localizedUsers.length - currentIndex;
 
   return (
-    <div className="min-h-screen bg-white text-neutral-900 overflow-hidden">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 h-screen flex flex-col">
-        <header className="py-8 md:py-12 flex-shrink-0">
-          <p className="text-sm uppercase tracking-widest text-neutral-500 mb-4">{texts.community}</p>
-          <h1 className="text-5xl md:text-6xl font-light text-black mb-3 tracking-tight">{texts.connectShare}</h1>
-          <p className="text-lg text-neutral-500 font-light max-w-3xl">{texts.subtitle}</p>
+    <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white text-neutral-900 overflow-hidden">
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 min-h-screen flex flex-col">
+        {/* Header */}
+        <header className="py-6 md:py-8 flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-widest text-neutral-400 mb-2">{texts.community}</p>
+              <h1 className="text-3xl md:text-4xl font-light text-black tracking-tight">{texts.connectShare}</h1>
+            </div>
+            {activeUser && (
+              <div className="text-right">
+                <p className="text-2xl font-light text-black">{remainingCount}</p>
+                <p className="text-xs uppercase tracking-wider text-neutral-400">{texts.profilesLeft(remainingCount).split(' ').slice(1).join(' ')}</p>
+              </div>
+            )}
+          </div>
+          <p className="text-sm text-neutral-500 font-light mt-2">{texts.subtitle}</p>
         </header>
 
-        <div className="flex-1 flex flex-col items-center justify-center relative pb-20">
-          {/* Progress Indicator */}
-          <div className="absolute top-0 right-0 p-4">
-            <span className="text-sm uppercase tracking-widest text-neutral-400">
-              {texts.profilesLeft(localizedUsers.length - currentIndex)}
-            </span>
-          </div>
-
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col items-center justify-center relative py-4">
           <AnimatePresence mode="popLayout">
             {activeUser ? (
               <motion.div
@@ -174,101 +285,215 @@ export default function CommunityPage() {
                   opacity: 0,
                   rotate: direction === 'right' ? 20 : direction === 'left' ? -20 : 0
                 }}
-                transition={{ duration: 0.4 }}
-                className="relative w-full max-w-md aspect-[3/4] bg-white border border-neutral-200 shadow-2xl"
+                transition={{ duration: 0.4, ease: 'easeOut' }}
+                style={{ x, rotate }}
+                className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden cursor-grab active:cursor-grabbing"
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
-                onDragEnd={(e, { offset, velocity }) => {
-                  const swipeThreshold = 100;
-                  if (offset.x > swipeThreshold) {
+                dragElastic={0.7}
+                onDragEnd={(e, { offset }) => {
+                  if (offset.x > 100) {
                     handleSwipe('like');
-                  } else if (offset.x < -swipeThreshold) {
+                  } else if (offset.x < -100) {
                     handleSwipe('pass');
                   }
                 }}
               >
-                {/* Card Content */}
-                <div className="absolute inset-0 select-none">
-                  <div className="relative w-full h-3/4 bg-neutral-100 overflow-hidden">
-                    <Image
-                      src={activeUser.avatar}
-                      alt={activeUser.nickname}
-                      fill
-                      className="object-cover grayscale"
-                      draggable={false}
-                    />
-                    <div className="absolute top-6 right-6 px-4 py-2 bg-white/90 backdrop-blur border border-white/50">
-                      <p className="text-xs uppercase tracking-wider text-black font-medium">
-                        APT: {activeUser.personalityType}
-                      </p>
+                {/* Image Section - 60% height */}
+                <div className="relative w-full aspect-[4/5] bg-neutral-100 overflow-hidden">
+                  <Image
+                    src={activeUser.avatar}
+                    alt={activeUser.nickname}
+                    fill
+                    className="object-cover"
+                    draggable={false}
+                    priority
+                  />
+
+                  {/* Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+                  {/* Top Badges */}
+                  <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
+                    <div className="flex gap-2">
+                      {activeUser.isVerified && (
+                        <div className="px-2 py-1 bg-white/90 backdrop-blur rounded-full flex items-center gap-1">
+                          <Sparkles className="w-3 h-3 text-amber-500" />
+                          <span className="text-[10px] font-medium text-neutral-700">{texts.verified}</span>
+                        </div>
+                      )}
+                      {activeUser.isNew && (
+                        <div className="px-2 py-1 bg-rose-500 rounded-full">
+                          <span className="text-[10px] font-medium text-white">{texts.newMember}</span>
+                        </div>
+                      )}
+                    </div>
+                    {activeUser.isActive && (
+                      <div className="px-2 py-1 bg-emerald-500 rounded-full flex items-center gap-1">
+                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                        <span className="text-[10px] font-medium text-white">{texts.recentlyActive}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Match Badge */}
+                  <div className="absolute top-4 right-4 hidden">
+                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center shadow-lg">
+                      <div className="text-center">
+                        <p className="text-white font-bold text-sm">{activeUser.compatibility}%</p>
+                        <p className="text-white/80 text-[8px] uppercase">{texts.match}</p>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="h-1/4 p-6 flex flex-col justify-between bg-white border-t border-neutral-100">
-                    <div>
-                      <h2 className="text-2xl font-light text-black tracking-tight mb-1">
-                        {activeUser.nickname}, {activeUser.age}
-                      </h2>
-                      <p className="text-sm text-neutral-500 line-clamp-2">{activeUser.bio}</p>
+                  {/* Bottom Info Overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 p-5">
+                    <div className="flex items-end justify-between">
+                      <div>
+                        <h2 className="text-2xl font-semibold text-white mb-1">
+                          {activeUser.nickname.split('.')[0]}, {activeUser.age}
+                        </h2>
+                        <div className="flex items-center gap-2 text-white/80 text-sm">
+                          <MapPin className="w-3.5 h-3.5" />
+                          <span>{activeUser.location}</span>
+                        </div>
+                      </div>
+                      <div className="px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-full border border-white/30">
+                        <p className="text-xs font-medium text-white">
+                          APT: {activeUser.personalityType}
+                        </p>
+                      </div>
                     </div>
+                  </div>
 
-                    <div className="flex justify-between items-center pt-2">
-                      <div className="text-center">
-                        <p className="text-lg font-light text-black">{activeUser.stats.exhibitions}</p>
-                        <p className="text-[10px] uppercase tracking-wider text-neutral-400">{texts.exhibitions}</p>
-                      </div>
-                      <div className="h-8 w-px bg-neutral-200" />
-                      <div className="text-center">
-                        <p className="text-lg font-light text-black">{activeUser.stats.artworks}</p>
-                        <p className="text-[10px] uppercase tracking-wider text-neutral-400">{texts.artworks}</p>
-                      </div>
-                      <div className="h-8 w-px bg-neutral-200" />
-                      <div className="text-center">
-                        <p className="text-lg font-light text-black">{activeUser.stats.followers}</p>
-                        <p className="text-[10px] uppercase tracking-wider text-neutral-400">{texts.followers}</p>
-                      </div>
+                  {/* Swipe Overlays */}
+                  <motion.div
+                    className="absolute inset-0 bg-emerald-500/20 flex items-center justify-center"
+                    style={{ opacity: likeOpacity }}
+                  >
+                    <div className="border-4 border-emerald-500 rounded-xl px-8 py-4 -rotate-12">
+                      <Heart className="w-16 h-16 text-emerald-500 fill-emerald-500" />
+                    </div>
+                  </motion.div>
+                  <motion.div
+                    className="absolute inset-0 bg-red-500/20 flex items-center justify-center"
+                    style={{ opacity: nopeOpacity }}
+                  >
+                    <div className="border-4 border-red-500 rounded-xl px-8 py-4 rotate-12">
+                      <X className="w-16 h-16 text-red-500" />
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* Info Section - 40% height */}
+                <div className="p-5 space-y-4">
+                  {/* Bio */}
+                  <p className="text-sm text-neutral-600 leading-relaxed line-clamp-2">
+                    {activeUser.bio}
+                  </p>
+
+                  {/* Compatibility Bar */}
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-neutral-500 uppercase tracking-wider">{texts.match}</span>
+                      <span className="text-sm font-semibold text-rose-500">{activeUser.compatibility}%</span>
+                    </div>
+                    <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+                      <motion.div
+                        className="h-full bg-gradient-to-r from-rose-400 to-rose-500 rounded-full"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${activeUser.compatibility}%` }}
+                        transition={{ duration: 0.8, ease: 'easeOut' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Stats */}
+                  <div className="flex justify-between items-center pt-2 border-t border-neutral-100">
+                    <div className="text-center flex-1">
+                      <p className="text-lg font-semibold text-neutral-800">{activeUser.stats.exhibitions}</p>
+                      <p className="text-[10px] uppercase tracking-wider text-neutral-400">{texts.exhibitions}</p>
+                    </div>
+                    <div className="h-8 w-px bg-neutral-100" />
+                    <div className="text-center flex-1">
+                      <p className="text-lg font-semibold text-neutral-800">{activeUser.stats.artworks}</p>
+                      <p className="text-[10px] uppercase tracking-wider text-neutral-400">{texts.artworks}</p>
+                    </div>
+                    <div className="h-8 w-px bg-neutral-100" />
+                    <div className="text-center flex-1">
+                      <p className="text-lg font-semibold text-neutral-800">{activeUser.stats.followers}</p>
+                      <p className="text-[10px] uppercase tracking-wider text-neutral-400">{texts.followers}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Swipe Overlays */}
-                <div className="absolute top-10 left-10 transform -rotate-12 border-4 border-emerald-500 px-4 py-2 opacity-0">
-                  <span className="text-4xl font-bold text-emerald-500 uppercase tracking-widest">{texts.connect}</span>
-                </div>
-                <div className="absolute top-10 right-10 transform rotate-12 border-4 border-red-500 px-4 py-2 opacity-0">
-                  <span className="text-4xl font-bold text-red-500 uppercase tracking-widest">{texts.skip}</span>
-                </div>
-
+                {/* Super Like Animation */}
+                <AnimatePresence>
+                  {superLiked && (
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 1.5, opacity: 0 }}
+                      className="absolute inset-0 bg-blue-500/30 flex items-center justify-center"
+                    >
+                      <Star className="w-24 h-24 text-blue-500 fill-blue-500" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             ) : (
-              <div className="text-center py-20">
-                <p className="text-lg font-light text-neutral-400 mb-6">{texts.noMoreProfiles}</p>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center py-20 px-8"
+              >
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-neutral-100 flex items-center justify-center">
+                  <Heart className="w-10 h-10 text-neutral-300" />
+                </div>
+                <p className="text-xl font-light text-neutral-600 mb-2">{texts.noMoreProfiles}</p>
+                <p className="text-sm text-neutral-400 mb-8">{texts.checkBackLater}</p>
                 <button
                   onClick={() => setCurrentIndex(0)}
-                  className="px-8 py-3 border border-neutral-200 hover:border-black text-sm uppercase tracking-wider transition-colors"
+                  className="px-8 py-3 bg-black text-white rounded-full text-sm font-medium hover:bg-neutral-800 transition-colors"
                 >
                   {texts.reviewAgain}
                 </button>
-              </div>
+              </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Controls */}
+          {/* Action Buttons */}
           {activeUser && (
-            <div className="flex items-center gap-6 mt-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="flex items-center justify-center gap-4 mt-6"
+            >
+              {/* Pass Button */}
               <button
                 onClick={() => handleSwipe('pass')}
-                className="w-16 h-16 rounded-full border border-neutral-200 flex items-center justify-center hover:bg-neutral-100 hover:border-neutral-300 transition-all"
+                className="w-14 h-14 rounded-full bg-white border-2 border-neutral-200 flex items-center justify-center hover:border-red-300 hover:bg-red-50 transition-all shadow-lg hover:shadow-xl active:scale-95"
               >
-                <X className="w-6 h-6 text-neutral-400" />
+                <X className="w-6 h-6 text-red-400" />
               </button>
+
+              {/* Super Like Button */}
+              <button
+                onClick={() => handleSwipe('superlike')}
+                className="w-12 h-12 rounded-full bg-white border-2 border-neutral-200 flex items-center justify-center hover:border-blue-300 hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl active:scale-95"
+              >
+                <Star className="w-5 h-5 text-blue-400" />
+              </button>
+
+              {/* Like Button */}
               <button
                 onClick={() => handleSwipe('like')}
-                className="w-16 h-16 rounded-full bg-black text-white flex items-center justify-center hover:scale-105 transition-transform shadow-xl"
+                className="w-14 h-14 rounded-full bg-gradient-to-br from-rose-400 to-rose-500 flex items-center justify-center hover:from-rose-500 hover:to-rose-600 transition-all shadow-lg hover:shadow-xl active:scale-95"
               >
-                <MessageCircle className="w-6 h-6" />
+                <Heart className="w-6 h-6 text-white fill-white" />
               </button>
-            </div>
+            </motion.div>
           )}
         </div>
 
