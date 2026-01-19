@@ -11,6 +11,8 @@ import {
   MapPin,
   ChevronLeft,
   ChevronRight,
+  SlidersHorizontal,
+  Zap,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthGate } from '@/hooks/useAuthGate';
@@ -48,6 +50,13 @@ const t = {
     anyAge: 'Any',
     nearby: 'Nearby',
     anywhere: 'Anywhere',
+    aptMatch: 'APT Match',
+    yourType: 'Your Type',
+    bestMatch: 'Best Match',
+    commonInterests: 'Common Interests',
+    impressionism: 'Impressionism',
+    contemporary: 'Contemporary',
+    matchRate: 'Match Rate',
   },
   ko: {
     community: 'Community',
@@ -78,6 +87,13 @@ const t = {
     anyAge: '전체',
     nearby: '가까운',
     anywhere: '전체',
+    aptMatch: 'APT 매칭',
+    yourType: '내 유형',
+    bestMatch: '최고 매칭',
+    commonInterests: '공통 관심사',
+    impressionism: '인상주의',
+    contemporary: '현대미술',
+    matchRate: '매칭률',
   },
 };
 
@@ -243,6 +259,7 @@ export default function CommunityPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [exitDirection, setExitDirection] = useState<'left' | 'right' | null>(null);
   const [showSwipeGuide, setShowSwipeGuide] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Check if user has seen the swipe guide before
   useEffect(() => {
@@ -298,56 +315,79 @@ export default function CommunityPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative">
         {/* Header - Matching Gallery style */}
-        <header className="mb-8">
+        <header className="mb-6">
           <div className="flex items-end justify-between">
             <div>
               <p className="text-sm uppercase tracking-widest text-neutral-500 mb-3">{texts.community}</p>
               <h1 className="text-5xl font-light text-black mb-1 tracking-tight">{texts.connectShare}</h1>
               <p className="text-base text-neutral-500 font-light mt-2">{texts.subtitle}</p>
             </div>
-            {activeUser && (
-              <div className="flex gap-8 pb-2">
+            <div className="flex items-center gap-6 pb-2">
+              {/* Filter Button */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-neutral-600 hover:text-neutral-900 border border-neutral-200 rounded-lg hover:border-neutral-300 transition-colors"
+                >
+                  <SlidersHorizontal className="w-4 h-4" />
+                  <span>{texts.filter}</span>
+                </button>
+                {/* Filter Dropdown */}
+                <AnimatePresence>
+                  {showFilters && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute top-full right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-neutral-100 p-4 z-50"
+                    >
+                      <div className="space-y-4">
+                        <div>
+                          <label className="text-xs uppercase tracking-wider text-neutral-400 mb-2 block">{texts.gender}</label>
+                          <select className="w-full text-sm bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-neutral-700 focus:outline-none focus:ring-2 focus:ring-rose-200">
+                            <option value="all">{texts.all}</option>
+                            <option value="male">{texts.male}</option>
+                            <option value="female">{texts.female}</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-xs uppercase tracking-wider text-neutral-400 mb-2 block">{texts.age}</label>
+                          <select className="w-full text-sm bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-neutral-700 focus:outline-none focus:ring-2 focus:ring-rose-200">
+                            <option value="any">{texts.anyAge}</option>
+                            <option value="20-25">20-25</option>
+                            <option value="26-30">26-30</option>
+                            <option value="31-35">31-35</option>
+                            <option value="36+">36+</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-xs uppercase tracking-wider text-neutral-400 mb-2 block">{texts.distance}</label>
+                          <select className="w-full text-sm bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-neutral-700 focus:outline-none focus:ring-2 focus:ring-rose-200">
+                            <option value="anywhere">{texts.anywhere}</option>
+                            <option value="nearby">{texts.nearby} (5km)</option>
+                            <option value="10km">10km</option>
+                            <option value="25km">25km</option>
+                          </select>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              {activeUser && (
                 <div className="text-right">
                   <p className="text-2xl font-light text-black tracking-tight">{remainingCount}</p>
                   <p className="text-xs uppercase tracking-wider text-neutral-400">{language === 'ko' ? '남음' : 'Left'}</p>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </header>
 
-        {/* Filter Bar */}
-        <div className="flex items-center gap-4 mb-6 pb-6 border-b border-neutral-100">
-          <span className="text-xs uppercase tracking-widest text-neutral-400">{texts.filter}</span>
-          <div className="flex items-center gap-2">
-            <select className="text-sm bg-white border border-neutral-200 rounded-lg px-3 py-1.5 text-neutral-700 focus:outline-none focus:ring-2 focus:ring-rose-200 focus:border-rose-300">
-              <option value="all">{texts.gender}: {texts.all}</option>
-              <option value="male">{texts.male}</option>
-              <option value="female">{texts.female}</option>
-            </select>
-            <select className="text-sm bg-white border border-neutral-200 rounded-lg px-3 py-1.5 text-neutral-700 focus:outline-none focus:ring-2 focus:ring-rose-200 focus:border-rose-300">
-              <option value="any">{texts.age}: {texts.anyAge}</option>
-              <option value="20-25">20-25</option>
-              <option value="26-30">26-30</option>
-              <option value="31-35">31-35</option>
-              <option value="36+">36+</option>
-            </select>
-            <select className="text-sm bg-white border border-neutral-200 rounded-lg px-3 py-1.5 text-neutral-700 focus:outline-none focus:ring-2 focus:ring-rose-200 focus:border-rose-300">
-              <option value="anywhere">{texts.distance}: {texts.anywhere}</option>
-              <option value="nearby">{texts.nearby} (5km)</option>
-              <option value="10km">10km</option>
-              <option value="25km">25km</option>
-            </select>
-          </div>
-        </div>
-
         {/* Main Content - Centered Card with Side Info */}
-        <div className="flex gap-8 lg:gap-12 items-start">
-          {/* Left Spacer for centering */}
-          <div className="hidden lg:block w-72 flex-shrink-0" />
-
+        <div className="flex gap-6 items-start justify-center">
           {/* Card Section - Centered */}
-          <div className="flex-1 flex flex-col items-center">
+          <div className="flex flex-col items-center">
             <AnimatePresence mode="wait" onExitComplete={handleExitComplete}>
               {activeUser && !exitDirection ? (
                 <motion.div
@@ -594,51 +634,83 @@ export default function CommunityPage() {
             )}
           </div>
 
-          {/* Sidebar - Upcoming Profiles */}
+          {/* Sidebar - Upcoming Profiles & APT Info */}
           {activeUser && (
-            <div className="hidden lg:block w-72 space-y-4">
-              <p className="text-xs uppercase tracking-widest text-neutral-400 mb-4">{language === 'ko' ? '다음 프로필' : 'Coming Up'}</p>
-              <div className="space-y-3">
-                {localizedUsers.slice(currentIndex + 1, currentIndex + 4).map((user, idx) => (
-                  <motion.div
-                    key={user.id}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.1 }}
-                    className="flex items-center gap-3 p-3 bg-white rounded-xl border border-neutral-100 shadow-sm"
-                  >
-                    <div className="relative w-12 h-12 rounded-full overflow-hidden bg-neutral-100 flex-shrink-0">
-                      <Image
-                        src={user.avatar}
-                        alt={user.nickname}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-neutral-800 truncate">
-                        {user.nickname.split('.')[0]}, {user.age}
-                      </p>
-                      <p className="text-xs text-neutral-400">{user.personalityType}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-rose-500">{user.compatibility}%</p>
-                    </div>
-                  </motion.div>
-                ))}
+            <div className="hidden lg:block w-64 space-y-4 flex-shrink-0">
+              {/* Upcoming Profiles */}
+              <div>
+                <p className="text-xs uppercase tracking-widest text-neutral-400 mb-3">{language === 'ko' ? '다음 프로필' : 'Coming Up'}</p>
+                <div className="space-y-2">
+                  {localizedUsers.slice(currentIndex + 1, currentIndex + 4).map((user, idx) => (
+                    <motion.div
+                      key={user.id}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.1 }}
+                      className="flex items-center gap-3 p-2.5 bg-white rounded-xl border border-neutral-100 shadow-sm"
+                    >
+                      <div className="relative w-10 h-10 rounded-full overflow-hidden bg-neutral-100 flex-shrink-0">
+                        <Image
+                          src={user.avatar}
+                          alt={user.nickname}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-neutral-800 truncate">
+                          {user.nickname.split('.')[0]}, {user.age}
+                        </p>
+                        <p className="text-[10px] text-neutral-400">{user.personalityType}</p>
+                      </div>
+                      <p className="text-xs font-semibold text-rose-500">{user.compatibility}%</p>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
 
-              {/* Quick Stats */}
-              <div className="mt-8 p-4 bg-neutral-50 rounded-xl">
-                <p className="text-xs uppercase tracking-widest text-neutral-400 mb-3">{language === 'ko' ? '오늘의 활동' : "Today's Activity"}</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="text-center p-2 bg-white rounded-lg">
-                    <p className="text-xl font-light text-neutral-800">{currentIndex}</p>
-                    <p className="text-[10px] uppercase tracking-wider text-neutral-400">{language === 'ko' ? '확인함' : 'Viewed'}</p>
+              {/* APT Matching Info */}
+              <div className="p-4 bg-gradient-to-br from-amber-50 to-rose-50 rounded-xl border border-amber-100/50">
+                <div className="flex items-center gap-2 mb-3">
+                  <Zap className="w-4 h-4 text-amber-500" />
+                  <p className="text-xs uppercase tracking-widest text-amber-700">{texts.aptMatch}</p>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-neutral-500">{texts.yourType}</span>
+                    <span className="text-sm font-semibold text-neutral-800">LAEF</span>
                   </div>
-                  <div className="text-center p-2 bg-white rounded-lg">
-                    <p className="text-xl font-light text-rose-500">{Math.floor(currentIndex * 0.6)}</p>
-                    <p className="text-[10px] uppercase tracking-wider text-neutral-400">{language === 'ko' ? '좋아요' : 'Liked'}</p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-neutral-500">{texts.bestMatch}</span>
+                    <span className="text-sm font-semibold text-rose-500">SAEF, LAMF</span>
+                  </div>
+                  <div className="pt-2 border-t border-amber-200/50">
+                    <span className="text-xs text-neutral-500">{texts.commonInterests}</span>
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      <span className="px-2 py-0.5 bg-white/80 text-[10px] text-neutral-600 rounded-full">{texts.impressionism}</span>
+                      <span className="px-2 py-0.5 bg-white/80 text-[10px] text-neutral-600 rounded-full">{texts.contemporary}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Today's Stats */}
+              <div className="p-3 bg-neutral-50 rounded-xl">
+                <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-2">{language === 'ko' ? '오늘의 활동' : "Today"}</p>
+                <div className="flex justify-around">
+                  <div className="text-center">
+                    <p className="text-lg font-light text-neutral-800">{currentIndex}</p>
+                    <p className="text-[9px] uppercase tracking-wider text-neutral-400">{language === 'ko' ? '확인' : 'Viewed'}</p>
+                  </div>
+                  <div className="w-px bg-neutral-200" />
+                  <div className="text-center">
+                    <p className="text-lg font-light text-rose-500">{Math.floor(currentIndex * 0.6)}</p>
+                    <p className="text-[9px] uppercase tracking-wider text-neutral-400">{language === 'ko' ? '좋아요' : 'Liked'}</p>
+                  </div>
+                  <div className="w-px bg-neutral-200" />
+                  <div className="text-center">
+                    <p className="text-lg font-light text-amber-500">89%</p>
+                    <p className="text-[9px] uppercase tracking-wider text-neutral-400">{texts.matchRate}</p>
                   </div>
                 </div>
               </div>
