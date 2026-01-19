@@ -5,6 +5,37 @@ import { useRouter } from 'next/navigation';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Sparkles, Play, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
+import { useLanguage } from '@/contexts/LanguageContext';
+
+// Translations
+const t = {
+  en: {
+    badge: 'Art Discovery Platform',
+    headline1: 'With Art,',
+    headline2: 'Find Your Own',
+    headline3: 'Taste',
+    description: 'Discover your artistic personality, explore world masterpieces, and connect with like-minded people.',
+    startTest: 'Start APT Test',
+    exploreGallery: 'Explore Gallery',
+    artPersonas: 'Art Personas',
+    artworks: 'Artworks',
+    todaysUsers: "Today's Users",
+    scroll: 'Scroll',
+  },
+  ko: {
+    badge: 'Art Discovery Platform',
+    headline1: '예술과 함께,',
+    headline2: '나만의 취향을',
+    headline3: '찾아가는 시간',
+    description: '당신만의 예술적 성향을 발견하고, 세계의 명작들을 탐험하며, 같은 취향의 사람들과 연결되세요.',
+    startTest: 'APT 테스트 시작',
+    exploreGallery: '갤러리 둘러보기',
+    artPersonas: 'Art Personas',
+    artworks: 'Artworks',
+    todaysUsers: "Today's Users",
+    scroll: '스크롤',
+  },
+};
 
 // Famous artworks for the gallery
 const ARTWORKS = [
@@ -142,6 +173,8 @@ function ArtworkCard({
 
 export const Hero3DSection: React.FC = () => {
   const router = useRouter();
+  const { language } = useLanguage();
+  const texts = t[language];
   const [currentArtwork, setCurrentArtwork] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -251,7 +284,7 @@ export const Hero3DSection: React.FC = () => {
             >
               <Sparkles size={16} className="text-[#d4a520]" />
               <span className="text-sm font-medium text-white/90 tracking-wide">
-                Art Discovery Platform
+                {texts.badge}
               </span>
             </motion.div>
 
@@ -262,13 +295,13 @@ export const Hero3DSection: React.FC = () => {
               transition={{ delay: 0.6 }}
             >
               <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extralight tracking-tight text-white leading-[0.95]">
-                예술과 함께,
+                {texts.headline1}
                 <br />
                 <span className="font-serif italic font-normal bg-gradient-to-r from-[#d4a520] via-[#f0d878] to-[#d4a520] bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
-                  나만의 취향을
+                  {texts.headline2}
                 </span>
                 <br />
-                찾아가는 시간
+                {texts.headline3}
               </h1>
             </motion.div>
 
@@ -279,8 +312,7 @@ export const Hero3DSection: React.FC = () => {
               transition={{ delay: 0.8 }}
               className="text-lg md:text-xl text-white/60 leading-relaxed max-w-lg"
             >
-              당신만의 예술적 성향을 발견하고, 세계의 명작들을 탐험하며,
-              같은 취향의 사람들과 연결되세요.
+              {texts.description}
             </motion.p>
 
             {/* CTA Buttons */}
@@ -295,7 +327,7 @@ export const Hero3DSection: React.FC = () => {
                 className="group relative px-8 py-4 bg-gradient-to-r from-[#d4a520] to-[#b8860b] text-white rounded-2xl font-semibold overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-[#d4a520]/30"
               >
                 <span className="relative z-10 flex items-center gap-2 justify-center">
-                  APT 테스트 시작
+                  {texts.startTest}
                   <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                 </span>
                 <motion.div
@@ -311,7 +343,7 @@ export const Hero3DSection: React.FC = () => {
                 className="group px-8 py-4 bg-white/5 backdrop-blur-md text-white border border-white/20 rounded-2xl font-semibold hover:bg-white/10 hover:border-white/30 transition-all duration-300 flex items-center gap-2 justify-center"
               >
                 <Play size={18} className="group-hover:scale-110 transition-transform" />
-                갤러리 둘러보기
+                {texts.exploreGallery}
               </button>
             </motion.div>
 
@@ -323,9 +355,9 @@ export const Hero3DSection: React.FC = () => {
               className="flex items-center gap-8 pt-4"
             >
               {[
-                { value: '16', label: 'Art Personas', color: 'text-[#d4a520]' },
-                { value: '10K+', label: 'Artworks', color: 'text-white' },
-                { value: '47', label: "Today's Users", color: 'text-white' },
+                { value: '16', label: texts.artPersonas, color: 'text-[#d4a520]' },
+                { value: '10K+', label: texts.artworks, color: 'text-white' },
+                { value: '47', label: texts.todaysUsers, color: 'text-white' },
               ].map((stat, i) => (
                 <div key={i} className="text-center">
                   <p className={`text-3xl font-bold ${stat.color}`}>{stat.value}</p>
@@ -406,7 +438,7 @@ export const Hero3DSection: React.FC = () => {
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           className="flex flex-col items-center gap-2"
         >
-          <span className="text-xs text-white/50 font-medium">스크롤</span>
+          <span className="text-xs text-white/50 font-medium">{texts.scroll}</span>
           <ChevronDown size={20} className="text-[#d4a520]" />
         </motion.div>
       </motion.div>

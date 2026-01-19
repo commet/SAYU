@@ -32,8 +32,8 @@ const t = {
     loading: 'Loading...',
   },
   ko: {
-    personalArchive: '개인 아카이브',
-    artMemories: '나의 예술 기억',
+    personalArchive: 'Personal Archive',
+    artMemories: 'Art Memories',
     works: '작품',
     visits: '방문',
     collections: '컬렉션',
