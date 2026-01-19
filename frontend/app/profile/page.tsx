@@ -32,6 +32,40 @@ import ShareModal from '@/components/share/ShareModal';
 import FeedbackButton from '@/components/feedback/FeedbackButton';
 import { cn } from '@/lib/utils';
 
+// Translations
+const t = {
+  en: {
+    profile: 'Profile',
+    activity: 'Activity',
+    artworksViewed: 'Artworks Viewed',
+    collections: 'Collections',
+    exhibitionsVisited: 'Exhibitions Visited',
+    followers: 'Followers',
+    savedArtworks: 'Saved Artworks',
+    viewAll: 'View All',
+    achievements: 'Achievements',
+    unlocked: 'Unlocked',
+    inProgress: 'In Progress',
+    defaultBio: 'An explorer in the world of art.',
+    defaultNickname: 'SAYU Explorer',
+  },
+  ko: {
+    profile: '프로필',
+    activity: '활동',
+    artworksViewed: '감상한 작품',
+    collections: '컬렉션',
+    exhibitionsVisited: '방문한 전시',
+    followers: '팔로워',
+    savedArtworks: '저장한 작품',
+    viewAll: '전체 보기',
+    achievements: '성취',
+    unlocked: '획득함',
+    inProgress: '진행 중',
+    defaultBio: '예술의 세계를 탐험하는 여행자',
+    defaultNickname: 'SAYU 탐험가',
+  },
+};
+
 const MobileProfile = dynamic(() => import('@/components/mobile/MobileProfile'), { ssr: false });
 
 const mockBadges = [
@@ -43,6 +77,7 @@ const mockBadges = [
 
 export default function ProfilePage() {
   const { language } = useLanguage();
+  const texts = t[language];
   const { user } = useAuth();
   const { requireAuth } = useAuthGate();
   const { isMobile } = useResponsive();
@@ -89,13 +124,13 @@ export default function ProfilePage() {
   }
 
   const userAnimal = userPersonalityType ? getAnimalByType(userPersonalityType as SAYUTypeCode) : null;
-  const bio = (language === 'ko' ? userAnimal?.description_ko : userAnimal?.description) || (language === 'ko' ? '예술의 세계를 탐험하는 여행자' : 'An explorer in the world of art.');
+  const bio = (language === 'ko' ? userAnimal?.description_ko : userAnimal?.description) || texts.defaultBio;
 
   const stats = [
-    { label: 'Artworks Viewed', value: gameStats?.total_points || 1250 },
-    { label: 'Collections', value: 12 },
-    { label: 'Exhibitions Visited', value: gameStats?.level || 3 },
-    { label: 'Followers', value: 8 },
+    { label: texts.artworksViewed, value: gameStats?.total_points || 1250 },
+    { label: texts.collections, value: 12 },
+    { label: texts.exhibitionsVisited, value: gameStats?.level || 3 },
+    { label: texts.followers, value: 8 },
   ];
   
   const savedArtworks = [
@@ -128,13 +163,13 @@ export default function ProfilePage() {
 
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <p className="text-sm uppercase tracking-widest text-neutral-500 mb-3 font-medium">Profile</p>
+                <p className="text-sm uppercase tracking-widest text-neutral-500 mb-3 font-medium">{texts.profile}</p>
                 <div className="flex items-center gap-2">
                    <button onClick={() => setShowSettings(true)} className="p-2 rounded-full hover:bg-neutral-100 transition-colors"><Settings className="w-4 h-4 text-neutral-500"/></button>
                    <button onClick={() => setShowShareModal(true)} className="p-2 rounded-full hover:bg-neutral-100 transition-colors"><Share2 className="w-4 h-4 text-neutral-500"/></button>
                 </div>
               </div>
-              <h1 className="text-4xl md:text-5xl font-light text-black mb-4 tracking-tight">{user?.nickname || 'SAYU Explorer'}</h1>
+              <h1 className="text-4xl md:text-5xl font-light text-black mb-4 tracking-tight">{user?.nickname || texts.defaultNickname}</h1>
               <p className="text-base text-neutral-500 mb-6 max-w-xl font-light">{bio}</p>
 
               <div className="flex items-center gap-4">
@@ -157,7 +192,7 @@ export default function ProfilePage() {
         {/* Profile Stats */}
         <section>
           <div className="flex items-baseline gap-3 mb-6">
-            <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">Activity</h2>
+            <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">{texts.activity}</h2>
             <div className="h-px flex-1 bg-neutral-200" />
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -173,10 +208,10 @@ export default function ProfilePage() {
         {/* Saved Artworks */}
         <section>
           <div className="flex items-baseline gap-3 mb-6">
-            <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">Saved Artworks</h2>
+            <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">{texts.savedArtworks}</h2>
             <div className="h-px flex-1 bg-neutral-200" />
             <span className="text-xs text-neutral-500 hover:text-black cursor-pointer transition-colors flex items-center gap-1">
-                View All <ArrowRight className="w-3 h-3"/>
+                {texts.viewAll} <ArrowRight className="w-3 h-3"/>
             </span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -203,13 +238,13 @@ export default function ProfilePage() {
         {/* Achievements */}
         <section>
            <div className="flex items-baseline gap-3 mb-6">
-            <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">Achievements</h2>
+            <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">{texts.achievements}</h2>
             <div className="h-px flex-1 bg-neutral-200" />
-            <span className="text-xs text-neutral-400">{mockBadges.filter(b => b.unlocked).length} / {mockBadges.length} Unlocked</span>
+            <span className="text-xs text-neutral-400">{mockBadges.filter(b => b.unlocked).length} / {mockBadges.length} {texts.unlocked}</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
              <div>
-                <h3 className="text-xs uppercase tracking-wider text-neutral-500 mb-4">In Progress</h3>
+                <h3 className="text-xs uppercase tracking-wider text-neutral-500 mb-4">{texts.inProgress}</h3>
                 <div className="space-y-4">
                     {mockBadges.filter(b => !b.unlocked).map((badge) => (
                       <div key={badge.id}>
@@ -230,7 +265,7 @@ export default function ProfilePage() {
                 </div>
              </div>
              <div>
-                <h3 className="text-xs uppercase tracking-wider text-neutral-500 mb-4">Unlocked</h3>
+                <h3 className="text-xs uppercase tracking-wider text-neutral-500 mb-4">{texts.unlocked}</h3>
                 <div className="flex flex-wrap gap-3">
                     {mockBadges.filter(b => b.unlocked).map((badge) => (
                         <div key={badge.id} className="px-4 py-2 border border-neutral-200 hover:bg-neutral-50 transition-colors">

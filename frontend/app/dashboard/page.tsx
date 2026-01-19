@@ -12,6 +12,147 @@ import { useResponsive } from '@/lib/responsive';
 import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 import { useRecentActivities } from '@/hooks/useActivityTracker';
+import { useLanguage } from '@/contexts/LanguageContext';
+
+// Translations
+const t = {
+  en: {
+    loading: 'Loading...',
+    // Login required section
+    loginRequired: 'Login to see your personalized dashboard',
+    loginRequiredDesc: 'View your recently viewed artworks, saved exhibitions, and APT-based statistics in one place. Log in to load your personalized data.',
+    login: 'Login',
+    register: 'Register',
+    recentlyViewed: 'Recently Viewed',
+    savedExhibitions: 'Saved Exhibitions',
+    discoveredArtists: 'Discovered Artists',
+    aptStats: 'APT Stats',
+    loginNeeded: 'Login Needed',
+    // Greetings
+    goodMorning: 'Good morning',
+    goodAfternoon: 'Good afternoon',
+    goodEvening: 'Good evening',
+    morningSubtitle: (apt: string | null) => apt
+      ? `Today is a time for new discoveries for you, a ${apt}`
+      : 'What art will you discover today?',
+    afternoonSubtitle: (apt: string | null) => apt
+      ? `Take a moment to awaken your ${apt} sensibility`
+      : 'Pause and breathe with art',
+    eveningSubtitle: 'Find artwork to fill your heart as you end the day',
+    // Quiz CTA
+    startArtJourney: 'Start Your Art Journey',
+    fiveMinTest: 'Discover your unique art personality with a 5-minute test and receive personalized recommendations',
+    startTest: 'Start Test',
+    // Sections
+    popularArtworks: 'Popular Artworks',
+    ongoingExhibitions: 'Ongoing Exhibitions',
+    exhibitionInfoSoon: 'Exhibition information will be updated soon',
+    // Journey stats (already in English)
+    yourJourney: 'Your Journey',
+    artworksExplored: 'Artworks Explored',
+    saved: 'Saved',
+    artistsFound: 'Artists Found',
+    exhibitions: 'Exhibitions',
+    // Recent activity
+    recentActivity: 'Recent Activity',
+    noActivityYet: 'No activity recorded yet',
+    startExploring: 'Start exploring the gallery!',
+    viewAllActivity: 'View all activity →',
+    // Featured
+    featuredToday: 'Featured Today',
+    todaysSelection: "Today's Selection",
+    curatedFor: (apt: string | null) => apt
+      ? `Curated for ${apt} — This piece resonates with your aesthetic`
+      : 'Selected to complement your morning atmosphere',
+    // Exhibitions for you
+    exhibitionsForYou: 'Exhibitions for You',
+    preparingExhibitions: (apt: string | null) => apt
+      ? `Preparing exhibitions tailored to your ${apt} taste`
+      : 'Preparing exhibitions tailored to your taste',
+    browseExhibitions: 'Browse exhibitions →',
+    // Curated for you
+    curatedForYou: 'Curated For You',
+    aiSelected: 'AI Selected',
+    // Recommendation reasons
+    matchesSensitivity: 'Matches your emotional tendencies',
+    similarToRecent: 'Similar to recently viewed',
+    preferAbstract: 'You prefer abstract expression',
+    mayLikeArtist: 'You may like this artist',
+    matchesMood: 'Matches the morning mood',
+    // CTA card
+    moreArtworks: 'More Artworks',
+    exploreThousands: 'Explore thousands of artworks',
+    viewFullGallery: 'View full gallery →',
+  },
+  ko: {
+    loading: '로딩 중...',
+    // Login required section
+    loginRequired: '로그인하고 맞춤 대시보드를 확인하세요',
+    loginRequiredDesc: '최근 본 작품, 저장한 전시, APT 기반 통계를 한곳에서 볼 수 있습니다. 로그인 후 개인화된 데이터를 불러올게요.',
+    login: '로그인',
+    register: '회원가입',
+    recentlyViewed: '최근 본 작품',
+    savedExhibitions: '저장한 전시',
+    discoveredArtists: '발견한 작가',
+    aptStats: 'APT 통계',
+    loginNeeded: '로그인 필요',
+    // Greetings
+    goodMorning: '좋은 아침이에요',
+    goodAfternoon: '좋은 오후에요',
+    goodEvening: '좋은 저녁이에요',
+    morningSubtitle: (apt: string | null) => apt
+      ? `${apt}인 당신에게 오늘은 새로운 발견의 시간입니다`
+      : '오늘은 어떤 예술을 만나볼까요?',
+    afternoonSubtitle: (apt: string | null) => apt
+      ? `잠시 멈춰서 ${apt}인 당신의 감성을 깨워보세요`
+      : '잠시 쉬어가며 예술과 함께 호흡해보세요',
+    eveningSubtitle: '하루를 마무리하며 마음을 채워줄 작품을 찾아보세요',
+    // Quiz CTA
+    startArtJourney: '당신의 예술 여정을 시작하세요',
+    fiveMinTest: '5분 테스트로 당신만의 예술 성향을 발견하고 맞춤 추천을 받아보세요',
+    startTest: '테스트 시작하기',
+    // Sections
+    popularArtworks: '인기 작품',
+    ongoingExhibitions: '진행 중인 전시',
+    exhibitionInfoSoon: '전시 정보는 곧 업데이트됩니다',
+    // Journey stats
+    yourJourney: 'Your Journey',
+    artworksExplored: 'Artworks Explored',
+    saved: 'Saved',
+    artistsFound: 'Artists Found',
+    exhibitions: 'Exhibitions',
+    // Recent activity
+    recentActivity: 'Recent Activity',
+    noActivityYet: '아직 활동 기록이 없습니다',
+    startExploring: '갤러리를 둘러보며 시작해보세요!',
+    viewAllActivity: '전체 활동 보기 →',
+    // Featured
+    featuredToday: 'Featured Today',
+    todaysSelection: "Today's Selection",
+    curatedFor: (apt: string | null) => apt
+      ? `Curated for ${apt} — This piece resonates with your aesthetic`
+      : 'Selected to complement your morning atmosphere',
+    // Exhibitions for you
+    exhibitionsForYou: '당신을 위한 전시',
+    preparingExhibitions: (apt: string | null) => apt
+      ? `${apt}인 당신의 취향에 맞는 전시를 준비하고 있습니다`
+      : '당신의 취향에 맞는 전시를 준비하고 있습니다',
+    browseExhibitions: '전시 둘러보기 →',
+    // Curated for you
+    curatedForYou: 'Curated For You',
+    aiSelected: 'AI Selected',
+    // Recommendation reasons
+    matchesSensitivity: '당신의 감성적 성향과 잘 맞아요',
+    similarToRecent: '최근 본 작품과 비슷한 스타일',
+    preferAbstract: '추상적 표현을 선호하시는군요',
+    mayLikeArtist: '이 아티스트를 좋아하실 것 같아요',
+    matchesMood: '오늘 아침의 분위기와 어울립니다',
+    // CTA card
+    moreArtworks: '더 많은 작품',
+    exploreThousands: '수천 개의 작품을 탐험하세요',
+    viewFullGallery: '갤러리 전체 보기 →',
+  },
+};
 
 // Lazy load mobile component
 const MobileDashboard = dynamic(() => import('@/components/mobile/MobileDashboard'), {
@@ -22,6 +163,8 @@ export default function DashboardPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
   const { isMobile } = useResponsive();
+  const { language } = useLanguage();
+  const texts = t[language];
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [artworks, setArtworks] = useState<any[]>([]);
@@ -124,7 +267,7 @@ export default function DashboardPage() {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-neutral-200 border-t-black mx-auto mb-4"></div>
-          <p className="text-neutral-600 text-sm">로딩 중...</p>
+          <p className="text-neutral-600 text-sm">{texts.loading}</p>
         </div>
       </div>
     );
@@ -136,9 +279,9 @@ export default function DashboardPage() {
         <div className="max-w-5xl mx-auto px-6 py-16 space-y-8">
           <div className="space-y-3">
             <p className="text-sm uppercase tracking-[0.2em] text-neutral-600">Dashboard</p>
-            <h1 className="text-4xl font-bold">로그인하고 맞춤 대시보드를 확인하세요</h1>
+            <h1 className="text-4xl font-bold">{texts.loginRequired}</h1>
             <p className="text-neutral-700">
-              최근 본 작품, 저장한 전시, APT 기반 통계를 한곳에서 볼 수 있습니다. 로그인 후 개인화된 데이터를 불러올게요.
+              {texts.loginRequiredDesc}
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -146,21 +289,21 @@ export default function DashboardPage() {
               onClick={() => router.push('/login?redirect=/dashboard')}
               className="px-4 py-3 rounded-lg bg-black text-white font-semibold shadow-md hover:shadow-xl hover:bg-[#D4A520] transition-all duration-300"
             >
-              로그인
+              {texts.login}
             </button>
             <button
               onClick={() => router.push('/register?redirect=/dashboard')}
               className="px-4 py-3 rounded-lg border border-neutral-200 text-neutral-800 font-semibold hover:bg-neutral-50 transition"
             >
-              회원가입
+              {texts.register}
             </button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { label: '최근 본 작품', value: '—' },
-              { label: '저장한 전시', value: '—' },
-              { label: '발견한 작가', value: '—' },
-              { label: 'APT 통계', value: '로그인 필요' }
+              { label: texts.recentlyViewed, value: '—' },
+              { label: texts.savedExhibitions, value: '—' },
+              { label: texts.discoveredArtists, value: '—' },
+              { label: texts.aptStats, value: texts.loginNeeded }
             ].map((item) => (
               <div key={item.label} className="rounded-xl border border-neutral-200 bg-neutral-50 shadow-md p-4">
                 <p className="text-sm text-neutral-600">{item.label}</p>
@@ -183,22 +326,18 @@ export default function DashboardPage() {
 
     if (hour < 12) {
       return {
-        title: "좋은 아침이에요",
-        subtitle: personalityType ?
-          `${personalityType}인 당신에게 오늘은 새로운 발견의 시간입니다` :
-          "오늘은 어떤 예술을 만나볼까요?"
+        title: texts.goodMorning,
+        subtitle: texts.morningSubtitle(personalityType)
       };
     } else if (hour < 18) {
       return {
-        title: "좋은 오후에요",
-        subtitle: personalityType ?
-          `잠시 멈춰서 ${personalityType}인 당신의 감성을 깨워보세요` :
-          "잠시 쉬어가며 예술과 함께 호흡해보세요"
+        title: texts.goodAfternoon,
+        subtitle: texts.afternoonSubtitle(personalityType)
       };
     } else {
       return {
-        title: "좋은 저녁이에요",
-        subtitle: "하루를 마무리하며 마음을 채워줄 작품을 찾아보세요"
+        title: texts.goodEvening,
+        subtitle: texts.eveningSubtitle
       };
     }
   };
@@ -216,11 +355,11 @@ export default function DashboardPage() {
   // For You recommendations (next 5)
   const forYouArtworks = randomArtworks.slice(1, 6).map((artwork, index) => {
     const reasons = [
-      '당신의 감성적 성향과 잘 맞아요',
-      '최근 본 작품과 비슷한 스타일',
-      '추상적 표현을 선호하시는군요',
-      '이 아티스트를 좋아하실 것 같아요',
-      '오늘 아침의 분위기와 어울립니다'
+      texts.matchesSensitivity,
+      texts.similarToRecent,
+      texts.preferAbstract,
+      texts.mayLikeArtist,
+      texts.matchesMood
     ];
     return {
       ...artwork,
@@ -252,18 +391,16 @@ export default function DashboardPage() {
           >
             <Sparkles className="w-16 h-16 text-black mx-auto mb-6" />
             <h1 className="text-4xl font-bold text-black mb-4">
-              당신의 예술 여정을 시작하세요
+              {texts.startArtJourney}
             </h1>
             <p className="text-lg text-neutral-600 mb-8 max-w-2xl mx-auto">
-              5분 테스트로 당신만의 예술 성향을 발견하고
-              <br />
-              맞춤 추천을 받아보세요
+              {texts.fiveMinTest}
             </p>
             <button
               onClick={() => router.push('/quiz')}
               className="bg-black text-white px-8 py-4 rounded-lg font-medium shadow-md hover:shadow-xl hover:bg-[#D4A520] transition-all duration-300"
             >
-              테스트 시작하기
+              {texts.startTest}
             </button>
           </motion.section>
 
@@ -274,7 +411,7 @@ export default function DashboardPage() {
             transition={{ delay: 0.1 }}
             className="mb-12"
           >
-            <h2 className="text-2xl font-bold text-black mb-6">인기 작품</h2>
+            <h2 className="text-2xl font-bold text-black mb-6">{texts.popularArtworks}</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {randomArtworks.slice(0, 6).map((artwork, index) => (
                 <div
@@ -316,11 +453,11 @@ export default function DashboardPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <h2 className="text-2xl font-bold text-black mb-6">진행 중인 전시</h2>
+            <h2 className="text-2xl font-bold text-black mb-6">{texts.ongoingExhibitions}</h2>
             <div className="bg-neutral-50 rounded-lg p-8 text-center">
               <MapPin className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
               <p className="text-neutral-600">
-                전시 정보는 곧 업데이트됩니다
+                {texts.exhibitionInfoSoon}
               </p>
             </div>
           </motion.section>
@@ -401,7 +538,7 @@ export default function DashboardPage() {
 
           {/* Recent Activity - Minimal */}
           <div className="border-t border-neutral-100 pt-6">
-            <h3 className="text-xs uppercase tracking-wider text-neutral-500 mb-4">Recent Activity</h3>
+            <h3 className="text-xs uppercase tracking-wider text-neutral-500 mb-4">{texts.recentActivity}</h3>
             <div className="space-y-3">
               {activitiesLoading ? (
                 [1, 2, 3].map(i => (
@@ -419,18 +556,18 @@ export default function DashboardPage() {
                     <span className="text-lg">{activity.icon || '📍'}</span>
                     <div className="flex-1">
                       <p className="text-sm font-medium text-black line-clamp-1">
-                        {activity.title || '활동'}
+                        {activity.title || 'Activity'}
                       </p>
                       <p className="text-xs text-neutral-600">
-                        {activity.formattedTime || '방금 전'}
+                        {activity.formattedTime || 'Just now'}
                       </p>
                     </div>
                   </div>
                 ))
               ) : (
                 <div className="text-center py-4">
-                  <p className="text-sm text-neutral-600">아직 활동 기록이 없습니다</p>
-                  <p className="text-xs text-neutral-500 mt-1">갤러리를 둘러보며 시작해보세요!</p>
+                  <p className="text-sm text-neutral-600">{texts.noActivityYet}</p>
+                  <p className="text-xs text-neutral-500 mt-1">{texts.startExploring}</p>
                 </div>
               )}
             </div>
@@ -439,7 +576,7 @@ export default function DashboardPage() {
                 onClick={() => router.push('/activity')}
                 className="w-full mt-4 text-sm text-black hover:underline"
               >
-                전체 활동 보기 →
+                {texts.viewAllActivity}
               </button>
             )}
           </div>
@@ -502,20 +639,17 @@ export default function DashboardPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <h2 className="text-2xl font-bold text-black mb-6">당신을 위한 전시</h2>
+          <h2 className="text-2xl font-bold text-black mb-6">{texts.exhibitionsForYou}</h2>
           <div className="bg-neutral-50 rounded-lg p-8 text-center">
             <Calendar className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
             <p className="text-neutral-600 mb-2">
-              {personalityType ?
-                `${personalityType}인 당신의 취향에 맞는 전시를 준비하고 있습니다` :
-                '당신의 취향에 맞는 전시를 준비하고 있습니다'
-              }
+              {texts.preparingExhibitions(personalityType)}
             </p>
             <button
               onClick={() => router.push('/exhibitions')}
               className="text-sm text-black hover:underline"
             >
-              전시 둘러보기 →
+              {texts.browseExhibitions}
             </button>
           </div>
         </motion.section>
@@ -587,16 +721,16 @@ export default function DashboardPage() {
               <div className="aspect-[4/3] flex flex-col items-center justify-center p-6">
                 <Palette className="w-12 h-12 text-neutral-400 mb-4" />
                 <h3 className="text-lg font-bold text-black mb-2 text-center">
-                  더 많은 작품
+                  {texts.moreArtworks}
                 </h3>
                 <p className="text-sm text-neutral-600 text-center mb-4">
-                  수천 개의 작품을 탐험하세요
+                  {texts.exploreThousands}
                 </p>
               </div>
               <div className="p-4 mt-auto">
                 <div className="text-center">
                   <span className="text-sm font-medium text-black group-hover:underline">
-                    갤러리 전체 보기 →
+                    {texts.viewFullGallery}
                   </span>
                 </div>
               </div>

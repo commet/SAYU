@@ -22,6 +22,44 @@ import { SAYUTypeCode } from '@/types/sayu-shared';
 import FeedbackButton from '@/components/feedback/FeedbackButton';
 import { cn } from '@/lib/utils';
 
+// Translations
+const t = {
+  en: {
+    community: 'Community',
+    connectShare: 'Connect & Share',
+    subtitle: 'Discover art lovers and share your perspective.',
+    profilesLeft: (count: number) => `${count} Profiles Left`,
+    exhibitions: 'Exhibitions',
+    artworks: 'Artworks',
+    followers: 'Followers',
+    connect: 'CONNECT',
+    skip: 'SKIP',
+    noMoreProfiles: 'No more profiles',
+    reviewAgain: 'Review Again',
+    // Mock user bios
+    bio1: 'Loves capturing sensory moments. Currently fascinated by Impressionism and Abstract Expressionism.',
+    bio2: 'Enjoys observing changes in color and light. A slow, deep appreciator of art.',
+    bio3: 'Values deep interpretation and context. Highly interested in the curatorial concepts of exhibitions.',
+  },
+  ko: {
+    community: '커뮤니티',
+    connectShare: '연결하고 공유하기',
+    subtitle: '예술을 사랑하는 사람들을 발견하고 당신의 시각을 나누세요.',
+    profilesLeft: (count: number) => `남은 프로필 ${count}개`,
+    exhibitions: '전시',
+    artworks: '작품',
+    followers: '팔로워',
+    connect: '연결하기',
+    skip: '넘기기',
+    noMoreProfiles: '더 이상 프로필이 없습니다',
+    reviewAgain: '다시 보기',
+    // Mock user bios
+    bio1: '감각적인 순간을 포착하는 것을 좋아합니다. 현재 인상주의와 추상표현주의에 매료되어 있어요.',
+    bio2: '색과 빛의 변화를 관찰하는 것을 즐깁니다. 천천히 깊이 있게 예술을 감상하는 편이에요.',
+    bio3: '깊은 해석과 맥락을 중요시합니다. 전시의 큐레이토리얼 컨셉에 큰 관심이 있어요.',
+  },
+};
+
 // Simplified mock data to match the new design
 const mockUsers = [
   {
@@ -59,9 +97,44 @@ const mockUsers = [
 export default function CommunityPage() {
   const { user } = useAuth();
   const { requireAuth } = useAuthGate();
-  const [users, setUsers] = useState(mockUsers);
+  const { language } = useLanguage();
+  const texts = t[language];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<'left' | 'right' | null>(null);
+
+  // Localized mock users
+  const localizedUsers = useMemo(() => [
+    {
+      id: '1',
+      nickname: 'sohee.moment',
+      age: 28,
+      personalityType: 'SAEF',
+      bio: texts.bio1,
+      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&h=800&fit=crop&crop=face',
+      stats: { exhibitions: 42, artworks: 156, followers: 128 },
+      compatibility: 95,
+    },
+    {
+      id: '2',
+      nickname: 'woojin.archive',
+      age: 32,
+      personalityType: 'LREF',
+      bio: texts.bio2,
+      avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=800&h=800&fit=crop&crop=face',
+      stats: { exhibitions: 38, artworks: 142, followers: 98 },
+      compatibility: 88,
+    },
+    {
+      id: '3',
+      nickname: 'minjee.curator',
+      age: 25,
+      personalityType: 'LAMF',
+      bio: texts.bio3,
+      avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&h=800&fit=crop&crop=face',
+      stats: { exhibitions: 28, artworks: 89, followers: 204 },
+      compatibility: 74,
+    },
+  ], [texts.bio1, texts.bio2, texts.bio3]);
 
   const handleSwipe = (action: 'like' | 'pass') => {
     setDirection(action === 'like' ? 'right' : 'left');
@@ -71,22 +144,22 @@ export default function CommunityPage() {
     }, 200);
   };
 
-  const activeUser = users[currentIndex];
+  const activeUser = localizedUsers[currentIndex];
 
   return (
     <div className="min-h-screen bg-white text-neutral-900 overflow-hidden">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 h-screen flex flex-col">
         <header className="py-8 md:py-12 flex-shrink-0">
-          <p className="text-sm uppercase tracking-widest text-neutral-500 mb-4">Community</p>
-          <h1 className="text-5xl md:text-6xl font-light text-black mb-3 tracking-tight">Connect & Share</h1>
-          <p className="text-lg text-neutral-500 font-light max-w-3xl">Discover art lovers and share your perspective.</p>
+          <p className="text-sm uppercase tracking-widest text-neutral-500 mb-4">{texts.community}</p>
+          <h1 className="text-5xl md:text-6xl font-light text-black mb-3 tracking-tight">{texts.connectShare}</h1>
+          <p className="text-lg text-neutral-500 font-light max-w-3xl">{texts.subtitle}</p>
         </header>
 
         <div className="flex-1 flex flex-col items-center justify-center relative pb-20">
           {/* Progress Indicator */}
           <div className="absolute top-0 right-0 p-4">
             <span className="text-sm uppercase tracking-widest text-neutral-400">
-              {users.length - currentIndex} Profiles Left
+              {texts.profilesLeft(localizedUsers.length - currentIndex)}
             </span>
           </div>
 
@@ -142,17 +215,17 @@ export default function CommunityPage() {
                     <div className="flex justify-between items-center pt-2">
                       <div className="text-center">
                         <p className="text-lg font-light text-black">{activeUser.stats.exhibitions}</p>
-                        <p className="text-[10px] uppercase tracking-wider text-neutral-400">Exhibitions</p>
+                        <p className="text-[10px] uppercase tracking-wider text-neutral-400">{texts.exhibitions}</p>
                       </div>
                       <div className="h-8 w-px bg-neutral-200" />
                       <div className="text-center">
                         <p className="text-lg font-light text-black">{activeUser.stats.artworks}</p>
-                        <p className="text-[10px] uppercase tracking-wider text-neutral-400">Artworks</p>
+                        <p className="text-[10px] uppercase tracking-wider text-neutral-400">{texts.artworks}</p>
                       </div>
                       <div className="h-8 w-px bg-neutral-200" />
                       <div className="text-center">
                         <p className="text-lg font-light text-black">{activeUser.stats.followers}</p>
-                        <p className="text-[10px] uppercase tracking-wider text-neutral-400">Followers</p>
+                        <p className="text-[10px] uppercase tracking-wider text-neutral-400">{texts.followers}</p>
                       </div>
                     </div>
                   </div>
@@ -160,21 +233,21 @@ export default function CommunityPage() {
 
                 {/* Swipe Overlays */}
                 <div className="absolute top-10 left-10 transform -rotate-12 border-4 border-emerald-500 px-4 py-2 opacity-0">
-                  <span className="text-4xl font-bold text-emerald-500 uppercase tracking-widest">CONNECT</span>
+                  <span className="text-4xl font-bold text-emerald-500 uppercase tracking-widest">{texts.connect}</span>
                 </div>
                 <div className="absolute top-10 right-10 transform rotate-12 border-4 border-red-500 px-4 py-2 opacity-0">
-                  <span className="text-4xl font-bold text-red-500 uppercase tracking-widest">SKIP</span>
+                  <span className="text-4xl font-bold text-red-500 uppercase tracking-widest">{texts.skip}</span>
                 </div>
 
               </motion.div>
             ) : (
               <div className="text-center py-20">
-                <p className="text-lg font-light text-neutral-400 mb-6">No more profiles</p>
+                <p className="text-lg font-light text-neutral-400 mb-6">{texts.noMoreProfiles}</p>
                 <button
                   onClick={() => setCurrentIndex(0)}
                   className="px-8 py-3 border border-neutral-200 hover:border-black text-sm uppercase tracking-wider transition-colors"
                 >
-                  Review Again
+                  {texts.reviewAgain}
                 </button>
               </div>
             )}
