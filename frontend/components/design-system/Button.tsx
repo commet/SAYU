@@ -47,9 +47,9 @@ const variantClasses = {
 };
 
 const sizeClasses = {
-  sm: 'px-3 py-1.5 text-sm',
-  md: 'px-6 py-3 text-base',
-  lg: 'px-8 py-4 text-lg',
+  sm: 'px-3 py-2 text-sm min-h-[44px]', // 44px min touch target
+  md: 'px-6 py-3 text-base min-h-[44px]',
+  lg: 'px-8 py-4 text-lg min-h-[48px]',
 };
 
 export function Button({
@@ -69,7 +69,7 @@ export function Button({
         'inline-flex items-center justify-center gap-2',
         'font-medium rounded-lg',
         'transition-all duration-200',
-        'focus:outline-none focus:ring-2 focus:ring-sayu-accent focus:ring-offset-2',
+        'focus:outline-none focus-visible:ring-2 focus-visible:ring-sayu-accent focus-visible:ring-offset-2',
 
         // Variant
         variantClasses[variant],

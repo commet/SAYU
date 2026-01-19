@@ -46,11 +46,25 @@
 /* Root font size for better mobile scaling */
 html {
   font-size: 16px; /* Base font size */
+  /* Vercel Guidelines: color-scheme for proper scrollbar contrast in dark mode */
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
 }
 
 @media (max-width: 768px) {
   html {
     font-size: 14px; /* Slightly smaller on mobile */
+  }
+
+  /* Vercel Guidelines: Prevent iOS Safari auto-zoom on input focus */
+  /* Input fields must be >= 16px on mobile */
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
   }
 }
 
@@ -435,11 +449,69 @@ html {
   * {
     @apply border-border;
   }
-  
+
+  /* Vercel Guidelines: focus-visible for better UX */
+  :focus {
+    outline: none;
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* Vercel Guidelines: minimum touch targets */
+  button,
+  [role="button"],
+  a,
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-height: 24px; /* Desktop minimum */
+  }
+
+  @media (max-width: 768px) {
+    button,
+    [role="button"],
+    a:not(.inline-link),
+    input[type="checkbox"],
+    input[type="radio"] {
+      min-height: 44px; /* Mobile minimum per Vercel Guidelines */
+    }
+  }
+
+  /* Vercel Guidelines: touch-action for buttons */
+  button,
+  [role="button"] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body {
     font-feature-settings: "rlig" 1, "calt" 1;
   }
-  
+
+  /* Vercel Guidelines: tabular-nums for comparable numbers (prices, stats, etc) */
+  .tabular-nums,
+  [data-numeric],
+  time,
+  .price,
+  .stat,
+  .count {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Vercel Guidelines: overscroll-behavior for modals and drawers */
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-radix-dialog-content],
+  [data-radix-alert-dialog-content],
+  [data-radix-sheet-content],
+  .modal,
+  .drawer,
+  .dialog {
+    overscroll-behavior: contain;
+  }
+
   ::selection {
     background-color: hsl(var(--primary) / 0.2);
   }
