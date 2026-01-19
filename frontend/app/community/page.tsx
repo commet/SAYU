@@ -388,7 +388,7 @@ export default function CommunityPage() {
         <div className="flex gap-6 items-start justify-center">
           {/* Card Section - Centered */}
           <div className="flex flex-col items-center">
-            <AnimatePresence mode="wait" onExitComplete={handleExitComplete}>
+            <AnimatePresence mode="wait">
               {activeUser && !exitDirection ? (
                 <motion.div
                   key={activeUser.id}
@@ -561,6 +561,7 @@ export default function CommunityPage() {
                   opacity: 0,
                 }}
                 transition={{ duration: 0.4, ease: 'easeOut' }}
+                onAnimationComplete={handleExitComplete}
                 className="relative w-80 bg-white rounded-2xl shadow-xl overflow-hidden border border-neutral-100"
               >
                 <div className="relative w-full aspect-[4/5] bg-neutral-100 overflow-hidden">
