@@ -38,6 +38,16 @@ const t = {
     swipeHint: 'Swipe to connect',
     swipeLeft: 'Pass',
     swipeRight: 'Like',
+    filter: 'Filter',
+    gender: 'Gender',
+    all: 'All',
+    male: 'Male',
+    female: 'Female',
+    age: 'Age',
+    distance: 'Distance',
+    anyAge: 'Any',
+    nearby: 'Nearby',
+    anywhere: 'Anywhere',
   },
   ko: {
     community: 'Community',
@@ -58,6 +68,16 @@ const t = {
     swipeHint: '스와이프하여 연결하기',
     swipeLeft: '패스',
     swipeRight: '좋아요',
+    filter: '필터',
+    gender: '성별',
+    all: '전체',
+    male: '남성',
+    female: '여성',
+    age: '나이',
+    distance: '거리',
+    anyAge: '전체',
+    nearby: '가까운',
+    anywhere: '전체',
   },
 };
 
@@ -296,10 +316,38 @@ export default function CommunityPage() {
           </div>
         </header>
 
-        {/* Main Content - Side by Side Layout */}
-        <div className="flex gap-8 lg:gap-12 items-start justify-center">
-          {/* Card Section */}
-          <div className="flex-shrink-0">
+        {/* Filter Bar */}
+        <div className="flex items-center gap-4 mb-6 pb-6 border-b border-neutral-100">
+          <span className="text-xs uppercase tracking-widest text-neutral-400">{texts.filter}</span>
+          <div className="flex items-center gap-2">
+            <select className="text-sm bg-white border border-neutral-200 rounded-lg px-3 py-1.5 text-neutral-700 focus:outline-none focus:ring-2 focus:ring-rose-200 focus:border-rose-300">
+              <option value="all">{texts.gender}: {texts.all}</option>
+              <option value="male">{texts.male}</option>
+              <option value="female">{texts.female}</option>
+            </select>
+            <select className="text-sm bg-white border border-neutral-200 rounded-lg px-3 py-1.5 text-neutral-700 focus:outline-none focus:ring-2 focus:ring-rose-200 focus:border-rose-300">
+              <option value="any">{texts.age}: {texts.anyAge}</option>
+              <option value="20-25">20-25</option>
+              <option value="26-30">26-30</option>
+              <option value="31-35">31-35</option>
+              <option value="36+">36+</option>
+            </select>
+            <select className="text-sm bg-white border border-neutral-200 rounded-lg px-3 py-1.5 text-neutral-700 focus:outline-none focus:ring-2 focus:ring-rose-200 focus:border-rose-300">
+              <option value="anywhere">{texts.distance}: {texts.anywhere}</option>
+              <option value="nearby">{texts.nearby} (5km)</option>
+              <option value="10km">10km</option>
+              <option value="25km">25km</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Main Content - Centered Card with Side Info */}
+        <div className="flex gap-8 lg:gap-12 items-start">
+          {/* Left Spacer for centering */}
+          <div className="hidden lg:block w-72 flex-shrink-0" />
+
+          {/* Card Section - Centered */}
+          <div className="flex-1 flex flex-col items-center">
             <AnimatePresence mode="wait" onExitComplete={handleExitComplete}>
               {activeUser && !exitDirection ? (
                 <motion.div
