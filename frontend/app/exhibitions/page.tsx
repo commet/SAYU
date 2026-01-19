@@ -17,6 +17,7 @@ import {
   AlertCircle,
   Loader2,
 } from 'lucide-react';
+import { ExhibitionPlaceholder } from '@/components/exhibitions/ExhibitionPlaceholder';
 
 // Translations
 const t = {
@@ -247,7 +248,14 @@ export default function ExhibitionsPage() {
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
             />
-          ) : <div />}
+          ) : (
+            <ExhibitionPlaceholder
+              title={exhibition.title}
+              venue={exhibition.venue}
+              category={exhibition.category}
+              variant="card"
+            />
+          )}
            <button
               onClick={(e) => handleSaveExhibition(exhibition.id, e)}
               className="absolute top-3 right-3 p-2 bg-white/50 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-white"
@@ -289,7 +297,7 @@ export default function ExhibitionsPage() {
               <div className="h-px flex-1 bg-neutral-200" />
             </div>
             <div className="relative aspect-[16/7] border border-neutral-200 group-hover:border-neutral-900 transition-colors duration-300 overflow-hidden cursor-pointer">
-              {featuredExhibition.image &&
+              {featuredExhibition.image ? (
                 <Image
                   src={featuredExhibition.image}
                   alt={featuredExhibition.title}
@@ -297,7 +305,14 @@ export default function ExhibitionsPage() {
                   className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
                   priority
                 />
-              }
+              ) : (
+                <ExhibitionPlaceholder
+                  title={featuredExhibition.title}
+                  venue={featuredExhibition.venue}
+                  category={featuredExhibition.category}
+                  variant="featured"
+                />
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 text-white">
                 <p className="text-xs uppercase tracking-widest text-white/70 mb-2">{texts.featuredExhibition}</p>
