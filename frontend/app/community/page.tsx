@@ -268,44 +268,55 @@ export default function CommunityPage() {
   const remainingCount = localizedUsers.length - currentIndex;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white text-neutral-900 overflow-hidden">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 min-h-screen flex flex-col">
-        {/* Header */}
-        <header className="py-6 md:py-8 flex-shrink-0">
-          <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-white text-neutral-900 overflow-hidden relative">
+      {/* Background Decoration */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-rose-100/30 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-amber-100/30 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-blue-100/20 rounded-full blur-3xl" />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative">
+        {/* Header - Matching Gallery style */}
+        <header className="mb-8">
+          <div className="flex items-end justify-between">
             <div>
-              <p className="text-xs uppercase tracking-widest text-neutral-400 mb-2">{texts.community}</p>
-              <h1 className="text-3xl md:text-4xl font-light text-black tracking-tight">{texts.connectShare}</h1>
+              <p className="text-sm uppercase tracking-widest text-neutral-500 mb-3">{texts.community}</p>
+              <h1 className="text-5xl font-light text-black mb-1 tracking-tight">{texts.connectShare}</h1>
+              <p className="text-base text-neutral-500 font-light mt-2">{texts.subtitle}</p>
             </div>
             {activeUser && (
-              <div className="text-right">
-                <p className="text-2xl font-light text-black">{remainingCount}</p>
-                <p className="text-xs uppercase tracking-wider text-neutral-400">{texts.profilesLeft(remainingCount).split(' ').slice(1).join(' ')}</p>
+              <div className="flex gap-8 pb-2">
+                <div className="text-right">
+                  <p className="text-2xl font-light text-black tracking-tight">{remainingCount}</p>
+                  <p className="text-xs uppercase tracking-wider text-neutral-400">{language === 'ko' ? '남음' : 'Left'}</p>
+                </div>
               </div>
             )}
           </div>
-          <p className="text-sm text-neutral-500 font-light mt-2">{texts.subtitle}</p>
         </header>
 
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col items-center justify-center relative py-4">
-          <AnimatePresence mode="wait" onExitComplete={handleExitComplete}>
-            {activeUser && !exitDirection ? (
-              <motion.div
-                key={activeUser.id}
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden cursor-grab active:cursor-grabbing"
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.9}
-                onDragEnd={handleDragEnd}
-                whileDrag={{ scale: 1.02 }}
-              >
-                {/* Image Section */}
-                <div className="relative w-full aspect-[4/5] bg-neutral-100 overflow-hidden">
+        {/* Main Content - Side by Side Layout */}
+        <div className="flex gap-8 lg:gap-12 items-start justify-center">
+          {/* Card Section */}
+          <div className="flex-shrink-0">
+            <AnimatePresence mode="wait" onExitComplete={handleExitComplete}>
+              {activeUser && !exitDirection ? (
+                <motion.div
+                  key={activeUser.id}
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="relative w-80 bg-white rounded-2xl shadow-xl overflow-hidden cursor-grab active:cursor-grabbing border border-neutral-100"
+                  drag="x"
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragElastic={0.9}
+                  onDragEnd={handleDragEnd}
+                  whileDrag={{ scale: 1.02 }}
+                >
+                  {/* Image Section - Shorter */}
+                  <div className="relative w-full aspect-[4/5] bg-neutral-100 overflow-hidden">
                   <Image
                     src={activeUser.avatar}
                     alt={activeUser.nickname}
@@ -362,20 +373,17 @@ export default function CommunityPage() {
                   </div>
                 </div>
 
-                {/* Info Section */}
-                <div className="p-5 space-y-4">
+                {/* Info Section - Compact */}
+                <div className="p-4 space-y-3">
                   {/* Bio */}
                   <p className="text-sm text-neutral-600 leading-relaxed line-clamp-2">
                     {activeUser.bio}
                   </p>
 
                   {/* Compatibility Bar */}
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-neutral-500 uppercase tracking-wider">{texts.match}</span>
-                      <span className="text-sm font-semibold text-rose-500">{activeUser.compatibility}%</span>
-                    </div>
-                    <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-neutral-500 uppercase tracking-wider">{texts.match}</span>
+                    <div className="flex-1 h-1.5 bg-neutral-100 rounded-full overflow-hidden">
                       <motion.div
                         className="h-full bg-gradient-to-r from-rose-400 to-rose-500 rounded-full"
                         initial={{ width: 0 }}
@@ -383,22 +391,23 @@ export default function CommunityPage() {
                         transition={{ duration: 0.8, ease: 'easeOut' }}
                       />
                     </div>
+                    <span className="text-sm font-semibold text-rose-500">{activeUser.compatibility}%</span>
                   </div>
 
                   {/* Stats */}
                   <div className="flex justify-between items-center pt-2 border-t border-neutral-100">
                     <div className="text-center flex-1">
-                      <p className="text-lg font-semibold text-neutral-800">{activeUser.stats.exhibitions}</p>
+                      <p className="text-base font-semibold text-neutral-800">{activeUser.stats.exhibitions}</p>
                       <p className="text-[10px] uppercase tracking-wider text-neutral-400">{texts.exhibitions}</p>
                     </div>
-                    <div className="h-8 w-px bg-neutral-100" />
+                    <div className="h-6 w-px bg-neutral-100" />
                     <div className="text-center flex-1">
-                      <p className="text-lg font-semibold text-neutral-800">{activeUser.stats.artworks}</p>
+                      <p className="text-base font-semibold text-neutral-800">{activeUser.stats.artworks}</p>
                       <p className="text-[10px] uppercase tracking-wider text-neutral-400">{texts.artworks}</p>
                     </div>
-                    <div className="h-8 w-px bg-neutral-100" />
+                    <div className="h-6 w-px bg-neutral-100" />
                     <div className="text-center flex-1">
-                      <p className="text-lg font-semibold text-neutral-800">{activeUser.stats.followers}</p>
+                      <p className="text-base font-semibold text-neutral-800">{activeUser.stats.followers}</p>
                       <p className="text-[10px] uppercase tracking-wider text-neutral-400">{texts.followers}</p>
                     </div>
                   </div>
@@ -464,9 +473,8 @@ export default function CommunityPage() {
                   opacity: 0,
                 }}
                 transition={{ duration: 0.4, ease: 'easeOut' }}
-                className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden"
+                className="relative w-80 bg-white rounded-2xl shadow-xl overflow-hidden border border-neutral-100"
               >
-                {/* Simplified exit card */}
                 <div className="relative w-full aspect-[4/5] bg-neutral-100 overflow-hidden">
                   <Image
                     src={activeUser.avatar}
@@ -476,14 +484,14 @@ export default function CommunityPage() {
                     draggable={false}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-5">
-                    <h2 className="text-2xl font-semibold text-white mb-1">
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <h2 className="text-xl font-semibold text-white">
                       {activeUser.nickname.split('.')[0]}, {activeUser.age}
                     </h2>
                   </div>
                 </div>
-                <div className="p-5">
-                  <p className="text-sm text-neutral-600 leading-relaxed line-clamp-2">{activeUser.bio}</p>
+                <div className="p-4">
+                  <p className="text-sm text-neutral-600 line-clamp-2">{activeUser.bio}</p>
                 </div>
               </motion.div>
             ) : !activeUser ? (
@@ -491,55 +499,102 @@ export default function CommunityPage() {
                 key="empty"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-center py-20 px-8"
+                className="text-center py-16 px-8 w-80"
               >
-                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-neutral-100 flex items-center justify-center">
-                  <Heart className="w-10 h-10 text-neutral-300" />
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-neutral-100 flex items-center justify-center">
+                  <Heart className="w-8 h-8 text-neutral-300" />
                 </div>
-                <p className="text-xl font-light text-neutral-600 mb-2">{texts.noMoreProfiles}</p>
-                <p className="text-sm text-neutral-400 mb-8">{texts.checkBackLater}</p>
+                <p className="text-lg font-light text-neutral-600 mb-2">{texts.noMoreProfiles}</p>
+                <p className="text-sm text-neutral-400 mb-6">{texts.checkBackLater}</p>
                 <button
                   onClick={() => setCurrentIndex(0)}
-                  className="px-8 py-3 bg-black text-white rounded-full text-sm font-medium hover:bg-neutral-800 transition-colors"
+                  className="px-6 py-2.5 bg-black text-white rounded-full text-sm font-medium hover:bg-neutral-800 transition-colors"
                 >
                   {texts.reviewAgain}
                 </button>
               </motion.div>
             ) : null}
-          </AnimatePresence>
+            </AnimatePresence>
 
-          {/* Action Buttons */}
-          {activeUser && !exitDirection && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="flex items-center justify-center gap-4 mt-6"
-            >
-              {/* Pass Button */}
-              <button
-                onClick={() => handleSwipe('pass')}
-                className="w-14 h-14 rounded-full bg-white border-2 border-neutral-200 flex items-center justify-center hover:border-red-300 hover:bg-red-50 transition-all shadow-lg hover:shadow-xl active:scale-95"
+            {/* Action Buttons */}
+            {activeUser && !exitDirection && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="flex items-center justify-center gap-4 mt-5"
               >
-                <X className="w-6 h-6 text-red-400" />
-              </button>
+                <button
+                  onClick={() => handleSwipe('pass')}
+                  className="w-12 h-12 rounded-full bg-white border-2 border-neutral-200 flex items-center justify-center hover:border-red-300 hover:bg-red-50 transition-all shadow-md hover:shadow-lg active:scale-95"
+                >
+                  <X className="w-5 h-5 text-red-400" />
+                </button>
+                <button
+                  onClick={() => handleSwipe('superlike')}
+                  className="w-10 h-10 rounded-full bg-white border-2 border-neutral-200 flex items-center justify-center hover:border-blue-300 hover:bg-blue-50 transition-all shadow-md hover:shadow-lg active:scale-95"
+                >
+                  <Star className="w-4 h-4 text-blue-400" />
+                </button>
+                <button
+                  onClick={() => handleSwipe('like')}
+                  className="w-12 h-12 rounded-full bg-gradient-to-br from-rose-400 to-rose-500 flex items-center justify-center hover:from-rose-500 hover:to-rose-600 transition-all shadow-md hover:shadow-lg active:scale-95"
+                >
+                  <Heart className="w-5 h-5 text-white fill-white" />
+                </button>
+              </motion.div>
+            )}
+          </div>
 
-              {/* Super Like Button */}
-              <button
-                onClick={() => handleSwipe('superlike')}
-                className="w-12 h-12 rounded-full bg-white border-2 border-neutral-200 flex items-center justify-center hover:border-blue-300 hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl active:scale-95"
-              >
-                <Star className="w-5 h-5 text-blue-400" />
-              </button>
+          {/* Sidebar - Upcoming Profiles */}
+          {activeUser && (
+            <div className="hidden lg:block w-72 space-y-4">
+              <p className="text-xs uppercase tracking-widest text-neutral-400 mb-4">{language === 'ko' ? '다음 프로필' : 'Coming Up'}</p>
+              <div className="space-y-3">
+                {localizedUsers.slice(currentIndex + 1, currentIndex + 4).map((user, idx) => (
+                  <motion.div
+                    key={user.id}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.1 }}
+                    className="flex items-center gap-3 p-3 bg-white rounded-xl border border-neutral-100 shadow-sm"
+                  >
+                    <div className="relative w-12 h-12 rounded-full overflow-hidden bg-neutral-100 flex-shrink-0">
+                      <Image
+                        src={user.avatar}
+                        alt={user.nickname}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-neutral-800 truncate">
+                        {user.nickname.split('.')[0]}, {user.age}
+                      </p>
+                      <p className="text-xs text-neutral-400">{user.personalityType}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold text-rose-500">{user.compatibility}%</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
 
-              {/* Like Button */}
-              <button
-                onClick={() => handleSwipe('like')}
-                className="w-14 h-14 rounded-full bg-gradient-to-br from-rose-400 to-rose-500 flex items-center justify-center hover:from-rose-500 hover:to-rose-600 transition-all shadow-lg hover:shadow-xl active:scale-95"
-              >
-                <Heart className="w-6 h-6 text-white fill-white" />
-              </button>
-            </motion.div>
+              {/* Quick Stats */}
+              <div className="mt-8 p-4 bg-neutral-50 rounded-xl">
+                <p className="text-xs uppercase tracking-widest text-neutral-400 mb-3">{language === 'ko' ? '오늘의 활동' : "Today's Activity"}</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="text-center p-2 bg-white rounded-lg">
+                    <p className="text-xl font-light text-neutral-800">{currentIndex}</p>
+                    <p className="text-[10px] uppercase tracking-wider text-neutral-400">{language === 'ko' ? '확인함' : 'Viewed'}</p>
+                  </div>
+                  <div className="text-center p-2 bg-white rounded-lg">
+                    <p className="text-xl font-light text-rose-500">{Math.floor(currentIndex * 0.6)}</p>
+                    <p className="text-[10px] uppercase tracking-wider text-neutral-400">{language === 'ko' ? '좋아요' : 'Liked'}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
         </div>
 
