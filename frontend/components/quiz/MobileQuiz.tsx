@@ -375,7 +375,7 @@ export const MobileQuiz: React.FC = () => {
                     delay: 0.1
                   }}
                 >
-                  <p className="text-sm leading-relaxed text-gray-600 font-normal" style={{ fontFamily: 'var(--font-cormorant), serif' }}>
+                  <p className="text-sm leading-relaxed text-gray-600 font-normal" style={{ fontFamily: 'var(--font-noto-serif-kr), var(--font-cormorant), serif', fontWeight: 400 }}>
                     {(language === 'ko'
                       ? (question.narrative.setup_ko || question.narrative.transition_ko)
                       : (question.narrative.setup || question.narrative.transition))
@@ -401,7 +401,7 @@ export const MobileQuiz: React.FC = () => {
                   delay: 0.2
                 }}
               >
-                <h2 className="text-xl sm:text-2xl font-normal text-center leading-relaxed text-gray-900" style={{ fontFamily: 'var(--font-cormorant), serif' }}>
+                <h2 className="text-xl sm:text-2xl font-normal text-center leading-relaxed text-gray-900" style={{ fontFamily: 'var(--font-noto-serif-kr), var(--font-cormorant), serif', fontWeight: 400 }}>
                   {(language === 'ko' && question.question_ko ? question.question_ko : question.question)
                     .split('\n')
                     .map((line, index) => (
@@ -464,7 +464,7 @@ export const MobileQuiz: React.FC = () => {
 
                     {/* Text Content */}
                     <div>
-                      <h4 className="text-base font-medium mb-1 text-gray-900 leading-relaxed" style={{ fontFamily: 'var(--font-cormorant), serif' }}>
+                      <h4 className="text-base font-medium mb-1 text-gray-900 leading-relaxed" style={{ fontFamily: 'var(--font-noto-serif-kr), var(--font-cormorant), serif', fontWeight: 400 }}>
                         {language === 'ko' && option.text_ko ? option.text_ko : option.text}
                       </h4>
 

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Playfair_Display, Cormorant_Garamond, Abril_Fatface, Dancing_Script, Gamja_Flower } from 'next/font/google'
+import { Inter, Playfair_Display, Cormorant_Garamond, Abril_Fatface, Dancing_Script, Gamja_Flower, Noto_Serif_KR } from 'next/font/google'
 import ToasterProvider from '@/components/ToasterProvider'
 import './globals.css'
 import '@/styles/anti-flicker.css'
@@ -32,6 +32,12 @@ const gamja = Gamja_Flower({
   subsets: ['latin'],
   variable: '--font-gamja',
   weight: '400',
+  display: 'swap'
+})
+const notoSerifKR = Noto_Serif_KR({
+  subsets: ['latin'],
+  variable: '--font-noto-serif-kr',
+  weight: ['300', '400', '500', '600', '700'],
   display: 'swap'
 })
 
@@ -116,7 +122,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.className} ${playfair.variable} ${cormorant.variable} ${abril.variable} ${dancing.variable} ${gamja.variable} min-h-screen bg-white text-black container-stable`}>
+      <body className={`${inter.className} ${playfair.variable} ${cormorant.variable} ${abril.variable} ${dancing.variable} ${gamja.variable} ${notoSerifKR.variable} min-h-screen bg-white text-black container-stable`}>
         <ToasterProvider />
         <Providers>
           <main className="pb-20 safe-area-bottom lg:pt-4 lg:pb-4 bg-white">

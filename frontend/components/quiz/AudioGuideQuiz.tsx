@@ -411,7 +411,7 @@ export const AudioGuideQuiz: React.FC = () => {
                         delay: 0.1
                       }}
                     >
-                      <p className="text-sm sm:text-base leading-relaxed text-gray-600 font-normal" style={{ fontFamily: 'var(--font-cormorant), serif' }}>
+                      <p className="text-sm sm:text-base leading-relaxed text-gray-600 font-normal" style={{ fontFamily: 'var(--font-noto-serif-kr), var(--font-cormorant), serif', fontWeight: 400 }}>
                         {getTransitionText()}
                       </p>
                     </motion.div>
@@ -428,7 +428,7 @@ export const AudioGuideQuiz: React.FC = () => {
                       delay: 0.2
                     }}
                   >
-                    <h2 className="text-xl sm:text-2xl md:text-3xl font-normal text-center leading-relaxed text-gray-900" style={{ fontFamily: 'var(--font-cormorant), serif' }}>
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-normal text-center leading-relaxed text-gray-900" style={{ fontFamily: 'var(--font-noto-serif-kr), var(--font-cormorant), serif', fontWeight: 400 }}>
                       {(language === 'ko' && question.question_ko ? question.question_ko : question.question)
                         .split('\n')
                         .map((line, index) => (
@@ -483,7 +483,7 @@ export const AudioGuideQuiz: React.FC = () => {
 
                         {/* Text Content */}
                         <div>
-                          <h4 className="text-base sm:text-lg font-medium mb-2 text-gray-900 leading-relaxed" style={{ fontFamily: 'var(--font-cormorant), serif' }}>
+                          <h4 className="text-base sm:text-lg font-medium mb-2 text-gray-900 leading-relaxed" style={{ fontFamily: 'var(--font-noto-serif-kr), var(--font-cormorant), serif', fontWeight: 400 }}>
                             {language === 'ko' && option.text_ko ? option.text_ko : option.text}
                           </h4>
 
@@ -612,17 +612,17 @@ export const AudioGuideQuiz: React.FC = () => {
                 <div className="mx-auto w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mb-6">
                   <Home className="w-10 h-10" style={{ color: '#D4A520' }} />
                 </div>
-                <h3 className="text-2xl sm:text-3xl font-normal mb-4 text-gray-900" style={{ fontFamily: 'var(--font-cormorant), serif' }}>
+                <h3 className="text-2xl sm:text-3xl font-normal mb-4 text-gray-900" style={{ fontFamily: 'var(--font-noto-serif-kr), var(--font-cormorant), serif', fontWeight: 400 }}>
                   {language === 'ko' ? '갤러리 투어를 종료하시겠습니까?' : 'End Gallery Tour?'}
                 </h3>
-                <p className="text-base sm:text-lg text-gray-600 mb-8 leading-relaxed" style={{ fontFamily: 'var(--font-cormorant), serif' }}>
+                <p className="text-base sm:text-lg text-gray-600 mb-8 leading-relaxed" style={{ fontFamily: 'var(--font-noto-serif-kr), var(--font-cormorant), serif', fontWeight: 400 }}>
                   {language === 'ko' ? '진행 상황이 사라집니다. 정말 나가시겠습니까?' : 'Your progress will be lost. Are you sure you want to exit?'}
                 </p>
                 <div className="flex gap-4">
                   <button
                     className="flex-1 px-6 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium transition-colors"
                     onClick={() => router.push('/')}
-                    style={{ fontFamily: 'var(--font-cormorant), serif' }}
+                    style={{ fontFamily: 'var(--font-noto-serif-kr), var(--font-cormorant), serif', fontWeight: 400 }}
                   >
                     {language === 'ko' ? '나가기' : 'Exit Tour'}
                   </button>
