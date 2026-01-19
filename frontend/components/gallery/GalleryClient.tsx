@@ -29,7 +29,7 @@ export default function GalleryClient({ initialStats }: GalleryClientProps) {
   const searchParams = useSearchParams();
 
   const tabParam = searchParams?.get('tab') as TabType | null;
-  const [activeTab, setActiveTab] = useState<TabType>(tabParam || 'collections');
+  const [activeTab, setActiveTab] = useState<TabType>(tabParam || 'discover');
   const [stats, setStats] = useState(initialStats);
 
   // URL의 tab 파라미터가 변경되면 activeTab 업데이트
