@@ -169,10 +169,10 @@ export default function ProfilePage() {
 
   // Placeholder artworks (shown when user has no saved artworks)
   const placeholderArtworks = [
-    { id: 'p1', title: '구성', artist: '김창열', imageUrl: '/mmca-tour-kcy/artwork/구성_1.jpg' },
-    { id: 'p2', title: '물방울', artist: '김창열', imageUrl: '/mmca-tour-kcy/artwork/물방울_00.jpg' },
-    { id: 'p3', title: 'Il Pleut', artist: '김창열', imageUrl: '/mmca-tour-kcy/artwork/il pleut.png' },
-    { id: 'p4', title: '드로잉', artist: '김창열', imageUrl: '/mmca-tour-kcy/artwork/드로잉_1.png' },
+    { id: 'p1', title: '회귀', artist: '김창열', imageUrl: '/mmca-tour-kcy/artwork/회귀.png' },
+    { id: 'p2', title: '제사', artist: '김창열', imageUrl: '/mmca-tour-kcy/artwork/제사_01.png' },
+    { id: 'p3', title: '현상', artist: '김창열', imageUrl: '/mmca-tour-kcy/artwork/현상_01.png' },
+    { id: 'p4', title: '구성', artist: '김창열', imageUrl: '/mmca-tour-kcy/artwork/구성_3.jpg' },
   ];
 
   const displayArtworks = savedArtworks.length > 0 ? savedArtworks : placeholderArtworks;
