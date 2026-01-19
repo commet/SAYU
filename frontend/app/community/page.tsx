@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
+import React, { useState, useMemo, useCallback } from 'react';
+import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import Image from 'next/image';
 import {
   Heart,
@@ -9,17 +9,11 @@ import {
   Star,
   Sparkles,
   MapPin,
-  MessageCircle,
-  Palette,
-  Clock,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthGate } from '@/hooks/useAuthGate';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { getAnimalByType } from '@/data/personality-animals';
-import { SAYUTypeCode } from '@/types/sayu-shared';
 import FeedbackButton from '@/components/feedback/FeedbackButton';
-import { cn } from '@/lib/utils';
 
 // Translations
 const t = {
@@ -219,36 +213,34 @@ export default function CommunityPage() {
   const { language } = useLanguage();
   const texts = t[language];
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState<'left' | 'right' | null>(null);
-  const [superLiked, setSuperLiked] = useState(false);
-
-  // Motion values for drag
-  const x = useMotionValue(0);
-  const rotate = useTransform(x, [-200, 200], [-25, 25]);
-  // Clamp opacity values to only show when actually dragging in that direction
-  const likeOpacity = useTransform(x, (latest) => Math.max(0, Math.min(1, latest / 100)));
-  const nopeOpacity = useTransform(x, (latest) => Math.max(0, Math.min(1, -latest / 100)));
+  const [exitDirection, setExitDirection] = useState<'left' | 'right' | null>(null);
 
   // Localized mock users
   const localizedUsers = useMemo(() =>
-    mockUsersData.map(user => ({
-      ...user,
-      bio: language === 'ko' ? user.bio_ko : user.bio_en,
+    mockUsersData.map(u => ({
+      ...u,
+      bio: language === 'ko' ? u.bio_ko : u.bio_en,
     }))
   , [language]);
 
-  const handleSwipe = (action: 'like' | 'pass' | 'superlike') => {
-    if (action === 'superlike') {
-      setSuperLiked(true);
-      setTimeout(() => setSuperLiked(false), 500);
+  const handleSwipe = useCallback((action: 'like' | 'pass' | 'superlike') => {
+    const dir = action === 'pass' ? 'left' : 'right';
+    setExitDirection(dir);
+  }, []);
+
+  const handleExitComplete = useCallback(() => {
+    setCurrentIndex((prev) => prev + 1);
+    setExitDirection(null);
+  }, []);
+
+  const handleDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const threshold = 100;
+    if (info.offset.x > threshold) {
+      handleSwipe('like');
+    } else if (info.offset.x < -threshold) {
+      handleSwipe('pass');
     }
-    setDirection(action === 'pass' ? 'left' : 'right');
-    setTimeout(() => {
-      setCurrentIndex((prev) => prev + 1);
-      setDirection(null);
-      x.set(0);
-    }, 300);
-  };
+  }, [handleSwipe]);
 
   const activeUser = localizedUsers[currentIndex];
   const remainingCount = localizedUsers.length - currentIndex;
@@ -275,32 +267,22 @@ export default function CommunityPage() {
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col items-center justify-center relative py-4">
-          <AnimatePresence mode="popLayout">
-            {activeUser ? (
+          <AnimatePresence mode="wait" onExitComplete={handleExitComplete}>
+            {activeUser && !exitDirection ? (
               <motion.div
                 key={activeUser.id}
-                initial={{ scale: 0.95, opacity: 0 }}
+                initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                exit={{
-                  x: direction === 'right' ? 500 : direction === 'left' ? -500 : 0,
-                  opacity: 0,
-                  rotate: direction === 'right' ? 20 : direction === 'left' ? -20 : 0
-                }}
-                transition={{ duration: 0.4, ease: 'easeOut' }}
-                style={{ x, rotate }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
                 className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden cursor-grab active:cursor-grabbing"
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.7}
-                onDragEnd={(e, { offset }) => {
-                  if (offset.x > 100) {
-                    handleSwipe('like');
-                  } else if (offset.x < -100) {
-                    handleSwipe('pass');
-                  }
-                }}
+                dragElastic={0.9}
+                onDragEnd={handleDragEnd}
+                whileDrag={{ scale: 1.02 }}
               >
-                {/* Image Section - 60% height */}
+                {/* Image Section */}
                 <div className="relative w-full aspect-[4/5] bg-neutral-100 overflow-hidden">
                   <Image
                     src={activeUser.avatar}
@@ -337,16 +319,6 @@ export default function CommunityPage() {
                     )}
                   </div>
 
-                  {/* Match Badge */}
-                  <div className="absolute top-4 right-4 hidden">
-                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center shadow-lg">
-                      <div className="text-center">
-                        <p className="text-white font-bold text-sm">{activeUser.compatibility}%</p>
-                        <p className="text-white/80 text-[8px] uppercase">{texts.match}</p>
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Bottom Info Overlay */}
                   <div className="absolute bottom-0 left-0 right-0 p-5">
                     <div className="flex items-end justify-between">
@@ -366,27 +338,9 @@ export default function CommunityPage() {
                       </div>
                     </div>
                   </div>
-
-                  {/* Swipe Overlays */}
-                  <motion.div
-                    className="absolute inset-0 bg-emerald-500/20 flex items-center justify-center"
-                    style={{ opacity: likeOpacity }}
-                  >
-                    <div className="border-4 border-emerald-500 rounded-xl px-8 py-4 -rotate-12">
-                      <Heart className="w-16 h-16 text-emerald-500 fill-emerald-500" />
-                    </div>
-                  </motion.div>
-                  <motion.div
-                    className="absolute inset-0 bg-red-500/20 flex items-center justify-center"
-                    style={{ opacity: nopeOpacity }}
-                  >
-                    <div className="border-4 border-red-500 rounded-xl px-8 py-4 rotate-12">
-                      <X className="w-16 h-16 text-red-500" />
-                    </div>
-                  </motion.div>
                 </div>
 
-                {/* Info Section - 40% height */}
+                {/* Info Section */}
                 <div className="p-5 space-y-4">
                   {/* Bio */}
                   <p className="text-sm text-neutral-600 leading-relaxed line-clamp-2">
@@ -427,23 +381,42 @@ export default function CommunityPage() {
                     </div>
                   </div>
                 </div>
-
-                {/* Super Like Animation */}
-                <AnimatePresence>
-                  {superLiked && (
-                    <motion.div
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 1.5, opacity: 0 }}
-                      className="absolute inset-0 bg-blue-500/30 flex items-center justify-center"
-                    >
-                      <Star className="w-24 h-24 text-blue-500 fill-blue-500" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </motion.div>
-            ) : (
+            ) : activeUser && exitDirection ? (
               <motion.div
+                key={`${activeUser.id}-exit`}
+                initial={{ x: 0, rotate: 0 }}
+                animate={{
+                  x: exitDirection === 'right' ? 500 : -500,
+                  rotate: exitDirection === 'right' ? 30 : -30,
+                  opacity: 0,
+                }}
+                transition={{ duration: 0.4, ease: 'easeOut' }}
+                className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden"
+              >
+                {/* Simplified exit card */}
+                <div className="relative w-full aspect-[4/5] bg-neutral-100 overflow-hidden">
+                  <Image
+                    src={activeUser.avatar}
+                    alt={activeUser.nickname}
+                    fill
+                    className="object-cover"
+                    draggable={false}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-5">
+                    <h2 className="text-2xl font-semibold text-white mb-1">
+                      {activeUser.nickname.split('.')[0]}, {activeUser.age}
+                    </h2>
+                  </div>
+                </div>
+                <div className="p-5">
+                  <p className="text-sm text-neutral-600 leading-relaxed line-clamp-2">{activeUser.bio}</p>
+                </div>
+              </motion.div>
+            ) : !activeUser ? (
+              <motion.div
+                key="empty"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-center py-20 px-8"
@@ -460,11 +433,11 @@ export default function CommunityPage() {
                   {texts.reviewAgain}
                 </button>
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
 
           {/* Action Buttons */}
-          {activeUser && (
+          {activeUser && !exitDirection && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
