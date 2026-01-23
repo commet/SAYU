@@ -795,6 +795,405 @@ class ArtCounselorController {
             });
         }
     }
+
+    // ====================================
+    // HYBRID SESSION ENDPOINTS
+    // ====================================
+
+    /**
+     * Hybrid Opening - Get initial question and options for artwork
+     * GET /api/art-counselor/hybrid/opening/:artworkId/:personality
+     */
+    async hybridOpening(req, res) {
+        try {
+            const { artworkId, personality } = req.params;
+            const { userId } = req;
+
+            // Get artwork info
+            let artwork = null;
+            try {
+                artwork = await supabaseArtService.getArtworkById(artworkId);
+            } catch (e) {
+                // Fallback to sample artwork data
+                artwork = {
+                    id: artworkId,
+                    title: 'Water Lilies',
+                    artist: 'Claude Monet',
+                    year: '1906',
+                    imageUrl: 'https://images.unsplash.com/photo-1500346138972-dc5b229af4ad?auto=format&fit=crop&w=900&q=80'
+                };
+            }
+
+            // Generate opening message based on personality
+            const openingMessages = {
+                LAEF: '이 작품을 처음 보았을 때, 어떤 느낌이 먼저 다가왔나요?',
+                SAEF: '작품 속 색채와 형태가 어떤 감정을 불러일으키나요?',
+                LAMF: '이 작품이 전달하려는 이야기는 무엇일까요?',
+                SRMF: '작품의 구조와 배치에서 무엇을 발견하셨나요?',
+                default: '이 작품을 바라보며 가장 먼저 떠오르는 생각은 무엇인가요?'
+            };
+
+            const message = openingMessages[personality] || openingMessages.default;
+
+            // Generate options based on personality
+            const options = [
+                {
+                    id: 'calm',
+                    label: '차분하고 평화로운 느낌이에요',
+                    description: '고요함과 안정감을 느끼고 있어요',
+                    tone: 'gentle'
+                },
+                {
+                    id: 'curious',
+                    label: '무언가 탐구하고 싶어지는 느낌이에요',
+                    description: '작품 속에서 더 많은 것을 발견하고 싶어요',
+                    tone: 'curious'
+                },
+                {
+                    id: 'nostalgic',
+                    label: '과거의 기억이 떠올라요',
+                    description: '어떤 추억이나 감정이 연결되는 것 같아요',
+                    tone: 'grounding'
+                },
+                {
+                    id: 'free_input',
+                    label: '다른 느낌이에요',
+                    description: '직접 표현해볼게요',
+                    tone: 'playful'
+                }
+            ];
+
+            logger.info(`Hybrid opening generated for user ${userId}`, {
+                artworkId,
+                personality
+            });
+
+            res.json({
+                success: true,
+                data: {
+                    artworkId: artwork.id,
+                    artworkTitle: artwork.title,
+                    artworkArtist: artwork.artist,
+                    artworkYear: artwork.year,
+                    personality,
+                    emoji: '🎨',
+                    message,
+                    options,
+                    stage: 'opening'
+                }
+            });
+
+        } catch (error) {
+            logger.error('Error in hybrid opening:', error);
+            res.status(500).json({
+                success: false,
+                error: { message: '세션을 시작하는 중 오류가 발생했습니다.' }
+            });
+        }
+    }
+
+    /**
+     * Hybrid Exploration - Process user selection and provide deeper exploration
+     * POST /api/art-counselor/hybrid/exploration
+     */
+    async hybridExploration(req, res) {
+        try {
+            const { userId } = req;
+            const { artworkId, personality, userSelection, freeText, sessionId } = req.body;
+
+            // Generate exploration response based on user selection
+            const explorationResponses = {
+                calm: '평화로움을 느끼셨군요. 작품 속 어떤 요소가 특히 그런 안정감을 주었나요?',
+                curious: '호기심이 생기셨네요. 작품에서 더 알고 싶은 부분이 있다면 무엇인가요?',
+                nostalgic: '과거의 기억과 연결되셨군요. 어떤 시간이나 장소가 떠오르셨나요?',
+                free_input: freeText
+                    ? `"${freeText}"라고 느끼셨군요. 그 감정을 조금 더 자세히 이야기해주실 수 있나요?`
+                    : '직접 표현해주셔서 감사해요. 더 깊이 탐색해볼까요?'
+            };
+
+            const message = explorationResponses[userSelection] || explorationResponses.free_input;
+
+            // Options for exploration stage
+            const options = [
+                {
+                    id: 'deeper',
+                    label: '더 깊이 느껴보고 싶어요',
+                    description: '이 감정을 좀 더 탐구해볼게요',
+                    tone: 'curious'
+                },
+                {
+                    id: 'connect',
+                    label: '제 경험과 연결해보고 싶어요',
+                    description: '작품과 저의 이야기를 엮어볼게요',
+                    tone: 'grounding'
+                },
+                {
+                    id: 'free_input',
+                    label: '다른 이야기를 해볼게요',
+                    description: '자유롭게 표현할게요',
+                    tone: 'playful'
+                }
+            ];
+
+            logger.info(`Hybrid exploration processed for user ${userId}`, {
+                artworkId,
+                personality,
+                userSelection,
+                sessionId
+            });
+
+            res.json({
+                success: true,
+                data: {
+                    artworkId,
+                    personality,
+                    stage: 'connection',
+                    message,
+                    method: 'exploration',
+                    options
+                }
+            });
+
+        } catch (error) {
+            logger.error('Error in hybrid exploration:', error);
+            res.status(500).json({
+                success: false,
+                error: { message: '탐색 단계에서 오류가 발생했습니다.' }
+            });
+        }
+    }
+
+    /**
+     * Hybrid Connection - Process reflection and generate connection response
+     * POST /api/art-counselor/hybrid/connection
+     */
+    async hybridConnection(req, res) {
+        try {
+            const { userId } = req;
+            const { artworkId, personality, userInput, sessionId } = req.body;
+
+            // Store the reflection in conversation memory
+            if (userInput && sessionId) {
+                try {
+                    await artCounselorService.storeConversationMemory(
+                        sessionId,
+                        userId,
+                        'user',
+                        userInput,
+                        null,
+                        'connection'
+                    );
+                } catch (e) {
+                    logger.warn('Failed to store conversation memory:', e.message);
+                }
+            }
+
+            // Generate connection response
+            const message = userInput && userInput.length > 0
+                ? `나눠주신 이야기가 참 의미있네요. "${userInput.substring(0, 50)}${userInput.length > 50 ? '...' : ''}" - 이 감정과 경험이 오늘 이 작품과 만나게 된 것 같아요. 이 순간을 소중히 기록해두면 좋겠어요.`
+                : '오늘의 감상이 당신에게 의미있는 시간이었기를 바라요. 이 순간을 소중히 기록해두면 좋겠어요.';
+
+            logger.info(`Hybrid connection processed for user ${userId}`, {
+                artworkId,
+                personality,
+                sessionId
+            });
+
+            res.json({
+                success: true,
+                data: {
+                    artworkId,
+                    personality,
+                    stage: 'connection',
+                    message,
+                    method: 'connection'
+                }
+            });
+
+        } catch (error) {
+            logger.error('Error in hybrid connection:', error);
+            res.status(500).json({
+                success: false,
+                error: { message: '연결 단계에서 오류가 발생했습니다.' }
+            });
+        }
+    }
+
+    /**
+     * Hybrid Complete - Finalize session and generate summary
+     * POST /api/art-counselor/hybrid/complete
+     */
+    async hybridComplete(req, res) {
+        try {
+            const { userId } = req;
+            const { artworkId, personality, sessionId } = req.body;
+
+            // Get artwork info for summary
+            let artwork = null;
+            try {
+                artwork = await supabaseArtService.getArtworkById(artworkId);
+            } catch (e) {
+                artwork = { title: '오늘의 작품' };
+            }
+
+            // Generate session summary
+            const summary = `오늘 "${artwork?.title || '작품'}"과 함께한 시간이 의미있었기를 바라요. 작품을 통해 떠올린 감정과 기억들이 앞으로의 하루에 작은 위안이 되길 바랍니다. 당신의 감상은 고유하고 소중해요.`;
+
+            // Store completion in database
+            try {
+                if (sessionId) {
+                    const client = await pool.connect();
+                    await client.query(
+                        `UPDATE art_counselor_sessions
+                         SET ended_at = CURRENT_TIMESTAMP,
+                             conversation_summary = $1
+                         WHERE id = $2 AND user_id = $3`,
+                        [summary, sessionId, userId]
+                    );
+                    client.release();
+                }
+            } catch (e) {
+                logger.warn('Failed to update session completion:', e.message);
+            }
+
+            logger.info(`Hybrid session completed for user ${userId}`, {
+                artworkId,
+                personality,
+                sessionId
+            });
+
+            res.json({
+                success: true,
+                data: {
+                    journalId: sessionId || `journal-${Date.now()}`,
+                    summary,
+                    artworkTitle: artwork?.title || '오늘의 작품',
+                    createdAt: new Date().toISOString()
+                }
+            });
+
+        } catch (error) {
+            logger.error('Error in hybrid complete:', error);
+            res.status(500).json({
+                success: false,
+                error: { message: '세션을 완료하는 중 오류가 발생했습니다.' }
+            });
+        }
+    }
+
+    /**
+     * Get response history
+     */
+    async getResponseHistory(req, res) {
+        try {
+            const { userId } = req;
+            const { limit = 20, artworkId, therapeuticTheme } = req.query;
+
+            const client = await pool.connect();
+
+            let query = `
+                SELECT
+                    id, artwork_id, artwork_title, artwork_artist,
+                    emotional_response, response_intensity, personal_meaning,
+                    created_at
+                FROM artwork_emotional_responses
+                WHERE user_id = $1
+            `;
+
+            const params = [userId];
+            let paramCount = 1;
+
+            if (artworkId) {
+                paramCount++;
+                query += ` AND artwork_id = $${paramCount}`;
+                params.push(artworkId);
+            }
+
+            query += ` ORDER BY created_at DESC LIMIT $${paramCount + 1}`;
+            params.push(parseInt(limit));
+
+            const result = await client.query(query, params);
+            client.release();
+
+            res.json({
+                success: true,
+                data: result.rows
+            });
+
+        } catch (error) {
+            logger.error('Error getting response history:', error);
+            res.status(500).json({
+                success: false,
+                message: '응답 기록을 가져오는 중 오류가 발생했습니다.'
+            });
+        }
+    }
+
+    /**
+     * Get emotional progress
+     */
+    async getEmotionalProgress(req, res) {
+        try {
+            const { userId } = req;
+
+            const client = await pool.connect();
+
+            // Get session statistics
+            const statsQuery = `
+                SELECT
+                    COUNT(*) as total_sessions,
+                    COUNT(CASE WHEN ended_at IS NOT NULL THEN 1 END) as completed_sessions,
+                    MAX(ended_at) as last_session
+                FROM art_counselor_sessions
+                WHERE user_id = $1
+            `;
+
+            const statsResult = await client.query(statsQuery, [userId]);
+            const stats = statsResult.rows[0];
+
+            // Get recent emotional responses
+            const emotionsQuery = `
+                SELECT emotional_response, created_at
+                FROM artwork_emotional_responses
+                WHERE user_id = $1
+                ORDER BY created_at DESC
+                LIMIT 5
+            `;
+
+            const emotionsResult = await client.query(emotionsQuery, [userId]);
+
+            client.release();
+
+            // Calculate streak (simplified)
+            let weeklyStreak = 0;
+            if (stats.last_session) {
+                const lastSession = new Date(stats.last_session);
+                const now = new Date();
+                const daysDiff = Math.floor((now - lastSession) / (1000 * 60 * 60 * 24));
+                if (daysDiff <= 1) {
+                    weeklyStreak = Math.min(7, parseInt(stats.completed_sessions));
+                }
+            }
+
+            res.json({
+                success: true,
+                data: {
+                    completedSessions: parseInt(stats.completed_sessions) || 0,
+                    totalSessions: parseInt(stats.total_sessions) || 0,
+                    weeklyStreak,
+                    lastEmotion: emotionsResult.rows[0]?.emotional_response?.primary || '아직 기록 없음',
+                    recentEmotions: emotionsResult.rows
+                }
+            });
+
+        } catch (error) {
+            logger.error('Error getting emotional progress:', error);
+            res.status(500).json({
+                success: false,
+                message: '진행 상황을 가져오는 중 오류가 발생했습니다.'
+            });
+        }
+    }
 }
 
 module.exports = new ArtCounselorController();

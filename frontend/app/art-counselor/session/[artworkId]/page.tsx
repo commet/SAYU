@@ -179,19 +179,19 @@ export default function ArtCounselorSessionPage() {
   })();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
+    <div className="min-h-screen bg-neutral-50 text-neutral-900">
       <ArtCounselorShell
         artworkPanel={<ArtworkHero artwork={artwork} personality={user?.personalityType ?? null} />}
         conversationPanel={
           <div className="relative flex h-full flex-col">
             <ConversationStage stage={stage} />
             <ConversationThread messages={messages} />
-            <div className="border-t border-white/5 bg-white/6">
+            <div className="border-t border-neutral-200 bg-white">
               {conversationFooter}
             </div>
             {isLoading ? (
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm">
-                <Loader2 className="h-8 w-8 animate-spin text-sayu-lavender-dream" />
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm">
+                <Loader2 className="h-8 w-8 animate-spin text-neutral-400" />
               </div>
             ) : null}
           </div>

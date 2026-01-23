@@ -14,8 +14,8 @@ interface CompleteStepProps {
 export function CompleteStep({ payload, onReset }: CompleteStepProps) {
   if (!payload) {
     return (
-      <div className="flex h-full flex-col items-center justify-center space-y-4 text-white/70">
-        <CheckCircle2 className="h-10 w-10 text-sayu-lavender-dream" />
+      <div className="flex h-full flex-col items-center justify-center space-y-4 text-neutral-500">
+        <CheckCircle2 className="h-10 w-10 text-neutral-400" />
         <p>세션 결과를 정리하는 중이에요...</p>
       </div>
     );
@@ -29,10 +29,10 @@ export function CompleteStep({ payload, onReset }: CompleteStepProps) {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="rounded-3xl border border-white/10 bg-white/12 p-5 text-sm text-white/90 shadow-inner shadow-black/10"
+        className="border border-neutral-200 bg-white p-5 text-sm text-neutral-700"
       >
-        <h3 className="flex items-center gap-2 text-base font-semibold text-white">
-          <CheckCircle2 className="h-5 w-5 text-sayu-lime-cream" />
+        <h3 className="flex items-center gap-2 text-base font-medium text-black">
+          <CheckCircle2 className="h-5 w-5 text-neutral-400" />
           오늘의 요약
         </h3>
         <p className="mt-3 whitespace-pre-wrap leading-relaxed">
@@ -40,12 +40,12 @@ export function CompleteStep({ payload, onReset }: CompleteStepProps) {
         </p>
       </motion.div>
 
-      <div className="rounded-3xl border border-white/10 bg-white/6 p-5">
-        <h4 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.3em] text-white/50">
+      <div className="border border-neutral-200 bg-neutral-50 p-5">
+        <h4 className="flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-neutral-500">
           <NotebookPen className="h-4 w-4" />
           Journal Prompt
         </h4>
-        <p className="mt-2 text-sm leading-relaxed text-white">
+        <p className="mt-2 text-sm leading-relaxed text-neutral-900">
           {payload.journalPrompt}
         </p>
         {emotionalKeywords.length > 0 ? (
@@ -53,7 +53,7 @@ export function CompleteStep({ payload, onReset }: CompleteStepProps) {
             {emotionalKeywords.map((keyword) => (
               <span
                 key={keyword}
-                className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-white/60"
+                className="border border-neutral-200 bg-white px-3 py-1 text-[11px] uppercase tracking-widest text-neutral-500"
               >
                 {keyword}
               </span>
@@ -68,12 +68,12 @@ export function CompleteStep({ payload, onReset }: CompleteStepProps) {
             const content = (
               <div
                 className={cn(
-                  'flex w-full items-center justify-between rounded-2xl border border-white/10 px-4 py-3 text-sm text-white/90 transition hover:border-white/30 hover:bg-white/12',
-                  'bg-gradient-to-r from-white/6 to-white/4'
+                  'flex w-full items-center justify-between border border-neutral-200 px-4 py-3 text-sm text-neutral-900 transition hover:border-neutral-900 hover:bg-neutral-50',
+                  'bg-white'
                 )}
               >
                 <span>{action.label}</span>
-                <Navigation className="h-4 w-4 text-white/70" />
+                <Navigation className="h-4 w-4 text-neutral-400" />
               </div>
             );
 

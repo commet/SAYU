@@ -557,4 +557,101 @@ router.get('/stats',
   artCounselorController.getServiceStats
 );
 
+// ====================================
+// HYBRID SESSION ROUTES (4-Stage Flow)
+// ====================================
+
+/**
+ * GET /api/art-counselor/hybrid/opening/:artworkId/:personality
+ * Start hybrid session with opening question and options
+ */
+router.get('/hybrid/opening/:artworkId/:personality',
+  [
+    param('artworkId')
+      .notEmpty()
+      .withMessage('작품 ID가 필요합니다'),
+    param('personality')
+      .notEmpty()
+      .withMessage('성격 유형이 필요합니다')
+  ],
+  validateRequest,
+  artCounselorController.hybridOpening
+);
+
+/**
+ * POST /api/art-counselor/hybrid/exploration
+ * Process user selection and provide exploration response
+ */
+router.post('/hybrid/exploration',
+  counselorLimiter,
+  [
+    body('artworkId')
+      .notEmpty()
+      .withMessage('작품 ID가 필요합니다'),
+    body('personality')
+      .notEmpty()
+      .withMessage('성격 유형이 필요합니다'),
+    body('userSelection')
+      .notEmpty()
+      .withMessage('사용자 선택이 필요합니다'),
+    body('freeText')
+      .optional()
+      .isString()
+      .isLength({ max: 1000 })
+      .withMessage('자유 입력은 1000자 이내여야 합니다'),
+    body('sessionId')
+      .optional()
+      .isString()
+  ],
+  validateRequest,
+  artCounselorController.hybridExploration
+);
+
+/**
+ * POST /api/art-counselor/hybrid/connection
+ * Process reflection and generate connection response
+ */
+router.post('/hybrid/connection',
+  counselorLimiter,
+  [
+    body('artworkId')
+      .notEmpty()
+      .withMessage('작품 ID가 필요합니다'),
+    body('personality')
+      .notEmpty()
+      .withMessage('성격 유형이 필요합니다'),
+    body('userInput')
+      .optional()
+      .isString()
+      .isLength({ max: 2000 })
+      .withMessage('사용자 입력은 2000자 이내여야 합니다'),
+    body('sessionId')
+      .optional()
+      .isString()
+  ],
+  validateRequest,
+  artCounselorController.hybridConnection
+);
+
+/**
+ * POST /api/art-counselor/hybrid/complete
+ * Finalize session and generate summary
+ */
+router.post('/hybrid/complete',
+  counselorLimiter,
+  [
+    body('artworkId')
+      .notEmpty()
+      .withMessage('작품 ID가 필요합니다'),
+    body('personality')
+      .notEmpty()
+      .withMessage('성격 유형이 필요합니다'),
+    body('sessionId')
+      .optional()
+      .isString()
+  ],
+  validateRequest,
+  artCounselorController.hybridComplete
+);
+
 module.exports = router;

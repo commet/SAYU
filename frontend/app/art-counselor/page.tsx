@@ -2,9 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { Sparkles, Clock, BookOpen, HeartHandshake, Feather, Compass } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
+import { Sparkles, Clock, BookOpen, HeartHandshake, Feather, Compass, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { cn } from '@/lib/utils';
 
 type CounselorArtwork = {
   id: string;
@@ -56,26 +58,26 @@ const OFFLINE_ARTWORKS: CounselorArtwork[] = [
     durationMinutes: 6,
   },
   {
-    id: 'kim-whanki-25-vii-69',
+    id: 'piet-mondrian-composition-1921',
+    title: 'Composition with Red, Yellow and Blue',
+    artist: 'Piet Mondrian',
+    year: '1921',
+    heroImage: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?auto=format&fit=crop&w=900&q=80',
+    summary: '수직과 수평의 완벽한 조화. 복잡한 감정을 단순한 구조로 정리하고 싶을 때 적합한 작품입니다.',
+    moodTags: ['contemplative', 'structured', 'clarity'],
+    personalityFit: ['LAMF', 'LRMC', 'SRMF'],
+    durationMinutes: 8,
+  },
+  {
+    id: 'kim-whanki-universe-1969',
     title: '25-VII-69 #200 (Universe)',
     artist: '김환기',
     year: '1969',
     heroImage: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=900&q=80',
     summary: '밤하늘을 닮은 점묘의 리듬. 호흡을 고르고 내면의 패턴을 찾도록 돕는 명상형 작품입니다.',
-    moodTags: ['contemplative', 'cosmic', 'steady'],
+    moodTags: ['cosmic', 'meditative', 'steady'],
     personalityFit: ['LAMF', 'LRMC', 'SRMF'],
     durationMinutes: 8,
-  },
-  {
-    id: 'yoo-youngkuk-untitled-orange-peak',
-    title: 'Untitled (Orange Peak)',
-    artist: '유영국',
-    year: '1974',
-    heroImage: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=900&q=80',
-    summary: '산세를 추상화한 직선과 색면이 에너지를 깨우는 작품. 도전과 활력을 필요로 할 때 적합합니다.',
-    moodTags: ['energy', 'focus', 'momentum'],
-    personalityFit: ['SAMC', 'SREC', 'SRMC'],
-    durationMinutes: 5,
   },
 ];
 
@@ -361,19 +363,24 @@ export default function ArtCounselorLandingPage() {
 
   const ritualSteps = [
     {
-      icon: <Sparkles className="w-5 h-5 text-pink-400" />,
-      title: 'Morning Spotlight',
+      icon: <Sparkles className="w-5 h-5" />,
+      title: 'Opening',
       description: 'AI 큐레이터가 오늘의 작품을 골라 감정을 여는 질문과 함께 소개합니다.',
     },
     {
-      icon: <HeartHandshake className="w-5 h-5 text-purple-400" />,
-      title: 'Guided Dialogue',
-      description: 'Opening → Exploration → Connection 단계별로 감정과 시선을 정리합니다.',
+      icon: <Compass className="w-5 h-5" />,
+      title: 'Exploration',
+      description: '작품을 자세히 관찰하며 떠오르는 감정과 생각을 자유롭게 탐색합니다.',
     },
     {
-      icon: <BookOpen className="w-5 h-5 text-blue-400" />,
-      title: 'Personal Journal',
-      description: '완료 후 감정 키워드와 통찰을 저널·콜렉션에 자동으로 아카이빙합니다.',
+      icon: <HeartHandshake className="w-5 h-5" />,
+      title: 'Connection',
+      description: '작품과 나의 경험을 연결하며 의미 있는 통찰을 발견합니다.',
+    },
+    {
+      icon: <BookOpen className="w-5 h-5" />,
+      title: 'Complete',
+      description: '세션을 마무리하며 감정 키워드와 통찰을 저널에 기록합니다.',
     },
   ];
 
@@ -396,289 +403,246 @@ export default function ArtCounselorLandingPage() {
     {
       label: '완료한 세션',
       value: progress.completedSessions,
-      accent: 'from-pink-500/20 to-pink-500/5',
     },
     {
       label: '연속 돌봄일',
-      value: `${progress.weeklyStreak} day${progress.weeklyStreak === 1 ? '' : 's'}`,
-      accent: 'from-purple-500/20 to-purple-500/5',
+      value: `${progress.weeklyStreak}`,
     },
     {
       label: '마지막 감정',
       value: progress.lastEmotion,
-      accent: 'from-indigo-500/20 to-indigo-500/5',
     },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-950">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(124,58,237,0.35),_transparent_45%)]" />
-        <div className="relative mx-auto max-w-6xl px-6 py-20 lg:py-28">
-          <p className="text-sm uppercase tracking-[0.4em] text-slate-300/80">
-            SAYU · APT Companion
-          </p>
-          <h1 className="mt-6 text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl">
+    <div className="min-h-screen bg-white text-neutral-900">
+      {/* Header */}
+      <header className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <p className="text-sm uppercase tracking-widest text-neutral-500 mb-4">SAYU · APT Companion</p>
+          <h1 className="text-5xl md:text-6xl font-light text-black mb-3 tracking-tight">
             {greeting}
-            <span className="block text-slate-300">
-              매일 한 작품으로 감정과 시선을 정리하는 하이브리드 아트 카운슬러
-            </span>
           </h1>
-          <p className="mt-6 max-w-3xl text-lg text-slate-200">
-            Opening → Exploration → Connection → Complete 네 단계로 감정과 관찰을 풀어내고,
-            세션이 끝나면 저널·콜렉션·추천 행동까지 즉시 전달합니다.
+          <p className="text-lg text-neutral-500 font-light max-w-3xl">
+            매일 한 작품으로 감정과 시선을 정리하는 하이브리드 아트 카운슬러.
+            Opening → Exploration → Connection → Complete 네 단계로 감정과 관찰을 풀어냅니다.
           </p>
-          <div className="mt-10 flex flex-wrap items-center gap-4">
-            <button
-              type="button"
-              disabled={!todayArtwork?.id || loading}
-              onClick={() => handleStartSession(todayArtwork?.id)}
-              className="inline-flex items-center gap-2 rounded-full bg-white/90 px-6 py-3 text-slate-900 transition hover:bg-white disabled:cursor-not-allowed disabled:bg-white/30 disabled:text-white/70"
-            >
-              <Sparkles className="h-4 w-4" />
-              {todayArtwork?.title ? `오늘의 세션 열기` : '세션 준비 중'}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                const el = document.getElementById('artwork-grid');
-                el?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-white transition hover:border-white hover:bg-white/10"
-            >
-              컬렉션 살펴보기
-            </button>
+        </motion.div>
+      </header>
+
+      {/* Featured Artwork Section */}
+      {todayArtwork && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
+          <div className="flex items-baseline gap-3 mb-6">
+            <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">Today's Artwork</h2>
+            <div className="h-px flex-1 bg-neutral-200" />
           </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="group cursor-pointer"
+            onClick={() => handleStartSession(todayArtwork.id)}
+          >
+            <div className="relative aspect-[16/7] border border-neutral-200 group-hover:border-neutral-900 transition-colors duration-300 overflow-hidden">
+              <Image
+                src={todayArtwork.heroImage}
+                alt={todayArtwork.title}
+                fill
+                className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 text-white">
+                <p className="text-xs uppercase tracking-widest text-white/70 mb-2">오늘의 세션</p>
+                <h3 className="text-3xl md:text-4xl font-light text-white mb-2 tracking-tight">{todayArtwork.title}</h3>
+                <p className="text-sm uppercase tracking-wider text-white/90">{todayArtwork.artist} {todayArtwork.year && `· ${todayArtwork.year}`}</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {todayArtwork.moodTags.slice(0, 3).map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-3 py-1 text-xs uppercase tracking-wide border border-white/30 text-white/80"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-2 px-4 py-2 bg-white text-black text-sm font-medium">
+                  세션 시작
+                  <ArrowRight className="w-4 h-4" />
+                </div>
+              </div>
+            </div>
+          </motion.div>
           {error && (
-            <p className="mt-4 text-sm text-red-300">
-              {error} · API_URL 확인 후 다시 새로고침 해주세요.
+            <p className="mt-4 text-sm text-red-600">
+              {error}
             </p>
           )}
-        </div>
-      </section>
+        </section>
+      )}
 
-      <section className="mx-auto max-w-6xl px-6 py-14">
-        <div className="grid gap-6 md:grid-cols-3">
-          {statusIndicators.map((status) => (
-            <div
+      {/* Stats */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
+        <div className="grid grid-cols-3 gap-6">
+          {statusIndicators.map((status, index) => (
+            <motion.div
               key={status.label}
-              className={`rounded-3xl border border-white/5 bg-gradient-to-br ${status.accent} p-6`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 + index * 0.05 }}
+              className="border border-neutral-200 p-6"
             >
-              <p className="text-sm text-slate-300">{status.label}</p>
-              <p className="mt-3 text-3xl font-semibold text-white">{status.value}</p>
+              <p className="text-xs uppercase tracking-wider text-neutral-400 mb-2">{status.label}</p>
+              <p className="text-2xl font-light text-black tracking-tight">{status.value}</p>
               {progress.lastArtworkTitle && status.label === '마지막 감정' && (
-                <p className="mt-2 text-sm text-slate-400">
+                <p className="mt-2 text-xs text-neutral-400">
                   최근 작품 · {progress.lastArtworkTitle}
                 </p>
               )}
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>
 
-      <section className="border-y border-white/5 bg-slate-900/40 py-14">
-        <div className="mx-auto max-w-6xl px-6">
-          <h2 className="text-2xl font-semibold text-white">Service Pillars</h2>
-          <p className="mt-2 text-slate-300">
-            SAYU Art Counselor는 단순 추천을 넘어, 예술 경험을 Art First · Personal Journal ·
-            Natural Connection 세 축으로 설계합니다.
+      {/* Daily Ritual Steps */}
+      <section className="border-y border-neutral-200 bg-neutral-50 py-16 mb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-baseline gap-3 mb-8">
+            <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">Daily Ritual</h2>
+            <div className="h-px flex-1 bg-neutral-300" />
+          </div>
+          <p className="text-neutral-600 font-light mb-10 max-w-2xl">
+            한 작품, 네 단계. 모든 여정은 10분 내외의 호흡으로 설계되어 있습니다.
           </p>
-          <div className="mt-8 grid gap-6 md:grid-cols-3">
-            {pillars.map((pillar) => (
-              <div
-                key={pillar.title}
-                className="rounded-3xl border border-white/5 bg-gradient-to-br from-slate-900/60 via-slate-900/30 to-transparent p-6"
+          <div className="grid md:grid-cols-4 gap-6">
+            {ritualSteps.map((step, index) => (
+              <motion.div
+                key={step.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 + index * 0.05 }}
+                className="relative"
               >
-                <h3 className="text-lg font-semibold text-white">{pillar.title}</h3>
-                <p className="mt-3 text-sm text-slate-300">{pillar.copy}</p>
-              </div>
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="flex items-center justify-center w-8 h-8 border border-neutral-300 text-xs font-medium">
+                    {index + 1}
+                  </span>
+                  <span className="text-neutral-400">{step.icon}</span>
+                </div>
+                <h3 className="text-lg font-medium text-black mb-2">{step.title}</h3>
+                <p className="text-sm text-neutral-600 font-light">{step.description}</p>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-6 py-14">
-        <div className="grid gap-8 lg:grid-cols-2">
-          <div>
-            <p className="text-sm uppercase tracking-[0.4em] text-slate-400">Daily Ritual</p>
-            <h2 className="mt-3 text-3xl font-semibold text-white">한 작품, 네 단계</h2>
-            <p className="mt-3 text-slate-300">
-              Morning Notification → Art Presentation → Guided Dialogue → Personal Journal. 모든
-              여정은 10분 내외의 호흡으로 설계되어 있습니다.
-            </p>
-            <div className="mt-8 space-y-5">
-              {ritualSteps.map((step) => (
-                <div key={step.title} className="flex gap-4 rounded-2xl border border-white/5 p-4">
-                  <div className="mt-1 flex h-11 w-11 items-center justify-center rounded-xl bg-white/10">
-                    {step.icon}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-white">{step.title}</h3>
-                    <p className="text-sm text-slate-300">{step.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="rounded-3xl border border-white/5 bg-slate-900/60 p-6"
-          >
-            <p className="text-sm text-slate-400">오늘의 작품</p>
-            <h3 className="mt-2 text-2xl font-semibold text-white">
-              {todayArtwork?.title ?? '준비 중'}
-            </h3>
-            <p className="text-sm text-slate-400">{todayArtwork?.artist}</p>
-            <div className="mt-4 overflow-hidden rounded-2xl">
-              <img
-                src={todayArtwork?.heroImage ?? OFFLINE_ARTWORKS[0].heroImage}
-                alt={todayArtwork?.title ?? 'Daily artwork'}
-                className="h-64 w-full object-cover"
-              />
-            </div>
-            <p className="mt-4 text-slate-300">{todayArtwork?.summary}</p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {(todayArtwork?.moodTags ?? []).map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full border border-white/10 px-3 py-1 text-xs uppercase tracking-wide text-slate-200"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-            <button
-              type="button"
-              disabled={!todayArtwork?.id || loading}
-              onClick={() => handleStartSession(todayArtwork?.id)}
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-3 text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-40"
+      {/* Service Pillars */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
+        <div className="flex items-baseline gap-3 mb-8">
+          <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">Service Pillars</h2>
+          <div className="h-px flex-1 bg-neutral-200" />
+        </div>
+        <div className="grid md:grid-cols-3 gap-6">
+          {pillars.map((pillar, index) => (
+            <motion.div
+              key={pillar.title}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 + index * 0.05 }}
+              className="border border-neutral-200 p-6"
             >
-              <Feather className="h-4 w-4" />
-              세션 시작
-              {todayArtwork?.durationMinutes && (
-                <span className="text-sm text-white/80">
-                  · {todayArtwork.durationMinutes}분 대화
-                </span>
-              )}
-            </button>
-          </motion.div>
-        </div>
-      </section>
-
-      <section id="artwork-grid" className="bg-slate-900/20 py-14">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="text-sm text-slate-400">APT 맞춤 추천 풀</p>
-              <h2 className="text-3xl font-semibold text-white">Featured pairings</h2>
-            </div>
-            <p className="text-sm text-slate-400">
-              {loading ? '데이터를 불러오는 중입니다…' : '16개의 시그니처 조합을 순차적으로 공개합니다.'}
-            </p>
-          </div>
-          <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {artworks.map((artwork) => (
-              <div
-                key={artwork.id || artwork.title}
-                className="flex h-full flex-col overflow-hidden rounded-3xl border border-white/5 bg-slate-900/60"
-              >
-                <div className="relative h-48">
-                  <img
-                    src={artwork.heroImage}
-                    alt={artwork.title}
-                    className="h-full w-full object-cover transition duration-300 hover:scale-105"
-                  />
-                </div>
-                <div className="flex flex-1 flex-col p-5">
-                  <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Guided pairing</p>
-                  <h3 className="mt-2 text-xl font-semibold text-white">{artwork.title}</h3>
-                  <p className="text-sm text-slate-400">
-                    {artwork.artist}
-                    {artwork.year && ` · ${artwork.year}`}
-                  </p>
-                  <p className="mt-3 min-h-[72px] text-sm text-slate-300">{artwork.summary}</p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {artwork.personalityFit.slice(0, 3).map((fit) => (
-                      <span
-                        key={`${artwork.id}-${fit}`}
-                        className="rounded-full bg-white/10 px-3 py-1 text-xs text-slate-100"
-                      >
-                        {fit}
-                      </span>
-                    ))}
-                  </div>
-                  <button
-                    type="button"
-                    disabled={!artwork.id}
-                    onClick={() => handleStartSession(artwork.id)}
-                    className="mt-5 inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 px-4 py-2 text-sm text-white transition hover:border-white disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    <Compass className="h-4 w-4" />
-                    이 작품으로 대화 열기
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-6 py-16">
-        <div className="grid gap-8 md:grid-cols-3">
-          {[
-            {
-              title: 'APT 저널',
-              description: '세션 완료 시 감정 키워드와 추천 행동이 자동으로 저장됩니다.',
-            },
-            {
-              title: '감정 메모리',
-              description: '16가지 유형별 감정 히스토리를 시각화하여 다음 추천에 반영합니다.',
-            },
-            {
-              title: 'Community Reflection',
-              description: '비슷한 감정 궤적을 가진 사용자와 익명으로 통찰을 나눌 수 있게 준비 중입니다.',
-            },
-          ].map((item) => (
-            <div key={item.title} className="rounded-3xl border border-dashed border-white/10 p-6">
-              <p className="text-sm text-slate-400">Next step</p>
-              <h3 className="mt-2 text-xl font-semibold text-white">{item.title}</h3>
-              <p className="mt-3 text-sm text-slate-300">{item.description}</p>
-            </div>
+              <h3 className="text-base font-medium text-black mb-3">{pillar.title}</h3>
+              <p className="text-sm text-neutral-600 font-light">{pillar.copy}</p>
+            </motion.div>
           ))}
         </div>
       </section>
 
-      <section className="bg-slate-950/30 border-t border-white/5">
-        <div className="mx-auto max-w-6xl px-6 py-16">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-sm uppercase tracking-[0.4em] text-slate-400">Reflection</p>
-              <h2 className="text-3xl font-semibold text-white">저널 & 메모리</h2>
-            </div>
-            {insightLoading && <p className="text-sm text-slate-400">기록을 불러오는 중…</p>}
-          </div>
-          <div className="mt-8 grid gap-6 lg:grid-cols-2">
-            <div className="rounded-3xl border border-white/5 bg-slate-900/60 p-6">
-              <div className="flex items-center gap-2 text-slate-300">
-                <BookOpen className="h-4 w-4" />
-                <span className="text-sm uppercase tracking-[0.3em]">Journal Preview</span>
+      {/* Artwork Collection Grid */}
+      <section id="artwork-grid" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
+        <div className="flex items-baseline gap-3 mb-8">
+          <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">Featured Pairings</h2>
+          <div className="h-px flex-1 bg-neutral-200" />
+          <p className="text-xs text-neutral-400">
+            {loading ? '불러오는 중...' : 'APT 맞춤 추천'}
+          </p>
+        </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
+          {artworks.map((artwork) => (
+            <motion.div
+              key={artwork.id || artwork.title}
+              whileHover={{ y: -4 }}
+              className="group cursor-pointer"
+              onClick={() => handleStartSession(artwork.id)}
+            >
+              <div className="aspect-[4/3] border border-neutral-200 group-hover:border-neutral-900 transition-colors duration-300 overflow-hidden mb-4 relative">
+                <Image
+                  src={artwork.heroImage}
+                  alt={artwork.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                />
               </div>
-              <div className="mt-4 space-y-4">
+              <div className="space-y-1.5">
+                <p className="text-xs uppercase tracking-wider text-neutral-500 font-light">
+                  {artwork.durationMinutes && `${artwork.durationMinutes}min`}
+                  {artwork.year && ` · ${artwork.year}`}
+                </p>
+                <h3 className="text-base font-medium text-black line-clamp-2 leading-snug">{artwork.title}</h3>
+                <p className="text-sm text-neutral-600 font-light">{artwork.artist}</p>
+                <div className="flex flex-wrap gap-1.5 pt-2">
+                  {artwork.personalityFit.slice(0, 3).map((fit) => (
+                    <span
+                      key={`${artwork.id}-${fit}`}
+                      className="px-2 py-0.5 text-xs text-neutral-500 border border-neutral-200"
+                    >
+                      {fit}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="h-px bg-neutral-900 mt-3 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300" />
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Journal & Memory Section */}
+      <section className="border-t border-neutral-200 bg-neutral-50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-baseline gap-3 mb-8">
+            <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">Reflection</h2>
+            <div className="h-px flex-1 bg-neutral-300" />
+            {insightLoading && <p className="text-xs text-neutral-400">기록 불러오는 중...</p>}
+          </div>
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* Journal Preview */}
+            <div className="border border-neutral-200 bg-white p-6">
+              <div className="flex items-center gap-2 text-neutral-600 mb-6">
+                <BookOpen className="h-4 w-4" />
+                <span className="text-xs uppercase tracking-widest">Journal Preview</span>
+              </div>
+              <div className="space-y-4">
                 {displayJournalEntries.map((entry) => (
-                  <div key={entry.id} className="rounded-2xl border border-white/5 p-4">
-                    <p className="text-sm font-semibold text-white">
+                  <div key={entry.id} className="border-b border-neutral-100 pb-4 last:border-0 last:pb-0">
+                    <p className="text-sm font-medium text-black">
                       {entry.artworkTitle ?? '기록된 작품'}
                     </p>
                     {entry.artworkArtist && (
-                      <p className="text-xs text-slate-400">{entry.artworkArtist}</p>
+                      <p className="text-xs text-neutral-400">{entry.artworkArtist}</p>
                     )}
-                    <p className="mt-2 text-sm text-slate-200">
+                    <p className="mt-2 text-sm text-neutral-600 font-light">
                       {entry.emotionalResponse ?? '감정 기록이 준비 중입니다.'}
                     </p>
-                    <div className="mt-3 flex items-center justify-between text-xs text-slate-400">
+                    <div className="mt-3 flex items-center justify-between text-xs text-neutral-400">
                       <span>
                         강도{' '}
                         {typeof entry.intensity === 'number'
@@ -694,43 +658,80 @@ export default function ArtCounselorLandingPage() {
                   </div>
                 ))}
                 {!journalEntries.length && !insightLoading && (
-                  <p className="text-sm text-slate-400">
+                  <p className="text-sm text-neutral-400">
                     아직 저장된 저널이 없습니다. 첫 번째 세션을 시작하면 기록이 여기에 쌓여요.
                   </p>
                 )}
               </div>
             </div>
-            <div className="rounded-3xl border border-white/5 bg-slate-900/60 p-6">
-              <div className="flex items-center gap-2 text-slate-300">
+
+            {/* Memory Highlights */}
+            <div className="border border-neutral-200 bg-white p-6">
+              <div className="flex items-center gap-2 text-neutral-600 mb-6">
                 <Feather className="h-4 w-4" />
-                <span className="text-sm uppercase tracking-[0.3em]">Memory Highlights</span>
+                <span className="text-xs uppercase tracking-widest">Memory Highlights</span>
               </div>
-              <div className="mt-4 space-y-4">
+              <div className="space-y-4">
                 {displayMemorySnippets.map((snippet) => (
-                  <div key={snippet.id} className="rounded-2xl border border-white/5 p-4">
-                    <p className="text-sm text-slate-200">{snippet.content}</p>
-                    <div className="mt-3 flex items-center justify-between text-xs text-slate-400">
+                  <div key={snippet.id} className="border-b border-neutral-100 pb-4 last:border-0 last:pb-0">
+                    <p className="text-sm text-neutral-700 font-light">{snippet.content}</p>
+                    <div className="mt-3 flex items-center justify-between text-xs text-neutral-400">
                       <span>{snippet.theme ?? '기록'}</span>
                       <span>
                         {snippet.createdAt
-                          ? new Date(snippet.createdAt).toLocaleString()
+                          ? new Date(snippet.createdAt).toLocaleDateString()
                           : '최근'}
                       </span>
                     </div>
                     {snippet.emotion && (
-                      <p className="mt-1 text-xs text-pink-300">감정 · {snippet.emotion}</p>
+                      <p className="mt-1 text-xs text-neutral-500">감정 · {snippet.emotion}</p>
                     )}
                   </div>
                 ))}
                 {!memorySnippets.length && !insightLoading && (
-                  <p className="text-sm text-slate-400">
-                    최근 대화 메모리가 아직 없습니다. 세션을 시작하면 여기에서 흐름을 다시 이어갈
-                    수 있어요.
+                  <p className="text-sm text-neutral-400">
+                    최근 대화 메모리가 아직 없습니다. 세션을 시작하면 여기에서 흐름을 다시 이어갈 수 있어요.
                   </p>
                 )}
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Coming Soon */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="flex items-baseline gap-3 mb-8">
+          <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">Coming Soon</h2>
+          <div className="h-px flex-1 bg-neutral-200" />
+        </div>
+        <div className="grid md:grid-cols-3 gap-6">
+          {[
+            {
+              title: 'APT 저널',
+              description: '세션 완료 시 감정 키워드와 추천 행동이 자동으로 저장됩니다.',
+            },
+            {
+              title: '감정 메모리',
+              description: '16가지 유형별 감정 히스토리를 시각화하여 다음 추천에 반영합니다.',
+            },
+            {
+              title: 'Community Reflection',
+              description: '비슷한 감정 궤적을 가진 사용자와 익명으로 통찰을 나눌 수 있습니다.',
+            },
+          ].map((item, index) => (
+            <motion.div
+              key={item.title}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 + index * 0.05 }}
+              className="border border-dashed border-neutral-300 p-6"
+            >
+              <p className="text-xs uppercase tracking-wider text-neutral-400 mb-2">Next step</p>
+              <h3 className="text-base font-medium text-black mb-2">{item.title}</h3>
+              <p className="text-sm text-neutral-600 font-light">{item.description}</p>
+            </motion.div>
+          ))}
         </div>
       </section>
     </div>

@@ -25,7 +25,7 @@ export function OpeningStep({
   return (
     <div className="space-y-3 p-6">
       {options.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-white/6 p-4 text-sm text-white/70">
+        <div className="border border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-500">
           안내를 준비하고 있어요...
         </div>
       ) : null}

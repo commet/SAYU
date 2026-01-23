@@ -27,12 +27,12 @@ export const MessageBubble = memo(function MessageBubble({
     >
       <div
         className={cn(
-          'max-w-[88%] rounded-2xl px-4 py-3 shadow-sm shadow-black/10',
+          'max-w-[88%] px-4 py-3',
           isSystem
-            ? 'bg-amber-100/80 text-amber-950 dark:bg-amber-200/30 dark:text-amber-100'
+            ? 'border border-amber-200 bg-amber-50 text-amber-900'
             : isUser
-            ? 'bg-gradient-to-r from-sayu-lavender-dream/80 to-sayu-peach-breeze/80 text-sayu-dark-purple'
-            : 'bg-white/80 text-sayu-text-primary backdrop-blur'
+            ? 'border border-neutral-900 bg-neutral-900 text-white'
+            : 'border border-neutral-200 bg-white text-neutral-900'
         )}
       >
         {message.emoji ? (
@@ -40,10 +40,13 @@ export const MessageBubble = memo(function MessageBubble({
         ) : null}
         <span>{message.content}</span>
         {message.subtitle ? (
-          <p className="mt-1 text-xs text-white/70">{message.subtitle}</p>
+          <p className={cn(
+            "mt-1 text-xs",
+            isUser ? "text-neutral-300" : "text-neutral-500"
+          )}>{message.subtitle}</p>
         ) : null}
       </div>
-      <span className="text-[10px] uppercase tracking-[0.2em] text-white/40">
+      <span className="text-[10px] uppercase tracking-widest text-neutral-400">
         {new Date(message.createdAt).toLocaleTimeString('ko-KR', {
           hour: '2-digit',
           minute: '2-digit',

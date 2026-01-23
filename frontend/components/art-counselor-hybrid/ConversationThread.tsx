@@ -16,10 +16,10 @@ export function ConversationThread({ messages }: ConversationThreadProps) {
   }, [messages.length]);
 
   return (
-    <div className="flex-1 space-y-4 overflow-y-auto px-6 py-6">
+    <div className="flex-1 space-y-4 overflow-y-auto px-6 py-6 bg-neutral-50">
       {messages.length === 0 ? (
-        <div className="rounded-3xl border border-white/5 bg-white/6 p-6 text-sm text-white/60">
-          감정과 예술을 이어줄 첫 대화를 준비하고 있어요 ✨
+        <div className="border border-neutral-200 bg-white p-6 text-sm text-neutral-500">
+          감정과 예술을 이어줄 첫 대화를 준비하고 있어요
         </div>
       ) : (
         messages.map((message) => (

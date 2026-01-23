@@ -27,17 +27,17 @@ export const ConversationStage = memo(function ConversationStage({
   stage,
 }: ConversationStageProps) {
   return (
-    <div className="flex items-center justify-between border-b border-white/5 bg-white/4 px-6 py-5">
+    <div className="flex items-center justify-between border-b border-neutral-200 bg-neutral-50 px-6 py-5">
       <div>
-        <p className="text-xs uppercase tracking-[0.3rem] text-white/40">
+        <p className="text-xs uppercase tracking-widest text-neutral-400">
           Guidance Flow
         </p>
-        <h1 className="text-2xl font-semibold text-white">
+        <h1 className="text-xl font-medium text-black">
           {STAGE_LABEL[stage]}
         </h1>
       </div>
 
-      <ol className="flex items-center gap-3 text-xs font-medium text-white/60">
+      <ol className="flex items-center gap-3 text-xs font-medium text-neutral-500">
         {STAGE_ORDER.map((item, index) => {
           const active = item === stage;
           const reached =
@@ -47,22 +47,22 @@ export const ConversationStage = memo(function ConversationStage({
             <li key={item} className="flex items-center">
               <motion.span
                 animate={{
-                  opacity: active || reached ? 1 : 0.2,
+                  opacity: active || reached ? 1 : 0.4,
                   scale: active ? 1.05 : 1,
                 }}
                 className={cn(
-                  'flex h-8 w-8 items-center justify-center rounded-full border text-[0.7rem]',
+                  'flex h-8 w-8 items-center justify-center border text-[0.7rem]',
                   active
-                    ? 'border-white bg-white/90 text-sayu-dark-purple shadow-lg shadow-white/20'
+                    ? 'border-neutral-900 bg-neutral-900 text-white'
                     : reached
-                    ? 'border-white/50 bg-white/10 text-white'
-                    : 'border-white/20 bg-white/5 text-white/40'
+                    ? 'border-neutral-400 bg-neutral-100 text-neutral-700'
+                    : 'border-neutral-200 bg-white text-neutral-400'
                 )}
               >
                 {index + 1}
               </motion.span>
               {index < STAGE_ORDER.length - 1 ? (
-                <span className="mx-1 h-px w-8 bg-gradient-to-r from-white/20 via-white/40 to-white/10" />
+                <span className="mx-1 h-px w-8 bg-neutral-200" />
               ) : null}
             </li>
           );

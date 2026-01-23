@@ -19,8 +19,8 @@ export function ConnectionStep({ isLoading, onSubmit }: ConnectionStepProps) {
 
   return (
     <div className="space-y-3 p-6">
-      <div className="rounded-3xl border border-white/10 bg-white/8 p-4">
-        <label className="mb-3 block text-xs uppercase tracking-[0.2em] text-white/50">
+      <div className="border border-neutral-200 bg-neutral-50 p-4">
+        <label className="mb-3 block text-xs uppercase tracking-widest text-neutral-500">
           지금 떠오르는 생각이나 기억이 있다면 적어주세요
         </label>
         <textarea
@@ -28,7 +28,7 @@ export function ConnectionStep({ isLoading, onSubmit }: ConnectionStepProps) {
           disabled={isLoading}
           onChange={(event) => setValue(event.target.value)}
           placeholder="이 작품이 건네준 감정, 기억, 이야기를 자유롭게 적어주세요."
-          className="min-h-[150px] w-full resize-none rounded-2xl border border-white/10 bg-white/10 px-3 py-3 text-sm text-white outline-none placeholder:text-white/30 focus:border-white/40"
+          className="min-h-[150px] w-full resize-none border border-neutral-200 bg-white px-3 py-3 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-neutral-400"
         />
         <div className="mt-4 flex justify-end">
           <button
@@ -36,8 +36,8 @@ export function ConnectionStep({ isLoading, onSubmit }: ConnectionStepProps) {
             disabled={isLoading || !value.trim()}
             onClick={handleSubmit}
             className={cn(
-              'rounded-full px-5 py-2 text-xs font-semibold text-sayu-dark-purple transition',
-              'bg-gradient-to-r from-sayu-lime-cream/80 to-sayu-pearl/80 shadow-lg shadow-sayu-lime-cream/30',
+              'px-5 py-2 text-xs font-medium text-white transition',
+              'bg-neutral-900 hover:bg-neutral-800',
               (isLoading || !value.trim()) && 'opacity-60'
             )}
           >
