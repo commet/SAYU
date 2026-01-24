@@ -1,739 +1,503 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { Sparkles, Clock, BookOpen, HeartHandshake, Feather, Compass, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useCloudinaryArtworks, CloudinaryArtwork } from '@/hooks/useCloudinaryArtworks';
 import { cn } from '@/lib/utils';
 
-type CounselorArtwork = {
+type Emotion = {
   id: string;
-  title: string;
-  artist: string;
-  year?: string;
-  heroImage: string;
-  summary: string;
-  moodTags: string[];
-  personalityFit: string[];
-  durationMinutes?: number;
+  label: string;
+  context: string;
+  aiResponse: string;
+  artworkIntro: string;
 };
 
-type CounselorProgress = {
-  completedSessions: number;
-  weeklyStreak: number;
-  lastEmotion: string;
-  lastArtworkTitle?: string;
-  lastUpdated?: string;
-};
-
-type MemorySnippet = {
-  id: string;
-  content: string;
-  theme?: string;
-  emotion?: string;
-  createdAt?: string;
-};
-
-type JournalEntryPreview = {
-  id: string;
-  artworkTitle?: string;
-  artworkArtist?: string;
-  emotionalResponse?: string;
-  intensity?: number | string;
-  createdAt?: string;
-};
-
-const OFFLINE_ARTWORKS: CounselorArtwork[] = [
+// 감정 데이터 - 각 감정에 맞는 구체적이고 진심 어린 메시지
+const EMOTIONS: Emotion[] = [
   {
-    id: 'claude-monet-water-lilies-1906',
-    title: 'Water Lilies, Morning Light',
-    artist: 'Claude Monet',
-    year: '1906',
-    heroImage: 'https://images.unsplash.com/photo-1500346138972-dc5b229af4ad?auto=format&fit=crop&w=900&q=80',
-    summary: '모네가 백내장을 견디며 그린 아침의 호수 빛. 잔잔한 파동과 빛의 움직임을 통해 감정의 층을 여는 작품입니다.',
-    moodTags: ['calm', 'wonder', 'reflection'],
-    personalityFit: ['LAEF', 'SAEF', 'LRMF'],
-    durationMinutes: 6,
+    id: 'calm',
+    label: '고요한 마음',
+    context: '오늘은 평화롭고, 이 순간을 음미하고 싶은',
+    aiResponse: '그 고요함을 조금 더 깊이 느껴보면 어떨까요.',
+    artworkIntro: '이 작품은 당신의 평온한 마음결과 닮아 있어요.',
   },
   {
-    id: 'piet-mondrian-composition-1921',
-    title: 'Composition with Red, Yellow and Blue',
-    artist: 'Piet Mondrian',
-    year: '1921',
-    heroImage: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?auto=format&fit=crop&w=900&q=80',
-    summary: '수직과 수평의 완벽한 조화. 복잡한 감정을 단순한 구조로 정리하고 싶을 때 적합한 작품입니다.',
-    moodTags: ['contemplative', 'structured', 'clarity'],
-    personalityFit: ['LAMF', 'LRMC', 'SRMF'],
-    durationMinutes: 8,
+    id: 'restless',
+    label: '불안한 마음',
+    context: '생각이 많고, 마음이 자꾸 다른 곳으로 가는',
+    aiResponse: '그런 날이 있죠. 잠시 여기 머물러도 괜찮아요.',
+    artworkIntro: '복잡한 마음을 잠시 내려놓고, 이 작품을 바라봐 주세요.',
   },
   {
-    id: 'kim-whanki-universe-1969',
-    title: '25-VII-69 #200 (Universe)',
-    artist: '김환기',
-    year: '1969',
-    heroImage: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=900&q=80',
-    summary: '밤하늘을 닮은 점묘의 리듬. 호흡을 고르고 내면의 패턴을 찾도록 돕는 명상형 작품입니다.',
-    moodTags: ['cosmic', 'meditative', 'steady'],
-    personalityFit: ['LAMF', 'LRMC', 'SRMF'],
-    durationMinutes: 8,
+    id: 'melancholy',
+    label: '쓸쓸한 마음',
+    context: '혼자라는 느낌이 들고, 누군가와 연결되고 싶은',
+    aiResponse: '외로운 밤, 말없이 곁에 있어줄 작품을 골랐어요.',
+    artworkIntro: '이 작품도 당신처럼 조용히 혼자 서 있었어요.',
+  },
+  {
+    id: 'heavy',
+    label: '무거운 마음',
+    context: '설명하기 어려운 무언가가 마음을 누르는',
+    aiResponse: '말로 다 표현하지 않아도 돼요.',
+    artworkIntro: '이 작품 앞에서 그냥 숨만 쉬어도 충분해요.',
+  },
+  {
+    id: 'curious',
+    label: '궁금한 마음',
+    context: '새로운 것을 발견하고 싶고, 탐험하고 싶은',
+    aiResponse: '좋은 호기심이에요. 함께 들여다볼까요?',
+    artworkIntro: '이 작품에는 볼수록 새로운 이야기가 숨어 있어요.',
   },
 ];
 
-const OFFLINE_PROGRESS: CounselorProgress = {
-  completedSessions: 0,
-  weeklyStreak: 0,
-  lastEmotion: '아직 세션 기록이 없어요',
-};
+// Typewriter hook
+function useTypewriter(text: string, speed: number = 50, startDelay: number = 0) {
+  const [displayedText, setDisplayedText] = useState('');
+  const [isComplete, setIsComplete] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
 
-const OFFLINE_JOURNAL_ENTRIES: JournalEntryPreview[] = [
-  {
-    id: 'offline-journal-1',
-    artworkTitle: 'Water Lilies',
-    artworkArtist: 'Claude Monet',
-    emotionalResponse: '차분함과 동시에 잔잔한 기쁨이 올라왔어요.',
-    intensity: 0.42,
-    createdAt: new Date().toISOString(),
-  },
-];
+  useEffect(() => {
+    setDisplayedText('');
+    setIsComplete(false);
+    setHasStarted(false);
 
-const OFFLINE_MEMORY_SNIPPETS: MemorySnippet[] = [
-  {
-    id: 'offline-memory-1',
-    content: '하늘을 바라볼 때마다 떠올릴 수 있는 작은 루틴을 만들었어요.',
-    theme: 'connection',
-    emotion: 'hopeful',
-    createdAt: new Date().toISOString(),
-  },
-];
+    if (!text) return;
 
-const BACKEND_API_URL = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/$/, '');
+    const startTimer = setTimeout(() => {
+      setHasStarted(true);
+      let index = 0;
+      const typeTimer = setInterval(() => {
+        if (index < text.length) {
+          setDisplayedText(text.slice(0, index + 1));
+          index++;
+        } else {
+          setIsComplete(true);
+          clearInterval(typeTimer);
+        }
+      }, speed);
 
-const fetchArtCounselor = async (endpoint: string, init?: RequestInit) => {
-  const sanitized = endpoint.replace(/^\/+/, '');
-  const requestInit: RequestInit = {
-    ...init,
-    credentials: 'include',
-    cache: 'no-store',
-    headers: {
-      ...(init?.headers || {}),
-    },
-  };
+      return () => clearInterval(typeTimer);
+    }, startDelay);
 
-  const proxyUrl = `/api/art-counselor/${sanitized}`;
+    return () => clearTimeout(startTimer);
+  }, [text, speed, startDelay]);
 
-  try {
-    const response = await fetch(proxyUrl, requestInit);
-    if (!response.ok && BACKEND_API_URL) {
-      return fetch(`${BACKEND_API_URL}/api/art-counselor/${sanitized}`, requestInit);
-    }
-    return response;
-  } catch (error) {
-    if (BACKEND_API_URL) {
-      return fetch(`${BACKEND_API_URL}/api/art-counselor/${sanitized}`, requestInit);
-    }
-    throw error;
-  }
-};
+  return { displayedText, isComplete, hasStarted };
+}
 
-const toCounselorArtwork = (payload?: any, fallback?: Partial<CounselorArtwork>): CounselorArtwork | null => {
-  if (!payload) return null;
-  const base = {
-    ...fallback,
-    ...payload,
-  };
+// 배경 - 더 은은하게
+function AmbientBackground() {
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 bg-[#0a0a0b]" />
+      <div
+        className="absolute inset-0 opacity-[0.015]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+        }}
+      />
+      <motion.div
+        className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full"
+        style={{
+          background: 'radial-gradient(circle, rgba(60,50,40,0.04) 0%, transparent 60%)',
+        }}
+        animate={{ y: [0, 20, 0], x: [0, 10, 0] }}
+        transition={{ duration: 30, repeat: Infinity, ease: 'easeInOut' }}
+      />
+    </div>
+  );
+}
 
-  return {
-    id: base.id ?? base.artworkId ?? '',
-    title: base.title ?? base.artworkTitle ?? fallback?.title ?? 'Untitled',
-    artist: base.artist ?? base.artworkArtist ?? '',
-    year: base.year ?? base.artworkYear,
-    heroImage: base.heroImage ?? base.imageUrl ?? base.image_url ?? OFFLINE_ARTWORKS[0].heroImage,
-    summary:
-      base.summary ??
-      base.story ??
-      base.preview ??
-      base.synopsis ??
-      fallback?.summary ??
-      '작품 소개가 준비 중입니다.',
-    moodTags: base.moodTags ?? base.emotions ?? base.tags ?? [],
-    personalityFit: base.personalityFit ?? base.recommendedPersonalities ?? [],
-    durationMinutes: base.durationMinutes ?? base.estimatedDuration ?? fallback?.durationMinutes,
-  };
-};
+type Step = 'welcome' | 'greeting' | 'emotion' | 'reflection' | 'transition';
 
-export default function ArtCounselorLandingPage() {
+export default function ArtCounselorPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
-  const [artworks, setArtworks] = useState<CounselorArtwork[]>(OFFLINE_ARTWORKS);
-  const [todayArtwork, setTodayArtwork] = useState<CounselorArtwork | null>(null);
-  const [progress, setProgress] = useState<CounselorProgress>(OFFLINE_PROGRESS);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [memorySnippets, setMemorySnippets] = useState<MemorySnippet[]>([]);
-  const [journalEntries, setJournalEntries] = useState<JournalEntryPreview[]>([]);
-  const [insightLoading, setInsightLoading] = useState(true);
+  const [step, setStep] = useState<Step>('welcome');
+  const [selectedEmotion, setSelectedEmotion] = useState<Emotion | null>(null);
+  const [recommendedArtwork, setRecommendedArtwork] = useState<CloudinaryArtwork | null>(null);
 
-  const greeting = useMemo(() => {
-    if (authLoading) return 'Art Companion';
-    const nickname = user?.nickname || user?.full_name || user?.email?.split('@')[0];
-    return nickname ? `${nickname}의 Art Companion` : 'Art Companion';
+  const { artworks } = useCloudinaryArtworks({
+    userType: user?.personalityType || 'DEFAULT',
+    limit: 15,
+    random: true,
+    autoLoad: true,
+  });
+
+  // 초기 진입 시 로그인 상태에 따라 시작점 결정
+  useEffect(() => {
+    if (authLoading) return;
+
+    // 로그인 안 됐으면 welcome, 됐으면 greeting부터
+    if (!user) {
+      setStep('welcome');
+    } else {
+      setStep('greeting');
+    }
   }, [authLoading, user]);
 
-  const displayJournalEntries =
-    journalEntries.length > 0
-      ? journalEntries
-      : !insightLoading
-      ? OFFLINE_JOURNAL_ENTRIES
-      : [];
-  const displayMemorySnippets =
-    memorySnippets.length > 0
-      ? memorySnippets
-      : !insightLoading
-      ? OFFLINE_MEMORY_SNIPPETS
-      : [];
-
-  useEffect(() => {
-    let ignore = false;
-
-    async function loadArtCounselorData() {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const [todayRes, artworksRes, progressRes] = await Promise.allSettled([
-          fetchArtCounselor('today'),
-          fetchArtCounselor('artworks?limit=6'),
-          fetchArtCounselor('progress'),
-        ]);
-
-        if (!ignore && artworksRes.status === 'fulfilled' && artworksRes.value.ok) {
-          const json = await artworksRes.value.json();
-          const rawList = Array.isArray(json?.data)
-            ? json?.data
-            : json?.data?.records ?? [];
-          const items: CounselorArtwork[] = rawList
-            .map((item: any) => toCounselorArtwork(item))
-            .filter(Boolean) as CounselorArtwork[];
-
-          if (items.length) {
-            setArtworks(items);
-          }
-        }
-
-        if (!ignore && todayRes.status === 'fulfilled' && todayRes.value.ok) {
-          const json = await todayRes.value.json();
-          const data = json?.data ?? json;
-          const primary = data?.artwork ?? data ?? null;
-          const normalized = toCounselorArtwork(primary, {
-            id: data?.artworkId,
-          });
-          if (normalized) {
-            setTodayArtwork(normalized);
-          }
-        } else if (!ignore) {
-          setTodayArtwork(OFFLINE_ARTWORKS[0]);
-        }
-
-        if (!ignore && progressRes.status === 'fulfilled' && progressRes.value.ok) {
-          const json = await progressRes.value.json();
-          const data = json?.data ?? json;
-          if (data) {
-            setProgress({
-              completedSessions: data.completedSessions ?? data.totalSessions ?? 0,
-              weeklyStreak: data.weeklyStreak ?? data.currentStreak ?? 0,
-              lastEmotion: data.lastEmotion ?? data.lastMood ?? OFFLINE_PROGRESS.lastEmotion,
-              lastArtworkTitle: data.lastArtworkTitle ?? data.lastArtwork?.title,
-              lastUpdated: data.lastCompletedAt ?? data.updatedAt,
-            });
-          }
-        }
-
-        if (
-          (todayRes.status === 'rejected' ||
-            artworksRes.status === 'rejected' ||
-            progressRes.status === 'rejected') &&
-          !ignore
-        ) {
-          const reason =
-            (todayRes.status === 'rejected' && todayRes.reason?.message) ||
-            (artworksRes.status === 'rejected' && artworksRes.reason?.message) ||
-            (progressRes.status === 'rejected' && progressRes.reason?.message) ||
-            'Art Counselor API 응답이 없습니다. 백엔드를 확인해 주세요.';
-          setError(reason);
-          if (!todayArtwork) {
-            setTodayArtwork(OFFLINE_ARTWORKS[0]);
-          }
-        }
-
-      } catch (err) {
-        console.error('[ArtCounselor] landing fetch failed', err);
-        if (!ignore) {
-          setError(
-            '라이브 데이터를 불러오지 못했습니다. 백엔드 상태를 확인하고 다시 시도해주세요.',
-          );
-          setTodayArtwork(OFFLINE_ARTWORKS[0]);
-          setProgress(OFFLINE_PROGRESS);
-          setArtworks(OFFLINE_ARTWORKS);
-        }
-      } finally {
-        if (!ignore) {
-          setLoading(false);
-        }
-      }
-    }
-
-    loadArtCounselorData();
-    return () => {
-      ignore = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    let ignore = false;
-
-    async function loadInsightData() {
-      setInsightLoading(true);
-      try {
-        const [memoryRes, responseRes] = await Promise.allSettled([
-          fetchArtCounselor('memory?limit=6'),
-          fetchArtCounselor('response/history?limit=6'),
-        ]);
-
-        if (!ignore && memoryRes.status === 'fulfilled' && memoryRes.value.ok) {
-          const json = await memoryRes.value.json();
-          const rows: MemorySnippet[] = (json?.data ?? []).map((item: any) => ({
-            id: item.id ?? item.session_id ?? Math.random().toString(36),
-            content: item.content ?? '대화 기록이 준비 중입니다.',
-            theme: item.therapeutic_theme ?? item.theme,
-            emotion: item.emotion_detected ?? item.emotion,
-            createdAt: item.created_at,
-          }));
-          setMemorySnippets(rows);
-        }
-
-        if (!ignore && responseRes.status === 'fulfilled' && responseRes.value.ok) {
-          const json = await responseRes.value.json();
-          const rawEntries = Array.isArray(json?.data)
-            ? json.data
-            : json?.data?.entries ?? [];
-          const parsed: JournalEntryPreview[] = rawEntries.map((item: any) => ({
-            id: item.id ?? item.response_id ?? Math.random().toString(36),
-            artworkTitle: item.artwork_title ?? item.artworkTitle,
-            artworkArtist: item.artwork_artist ?? item.artworkArtist,
-            emotionalResponse: item.emotional_response ?? item.emotionalResponse,
-            intensity: item.response_intensity ?? item.responseIntensity,
-            createdAt: item.created_at ?? item.recordedAt,
-          }));
-          setJournalEntries(parsed);
-        }
-
-        if (
-          (memoryRes.status === 'rejected' || responseRes.status === 'rejected') &&
-          !ignore
-        ) {
-          const message =
-            (memoryRes.status === 'rejected' && memoryRes.reason?.message) ||
-            (responseRes.status === 'rejected' && responseRes.reason?.message) ||
-            null;
-          if (message) {
-            setError(message);
-          }
-        }
-      } catch (err) {
-        console.error('[ArtCounselor] insights fetch failed', err);
-      } finally {
-        if (!ignore) {
-          setInsightLoading(false);
-        }
-      }
-    }
-
-    loadInsightData();
-    return () => {
-      ignore = true;
-    };
-  }, []);
-
-  const handleStartSession = (artworkId?: string) => {
-    if (!artworkId) return;
-    router.push(`/art-counselor/session/${artworkId}`);
+  // 시간대별 인사
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    const name = user?.nickname || user?.full_name?.split(' ')[0];
+    const greeting = hour < 12 ? '좋은 아침이에요' : hour < 18 ? '안녕하세요' : '편안한 저녁이에요';
+    return name ? `${name}님, ${greeting}.` : `${greeting}.`;
   };
 
-  const ritualSteps = [
-    {
-      icon: <Sparkles className="w-5 h-5" />,
-      title: 'Opening',
-      description: 'AI 큐레이터가 오늘의 작품을 골라 감정을 여는 질문과 함께 소개합니다.',
-    },
-    {
-      icon: <Compass className="w-5 h-5" />,
-      title: 'Exploration',
-      description: '작품을 자세히 관찰하며 떠오르는 감정과 생각을 자유롭게 탐색합니다.',
-    },
-    {
-      icon: <HeartHandshake className="w-5 h-5" />,
-      title: 'Connection',
-      description: '작품과 나의 경험을 연결하며 의미 있는 통찰을 발견합니다.',
-    },
-    {
-      icon: <BookOpen className="w-5 h-5" />,
-      title: 'Complete',
-      description: '세션을 마무리하며 감정 키워드와 통찰을 저널에 기록합니다.',
-    },
-  ];
+  const greetingText = getGreeting();
+  const { displayedText: greeting, isComplete: greetingDone } = useTypewriter(
+    step === 'greeting' ? greetingText : '',
+    60
+  );
 
-  const pillars = [
-    {
-      title: 'Art First',
-      copy: '모든 대화는 작품에서 출발합니다. 시각 경험을 지키고 감정은 그 위에 펼칩니다.',
-    },
-    {
-      title: 'Personal Journal',
-      copy: '세션이 끝나면 감정 키워드, 통찰, 추천 행동이 모두 개인 기록으로 남습니다.',
-    },
-    {
-      title: 'Natural Connection',
-      copy: '강요 없이 차분한 톤으로 묻고 기다립니다. APT 유형에 맞춘 언어로 연결합니다.',
-    },
-  ];
+  useEffect(() => {
+    if (greetingDone && step === 'greeting') {
+      const timer = setTimeout(() => setStep('emotion'), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [greetingDone, step]);
 
-  const statusIndicators = [
-    {
-      label: '완료한 세션',
-      value: progress.completedSessions,
-    },
-    {
-      label: '연속 돌봄일',
-      value: `${progress.weeklyStreak}`,
-    },
-    {
-      label: '마지막 감정',
-      value: progress.lastEmotion,
-    },
-  ];
+  const findMatchingArtwork = useCallback((): CloudinaryArtwork | null => {
+    if (!artworks.length) return null;
+    return artworks[Math.floor(Math.random() * Math.min(artworks.length, 10))];
+  }, [artworks]);
+
+  const handleEmotionSelect = useCallback((emotion: Emotion) => {
+    setSelectedEmotion(emotion);
+    setRecommendedArtwork(findMatchingArtwork());
+    setStep('reflection');
+  }, [findMatchingArtwork]);
+
+  const handleStartSession = useCallback(() => {
+    if (!recommendedArtwork) return;
+
+    if (!user) {
+      router.push('/auth/sign-in?redirect=/art-counselor');
+      return;
+    }
+
+    if (!user.personalityType) {
+      router.push('/quiz?redirect=/art-counselor');
+      return;
+    }
+
+    setStep('transition');
+    setTimeout(() => {
+      router.push(`/art-counselor/session/${recommendedArtwork.id}`);
+    }, 800);
+  }, [recommendedArtwork, router, user]);
+
+  const handleLogin = () => router.push('/auth/sign-in?redirect=/art-counselor');
+  const handleSignup = () => router.push('/auth/sign-up?redirect=/art-counselor');
+  const handleContinueAsGuest = () => setStep('greeting');
+
+  // Reflection step typewriter
+  const { displayedText: aiResponse, isComplete: aiResponseDone } = useTypewriter(
+    step === 'reflection' && selectedEmotion ? selectedEmotion.aiResponse : '',
+    45,
+    300
+  );
+
+  const { displayedText: artworkIntro, isComplete: artworkIntroDone } = useTypewriter(
+    step === 'reflection' && selectedEmotion && aiResponseDone ? selectedEmotion.artworkIntro : '',
+    40,
+    500
+  );
 
   return (
-    <div className="min-h-screen bg-white text-neutral-900">
-      {/* Header */}
-      <header className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <p className="text-sm uppercase tracking-widest text-neutral-500 mb-4">SAYU · APT Companion</p>
-          <h1 className="text-5xl md:text-6xl font-light text-black mb-3 tracking-tight">
-            {greeting}
-          </h1>
-          <p className="text-lg text-neutral-500 font-light max-w-3xl">
-            매일 한 작품으로 감정과 시선을 정리하는 하이브리드 아트 카운슬러.
-            Opening → Exploration → Connection → Complete 네 단계로 감정과 관찰을 풀어냅니다.
-          </p>
-        </motion.div>
-      </header>
+    <div className="fixed inset-0 overflow-hidden">
+      <AmbientBackground />
 
-      {/* Featured Artwork Section */}
-      {todayArtwork && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-          <div className="flex items-baseline gap-3 mb-6">
-            <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">Today's Artwork</h2>
-            <div className="h-px flex-1 bg-neutral-200" />
-          </div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="group cursor-pointer"
-            onClick={() => handleStartSession(todayArtwork.id)}
-          >
-            <div className="relative aspect-[16/7] border border-neutral-200 group-hover:border-neutral-900 transition-colors duration-300 overflow-hidden">
-              <Image
-                src={todayArtwork.heroImage}
-                alt={todayArtwork.title}
-                fill
-                className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
-                priority
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 text-white">
-                <p className="text-xs uppercase tracking-widest text-white/70 mb-2">오늘의 세션</p>
-                <h3 className="text-3xl md:text-4xl font-light text-white mb-2 tracking-tight">{todayArtwork.title}</h3>
-                <p className="text-sm uppercase tracking-wider text-white/90">{todayArtwork.artist} {todayArtwork.year && `· ${todayArtwork.year}`}</p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {todayArtwork.moodTags.slice(0, 3).map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-3 py-1 text-xs uppercase tracking-wide border border-white/30 text-white/80"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="flex items-center gap-2 px-4 py-2 bg-white text-black text-sm font-medium">
-                  세션 시작
-                  <ArrowRight className="w-4 h-4" />
-                </div>
-              </div>
-            </div>
-          </motion.div>
-          {error && (
-            <p className="mt-4 text-sm text-red-600">
-              {error}
-            </p>
-          )}
-        </section>
-      )}
+      <div className="relative z-10 h-full flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-lg">
+          <AnimatePresence mode="wait">
 
-      {/* Stats */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-        <div className="grid grid-cols-3 gap-6">
-          {statusIndicators.map((status, index) => (
-            <motion.div
-              key={status.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 + index * 0.05 }}
-              className="border border-neutral-200 p-6"
-            >
-              <p className="text-xs uppercase tracking-wider text-neutral-400 mb-2">{status.label}</p>
-              <p className="text-2xl font-light text-black tracking-tight">{status.value}</p>
-              {progress.lastArtworkTitle && status.label === '마지막 감정' && (
-                <p className="mt-2 text-xs text-neutral-400">
-                  최근 작품 · {progress.lastArtworkTitle}
-                </p>
-              )}
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* Daily Ritual Steps */}
-      <section className="border-y border-neutral-200 bg-neutral-50 py-16 mb-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-baseline gap-3 mb-8">
-            <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">Daily Ritual</h2>
-            <div className="h-px flex-1 bg-neutral-300" />
-          </div>
-          <p className="text-neutral-600 font-light mb-10 max-w-2xl">
-            한 작품, 네 단계. 모든 여정은 10분 내외의 호흡으로 설계되어 있습니다.
-          </p>
-          <div className="grid md:grid-cols-4 gap-6">
-            {ritualSteps.map((step, index) => (
+            {/* Welcome - 비로그인 상태 */}
+            {step === 'welcome' && !authLoading && (
               <motion.div
-                key={step.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + index * 0.05 }}
-                className="relative"
+                key="welcome"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.8 }}
+                className="text-center"
               >
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="flex items-center justify-center w-8 h-8 border border-neutral-300 text-xs font-medium">
-                    {index + 1}
-                  </span>
-                  <span className="text-neutral-400">{step.icon}</span>
-                </div>
-                <h3 className="text-lg font-medium text-black mb-2">{step.title}</h3>
-                <p className="text-sm text-neutral-600 font-light">{step.description}</p>
+                <motion.p
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-white/40 text-xs uppercase tracking-[0.3em] mb-8"
+                >
+                  Art Counselor
+                </motion.p>
+
+                <motion.h1
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="text-2xl md:text-3xl text-white/90 font-light leading-relaxed mb-4"
+                  style={{ fontFamily: 'var(--font-serif, Georgia, serif)' }}
+                >
+                  예술 작품과 함께<br />
+                  마음을 들여다보는 시간
+                </motion.h1>
+
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.8 }}
+                  className="text-white/50 text-sm font-light mb-12 leading-relaxed"
+                >
+                  AI 큐레이터가 당신의 감정에 맞는 작품을 추천하고,<br />
+                  그 작품과 함께 짧은 대화를 나눕니다.
+                </motion.p>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.1 }}
+                  className="space-y-3"
+                >
+                  <button
+                    onClick={handleLogin}
+                    className="w-full max-w-xs mx-auto block px-6 py-3 bg-white text-neutral-900 text-sm font-medium rounded-sm hover:bg-white/90 transition-colors"
+                  >
+                    로그인하고 시작하기
+                  </button>
+                  <button
+                    onClick={handleSignup}
+                    className="w-full max-w-xs mx-auto block px-6 py-3 border border-white/20 text-white/70 text-sm font-light rounded-sm hover:border-white/40 hover:text-white transition-colors"
+                  >
+                    회원가입
+                  </button>
+                  <button
+                    onClick={handleContinueAsGuest}
+                    className="block mx-auto text-sm text-white/30 hover:text-white/50 transition-colors mt-6"
+                  >
+                    먼저 둘러보기
+                  </button>
+                </motion.div>
               </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+            )}
 
-      {/* Service Pillars */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-        <div className="flex items-baseline gap-3 mb-8">
-          <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">Service Pillars</h2>
-          <div className="h-px flex-1 bg-neutral-200" />
-        </div>
-        <div className="grid md:grid-cols-3 gap-6">
-          {pillars.map((pillar, index) => (
-            <motion.div
-              key={pillar.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 + index * 0.05 }}
-              className="border border-neutral-200 p-6"
-            >
-              <h3 className="text-base font-medium text-black mb-3">{pillar.title}</h3>
-              <p className="text-sm text-neutral-600 font-light">{pillar.copy}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* Artwork Collection Grid */}
-      <section id="artwork-grid" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-        <div className="flex items-baseline gap-3 mb-8">
-          <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">Featured Pairings</h2>
-          <div className="h-px flex-1 bg-neutral-200" />
-          <p className="text-xs text-neutral-400">
-            {loading ? '불러오는 중...' : 'APT 맞춤 추천'}
-          </p>
-        </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
-          {artworks.map((artwork) => (
-            <motion.div
-              key={artwork.id || artwork.title}
-              whileHover={{ y: -4 }}
-              className="group cursor-pointer"
-              onClick={() => handleStartSession(artwork.id)}
-            >
-              <div className="aspect-[4/3] border border-neutral-200 group-hover:border-neutral-900 transition-colors duration-300 overflow-hidden mb-4 relative">
-                <Image
-                  src={artwork.heroImage}
-                  alt={artwork.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <p className="text-xs uppercase tracking-wider text-neutral-500 font-light">
-                  {artwork.durationMinutes && `${artwork.durationMinutes}min`}
-                  {artwork.year && ` · ${artwork.year}`}
+            {/* Greeting */}
+            {step === 'greeting' && (
+              <motion.div
+                key="greeting"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.6 }}
+                className="text-center"
+              >
+                <p
+                  className="text-2xl md:text-3xl lg:text-4xl text-white/90 font-light tracking-wide"
+                  style={{ fontFamily: 'var(--font-serif, Georgia, serif)' }}
+                >
+                  {greeting}
+                  {!greetingDone && (
+                    <motion.span
+                      animate={{ opacity: [1, 0] }}
+                      transition={{ duration: 0.7, repeat: Infinity }}
+                      className="inline-block w-[2px] h-[0.9em] bg-white/50 ml-1 align-middle"
+                    />
+                  )}
                 </p>
-                <h3 className="text-base font-medium text-black line-clamp-2 leading-snug">{artwork.title}</h3>
-                <p className="text-sm text-neutral-600 font-light">{artwork.artist}</p>
-                <div className="flex flex-wrap gap-1.5 pt-2">
-                  {artwork.personalityFit.slice(0, 3).map((fit) => (
-                    <span
-                      key={`${artwork.id}-${fit}`}
-                      className="px-2 py-0.5 text-xs text-neutral-500 border border-neutral-200"
+              </motion.div>
+            )}
+
+            {/* Emotion Selection - 세로 레이아웃 */}
+            {step === 'emotion' && (
+              <motion.div
+                key="emotion"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.6 }}
+              >
+                <motion.p
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-xl md:text-2xl text-white/80 font-light text-center mb-12"
+                  style={{ fontFamily: 'var(--font-serif, Georgia, serif)' }}
+                >
+                  지금, 어떤 마음인가요?
+                </motion.p>
+
+                <div className="space-y-2">
+                  {EMOTIONS.map((emotion, index) => (
+                    <motion.button
+                      key={emotion.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2 + index * 0.1 }}
+                      onClick={() => handleEmotionSelect(emotion)}
+                      className={cn(
+                        'w-full text-left px-5 py-4 rounded-sm',
+                        'border border-white/10 bg-white/[0.02]',
+                        'hover:bg-white/[0.06] hover:border-white/20',
+                        'transition-all duration-300 group'
+                      )}
                     >
-                      {fit}
-                    </span>
+                      <span className="block text-white/90 text-base font-light mb-1">
+                        {emotion.label}
+                      </span>
+                      <span className="block text-white/40 text-sm font-light">
+                        {emotion.context}
+                      </span>
+                    </motion.button>
                   ))}
                 </div>
-              </div>
-              <div className="h-px bg-neutral-900 mt-3 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300" />
-            </motion.div>
-          ))}
-        </div>
-      </section>
+              </motion.div>
+            )}
 
-      {/* Journal & Memory Section */}
-      <section className="border-t border-neutral-200 bg-neutral-50 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-baseline gap-3 mb-8">
-            <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">Reflection</h2>
-            <div className="h-px flex-1 bg-neutral-300" />
-            {insightLoading && <p className="text-xs text-neutral-400">기록 불러오는 중...</p>}
-          </div>
-          <div className="grid lg:grid-cols-2 gap-8">
-            {/* Journal Preview */}
-            <div className="border border-neutral-200 bg-white p-6">
-              <div className="flex items-center gap-2 text-neutral-600 mb-6">
-                <BookOpen className="h-4 w-4" />
-                <span className="text-xs uppercase tracking-widest">Journal Preview</span>
-              </div>
-              <div className="space-y-4">
-                {displayJournalEntries.map((entry) => (
-                  <div key={entry.id} className="border-b border-neutral-100 pb-4 last:border-0 last:pb-0">
-                    <p className="text-sm font-medium text-black">
-                      {entry.artworkTitle ?? '기록된 작품'}
-                    </p>
-                    {entry.artworkArtist && (
-                      <p className="text-xs text-neutral-400">{entry.artworkArtist}</p>
+            {/* Reflection - 작품 추천 */}
+            {step === 'reflection' && selectedEmotion && (
+              <motion.div
+                key="reflection"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.6 }}
+              >
+                {/* AI Response */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-center mb-8"
+                >
+                  <p
+                    className="text-lg md:text-xl text-white/80 font-light leading-relaxed"
+                    style={{ fontFamily: 'var(--font-serif, Georgia, serif)' }}
+                  >
+                    {aiResponse}
+                    {!aiResponseDone && (
+                      <motion.span
+                        animate={{ opacity: [1, 0] }}
+                        transition={{ duration: 0.7, repeat: Infinity }}
+                        className="inline-block w-[2px] h-[0.8em] bg-white/50 ml-1 align-middle"
+                      />
                     )}
-                    <p className="mt-2 text-sm text-neutral-600 font-light">
-                      {entry.emotionalResponse ?? '감정 기록이 준비 중입니다.'}
-                    </p>
-                    <div className="mt-3 flex items-center justify-between text-xs text-neutral-400">
-                      <span>
-                        강도{' '}
-                        {typeof entry.intensity === 'number'
-                          ? `${Math.round(entry.intensity * 100)}%`
-                          : entry.intensity ?? '-'}
-                      </span>
-                      <span>
-                        {entry.createdAt
-                          ? new Date(entry.createdAt).toLocaleDateString()
-                          : '최근'}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-                {!journalEntries.length && !insightLoading && (
-                  <p className="text-sm text-neutral-400">
-                    아직 저장된 저널이 없습니다. 첫 번째 세션을 시작하면 기록이 여기에 쌓여요.
                   </p>
-                )}
-              </div>
-            </div>
+                </motion.div>
 
-            {/* Memory Highlights */}
-            <div className="border border-neutral-200 bg-white p-6">
-              <div className="flex items-center gap-2 text-neutral-600 mb-6">
-                <Feather className="h-4 w-4" />
-                <span className="text-xs uppercase tracking-widest">Memory Highlights</span>
-              </div>
-              <div className="space-y-4">
-                {displayMemorySnippets.map((snippet) => (
-                  <div key={snippet.id} className="border-b border-neutral-100 pb-4 last:border-0 last:pb-0">
-                    <p className="text-sm text-neutral-700 font-light">{snippet.content}</p>
-                    <div className="mt-3 flex items-center justify-between text-xs text-neutral-400">
-                      <span>{snippet.theme ?? '기록'}</span>
-                      <span>
-                        {snippet.createdAt
-                          ? new Date(snippet.createdAt).toLocaleDateString()
-                          : '최근'}
-                      </span>
-                    </div>
-                    {snippet.emotion && (
-                      <p className="mt-1 text-xs text-neutral-500">감정 · {snippet.emotion}</p>
-                    )}
-                  </div>
-                ))}
-                {!memorySnippets.length && !insightLoading && (
-                  <p className="text-sm text-neutral-400">
-                    최근 대화 메모리가 아직 없습니다. 세션을 시작하면 여기에서 흐름을 다시 이어갈 수 있어요.
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+                {/* Artwork Intro */}
+                <AnimatePresence>
+                  {aiResponseDone && (
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.3 }}
+                      className="text-center text-white/50 text-sm font-light mb-8"
+                    >
+                      {artworkIntro}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
 
-      {/* Coming Soon */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="flex items-baseline gap-3 mb-8">
-          <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">Coming Soon</h2>
-          <div className="h-px flex-1 bg-neutral-200" />
+                {/* Artwork */}
+                <AnimatePresence>
+                  {artworkIntroDone && recommendedArtwork && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2, duration: 0.8 }}
+                    >
+                      <div
+                        className="relative w-full mb-6 cursor-pointer group"
+                        onClick={handleStartSession}
+                      >
+                        {/* 작품 이미지 - 비율 유지, 잘리지 않게 */}
+                        <div className="relative w-full" style={{ paddingBottom: '75%' }}>
+                          <Image
+                            src={recommendedArtwork.imageUrl}
+                            alt={recommendedArtwork.title}
+                            fill
+                            className="object-contain"
+                            priority
+                            sizes="(max-width: 768px) 100vw, 512px"
+                          />
+                        </div>
+
+                        {/* 작품 정보 */}
+                        <div className="mt-4 text-center">
+                          <h3 className="text-white/90 text-base font-light">
+                            {recommendedArtwork.title}
+                          </h3>
+                          <p className="text-white/40 text-sm mt-1">
+                            {recommendedArtwork.artist}
+                            {recommendedArtwork.year && ` · ${recommendedArtwork.year}`}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* CTA */}
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.5 }}
+                        className="text-center space-y-4"
+                      >
+                        <button
+                          onClick={handleStartSession}
+                          className="px-8 py-3 bg-white/10 border border-white/20 text-white text-sm font-light rounded-sm hover:bg-white/20 transition-colors"
+                        >
+                          {user ? '이 작품과 대화 나누기' : '로그인하고 대화 시작하기'}
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setStep('emotion');
+                            setSelectedEmotion(null);
+                          }}
+                          className="block mx-auto text-sm text-white/30 hover:text-white/50 transition-colors"
+                        >
+                          다른 감정으로 돌아가기
+                        </button>
+                      </motion.div>
+                    </motion.div>
+                  )}
+
+                  {artworkIntroDone && !recommendedArtwork && (
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-center text-white/40 text-sm"
+                    >
+                      작품을 불러오고 있어요...
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            )}
+
+            {/* Transition */}
+            {step === 'transition' && (
+              <motion.div
+                key="transition"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center"
+              >
+                <motion.div
+                  animate={{ scale: [1, 1.1, 1], opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="w-2 h-2 rounded-full bg-white/60 mx-auto mb-6"
+                />
+                <p className="text-white/40 text-sm font-light">
+                  대화를 준비하고 있어요
+                </p>
+              </motion.div>
+            )}
+
+          </AnimatePresence>
         </div>
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            {
-              title: 'APT 저널',
-              description: '세션 완료 시 감정 키워드와 추천 행동이 자동으로 저장됩니다.',
-            },
-            {
-              title: '감정 메모리',
-              description: '16가지 유형별 감정 히스토리를 시각화하여 다음 추천에 반영합니다.',
-            },
-            {
-              title: 'Community Reflection',
-              description: '비슷한 감정 궤적을 가진 사용자와 익명으로 통찰을 나눌 수 있습니다.',
-            },
-          ].map((item, index) => (
-            <motion.div
-              key={item.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 + index * 0.05 }}
-              className="border border-dashed border-neutral-300 p-6"
-            >
-              <p className="text-xs uppercase tracking-wider text-neutral-400 mb-2">Next step</p>
-              <h3 className="text-base font-medium text-black mb-2">{item.title}</h3>
-              <p className="text-sm text-neutral-600 font-light">{item.description}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+      </div>
     </div>
   );
 }
