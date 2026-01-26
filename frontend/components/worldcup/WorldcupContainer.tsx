@@ -9,13 +9,16 @@ import { ResultView } from './ResultView';
 import type { RoundType } from '@sayu/shared/exhibition-worldcup-types';
 
 type Phase = 'setup' | 'tournament' | 'result';
+type WorldcupMode = 'my' | 'all';
 
 interface WorldcupContainerProps {
+  mode?: WorldcupMode;
   exhibitionVisitId?: string;
   exhibitionId?: string;
 }
 
 export function WorldcupContainer({
+  mode = 'all',
   exhibitionVisitId,
   exhibitionId,
 }: WorldcupContainerProps) {
@@ -62,6 +65,7 @@ export function WorldcupContainer({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             round_type: roundType,
+            mode: mode,
             exhibition_visit_id: exhibitionVisitId,
             exhibition_id: exhibitionId,
           }),
@@ -186,7 +190,7 @@ export function WorldcupContainer({
   }, [reset]);
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen bg-neutral-50 text-neutral-900">
       <AnimatePresence mode="wait">
         {phase === 'setup' && (
           <motion.div
@@ -197,6 +201,7 @@ export function WorldcupContainer({
             transition={{ duration: 0.3 }}
           >
             <SetupPhase
+              mode={mode}
               session={session}
               participants={participants}
               onCreateSession={handleCreateSession}

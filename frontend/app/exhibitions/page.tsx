@@ -16,7 +16,10 @@ import {
   Heart,
   AlertCircle,
   Loader2,
+  Trophy,
+  ChevronRight,
 } from 'lucide-react';
+import Link from 'next/link';
 import { ExhibitionPlaceholder } from '@/components/exhibitions/ExhibitionPlaceholder';
 
 // Translations
@@ -39,6 +42,9 @@ const t = {
     addedToSaved: 'Added to saved',
     removedFromSaved: 'Removed from saved',
     loginToSave: 'Login to save exhibitions.',
+    worldcupBanner: 'Exhibition Worldcup',
+    worldcupDesc: 'Which exhibition left the deepest impression? Find your favorite!',
+    startWorldcup: 'Start Worldcup',
   },
   ko: {
     title: '전시',
@@ -58,6 +64,9 @@ const t = {
     addedToSaved: '저장되었습니다',
     removedFromSaved: '저장 취소되었습니다',
     loginToSave: '전시를 저장하려면 로그인이 필요합니다.',
+    worldcupBanner: '전시 월드컵',
+    worldcupDesc: '어떤 전시가 가장 인상 깊었나요? 나의 최애 전시를 찾아보세요!',
+    startWorldcup: '월드컵 시작',
   },
 };
 
@@ -322,6 +331,30 @@ export default function ExhibitionsPage() {
             </div>
           </section>
         )}
+
+        {/* Exhibition Worldcup Banner */}
+        <Link href="/worldcup" className="block mb-12 md:mb-16 group">
+          <div className="relative overflow-hidden rounded-xl border border-neutral-200 bg-gradient-to-r from-neutral-900 to-neutral-800 p-6 md:p-8 hover:border-neutral-400 transition-all">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-xl bg-[#D4A520]/20 flex items-center justify-center flex-shrink-0">
+                  <Trophy className="w-7 h-7 text-[#D4A520]" />
+                </div>
+                <div>
+                  <h3 className="text-lg md:text-xl font-semibold text-white mb-1">{texts.worldcupBanner}</h3>
+                  <p className="text-sm text-white/70">{texts.worldcupDesc}</p>
+                </div>
+              </div>
+              <div className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-white text-neutral-900 rounded-lg font-medium text-sm group-hover:bg-[#D4A520] group-hover:text-white transition-colors">
+                {texts.startWorldcup}
+                <ChevronRight className="w-4 h-4" />
+              </div>
+            </div>
+            {/* Decorative elements */}
+            <div className="absolute -right-8 -top-8 w-32 h-32 bg-[#D4A520]/10 rounded-full blur-2xl" />
+            <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-white/5 rounded-full blur-xl" />
+          </div>
+        </Link>
 
         <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md pt-4 pb-4 border-b border-neutral-200 mb-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">

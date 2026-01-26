@@ -2,10 +2,28 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useWorldcupStore } from '@/lib/stores/worldcup-store';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { ChevronLeft, Trophy } from 'lucide-react';
 import type { WorldcupMatch } from '@sayu/shared/exhibition-worldcup-types';
-import { getRoundLabel } from '@sayu/shared/exhibition-worldcup-types';
+
+const t = {
+  en: {
+    match: 'Match',
+    loading: 'Loading...',
+    untitled: 'Untitled',
+    unknownVenue: 'Unknown Venue',
+  },
+  ko: {
+    match: '매치',
+    loading: '로딩 중...',
+    untitled: '제목 없음',
+    unknownVenue: '장소 미상',
+  },
+};
 
 interface MatchViewProps {
   match: WorldcupMatch;
@@ -20,6 +38,8 @@ export function MatchView({
   progress,
   isProcessing,
 }: MatchViewProps) {
+  const { language } = useLanguage();
+  const texts = t[language];
   const { currentMatchParticipants, matchStartTime, getCurrentRoundLabel } = useWorldcupStore();
   const [selected, setSelected] = useState<'a' | 'b' | null>(null);
 
@@ -28,7 +48,6 @@ export function MatchView({
 
   const roundLabel = getCurrentRoundLabel();
 
-  // 선택 처리
   const handleSelect = useCallback(
     (side: 'a' | 'b') => {
       if (isProcessing || selected) return;
@@ -42,7 +61,6 @@ export function MatchView({
         ? Date.now() - matchStartTime
         : undefined;
 
-      // 짧은 딜레이 후 결과 제출 (애니메이션 효과)
       setTimeout(() => {
         onSelectWinner(winnerId, decisionTimeMs);
       }, 300);
@@ -50,52 +68,64 @@ export function MatchView({
     [isProcessing, selected, participantA?.id, participantB?.id, matchStartTime, onSelectWinner]
   );
 
-  // 매치 변경 시 선택 초기화
   useEffect(() => {
     setSelected(null);
   }, [match.id]);
 
   if (!participantA || !participantB) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-400">로딩 중...</div>
+      <div className="min-h-screen flex items-center justify-center bg-neutral-50">
+        <div className="text-neutral-500">{texts.loading}</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* 헤더 */}
-      <div className="p-4 text-center border-b border-gray-800">
-        <div className="text-lg font-bold text-yellow-500">{roundLabel}</div>
-        <div className="text-sm text-gray-400">
-          {progress.current + 1} / {progress.total} 매치
-        </div>
-        <div className="w-full max-w-xs mx-auto mt-2 h-1.5 bg-gray-800 rounded-full overflow-hidden">
-          <motion.div
-            className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
-            initial={{ width: 0 }}
-            animate={{ width: `${progress.percentage}%` }}
-            transition={{ duration: 0.3 }}
-          />
+    <div className="min-h-screen flex flex-col bg-neutral-100">
+      {/* Header */}
+      <div className="bg-white border-b border-neutral-200 p-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-3">
+            <Link
+              href="/worldcup"
+              className="flex items-center gap-1 text-neutral-500 hover:text-neutral-900 transition-colors"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </Link>
+            <div className="flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-[#D4A520]" />
+              <span className="font-bold text-neutral-900">{roundLabel}</span>
+            </div>
+            <div className="text-sm text-neutral-500">
+              {progress.current + 1} / {progress.total}
+            </div>
+          </div>
+          <div className="w-full h-2 bg-neutral-200 rounded-full overflow-hidden">
+            <motion.div
+              className="h-full bg-neutral-900"
+              initial={{ width: 0 }}
+              animate={{ width: `${progress.percentage}%` }}
+              transition={{ duration: 0.3 }}
+            />
+          </div>
         </div>
       </div>
 
-      {/* VS 텍스트 - 중앙 */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none">
+      {/* VS Badge - Center */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
         <motion.div
-          className="w-16 h-16 rounded-full bg-gray-900 border-4 border-yellow-500 flex items-center justify-center shadow-xl"
+          className="w-16 h-16 rounded-full bg-white border-4 border-neutral-900 flex items-center justify-center shadow-xl"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: 'spring', stiffness: 300 }}
         >
-          <span className="text-yellow-500 font-bold text-lg">VS</span>
+          <span className="text-neutral-900 font-bold text-lg">VS</span>
         </motion.div>
       </div>
 
-      {/* 매치 영역 */}
-      <div className="flex-1 flex flex-col md:flex-row">
-        {/* 참가자 A (왼쪽/위) */}
+      {/* Match Area */}
+      <div className="flex-1 flex flex-col md:flex-row relative">
+        {/* Participant A */}
         <ParticipantCard
           participant={participantA}
           side="a"
@@ -103,9 +133,10 @@ export function MatchView({
           isLoser={selected === 'b'}
           isDisabled={isProcessing || selected !== null}
           onClick={() => handleSelect('a')}
+          texts={texts}
         />
 
-        {/* 참가자 B (오른쪽/아래) */}
+        {/* Participant B */}
         <ParticipantCard
           participant={participantB}
           side="b"
@@ -113,6 +144,7 @@ export function MatchView({
           isLoser={selected === 'a'}
           isDisabled={isProcessing || selected !== null}
           onClick={() => handleSelect('b')}
+          texts={texts}
         />
       </div>
     </div>
@@ -124,6 +156,7 @@ interface ParticipantCardProps {
     id: string;
     title?: string;
     artist?: string;
+    venue?: string;
     image_url?: string;
     temp_image_url?: string;
   };
@@ -132,6 +165,7 @@ interface ParticipantCardProps {
   isLoser: boolean;
   isDisabled: boolean;
   onClick: () => void;
+  texts: typeof t['en'];
 }
 
 function ParticipantCard({
@@ -141,21 +175,21 @@ function ParticipantCard({
   isLoser,
   isDisabled,
   onClick,
+  texts,
 }: ParticipantCardProps) {
   const imageUrl =
     participant.image_url ||
     participant.temp_image_url ||
-    '/images/placeholder-artwork.png';
+    '/images/placeholder-exhibition.png';
 
   return (
     <motion.button
       onClick={onClick}
       disabled={isDisabled}
       className={cn(
-        'flex-1 relative overflow-hidden transition-all',
+        'flex-1 relative overflow-hidden transition-all min-h-[40vh] md:min-h-0',
         'focus:outline-none',
-        side === 'a' ? 'md:border-r border-b md:border-b-0' : '',
-        'border-gray-800',
+        side === 'a' ? 'md:border-r border-b md:border-b-0 border-neutral-300' : '',
         isDisabled && !isSelected && !isLoser ? 'cursor-not-allowed' : 'cursor-pointer'
       )}
       animate={{
@@ -167,40 +201,45 @@ function ParticipantCard({
       whileHover={!isDisabled ? { scale: 1.01 } : {}}
       whileTap={!isDisabled ? { scale: 0.99 } : {}}
     >
-      {/* 배경 이미지 */}
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${imageUrl})` }}
-      />
+      {/* Background Image */}
+      <div className="absolute inset-0">
+        <Image
+          src={imageUrl}
+          alt={participant.title || 'Exhibition'}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 50vw"
+        />
+      </div>
 
-      {/* 오버레이 */}
+      {/* Overlay */}
       <div
         className={cn(
           'absolute inset-0 transition-all duration-300',
           isSelected
-            ? 'bg-gradient-to-t from-green-900/80 via-green-900/40 to-transparent'
-            : 'bg-gradient-to-t from-black/80 via-black/40 to-transparent',
-          !isDisabled && 'hover:from-blue-900/60 hover:via-blue-900/30'
+            ? 'bg-gradient-to-t from-emerald-900/80 via-emerald-900/40 to-transparent'
+            : 'bg-gradient-to-t from-black/70 via-black/30 to-transparent',
+          !isDisabled && 'hover:from-neutral-900/60 hover:via-neutral-900/20'
         )}
       />
 
-      {/* 정보 */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 text-left">
+      {/* Info */}
+      <div className="absolute bottom-0 left-0 right-0 p-6 text-left text-white">
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.1 }}
         >
-          <h3 className="text-xl md:text-2xl font-bold mb-1 line-clamp-2">
-            {participant.title || '제목 없음'}
+          <h3 className="text-xl md:text-2xl font-bold mb-1 line-clamp-2 drop-shadow-lg">
+            {participant.title || texts.untitled}
           </h3>
-          <p className="text-gray-300 text-sm md:text-base">
-            {participant.artist || '작가 미상'}
+          <p className="text-white/80 text-sm md:text-base drop-shadow">
+            {participant.venue || participant.artist || texts.unknownVenue}
           </p>
         </motion.div>
       </div>
 
-      {/* 선택 표시 */}
+      {/* Selection Indicator */}
       <AnimatePresence>
         {isSelected && (
           <motion.div
@@ -209,9 +248,9 @@ function ParticipantCard({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}
           >
-            <div className="w-24 h-24 rounded-full bg-green-500/30 flex items-center justify-center backdrop-blur-sm">
+            <div className="w-24 h-24 rounded-full bg-emerald-500/30 flex items-center justify-center backdrop-blur-sm">
               <motion.div
-                className="text-6xl"
+                className="text-6xl text-white"
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: 'spring', stiffness: 300 }}
@@ -223,11 +262,11 @@ function ParticipantCard({
         )}
       </AnimatePresence>
 
-      {/* 측면 색상 인디케이터 */}
+      {/* Side Color Indicator */}
       <div
         className={cn(
           'absolute top-0 bottom-0 w-1',
-          side === 'a' ? 'left-0 bg-blue-500' : 'right-0 bg-red-500'
+          side === 'a' ? 'left-0 bg-neutral-900' : 'right-0 bg-[#D4A520]'
         )}
       />
     </motion.button>
