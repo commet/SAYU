@@ -571,7 +571,6 @@ class APTDataAccess {
     
     return reasons.join(' · ') || `${typeData.name}님께 추천`;
   }
-}
 
   // ==================== 새로운 최적화 메서드들 ====================
   

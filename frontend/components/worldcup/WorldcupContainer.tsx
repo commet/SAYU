@@ -15,6 +15,37 @@ interface WorldcupContainerProps {
   exhibitionId?: string;
 }
 
+// Ambient Background Component
+function AmbientBackground() {
+  return (
+    <div className="fixed inset-0 pointer-events-none">
+      <div className="absolute inset-0 bg-[#0a0a0b]" />
+      <div
+        className="absolute inset-0 opacity-[0.015]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+        }}
+      />
+      <motion.div
+        className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full"
+        style={{
+          background: 'radial-gradient(circle, rgba(180,140,100,0.03) 0%, transparent 60%)',
+        }}
+        animate={{ y: [0, 30, 0], x: [0, -20, 0] }}
+        transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <motion.div
+        className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full"
+        style={{
+          background: 'radial-gradient(circle, rgba(100,120,180,0.02) 0%, transparent 60%)',
+        }}
+        animate={{ y: [0, -20, 0], x: [0, 15, 0] }}
+        transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
+      />
+    </div>
+  );
+}
+
 export function WorldcupContainer({
   exhibitionVisitId,
   exhibitionId,
@@ -28,7 +59,6 @@ export function WorldcupContainer({
     addParticipant,
     removeParticipant,
     startTournament,
-    setCurrentMatch,
     selectWinner,
     advanceToNextMatch,
     completeTournament,
@@ -40,7 +70,6 @@ export function WorldcupContainer({
   const [phase, setPhase] = useState<Phase>('setup');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // 세션 상태에 따라 phase 설정
   useEffect(() => {
     if (session?.status === 'completed' && winner) {
       setPhase('result');
@@ -51,7 +80,6 @@ export function WorldcupContainer({
     }
   }, [session?.status, winner, currentMatch]);
 
-  // 세션 생성
   const handleCreateSession = useCallback(
     async (roundType: RoundType) => {
       try {
@@ -83,7 +111,6 @@ export function WorldcupContainer({
     [exhibitionVisitId, exhibitionId, setSession, setLoading]
   );
 
-  // 토너먼트 시작
   const handleStartTournament = useCallback(async () => {
     if (!session?.id) return;
 
@@ -101,11 +128,7 @@ export function WorldcupContainer({
         const { session: updatedSession, matches, participants: updatedParticipants } = data.data;
 
         setSession(updatedSession);
-
-        // 참가자 업데이트 (셔플된 순서)
         useWorldcupStore.setState({ participants: updatedParticipants });
-
-        // 토너먼트 시작
         startTournament(matches);
         setPhase('tournament');
       } else {
@@ -120,15 +143,12 @@ export function WorldcupContainer({
     }
   }, [session?.id, setSession, startTournament, setLoading]);
 
-  // 매치 결과 제출
   const handleMatchResult = useCallback(
     async (winnerId: string, decisionTimeMs?: number) => {
       if (!session?.id || !currentMatch?.id || isProcessing) return;
 
       try {
         setIsProcessing(true);
-
-        // 로컬 상태 먼저 업데이트 (빠른 UI 반응)
         selectWinner(winnerId, decisionTimeMs);
 
         const response = await fetch(
@@ -147,14 +167,12 @@ export function WorldcupContainer({
 
         if (data.success && data.data) {
           if (data.data.completed) {
-            // 토너먼트 완료
             const winnerParticipant = participants.find((p) => p.id === winnerId);
             if (winnerParticipant) {
               completeTournament(winnerParticipant, []);
               setPhase('result');
             }
           } else if (data.data.nextMatch) {
-            // 다음 매치로 진행
             setTimeout(() => {
               advanceToNextMatch(data.data.nextMatch);
             }, 500);
@@ -179,68 +197,71 @@ export function WorldcupContainer({
     ]
   );
 
-  // 재시작
   const handleRestart = useCallback(() => {
     reset();
     setPhase('setup');
   }, [reset]);
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      <AnimatePresence mode="wait">
-        {phase === 'setup' && (
-          <motion.div
-            key="setup"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <SetupPhase
-              session={session}
-              participants={participants}
-              onCreateSession={handleCreateSession}
-              onAddParticipant={addParticipant}
-              onRemoveParticipant={removeParticipant}
-              onStartTournament={handleStartTournament}
-              isProcessing={isProcessing}
-            />
-          </motion.div>
-        )}
+    <div className="min-h-screen relative">
+      <AmbientBackground />
 
-        {phase === 'tournament' && currentMatch && (
-          <motion.div
-            key="tournament"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.3 }}
-          >
-            <MatchView
-              match={currentMatch}
-              onSelectWinner={handleMatchResult}
-              progress={getProgress()}
-              isProcessing={isProcessing}
-            />
-          </motion.div>
-        )}
+      <div className="relative z-10">
+        <AnimatePresence mode="wait">
+          {phase === 'setup' && (
+            <motion.div
+              key="setup"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4 }}
+            >
+              <SetupPhase
+                session={session}
+                participants={participants}
+                onCreateSession={handleCreateSession}
+                onAddParticipant={addParticipant}
+                onRemoveParticipant={removeParticipant}
+                onStartTournament={handleStartTournament}
+                isProcessing={isProcessing}
+              />
+            </motion.div>
+          )}
 
-        {phase === 'result' && winner && (
-          <motion.div
-            key="result"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.5 }}
-          >
-            <ResultView
-              sessionId={session?.id || ''}
-              winner={winner}
-              onRestart={handleRestart}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+          {phase === 'tournament' && currentMatch && (
+            <motion.div
+              key="tournament"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.4 }}
+            >
+              <MatchView
+                match={currentMatch}
+                onSelectWinner={handleMatchResult}
+                progress={getProgress()}
+                isProcessing={isProcessing}
+              />
+            </motion.div>
+          )}
+
+          {phase === 'result' && winner && (
+            <motion.div
+              key="result"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.5 }}
+            >
+              <ResultView
+                sessionId={session?.id || ''}
+                winner={winner}
+                onRestart={handleRestart}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

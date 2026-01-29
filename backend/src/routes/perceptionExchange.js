@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const perceptionExchangeController = require('../controllers/perceptionExchangeController');
-const authMiddleware = require('../middleware/authMiddleware');
+const authMiddleware = require('../middleware/auth');
 const rateLimitMiddleware = require('../middleware/rateLimiter');
 
 // 모든 라우트에 인증 미들웨어 적용
@@ -9,7 +9,7 @@ router.use(authMiddleware);
 
 // 감상 교환 CRUD 작업
 router.post('/',
-  rateLimitMiddleware.createExchange,
+  rateLimitMiddleware.strict,
   perceptionExchangeController.createExchange
 );
 
@@ -25,7 +25,7 @@ router.get('/:sessionId',
 
 // 메시지 관련
 router.post('/:sessionId/messages',
-  rateLimitMiddleware.sendMessage,
+  rateLimitMiddleware.strict,
   perceptionExchangeController.sendMessage
 );
 

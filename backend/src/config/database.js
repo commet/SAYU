@@ -27,6 +27,8 @@ const pool = new Pool({
   createRetryIntervalMillis: 100 // 100ms - faster retry cycles
 });
 
+let isConnected = false;
+
 async function connectDatabase() {
   try {
     const client = await pool.connect();
@@ -34,10 +36,20 @@ async function connectDatabase() {
     await client.query('SELECT NOW()');
     client.release();
     console.log('✅ Connected to PostgreSQL');
+    isConnected = true;
+    return true;
   } catch (error) {
-    console.error('❌ Database connection failed:', error);
-    throw error;
+    console.error('❌ Database connection failed:', error.message);
+    console.warn('⚠️ Server will start without direct database connection.');
+    console.warn('⚠️ Supabase REST API will be used as fallback.');
+    isConnected = false;
+    // Don't throw - allow server to start
+    return false;
   }
+}
+
+function isDatabaseConnected() {
+  return isConnected;
 }
 
 async function withTransaction(callback) {
@@ -93,6 +105,7 @@ if (process.env.NODE_ENV === 'production') {
 module.exports = {
   pool,
   connectDatabase,
+  isDatabaseConnected,
   withTransaction,
   getPoolStats,
   logPoolStats

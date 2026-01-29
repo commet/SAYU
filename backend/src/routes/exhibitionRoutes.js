@@ -77,59 +77,62 @@ router.post('/exhibitions/submit',
   exhibitionController.submitExhibition
 );
 
-// 도시별 전시 통계
-router.get('/exhibitions/stats/cities',
-  exhibitionLimiter,
-  exhibitionController.getCityStats
-);
+// TODO: These routes need exhibitionController.js functions (currently using exhibitionControllerPG.js)
+// Temporarily disabled until controller unification
 
-// 인기 전시 조회
-router.get('/exhibitions/popular',
-  exhibitionLimiter,
-  exhibitionQueryValidation,
-  handleExhibitionValidationResult,
-  exhibitionController.getPopularExhibitions
-);
+// // 도시별 전시 통계
+// router.get('/exhibitions/stats/cities',
+//   exhibitionLimiter,
+//   exhibitionController.getCityStats
+// );
 
-// 진행중인 전시 조회
-router.get('/exhibitions/ongoing',
-  exhibitionLimiter,
-  exhibitionQueryValidation,
-  handleExhibitionValidationResult,
-  exhibitionController.getOngoingExhibitions
-);
+// // 인기 전시 조회
+// router.get('/exhibitions/popular',
+//   exhibitionLimiter,
+//   exhibitionQueryValidation,
+//   handleExhibitionValidationResult,
+//   exhibitionController.getPopularExhibitions
+// );
 
-// 다가오는 전시 조회
-router.get('/exhibitions/upcoming',
-  exhibitionLimiter,
-  exhibitionQueryValidation,
-  handleExhibitionValidationResult,
-  exhibitionController.getUpcomingExhibitions
-);
+// // 진행중인 전시 조회
+// router.get('/exhibitions/ongoing',
+//   exhibitionLimiter,
+//   exhibitionQueryValidation,
+//   handleExhibitionValidationResult,
+//   exhibitionController.getOngoingExhibitions
+// );
 
-// 트렌딩 전시 조회
-router.get('/exhibitions/trending',
-  exhibitionLimiter,
-  exhibitionQueryValidation,
-  handleExhibitionValidationResult,
-  exhibitionController.getTrendingExhibitions
-);
+// // 다가오는 전시 조회
+// router.get('/exhibitions/upcoming',
+//   exhibitionLimiter,
+//   exhibitionQueryValidation,
+//   handleExhibitionValidationResult,
+//   exhibitionController.getUpcomingExhibitions
+// );
 
-// SAYU 개성별 추천 전시
-router.get('/exhibitions/personality-recommendations',
-  exhibitionLimiter,
-  exhibitionQueryValidation,
-  handleExhibitionValidationResult,
-  exhibitionController.getPersonalityRecommendations
-);
+// // 트렌딩 전시 조회
+// router.get('/exhibitions/trending',
+//   exhibitionLimiter,
+//   exhibitionQueryValidation,
+//   handleExhibitionValidationResult,
+//   exhibitionController.getTrendingExhibitions
+// );
 
-// 장소(venue) 목록 조회
-router.get('/venues',
-  exhibitionLimiter,
-  exhibitionQueryValidation,
-  handleExhibitionValidationResult,
-  exhibitionController.getVenues
-);
+// // SAYU 개성별 추천 전시
+// router.get('/exhibitions/personality-recommendations',
+//   exhibitionLimiter,
+//   exhibitionQueryValidation,
+//   handleExhibitionValidationResult,
+//   exhibitionController.getPersonalityRecommendations
+// );
+
+// // 장소(venue) 목록 조회
+// router.get('/venues',
+//   exhibitionLimiter,
+//   exhibitionQueryValidation,
+//   handleExhibitionValidationResult,
+//   exhibitionController.getVenues
+// );
 
 // =========================
 // 새로운 실시간 전시 정보 API

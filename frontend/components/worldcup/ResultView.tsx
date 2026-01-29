@@ -10,6 +10,7 @@ import {
   Check,
   RotateCcw,
   Sparkles,
+  Crown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { WorldcupParticipant, WorldcupRanking } from '@sayu/shared/exhibition-worldcup-types';
@@ -27,11 +28,9 @@ export function ResultView({ sessionId, winner, onRestart }: ResultViewProps) {
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const resultCardRef = useRef<HTMLDivElement>(null);
 
-  // 랭킹 및 공유 URL 가져오기
   useEffect(() => {
     async function fetchData() {
       try {
-        // 세션 데이터 조회
         const sessionResponse = await fetch(`/api/worldcup/sessions/${sessionId}`);
         const sessionData = await sessionResponse.json();
 
@@ -53,7 +52,6 @@ export function ResultView({ sessionId, winner, onRestart }: ResultViewProps) {
           setRankings(rankedParticipants);
         }
 
-        // 공유 URL 생성
         const shareResponse = await fetch('/api/worldcup/share', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -75,23 +73,20 @@ export function ResultView({ sessionId, winner, onRestart }: ResultViewProps) {
     fetchData();
   }, [sessionId]);
 
-  // 결과 이미지 생성 및 다운로드
   const handleDownloadImage = useCallback(async () => {
     if (!resultCardRef.current) return;
 
     setIsGeneratingImage(true);
 
     try {
-      // html2canvas 동적 import
       const html2canvas = (await import('html2canvas')).default;
 
       const canvas = await html2canvas(resultCardRef.current, {
         scale: 2,
-        backgroundColor: '#111827',
+        backgroundColor: '#0a0a0b',
         useCORS: true,
       });
 
-      // Blob으로 변환
       canvas.toBlob((blob) => {
         if (!blob) return;
 
@@ -109,7 +104,6 @@ export function ResultView({ sessionId, winner, onRestart }: ResultViewProps) {
     }
   }, []);
 
-  // URL 복사
   const handleCopyUrl = useCallback(async () => {
     if (!shareUrl) return;
 
@@ -122,7 +116,6 @@ export function ResultView({ sessionId, winner, onRestart }: ResultViewProps) {
     }
   }, [shareUrl]);
 
-  // 공유 (Web Share API)
   const handleShare = useCallback(async () => {
     const shareData = {
       title: '전시 월드컵 결과',
@@ -134,7 +127,7 @@ export function ResultView({ sessionId, winner, onRestart }: ResultViewProps) {
       try {
         await navigator.share(shareData);
       } catch (error) {
-        // 사용자가 취소한 경우 무시
+        // User cancelled
       }
     } else {
       handleCopyUrl();
@@ -148,50 +141,83 @@ export function ResultView({ sessionId, winner, onRestart }: ResultViewProps) {
 
   return (
     <div className="min-h-screen p-6">
-      {/* 축하 효과 */}
+      {/* Floating Sparkles */}
       <motion.div
-        className="fixed inset-0 pointer-events-none"
+        className="fixed inset-0 pointer-events-none overflow-hidden"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        <Sparkles className="absolute top-20 left-10 text-yellow-400 w-8 h-8 animate-pulse" />
-        <Sparkles className="absolute top-40 right-20 text-yellow-400 w-6 h-6 animate-pulse delay-300" />
-        <Sparkles className="absolute top-60 left-1/4 text-yellow-400 w-4 h-4 animate-pulse delay-500" />
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute"
+            style={{
+              top: `${15 + Math.random() * 50}%`,
+              left: `${10 + Math.random() * 80}%`,
+            }}
+            animate={{
+              y: [0, -20, 0],
+              opacity: [0.3, 0.8, 0.3],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{
+              duration: 3 + Math.random() * 2,
+              repeat: Infinity,
+              delay: Math.random() * 2,
+            }}
+          >
+            <Sparkles className={`text-amber-400/40 w-${4 + Math.floor(Math.random() * 4)} h-${4 + Math.floor(Math.random() * 4)}`} />
+          </motion.div>
+        ))}
       </motion.div>
 
-      <div className="max-w-lg mx-auto">
-        {/* 결과 카드 (캡처 대상) */}
-        <div
+      <div className="max-w-lg mx-auto relative z-10">
+        {/* Result Card */}
+        <motion.div
           ref={resultCardRef}
-          className="bg-gray-900 rounded-2xl overflow-hidden shadow-2xl"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-[#0f0f10] rounded-sm overflow-hidden border border-white/10"
         >
-          {/* 우승 헤더 */}
-          <div className="bg-gradient-to-r from-yellow-600 to-amber-500 p-6 text-center">
+          {/* Winner Header */}
+          <div className="bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 p-6 text-center border-b border-amber-500/20">
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
+              transition={{ type: 'spring', stiffness: 200, delay: 0.3 }}
+              className="mb-3"
             >
-              <Trophy className="w-16 h-16 mx-auto mb-2 text-yellow-100" />
+              <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-amber-400/30 to-yellow-600/30 flex items-center justify-center border border-amber-400/40">
+                <Crown className="w-8 h-8 text-amber-400" />
+              </div>
             </motion.div>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="text-[10px] uppercase tracking-[0.3em] text-amber-400/60 mb-1"
+            >
+              My Favorite
+            </motion.p>
             <motion.h1
-              className="text-2xl font-bold text-white"
-              initial={{ opacity: 0, y: 20 }}
+              className="text-xl font-light text-white/90"
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
+              transition={{ delay: 0.6 }}
+              style={{ fontFamily: 'var(--font-serif, Georgia, serif)' }}
             >
               나의 최애 작품
             </motion.h1>
           </div>
 
-          {/* 우승 작품 */}
+          {/* Winner Artwork */}
           <motion.div
             className="p-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
+            transition={{ delay: 0.7 }}
           >
-            <div className="aspect-square rounded-xl overflow-hidden mb-4 shadow-lg">
+            <div className="aspect-square rounded-sm overflow-hidden mb-4 border border-white/10">
               <img
                 src={winnerImageUrl}
                 alt={winner.title || '우승 작품'}
@@ -199,35 +225,43 @@ export function ResultView({ sessionId, winner, onRestart }: ResultViewProps) {
                 crossOrigin="anonymous"
               />
             </div>
-            <h2 className="text-xl font-bold text-center mb-1">
+            <h2
+              className="text-lg font-light text-center text-white/90 mb-1"
+              style={{ fontFamily: 'var(--font-serif, Georgia, serif)' }}
+            >
               {winner.title || '제목 없음'}
             </h2>
-            <p className="text-gray-400 text-center">
+            <p className="text-white/40 text-sm text-center font-light">
               {winner.artist || '작가 미상'}
             </p>
           </motion.div>
 
-          {/* 순위 */}
+          {/* Rankings */}
           {rankings.length > 1 && (
             <motion.div
               className="px-6 pb-6"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.8 }}
+              transition={{ delay: 0.9 }}
             >
-              <h3 className="text-sm text-gray-400 mb-3">최종 순위</h3>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-white/30 mb-3">
+                최종 순위
+              </p>
               <div className="space-y-2">
                 {rankings.slice(1, 4).map((ranking, index) => (
-                  <div
+                  <motion.div
                     key={ranking.participant_id}
-                    className="flex items-center gap-3 p-2 bg-gray-800 rounded-lg"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 1 + index * 0.1 }}
+                    className="flex items-center gap-3 p-3 bg-white/[0.03] border border-white/10 rounded-sm"
                   >
                     <div
                       className={cn(
-                        'w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold',
+                        'w-6 h-6 rounded-full flex items-center justify-center text-xs font-light',
                         ranking.rank === 2
-                          ? 'bg-gray-400 text-gray-900'
-                          : 'bg-amber-700 text-amber-100'
+                          ? 'bg-gray-400/20 text-gray-300 border border-gray-400/30'
+                          : 'bg-amber-700/20 text-amber-300/80 border border-amber-700/30'
                       )}
                     >
                       {ranking.rank}
@@ -236,78 +270,100 @@ export function ResultView({ sessionId, winner, onRestart }: ResultViewProps) {
                       <img
                         src={ranking.image_url}
                         alt={ranking.title || ''}
-                        className="w-10 h-10 rounded object-cover"
+                        className="w-10 h-10 rounded-sm object-cover"
                         crossOrigin="anonymous"
                       />
                     )}
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium truncate text-sm">
+                      <div className="font-light truncate text-sm text-white/70">
                         {ranking.title || '제목 없음'}
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </motion.div>
           )}
 
-          {/* 워터마크 */}
+          {/* Watermark */}
           <div className="px-6 pb-4 text-center">
-            <p className="text-xs text-gray-500">SAYU 전시 월드컵</p>
+            <p className="text-[10px] text-white/20 tracking-wider">SAYU Exhibition Worldcup</p>
           </div>
-        </div>
+        </motion.div>
 
-        {/* 액션 버튼들 */}
+        {/* Action Buttons */}
         <motion.div
           className="mt-6 space-y-3"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1 }}
+          transition={{ delay: 1.2 }}
         >
-          {/* 이미지 저장 */}
+          {/* Download Image */}
           <button
             onClick={handleDownloadImage}
             disabled={isGeneratingImage}
-            className="w-full py-4 bg-blue-600 hover:bg-blue-700 rounded-xl font-medium flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+            className={cn(
+              "w-full py-4 rounded-sm font-light text-sm transition-all",
+              "bg-gradient-to-r from-amber-500/80 to-yellow-500/80 text-white",
+              "hover:from-amber-500 hover:to-yellow-500",
+              "flex items-center justify-center gap-2",
+              "disabled:opacity-50 disabled:cursor-not-allowed"
+            )}
           >
-            <Download className="w-5 h-5" />
+            <Download className="w-4 h-4" />
             {isGeneratingImage ? '이미지 생성 중...' : '결과 이미지 저장'}
           </button>
 
-          {/* 공유 */}
+          {/* Share Buttons */}
           <div className="flex gap-3">
             <button
               onClick={handleShare}
-              className="flex-1 py-4 bg-gray-800 hover:bg-gray-700 rounded-xl font-medium flex items-center justify-center gap-2 transition-colors"
+              className={cn(
+                "flex-1 py-4 rounded-sm font-light text-sm transition-all",
+                "bg-white/[0.05] border border-white/10 text-white/70",
+                "hover:bg-white/[0.08] hover:text-white/90",
+                "flex items-center justify-center gap-2"
+              )}
             >
-              <Share2 className="w-5 h-5" />
+              <Share2 className="w-4 h-4" />
               공유하기
             </button>
             <button
               onClick={handleCopyUrl}
               disabled={!shareUrl}
-              className="flex-1 py-4 bg-gray-800 hover:bg-gray-700 rounded-xl font-medium flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+              className={cn(
+                "flex-1 py-4 rounded-sm font-light text-sm transition-all",
+                "bg-white/[0.05] border border-white/10 text-white/70",
+                "hover:bg-white/[0.08] hover:text-white/90",
+                "flex items-center justify-center gap-2",
+                "disabled:opacity-40 disabled:cursor-not-allowed"
+              )}
             >
               {isCopied ? (
                 <>
-                  <Check className="w-5 h-5 text-green-400" />
+                  <Check className="w-4 h-4 text-green-400" />
                   복사됨!
                 </>
               ) : (
                 <>
-                  <Copy className="w-5 h-5" />
+                  <Copy className="w-4 h-4" />
                   링크 복사
                 </>
               )}
             </button>
           </div>
 
-          {/* 다시하기 */}
+          {/* Restart */}
           <button
             onClick={onRestart}
-            className="w-full py-4 border border-gray-700 hover:bg-gray-800 rounded-xl font-medium flex items-center justify-center gap-2 transition-colors"
+            className={cn(
+              "w-full py-4 rounded-sm font-light text-sm transition-all",
+              "border border-white/10 text-white/50",
+              "hover:bg-white/[0.03] hover:text-white/70",
+              "flex items-center justify-center gap-2"
+            )}
           >
-            <RotateCcw className="w-5 h-5" />
+            <RotateCcw className="w-4 h-4" />
             새 월드컵 시작
           </button>
         </motion.div>

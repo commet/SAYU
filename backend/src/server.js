@@ -357,8 +357,8 @@ app.use('/api/daily-habit', dailyHabitRoutes); // Daily Art Habit 시스템
 app.use('/api/mood-atlas', moodAtlasRoutes); // Mood Atlas - 감정 기반 예술 여정
 app.use('/api/artist-data', artistDataRoutes); // 아티스트 데이터 수집 및 관리
 app.use('/api/matching', require('./routes/matchingRoutes')); // 매칭 시스템
-app.use('/api/waitlist', require('./routes/waitlistRoutes')); // 베타 대기 목록
-app.use('/api/art-pulse', require('./routes/artPulseRoutes')); // Art Pulse 실시간 공동 감상
+// app.use('/api/waitlist', require('./routes/waitlistRoutes')); // 베타 대기 목록 (disabled - requires sequelize)
+// app.use('/api/art-pulse', require('./routes/artPulseRoutes')); // Art Pulse 실시간 공동 감상 (disabled - requires socket.io)
 app.use('/api/pioneer', require('./routes/pioneer')); // Pioneer 번호 시스템
 app.use('/api/journey', require('./routes/journey')); // 7일 여정 시스템
 app.use('/api/venues', venueRoutes); // 다국어 지원 venue API
@@ -436,10 +436,10 @@ async function startServer() {
       console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
     });
 
-    // Initialize Socket.io for real-time gallery sessions
-    const realtimeGalleryService = require('./services/realtimeGalleryService');
-    realtimeGalleryService.initialize(server);
-    log.info('Real-time gallery service initialized');
+    // Initialize Socket.io for real-time gallery sessions (disabled - requires socket.io)
+    // const realtimeGalleryService = require('./services/realtimeGalleryService');
+    // realtimeGalleryService.initialize(server);
+    // log.info('Real-time gallery service initialized');
   } catch (error) {
     log.error('Failed to start server', error, {
       port: PORT,

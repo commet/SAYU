@@ -12,11 +12,11 @@ const STAGE_ORDER: ArtCounselorStage[] = [
   'complete',
 ];
 
-const STAGE_LABEL: Record<ArtCounselorStage, string> = {
-  opening: '시작하기',
-  exploration: '깊이 탐색',
-  connection: '감정 연결',
-  complete: '정리하기',
+const STAGE_INFO: Record<ArtCounselorStage, { label: string; subtitle: string }> = {
+  opening: { label: '만남', subtitle: '작품과의 첫 만남' },
+  exploration: { label: '탐색', subtitle: '감정의 깊이로' },
+  connection: { label: '연결', subtitle: '나와 작품 사이' },
+  complete: { label: '기록', subtitle: '오늘의 감상' },
 };
 
 interface ConversationStageProps {
@@ -26,48 +26,59 @@ interface ConversationStageProps {
 export const ConversationStage = memo(function ConversationStage({
   stage,
 }: ConversationStageProps) {
+  const currentIndex = STAGE_ORDER.indexOf(stage);
+
   return (
-    <div className="flex items-center justify-between border-b border-neutral-200 bg-neutral-50 px-6 py-5">
-      <div>
-        <p className="text-xs uppercase tracking-widest text-neutral-400">
-          Guidance Flow
-        </p>
-        <h1 className="text-xl font-medium text-black">
-          {STAGE_LABEL[stage]}
-        </h1>
-      </div>
+    <div className="border-b border-white/10 bg-white/[0.02] px-6 py-5">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.25em] text-white/30 mb-1">
+            Art Counselor
+          </p>
+          <h1 className="text-lg font-light text-white/90 tracking-wide">
+            {STAGE_INFO[stage].label}
+          </h1>
+          <p className="text-xs text-white/40 mt-0.5 font-light">
+            {STAGE_INFO[stage].subtitle}
+          </p>
+        </div>
 
-      <ol className="flex items-center gap-3 text-xs font-medium text-neutral-500">
-        {STAGE_ORDER.map((item, index) => {
-          const active = item === stage;
-          const reached =
-            STAGE_ORDER.indexOf(stage) > STAGE_ORDER.indexOf(item);
+        {/* Progress Dots */}
+        <div className="flex items-center gap-2">
+          {STAGE_ORDER.map((item, index) => {
+            const active = item === stage;
+            const reached = currentIndex > index;
+            const isLast = index === STAGE_ORDER.length - 1;
 
-          return (
-            <li key={item} className="flex items-center">
-              <motion.span
-                animate={{
-                  opacity: active || reached ? 1 : 0.4,
-                  scale: active ? 1.05 : 1,
-                }}
-                className={cn(
-                  'flex h-8 w-8 items-center justify-center border text-[0.7rem]',
-                  active
-                    ? 'border-neutral-900 bg-neutral-900 text-white'
-                    : reached
-                    ? 'border-neutral-400 bg-neutral-100 text-neutral-700'
-                    : 'border-neutral-200 bg-white text-neutral-400'
+            return (
+              <div key={item} className="flex items-center">
+                <motion.div
+                  animate={{
+                    scale: active ? 1 : 0.8,
+                    opacity: active || reached ? 1 : 0.3,
+                  }}
+                  className={cn(
+                    'w-2 h-2 rounded-full transition-colors duration-300',
+                    active
+                      ? 'bg-white'
+                      : reached
+                      ? 'bg-white/60'
+                      : 'bg-white/20'
+                  )}
+                />
+                {!isLast && (
+                  <div
+                    className={cn(
+                      'w-6 h-px mx-1 transition-colors duration-300',
+                      reached ? 'bg-white/40' : 'bg-white/10'
+                    )}
+                  />
                 )}
-              >
-                {index + 1}
-              </motion.span>
-              {index < STAGE_ORDER.length - 1 ? (
-                <span className="mx-1 h-px w-8 bg-neutral-200" />
-              ) : null}
-            </li>
-          );
-        })}
-      </ol>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 });

@@ -1194,6 +1194,377 @@ class ArtCounselorController {
             });
         }
     }
+
+    /**
+     * Provide feedback on daily art recommendation
+     */
+    async provideDailyArtFeedback(req, res) {
+        try {
+            const { recommendationId } = req.params;
+            const { userId } = req;
+            const { helpfulnessRating, emotionalImpact } = req.body;
+
+            const client = await pool.connect();
+
+            const updateQuery = `
+                UPDATE daily_art_recommendations
+                SET
+                    helpfulness_rating = $3,
+                    emotional_impact = $4,
+                    feedback_at = CURRENT_TIMESTAMP
+                WHERE id = $1 AND user_id = $2
+                RETURNING id
+            `;
+
+            const result = await client.query(updateQuery, [
+                recommendationId,
+                userId,
+                helpfulnessRating,
+                emotionalImpact
+            ]);
+
+            client.release();
+
+            if (result.rows.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: '추천 항목을 찾을 수 없습니다.'
+                });
+            }
+
+            res.json({
+                success: true,
+                data: { feedbackRecorded: true }
+            });
+
+        } catch (error) {
+            logger.error('Error providing daily art feedback:', error);
+            res.status(500).json({
+                success: false,
+                message: '피드백을 저장하는 중 오류가 발생했습니다.'
+            });
+        }
+    }
+
+    /**
+     * Search conversation memory using semantic similarity
+     */
+    async searchMemory(req, res) {
+        try {
+            const { userId } = req;
+            const { query, limit = 10 } = req.body;
+
+            const client = await pool.connect();
+
+            // Simple text search (semantic search would require pgvector)
+            const searchQuery = `
+                SELECT
+                    id, session_id, message_type, content,
+                    emotion_detected, therapeutic_theme, created_at
+                FROM counselor_conversation_memory
+                WHERE user_id = $1
+                  AND content ILIKE $2
+                ORDER BY created_at DESC
+                LIMIT $3
+            `;
+
+            const result = await client.query(searchQuery, [
+                userId,
+                `%${query}%`,
+                limit
+            ]);
+
+            client.release();
+
+            res.json({
+                success: true,
+                data: result.rows
+            });
+
+        } catch (error) {
+            logger.error('Error searching memory:', error);
+            res.status(500).json({
+                success: false,
+                message: '기억을 검색하는 중 오류가 발생했습니다.'
+            });
+        }
+    }
+
+    /**
+     * Update emotional profile
+     */
+    async updateEmotionalProfile(req, res) {
+        try {
+            const { userId } = req;
+            const {
+                therapeuticGoals,
+                conversationStyle,
+                communicationPace,
+                preferredTherapeuticApproaches
+            } = req.body;
+
+            const client = await pool.connect();
+
+            const updateQuery = `
+                INSERT INTO user_emotional_profiles (
+                    user_id, therapeutic_goals, conversation_style,
+                    communication_pace, preferred_therapeutic_approaches,
+                    updated_at
+                ) VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
+                ON CONFLICT (user_id) DO UPDATE SET
+                    therapeutic_goals = COALESCE($2, user_emotional_profiles.therapeutic_goals),
+                    conversation_style = COALESCE($3, user_emotional_profiles.conversation_style),
+                    communication_pace = COALESCE($4, user_emotional_profiles.communication_pace),
+                    preferred_therapeutic_approaches = COALESCE($5, user_emotional_profiles.preferred_therapeutic_approaches),
+                    updated_at = CURRENT_TIMESTAMP
+                RETURNING *
+            `;
+
+            const result = await client.query(updateQuery, [
+                userId,
+                therapeuticGoals || null,
+                conversationStyle || null,
+                communicationPace || null,
+                preferredTherapeuticApproaches || null
+            ]);
+
+            client.release();
+
+            res.json({
+                success: true,
+                data: result.rows[0]
+            });
+
+        } catch (error) {
+            logger.error('Error updating emotional profile:', error);
+            res.status(500).json({
+                success: false,
+                message: '감정 프로필을 업데이트하는 중 오류가 발생했습니다.'
+            });
+        }
+    }
+
+    /**
+     * Update counselor interaction preferences
+     */
+    async updatePreferences(req, res) {
+        try {
+            const { userId } = req;
+            const {
+                preferredCounselorPersona,
+                communicationFormality,
+                crisisSupportEnabled,
+                triggerWarningsEnabled,
+                communitySharing
+            } = req.body;
+
+            const client = await pool.connect();
+
+            const updateQuery = `
+                INSERT INTO counselor_user_preferences (
+                    user_id, preferred_counselor_persona, communication_formality,
+                    crisis_support_enabled, trigger_warnings_enabled, community_sharing,
+                    updated_at
+                ) VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP)
+                ON CONFLICT (user_id) DO UPDATE SET
+                    preferred_counselor_persona = COALESCE($2, counselor_user_preferences.preferred_counselor_persona),
+                    communication_formality = COALESCE($3, counselor_user_preferences.communication_formality),
+                    crisis_support_enabled = COALESCE($4, counselor_user_preferences.crisis_support_enabled),
+                    trigger_warnings_enabled = COALESCE($5, counselor_user_preferences.trigger_warnings_enabled),
+                    community_sharing = COALESCE($6, counselor_user_preferences.community_sharing),
+                    updated_at = CURRENT_TIMESTAMP
+                RETURNING *
+            `;
+
+            const result = await client.query(updateQuery, [
+                userId,
+                preferredCounselorPersona || null,
+                communicationFormality || null,
+                crisisSupportEnabled ?? null,
+                triggerWarningsEnabled ?? null,
+                communitySharing ?? null
+            ]);
+
+            client.release();
+
+            res.json({
+                success: true,
+                data: result.rows[0]
+            });
+
+        } catch (error) {
+            logger.error('Error updating preferences:', error);
+            res.status(500).json({
+                success: false,
+                message: '설정을 업데이트하는 중 오류가 발생했습니다.'
+            });
+        }
+    }
+
+    /**
+     * Provide feedback on counselor session
+     */
+    async provideFeedback(req, res) {
+        try {
+            const { userId } = req;
+            const { sessionId, userSatisfaction, helpfulnessRating, feedback } = req.body;
+
+            const client = await pool.connect();
+
+            const updateQuery = `
+                UPDATE art_counselor_sessions
+                SET
+                    user_satisfaction = $3,
+                    helpfulness_rating = $4,
+                    user_feedback = $5
+                WHERE id = $1 AND user_id = $2
+                RETURNING id
+            `;
+
+            const result = await client.query(updateQuery, [
+                sessionId,
+                userId,
+                userSatisfaction,
+                helpfulnessRating,
+                feedback
+            ]);
+
+            client.release();
+
+            if (result.rows.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: '세션을 찾을 수 없습니다.'
+                });
+            }
+
+            logger.info(`Session feedback recorded for user ${userId}`, { sessionId });
+
+            res.json({
+                success: true,
+                data: { feedbackRecorded: true }
+            });
+
+        } catch (error) {
+            logger.error('Error providing feedback:', error);
+            res.status(500).json({
+                success: false,
+                message: '피드백을 저장하는 중 오류가 발생했습니다.'
+            });
+        }
+    }
+
+    /**
+     * Get personal therapeutic insights and progress
+     */
+    async getTherapeuticInsights(req, res) {
+        try {
+            const { userId } = req;
+            const { timeframe = 'month' } = req.query;
+
+            const client = await pool.connect();
+
+            // Calculate date range
+            let dateFilter = "INTERVAL '30 days'";
+            if (timeframe === 'week') dateFilter = "INTERVAL '7 days'";
+            else if (timeframe === 'quarter') dateFilter = "INTERVAL '90 days'";
+            else if (timeframe === 'year') dateFilter = "INTERVAL '365 days'";
+
+            // Get session insights
+            const insightsQuery = `
+                SELECT
+                    COUNT(*) as session_count,
+                    AVG(user_satisfaction) as avg_satisfaction,
+                    AVG(helpfulness_rating) as avg_helpfulness,
+                    array_agg(DISTINCT key_insights) FILTER (WHERE key_insights IS NOT NULL) as insights
+                FROM art_counselor_sessions
+                WHERE user_id = $1
+                  AND started_at > NOW() - ${dateFilter}
+            `;
+
+            const insightsResult = await client.query(insightsQuery, [userId]);
+
+            // Get emotional trends
+            const trendsQuery = `
+                SELECT
+                    emotional_response->'primary' as emotion,
+                    COUNT(*) as count
+                FROM artwork_emotional_responses
+                WHERE user_id = $1
+                  AND created_at > NOW() - ${dateFilter}
+                GROUP BY emotional_response->'primary'
+                ORDER BY count DESC
+                LIMIT 5
+            `;
+
+            const trendsResult = await client.query(trendsQuery, [userId]);
+
+            client.release();
+
+            const insights = insightsResult.rows[0];
+
+            res.json({
+                success: true,
+                data: {
+                    timeframe,
+                    sessionCount: parseInt(insights.session_count) || 0,
+                    avgSatisfaction: parseFloat(insights.avg_satisfaction) || 0,
+                    avgHelpfulness: parseFloat(insights.avg_helpfulness) || 0,
+                    keyInsights: insights.insights?.flat().filter(Boolean) || [],
+                    emotionalTrends: trendsResult.rows
+                }
+            });
+
+        } catch (error) {
+            logger.error('Error getting therapeutic insights:', error);
+            res.status(500).json({
+                success: false,
+                message: '인사이트를 가져오는 중 오류가 발생했습니다.'
+            });
+        }
+    }
+
+    /**
+     * Get service usage statistics (admin only)
+     */
+    async getServiceStats(req, res) {
+        try {
+            const client = await pool.connect();
+
+            // Get overall statistics
+            const statsQuery = `
+                SELECT
+                    (SELECT COUNT(*) FROM art_counselor_sessions) as total_sessions,
+                    (SELECT COUNT(DISTINCT user_id) FROM art_counselor_sessions) as unique_users,
+                    (SELECT COUNT(*) FROM counselor_conversation_memory) as total_messages,
+                    (SELECT COUNT(*) FROM artwork_emotional_responses) as total_responses,
+                    (SELECT AVG(user_satisfaction) FROM art_counselor_sessions WHERE user_satisfaction IS NOT NULL) as avg_satisfaction
+            `;
+
+            const result = await client.query(statsQuery);
+            client.release();
+
+            const stats = result.rows[0];
+
+            res.json({
+                success: true,
+                data: {
+                    totalSessions: parseInt(stats.total_sessions) || 0,
+                    uniqueUsers: parseInt(stats.unique_users) || 0,
+                    totalMessages: parseInt(stats.total_messages) || 0,
+                    totalResponses: parseInt(stats.total_responses) || 0,
+                    avgSatisfaction: parseFloat(stats.avg_satisfaction) || 0
+                }
+            });
+
+        } catch (error) {
+            logger.error('Error getting service stats:', error);
+            res.status(500).json({
+                success: false,
+                message: '통계를 가져오는 중 오류가 발생했습니다.'
+            });
+        }
+    }
 }
 
 module.exports = new ArtCounselorController();

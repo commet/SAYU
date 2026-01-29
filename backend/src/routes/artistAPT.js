@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const { pool } = require('../config/database');
 const { authenticateToken } = require('../middleware/auth');
-const { handleError } = require('../utils/errorHandler');
+const { handleError } = require('../middleware/errorHandler');
 
 // APT 유형 정보
 const APT_TYPES = {

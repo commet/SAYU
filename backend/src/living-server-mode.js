@@ -916,6 +916,135 @@ app.post('/api/chatbot/message', async (req, res) => {
   }
 });
 
+// ===========================================
+// ART COUNSELOR HYBRID API ENDPOINTS (Simplified)
+// ===========================================
+
+// Demo artwork data
+const demoArtworks = {
+  'kitchen-scene-7': {
+    id: 'kitchen-scene-7',
+    title: 'Kitchen Scene',
+    artist: 'Unknown Artist',
+    year: '19th Century'
+  },
+  'starry-night': {
+    id: 'starry-night',
+    title: 'The Starry Night',
+    artist: 'Vincent van Gogh',
+    year: '1889'
+  }
+};
+
+// Opening messages by personality
+const openingMessages = {
+  LRMC: '이 작품 앞에 서니 어떤 생각이 드시나요? 천천히 감상해보세요.',
+  LAEF: '와, 이 작품이 눈에 들어왔군요! 첫인상이 어떠세요?',
+  SAEF: '함께 이 작품을 보게 되어 기뻐요! 어떤 느낌이 드시나요?',
+  default: '이 작품과 함께하는 시간이에요. 지금 어떤 느낌이 드시나요?'
+};
+
+// Hybrid Opening
+app.get('/api/art-counselor/hybrid/opening/:artworkId/:personality', (req, res) => {
+  const { artworkId, personality } = req.params;
+
+  const artwork = demoArtworks[artworkId] || {
+    id: artworkId,
+    title: 'Unknown Artwork',
+    artist: 'Unknown Artist',
+    year: ''
+  };
+
+  const message = openingMessages[personality] || openingMessages.default;
+
+  res.json({
+    success: true,
+    data: {
+      artworkId: artwork.id,
+      artworkTitle: artwork.title,
+      artworkArtist: artwork.artist,
+      artworkYear: artwork.year,
+      personality,
+      emoji: '🎨',
+      message,
+      stage: 'opening',
+      options: [
+        { id: 'calm', label: '차분하고 평화로운 느낌이에요', tone: 'gentle' },
+        { id: 'curious', label: '무언가 탐구하고 싶어지는 느낌이에요', tone: 'curious' },
+        { id: 'nostalgic', label: '과거의 기억이 떠올라요', tone: 'grounding' },
+        { id: 'free_input', label: '다른 느낌이에요', tone: 'playful' }
+      ]
+    }
+  });
+});
+
+// Hybrid Exploration
+app.post('/api/art-counselor/hybrid/exploration', express.json(), (req, res) => {
+  const { artworkId, personality, userSelection, freeText, sessionId } = req.body;
+
+  const explorationResponses = {
+    calm: '평화로움을 느끼셨군요. 작품 속 어떤 요소가 특히 그런 안정감을 주었나요?',
+    curious: '호기심이 생기셨네요. 작품에서 더 알고 싶은 부분이 있다면 무엇인가요?',
+    nostalgic: '과거의 기억과 연결되셨군요. 어떤 시간이나 장소가 떠오르셨나요?',
+    free_input: freeText
+      ? `"${freeText}"라고 느끼셨군요. 그 감정을 조금 더 자세히 이야기해주실 수 있나요?`
+      : '직접 표현해주셔서 감사해요. 더 깊이 탐색해볼까요?'
+  };
+
+  const message = explorationResponses[userSelection] || explorationResponses.free_input;
+
+  res.json({
+    success: true,
+    data: {
+      artworkId,
+      personality,
+      stage: 'connection',
+      message,
+      method: 'exploration',
+      options: [
+        { id: 'deeper', label: '더 깊이 느껴보고 싶어요', tone: 'curious' },
+        { id: 'connect', label: '제 경험과 연결해보고 싶어요', tone: 'grounding' },
+        { id: 'free_input', label: '다른 이야기를 해볼게요', tone: 'playful' }
+      ]
+    }
+  });
+});
+
+// Hybrid Connection
+app.post('/api/art-counselor/hybrid/connection', express.json(), (req, res) => {
+  const { artworkId, personality, userInput, sessionId } = req.body;
+
+  const message = userInput && userInput.length > 0
+    ? `나눠주신 이야기가 참 의미있네요. "${userInput.substring(0, 50)}${userInput.length > 50 ? '...' : ''}" - 이 감정과 경험이 오늘 이 작품과 만나게 된 것 같아요.`
+    : '오늘의 감상이 당신에게 의미있는 시간이었기를 바라요.';
+
+  res.json({
+    success: true,
+    data: {
+      artworkId,
+      personality,
+      stage: 'connection',
+      message,
+      method: 'connection'
+    }
+  });
+});
+
+// Hybrid Complete
+app.post('/api/art-counselor/hybrid/complete', express.json(), (req, res) => {
+  const { artworkId, personality, sessionId } = req.body;
+
+  res.json({
+    success: true,
+    data: {
+      journalId: `journal-${Date.now()}`,
+      summary: '오늘 작품과 함께한 시간이 의미있었기를 바랍니다. 당신의 감정과 생각을 작품과 연결하며 새로운 시각을 발견하셨네요.',
+      artworkTitle: 'Artwork',
+      createdAt: new Date().toISOString()
+    }
+  });
+});
+
 // 404 handler
 app.use('*', (req, res) => {
   res.status(404).json({ error: 'Endpoint not found in living mode' });

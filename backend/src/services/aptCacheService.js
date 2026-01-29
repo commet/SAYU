@@ -618,7 +618,6 @@ class APTCacheService {
   async calculateExhibitionRecommendations(aptType, options) {
     return aptDataAccess.calculateExhibitionRecommendations(aptType, options);
   }
-}
 
   // ==================== 새로운 최적화 메서드들 ====================
   

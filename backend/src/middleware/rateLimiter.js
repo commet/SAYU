@@ -243,17 +243,20 @@ const dailyUserLimit = createRateLimiter({
   keyGenerator: (req) => `daily_user:${req.userId || req.ip}`
 });
 
-module.exports = {
-  createMatchRequest,
-  findMatches,
-  matchAction,
-  general,
-  strict,
-  museumApiLimiter,
-  exhibitionLimiter,
-  realtimeLimiter,
-  adaptiveMatchingLimiter,
-  updateSpamScore,
-  globalIpLimit,
-  dailyUserLimit
-};
+// Default export as function for backward compatibility
+const rateLimiter = createRateLimiter;
+
+module.exports = rateLimiter;
+module.exports.createRateLimiter = createRateLimiter;
+module.exports.createMatchRequest = createMatchRequest;
+module.exports.findMatches = findMatches;
+module.exports.matchAction = matchAction;
+module.exports.general = general;
+module.exports.strict = strict;
+module.exports.museumApiLimiter = museumApiLimiter;
+module.exports.exhibitionLimiter = exhibitionLimiter;
+module.exports.realtimeLimiter = realtimeLimiter;
+module.exports.adaptiveMatchingLimiter = adaptiveMatchingLimiter;
+module.exports.updateSpamScore = updateSpamScore;
+module.exports.globalIpLimit = globalIpLimit;
+module.exports.dailyUserLimit = dailyUserLimit;

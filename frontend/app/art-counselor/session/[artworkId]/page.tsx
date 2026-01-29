@@ -179,33 +179,31 @@ export default function ArtCounselorSessionPage() {
   })();
 
   return (
-    <div className="min-h-screen bg-neutral-50 text-neutral-900">
-      <ArtCounselorShell
-        artworkPanel={<ArtworkHero artwork={artwork} personality={user?.personalityType ?? null} />}
-        conversationPanel={
-          <div className="relative flex h-full flex-col">
-            <ConversationStage stage={stage} />
-            <ConversationThread messages={messages} />
-            <div className="border-t border-neutral-200 bg-white">
-              {conversationFooter}
-            </div>
-            {isLoading ? (
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm">
-                <Loader2 className="h-8 w-8 animate-spin text-neutral-400" />
-              </div>
-            ) : null}
+    <ArtCounselorShell
+      artworkPanel={<ArtworkHero artwork={artwork} personality={user?.personalityType ?? null} />}
+      conversationPanel={
+        <div className="relative flex h-full flex-col">
+          <ConversationStage stage={stage} />
+          <ConversationThread messages={messages} />
+          <div className="border-t border-white/10 bg-white/[0.02]">
+            {conversationFooter}
           </div>
-        }
-        summaryPanel={
-          <SessionInsightsPanel
-            artwork={artwork}
-            personality={user?.personalityType ?? null}
-            stage={stage}
-            journalPayload={journalPayload}
-            onOpenJournal={journalPayload ? handleJournalRedirect : undefined}
-          />
-        }
-      />
-    </div>
+          {isLoading ? (
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+              <Loader2 className="h-6 w-6 animate-spin text-white/50" />
+            </div>
+          ) : null}
+        </div>
+      }
+      summaryPanel={
+        <SessionInsightsPanel
+          artwork={artwork}
+          personality={user?.personalityType ?? null}
+          stage={stage}
+          journalPayload={journalPayload}
+          onOpenJournal={journalPayload ? handleJournalRedirect : undefined}
+        />
+      }
+    />
   );
 }

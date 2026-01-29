@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { CounselorOption } from '@/lib/art-counselor/types';
 import { OptionButton } from './OptionButton';
 import { cn } from '@/lib/utils';
@@ -41,20 +42,33 @@ export function ExplorationStep({
   };
 
   return (
-    <div className="space-y-3 p-6">
-      {options.map((option) => (
-        <OptionButton
+    <div className="space-y-2 p-5">
+      <p className="text-[10px] uppercase tracking-[0.2em] text-white/30 mb-3 px-1">
+        감정의 깊이를 탐색해요
+      </p>
+      {options.map((option, index) => (
+        <motion.div
           key={option.id}
-          option={option}
-          disabled={isLoading}
-          isSelected={selectedId === option.id}
-          onSelect={handleSelect}
-        />
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.05 }}
+        >
+          <OptionButton
+            option={option}
+            disabled={isLoading}
+            isSelected={selectedId === option.id}
+            onSelect={handleSelect}
+          />
+        </motion.div>
       ))}
 
       {useFreeText ? (
-        <div className="border border-neutral-200 bg-neutral-50 p-4">
-          <label className="mb-2 block text-xs uppercase tracking-widest text-neutral-500">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="border border-white/10 bg-white/[0.02] p-4 mt-3 rounded-sm"
+        >
+          <label className="mb-2 block text-[10px] uppercase tracking-[0.2em] text-white/40">
             자유롭게 감정을 적어볼까요?
           </label>
           <textarea
@@ -62,7 +76,12 @@ export function ExplorationStep({
             disabled={isLoading}
             onChange={(event) => setFreeText(event.target.value)}
             placeholder="이 순간 떠오른 생각이나 감정을 들려주세요."
-            className="min-h-[120px] w-full resize-none border border-neutral-200 bg-white px-3 py-3 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-neutral-400"
+            className={cn(
+              "min-h-[120px] w-full resize-none px-3 py-3 text-sm font-light",
+              "bg-white/[0.03] border border-white/10 rounded-sm",
+              "text-white/90 outline-none placeholder:text-white/30",
+              "focus:border-white/20 transition-colors"
+            )}
           />
           <div className="mt-3 flex justify-end gap-2">
             <button
@@ -71,7 +90,7 @@ export function ExplorationStep({
                 setUseFreeText(false);
                 setSelectedId(null);
               }}
-              className="border border-neutral-200 px-4 py-2 text-xs text-neutral-600 hover:border-neutral-400 hover:text-neutral-900"
+              className="border border-white/10 px-4 py-2 text-xs text-white/50 hover:border-white/20 hover:text-white/70 transition-colors rounded-sm"
             >
               취소
             </button>
@@ -80,15 +99,15 @@ export function ExplorationStep({
               disabled={isLoading || !freeText.trim()}
               onClick={handleSubmit}
               className={cn(
-                'px-5 py-2 text-xs font-medium text-white transition',
-                'bg-neutral-900 hover:bg-neutral-800',
-                (isLoading || !freeText.trim()) && 'opacity-60'
+                'px-5 py-2 text-xs font-light text-white/90 transition-all rounded-sm',
+                'bg-white/10 border border-white/20 hover:bg-white/15',
+                (isLoading || !freeText.trim()) && 'opacity-40 cursor-not-allowed'
               )}
             >
               전송하기
             </button>
           </div>
-        </div>
+        </motion.div>
       ) : null}
     </div>
   );

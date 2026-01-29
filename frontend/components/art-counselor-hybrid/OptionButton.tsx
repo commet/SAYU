@@ -20,24 +20,25 @@ export const OptionButton = memo(function OptionButton({
 }: OptionButtonProps) {
   return (
     <motion.button
-      whileTap={{ scale: disabled ? 1 : 0.98 }}
+      whileHover={{ scale: disabled ? 1 : 1.01 }}
+      whileTap={{ scale: disabled ? 1 : 0.99 }}
       disabled={disabled}
       onClick={() => onSelect(option)}
       className={cn(
-        'flex w-full flex-col border px-4 py-3 text-left transition-all duration-200',
-        'focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400',
+        'flex w-full flex-col rounded-sm px-4 py-3.5 text-left transition-all duration-200',
+        'focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30',
         disabled
-          ? 'cursor-not-allowed border-neutral-200 bg-neutral-100 text-neutral-400'
+          ? 'cursor-not-allowed bg-white/[0.02] text-white/20 border border-white/5'
           : isSelected
-          ? 'border-neutral-900 bg-neutral-900 text-white'
-          : 'border-neutral-200 bg-white text-neutral-900 hover:border-neutral-400 hover:bg-neutral-50'
+          ? 'bg-white/15 text-white border border-white/20'
+          : 'bg-white/[0.03] text-white/80 border border-white/10 hover:bg-white/[0.06] hover:border-white/15'
       )}
     >
-      <span className="text-sm font-medium">{option.label}</span>
+      <span className="text-sm font-light">{option.label}</span>
       {option.description ? (
         <span className={cn(
-          "mt-1 text-xs",
-          isSelected ? "text-neutral-300" : "text-neutral-500"
+          "mt-1 text-xs font-light",
+          isSelected ? "text-white/60" : "text-white/40"
         )}>
           {option.description}
         </span>
