@@ -6,6 +6,9 @@ const rateLimit = require('express-rate-limit');
 const session = require('express-session');
 const passport = require('passport');
 const cookieParser = require('cookie-parser');
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
+const path = require('path');
 
 // Memory optimization imports
 const { memoryMiddleware, memoryStatsMiddleware } = require('./middleware/memoryMiddleware');
@@ -307,6 +310,18 @@ app.get('/api/status', (req, res) => {
     }
   });
 });
+
+// Swagger API Documentation
+try {
+  const swaggerDocument = YAML.load(path.join(__dirname, '../openapi.yaml'));
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'SAYU API Documentation'
+  }));
+  console.log('📚 API Documentation available at /api-docs');
+} catch (error) {
+  console.warn('⚠️ OpenAPI spec not found, API docs disabled');
+}
 
 // Routes
 app.use('/api/auth', authRoutes);

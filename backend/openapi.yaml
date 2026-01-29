@@ -1,0 +1,852 @@
+openapi: 3.0.3
+info:
+  title: SAYU API
+  description: |
+    SAYU - AI-Powered Art Discovery Platform API
+
+    예술과 나를 연결하는 AI 기반 예술 발견 플랫폼
+
+    ## Authentication
+    대부분의 엔드포인트는 JWT Bearer 토큰이 필요합니다.
+
+    ## Rate Limiting
+    - 일반 API: 60 req/min
+    - Art Counselor: 15 req/min
+    - 인증: 10 req/min
+  version: 1.0.0
+  contact:
+    name: SAYU Support
+  license:
+    name: Personal Use
+
+servers:
+  - url: https://sayu.my/api
+    description: Production
+  - url: http://localhost:3001/api
+    description: Development
+
+tags:
+  - name: Authentication
+    description: 사용자 인증 및 세션 관리
+  - name: Art Counselor
+    description: AI 기반 예술 상담
+  - name: APT Quiz
+    description: Art Personality Type 테스트
+  - name: Exhibitions
+    description: 전시 정보 및 추천
+  - name: Gallery
+    description: 개인 갤러리 관리
+  - name: Artists
+    description: 작가 정보 및 팔로우
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        details:
+          type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        apt_type:
+          type: string
+          example: LAEF
+        created_at:
+          type: string
+          format: date-time
+
+    APTType:
+      type: object
+      properties:
+        type:
+          type: string
+          example: LAEF
+        animal:
+          type: string
+          example: 여우
+        title:
+          type: string
+          example: 몽환적 방랑자
+        color:
+          type: string
+          example: "#FF6B6B"
+        description:
+          type: string
+        dimensions:
+          type: object
+          properties:
+            L_S:
+              type: integer
+              minimum: 0
+              maximum: 100
+            A_R:
+              type: integer
+            E_M:
+              type: integer
+            F_C:
+              type: integer
+
+    CounselorSession:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+        session_type:
+          type: string
+          enum: [general, crisis, celebration, reflection]
+        status:
+          type: string
+          enum: [active, completed, abandoned]
+        created_at:
+          type: string
+          format: date-time
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/CounselorMessage'
+
+    CounselorMessage:
+      type: object
+      properties:
+        id:
+          type: string
+        role:
+          type: string
+          enum: [user, counselor]
+        content:
+          type: string
+        emotion_detected:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    Exhibition:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        venue:
+          type: string
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        description:
+          type: string
+        poster_image_url:
+          type: string
+          format: uri
+        apt_match_score:
+          type: number
+          minimum: 0
+          maximum: 100
+
+    Artwork:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        artist:
+          type: string
+        image_url:
+          type: string
+          format: uri
+        year:
+          type: integer
+        medium:
+          type: string
+        apt_analysis:
+          type: object
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+        hasPrev:
+          type: boolean
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ============ Authentication ============
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: 회원가입
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, name]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                name:
+                  type: string
+      responses:
+        '201':
+          description: 회원가입 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+        '400':
+          description: 잘못된 요청
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: 로그인
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: 로그인 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+                  refreshToken:
+                    type: string
+
+  /auth/me:
+    get:
+      tags: [Authentication]
+      summary: 현재 사용자 정보
+      responses:
+        '200':
+          description: 사용자 정보
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  # ============ Art Counselor ============
+  /art-counselor/session:
+    post:
+      tags: [Art Counselor]
+      summary: 새 상담 세션 시작
+      description: AI 예술 상담 세션을 시작합니다.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                session_type:
+                  type: string
+                  enum: [general, crisis, celebration, reflection]
+                  default: general
+                initial_emotion:
+                  type: string
+                  description: 초기 감정 상태
+                artwork_id:
+                  type: string
+                  description: 상담에 사용할 작품 ID (선택)
+      responses:
+        '201':
+          description: 세션 생성 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session:
+                    $ref: '#/components/schemas/CounselorSession'
+                  opening_message:
+                    type: string
+                    description: AI의 첫 인사 메시지
+
+  /art-counselor/session/{sessionId}:
+    get:
+      tags: [Art Counselor]
+      summary: 세션 상세 조회
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 세션 정보
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CounselorSession'
+
+  /art-counselor/session/{sessionId}/message:
+    post:
+      tags: [Art Counselor]
+      summary: 메시지 전송
+      description: 상담 세션에 메시지를 전송하고 AI 응답을 받습니다.
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content:
+                  type: string
+                  maxLength: 2000
+      responses:
+        '200':
+          description: AI 응답
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_message:
+                    $ref: '#/components/schemas/CounselorMessage'
+                  counselor_response:
+                    $ref: '#/components/schemas/CounselorMessage'
+                  emotion_analysis:
+                    type: object
+                    properties:
+                      detected_emotion:
+                        type: string
+                      confidence:
+                        type: number
+
+  /art-counselor/hybrid/opening/{artworkId}/{personality}:
+    get:
+      tags: [Art Counselor]
+      summary: 하이브리드 오프닝 질문
+      description: 4단계 하이브리드 상담의 첫 단계 - 오프닝 질문
+      parameters:
+        - name: artworkId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: personality
+          in: path
+          required: true
+          schema:
+            type: string
+            example: LAEF
+      responses:
+        '200':
+          description: 오프닝 질문
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  questions:
+                    type: array
+                    items:
+                      type: string
+                  artwork_context:
+                    type: object
+
+  # ============ APT Quiz ============
+  /sayu-quiz/start:
+    post:
+      tags: [APT Quiz]
+      summary: 퀴즈 시작 (인증 필요)
+      responses:
+        '201':
+          description: 퀴즈 세션 생성
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session_id:
+                    type: string
+                  total_questions:
+                    type: integer
+                  first_question:
+                    type: object
+
+  /sayu-quiz/start-public:
+    post:
+      tags: [APT Quiz]
+      summary: 퀴즈 시작 (비회원)
+      security: []
+      responses:
+        '201':
+          description: 공개 퀴즈 세션
+
+  /sayu-quiz/answer:
+    post:
+      tags: [APT Quiz]
+      summary: 답변 제출
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id, question_id, answer]
+              properties:
+                session_id:
+                  type: string
+                question_id:
+                  type: string
+                answer:
+                  type: string
+                  enum: [A, B, C, D]
+      responses:
+        '200':
+          description: 다음 질문 또는 완료
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  next_question:
+                    type: object
+                    nullable: true
+                  is_complete:
+                    type: boolean
+                  progress:
+                    type: number
+
+  /sayu-quiz/complete:
+    post:
+      tags: [APT Quiz]
+      summary: 퀴즈 완료 및 결과
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id]
+              properties:
+                session_id:
+                  type: string
+      responses:
+        '200':
+          description: APT 결과
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    $ref: '#/components/schemas/APTType'
+                  scores:
+                    type: object
+                  recommended_artworks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Artwork'
+
+  /sayu-quiz/types:
+    get:
+      tags: [APT Quiz]
+      summary: 모든 APT 유형 조회
+      security: []
+      responses:
+        '200':
+          description: 16가지 APT 유형
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/APTType'
+
+  # ============ Exhibitions ============
+  /exhibitions/exhibitions:
+    get:
+      tags: [Exhibitions]
+      summary: 전시 목록
+      security: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ongoing, upcoming, past]
+        - name: region
+          in: query
+          schema:
+            type: string
+        - name: apt_type
+          in: query
+          schema:
+            type: string
+            description: APT 유형으로 필터링
+      responses:
+        '200':
+          description: 전시 목록
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Exhibition'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  /exhibitions/exhibitions/{id}:
+    get:
+      tags: [Exhibitions]
+      summary: 전시 상세
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 전시 상세 정보
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exhibition'
+
+  /exhibitions/exhibitions/{id}/like:
+    post:
+      tags: [Exhibitions]
+      summary: 전시 좋아요
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 좋아요 성공
+
+  # ============ Gallery ============
+  /gallery/personal:
+    get:
+      tags: [Gallery]
+      summary: 개인 갤러리
+      parameters:
+        - name: filter
+          in: query
+          schema:
+            type: string
+            enum: [all, liked, archived]
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 갤러리 작품 목록
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  artworks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Artwork'
+
+  /gallery/artworks/{id}/like:
+    post:
+      tags: [Gallery]
+      summary: 작품 좋아요
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 좋아요 성공
+
+  /gallery/stats:
+    get:
+      tags: [Gallery]
+      summary: 갤러리 통계
+      responses:
+        '200':
+          description: 통계 정보
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_artworks:
+                    type: integer
+                  liked_count:
+                    type: integer
+                  archived_count:
+                    type: integer
+                  top_artists:
+                    type: array
+                    items:
+                      type: string
+
+  # ============ Artists ============
+  /artists:
+    get:
+      tags: [Artists]
+      summary: 작가 목록
+      security: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: apt_type
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 작가 목록
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        nationality:
+                          type: string
+                        apt_type:
+                          type: string
+                        artwork_count:
+                          type: integer
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  /artists/{id}:
+    get:
+      tags: [Artists]
+      summary: 작가 상세
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 작가 정보
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  bio:
+                    type: string
+                  apt_type:
+                    type: string
+                  artworks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Artwork'
+
+  /artists/{id}/follow:
+    post:
+      tags: [Artists]
+      summary: 작가 팔로우
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 팔로우 성공
+    delete:
+      tags: [Artists]
+      summary: 작가 언팔로우
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 언팔로우 성공
+
+  # ============ APT Recommendations ============
+  /apt/artworks:
+    get:
+      tags: [APT Quiz]
+      summary: APT 기반 작품 추천
+      parameters:
+        - name: apt_type
+          in: query
+          required: true
+          schema:
+            type: string
+            example: LAEF
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: 추천 작품
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Artwork'
+
+  /apt/exhibitions:
+    get:
+      tags: [APT Quiz]
+      summary: APT 기반 전시 추천
+      parameters:
+        - name: apt_type
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: location
+          in: query
+          schema:
+            type: string
+            description: 위치 (위도,경도)
+      responses:
+        '200':
+          description: 추천 전시
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Exhibition'
+
+  /artist-apt/match:
+    get:
+      tags: [APT Quiz]
+      summary: 사용자-작가 APT 매칭
+      responses:
+        '200':
+          description: 매칭된 작가 목록
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    artist_id:
+                      type: string
+                    artist_name:
+                      type: string
+                    match_score:
+                      type: number
+                    apt_compatibility:
+                      type: string

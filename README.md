@@ -1,113 +1,261 @@
-# SAYU - 예술을 통한 자기 발견 플랫폼
+# SAYU - AI-Powered Art Discovery Platform
 
-**"예술과 나를 연결하다"** (Connecting Art and Myself)
+<div align="center">
 
-SAYU는 단순한 미술 추천 서비스가 아닌, 예술을 매개로 한 **자기 발견 플랫폼**입니다. 16가지 예술 성격 유형(APT)을 기반으로 당신만의 예술 여정을 안내합니다.
+**"예술과 나를 연결하다"** | *Connecting Art and Myself*
 
-## 핵심 가치
+[![Live Demo](https://img.shields.io/badge/demo-sayu.my-blue?style=for-the-badge)](https://sayu.my)
+[![APT Quiz](https://img.shields.io/badge/try-APT%20Quiz-purple?style=for-the-badge)](https://sayu.my/quiz)
 
-- **예술에 대한 진입장벽 해소** - "미술 몰라도 괜찮을까?"라는 두려움 제거
-- **자기 이해를 통한 예술 접근** - 성격 유형 기반 맞춤 경험
-- **의미 있는 연결 형성** - 표면적 매칭이 아닌 깊이 있는 예술 관계
+</div>
 
-## 주요 기능
+---
 
-### APT (Art Personality Type) 테스트
-16가지 예술 성격 유형을 발견하세요. 100명 실사용자 테스트에서 **100% 완료율**과 **20% 자발적 추천율**을 기록했습니다.
+## Overview
 
-### AI Art Profile Generator
-당신의 성격을 명화로 표현합니다. APT 유형을 기반으로 AI가 생성한 개인화된 예술 프로필을 받아보세요.
+SAYU is an AI-powered art discovery platform that connects users with art through personality-based matching. Using the **APT (Art Personality Type)** system with 16 unique types, SAYU creates meaningful connections between individuals and artworks.
+
+### Key Metrics
+
+| Metric | Result | Industry Average |
+|--------|--------|------------------|
+| Quiz Completion Rate | **100%** | 30-50% |
+| Viral Coefficient | **20%** | 5-10% |
+| Artworks Integrated | **5M+** | - |
+
+---
+
+## Features
+
+### APT (Art Personality Type) Test
+Discover your art personality through a scientifically designed quiz. 16 unique types based on 4 axes:
+- **L/S**: Lyrical vs Structural
+- **A/R**: Abstract vs Realistic
+- **E/M**: Emotional vs Mental
+- **F/C**: Free vs Conventional
+
+### AI Art Counselor
+Therapeutic conversations mediated by art. AI-powered sessions help users explore emotions through artwork appreciation.
 
 ### Global Exhibition Recommendation
-서울, 뉴욕, 파리 등 전 세계 전시 정보를 APT 유형에 맞춰 추천합니다. "지금 당신 근처 500m에 딱 맞는 전시가 있어요"
+Real-time exhibition matching based on APT type and location. "There's a perfect exhibition 500m away from you right now."
 
 ### Mood Atlas
-매일 감정을 색으로 기록하고, AI가 추천하는 작품을 감상하며 예술 세계 지도를 탐험하세요. 7개 대륙, 180일의 여정.
+A 180-day emotional journey through art. Daily mood tracking with AI-recommended artworks across 7 continents.
 
-### Art Counselor
-AI 기반 예술 상담 서비스. 작품을 매개로 한 자기 성찰과 치유의 경험을 제공합니다.
+---
 
-## 기술 스택
+## Architecture
 
-| Layer | Technology |
-|-------|------------|
-| Frontend | Next.js 15, React 19, TypeScript, Tailwind CSS |
-| Backend | Supabase (PostgreSQL + Edge Functions) |
-| AI/ML | Groq, OpenAI, Replicate (SDXL) |
-| Database | Supabase PostgreSQL + pgvector |
-| Deployment | Vercel |
+```
+┌─────────────────────────────────────────────────────────────┐
+│              Frontend (Next.js 15 + React 19)               │
+│                    Deployed on Vercel                        │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+┌─────────────────────────▼───────────────────────────────────┐
+│                   Backend (Express.js)                       │
+│               Deployed on Railway (2GB optimized)            │
+│  ┌─────────────┬─────────────┬─────────────┬─────────────┐  │
+│  │ Art         │ Exhibition  │ APT         │ Mood        │  │
+│  │ Counselor   │ Matching    │ Analysis    │ Atlas       │  │
+│  └─────────────┴─────────────┴─────────────┴─────────────┘  │
+└───────────┬─────────────────────────────────┬───────────────┘
+            │                                 │
+┌───────────▼───────────┐       ┌─────────────▼─────────────┐
+│   Supabase (Primary)  │       │    Railway PostgreSQL     │
+│   - Auth (OAuth 2.0)  │       │    - Caching              │
+│   - Users & Profiles  │       │    - Background Jobs      │
+│   - Exhibitions (RLS) │       │    - Scraping Data        │
+│   - AI Recommendations│       └───────────────────────────┘
+│   - pgvector Search   │
+└───────────────────────┘
+```
 
-## 프로젝트 구조
+---
+
+## Tech Stack
+
+### Frontend
+![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript)
+![Tailwind](https://img.shields.io/badge/Tailwind-3.4-06B6D4?logo=tailwindcss)
+
+### Backend
+![Node.js](https://img.shields.io/badge/Node.js-22-339933?logo=node.js)
+![Express](https://img.shields.io/badge/Express-4.x-000000?logo=express)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql)
+
+### AI/ML Integration
+
+| Component | Provider | Purpose |
+|-----------|----------|---------|
+| Art Counselor | OpenAI GPT-4 | Therapeutic art conversations |
+| Quick Response | Groq Llama 3 | Fast recommendations (free) |
+| Image Generation | Replicate SDXL | Personal art profiles |
+| Vector Search | pgvector | Emotion-based matching |
+| **Planned** | Claude Vision | Artwork APT analysis |
+
+### Infrastructure
+![Vercel](https://img.shields.io/badge/Vercel-Frontend-black?logo=vercel)
+![Railway](https://img.shields.io/badge/Railway-Backend-0B0D0E?logo=railway)
+![Supabase](https://img.shields.io/badge/Supabase-Database-3FCF8E?logo=supabase)
+
+---
+
+## Project Structure
 
 ```
 sayu/
-├── frontend/          # Next.js 웹 애플리케이션
-├── backend/           # Express.js API 서버
-├── shared/            # 공유 타입 및 유틸리티
-├── supabase/          # Supabase 마이그레이션
-└── docs/              # 프로젝트 문서
+├── frontend/              # Next.js 15 application
+│   ├── app/               # App Router pages (109 pages)
+│   ├── components/        # React components (86 dirs)
+│   ├── lib/               # Utilities & API clients
+│   └── hooks/             # Custom React hooks (25+)
+├── backend/               # Express.js API server
+│   ├── src/
+│   │   ├── routes/        # API routes (40+)
+│   │   ├── services/      # AI/ML services (25+)
+│   │   ├── middleware/    # Auth, security, rate limiting
+│   │   └── config/        # Database, logging
+│   └── tests/             # Jest tests
+├── supabase/              # Database migrations (71 tables)
+├── shared/                # Shared types & utilities
+└── docs/                  # Documentation
 ```
 
-## 시작하기
+---
 
-### 요구 사항
+## Getting Started
+
+### Prerequisites
 - Node.js 18+
 - npm 9+
 
-### 설치
+### Installation
 
 ```bash
-# 의존성 설치
+# Clone repository
+git clone https://github.com/yourusername/sayu.git
+cd sayu
+
+# Install dependencies
 npm install
 
-# 환경 변수 설정
+# Set up environment variables
 cp frontend/.env.example frontend/.env.local
-# .env.local 파일에 필요한 API 키 설정
+# Edit .env.local with your API keys
 
-# 개발 서버 실행
+# Run development server
 npm run dev:frontend
 ```
 
-### 환경 변수
+### Environment Variables
 
 ```env
+# Supabase
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+# AI Providers
 GROQ_API_KEY=your_groq_api_key
 OPENAI_API_KEY=your_openai_api_key
 REPLICATE_API_TOKEN=your_replicate_token
 ```
 
-## 16가지 APT 유형
+---
 
-SAYU의 APT 시스템은 4가지 축을 기반으로 16가지 예술 성격 유형을 정의합니다:
+## 16 APT Types
 
-- **L/S** - Lyrical(서정적) vs Structural(구조적)
-- **A/R** - Abstract(추상적) vs Realistic(사실적)
-- **E/M** - Emotional(감성적) vs Mental(이성적)
-- **F/C** - Free(자유로운) vs Conventional(전통적)
+SAYU's Art Personality Type system defines 16 unique types, each represented by a spirit animal:
 
-예시 유형:
-- **LAEF** (몽상가 여우) - 몽환적, 초현실주의, 감성적
-- **SRMC** (전달자 사슴) - 스토리텔링, 서사적, 역사적 맥락
-- **HAEC** (탐험가 매) - 실험적, 현대미술, 인터랙티브
+<div align="center">
 
-## 검증된 성과
+| | | | |
+|:---:|:---:|:---:|:---:|
+| <img src="frontend/public/images/personality-animals/main/fox-laef.png" width="100"><br>**LAEF**<br>몽환적 여우 | <img src="frontend/public/images/personality-animals/main/owl-lamf.png" width="100"><br>**LAMF**<br>심오한 올빼미 | <img src="frontend/public/images/personality-animals/main/cat-laec.png" width="100"><br>**LAEC**<br>감각적 고양이 | <img src="frontend/public/images/personality-animals/main/turtle-lamc.png" width="100"><br>**LAMC**<br>사색적 거북 |
+| <img src="frontend/public/images/personality-animals/main/chameleon-lref.png" width="100"><br>**LREF**<br>적응적 카멜레온 | <img src="frontend/public/images/personality-animals/main/octopus-lrmf.png" width="100"><br>**LRMF**<br>다재다능 문어 | <img src="frontend/public/images/personality-animals/main/hedgehog-lrec.png" width="100"><br>**LREC**<br>섬세한 고슴도치 | <img src="frontend/public/images/personality-animals/main/beaver-lrmc.png" width="100"><br>**LRMC**<br>장인적 비버 |
+| <img src="frontend/public/images/personality-animals/main/butterfly-saef.png" width="100"><br>**SAEF**<br>자유로운 나비 | <img src="frontend/public/images/personality-animals/main/parrot-samf.png" width="100"><br>**SAMF**<br>표현적 앵무새 | <img src="frontend/public/images/personality-animals/main/penguin-saec.png" width="100"><br>**SAEC**<br>균형잡힌 펭귄 | <img src="frontend/public/images/personality-animals/main/deer-samc.png" width="100"><br>**SAMC**<br>우아한 사슴 |
+| <img src="frontend/public/images/personality-animals/main/dog-sref.png" width="100"><br>**SREF**<br>충실한 강아지 | <img src="frontend/public/images/personality-animals/main/elephant-srmf.png" width="100"><br>**SRMF**<br>지혜로운 코끼리 | <img src="frontend/public/images/personality-animals/main/duck-srec.png" width="100"><br>**SREC**<br>사교적 오리 | <img src="frontend/public/images/personality-animals/main/eagle-srmc.png" width="100"><br>**SRMC**<br>통찰적 독수리 |
 
-| 지표 | 결과 | 업계 평균 |
-|------|------|----------|
-| APT 테스트 완료율 | **100%** | 30-50% |
-| 바이럴 계수 | **20%** | 5-10% |
-| 핵심 반응 | "오 나는 이런 유형이구나" | - |
+</div>
 
-## 라이선스
+### APT Axes
 
-이 프로젝트는 개인 사용 목적으로 개발되었습니다.
-
-## 문의
-
-프로젝트에 대한 문의사항은 Issues를 통해 남겨주세요.
+| Axis | Dimension | Description |
+|------|-----------|-------------|
+| **L/S** | Lyrical↔Structural | 감성적 표현 vs 구조적 접근 |
+| **A/R** | Abstract↔Realistic | 추상적 해석 vs 사실적 묘사 |
+| **E/M** | Emotional↔Mental | 감정 중심 vs 이성 중심 |
+| **F/C** | Free↔Conventional | 자유로운 탐구 vs 전통적 감상 |
 
 ---
 
+## Security
+
+SAYU implements comprehensive security measures:
+
+- **Authentication**: OAuth 2.0 (Google, GitHub) + JWT
+- **API Protection**: CSRF, XSS, SSRF prevention
+- **Database**: Row-Level Security (RLS) on Supabase
+- **Rate Limiting**: 15 req/min for AI endpoints
+- **CORS**: Whitelist-based domain control
+
+See [SECURITY.md](./docs/SECURITY.md) for details.
+
+---
+
+## Documentation
+
+- [Architecture Overview](./docs/architecture/)
+- [Claude Integration Plan](./docs/architecture/CLAUDE_INTEGRATION_ARCHITECTURE.md)
+- [API Documentation (OpenAPI)](./backend/openapi.yaml) - 100+ endpoints documented
+- [Security Guidelines](./docs/SECURITY.md)
+- [Deployment Guide](./docs/deployment-guide.md)
+- [Improvement Roadmap](./docs/ANTHROPIC_SA_PORTFOLIO_IMPROVEMENT_PLAN.md)
+
+---
+
+## Performance
+
+| Optimization | Result |
+|--------------|--------|
+| Image Size | 73% reduction (200MB → 54MB) |
+| Memory Usage | Optimized for Railway 2GB limit |
+| API Caching | 5-minute TTL for exhibitions |
+| Bundle Size | Dynamic imports for 200KB+ libs |
+
+---
+
+## Roadmap
+
+- [x] APT Personality System (16 types)
+- [x] AI Art Counselor
+- [x] Global Exhibition Database (5M+ artworks)
+- [x] Mood Atlas Journey
+- [ ] Claude Vision Integration
+- [ ] Multi-language Support (12 languages)
+- [ ] Mobile App (React Native)
+
+---
+
+## Contributing
+
+This project is for personal use. Feel free to explore the codebase for learning purposes.
+
+---
+
+## License
+
+Personal use only.
+
+---
+
+<div align="center">
+
 **SAYU** - 예술을 통해 나를 발견하는 여정
+
+*A journey of self-discovery through art*
+
+</div>
