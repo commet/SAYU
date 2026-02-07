@@ -39,12 +39,13 @@ export async function GET(request: NextRequest) {
       // RPC 함수가 없으면 직접 검색
       console.warn('RPC function not available, using direct query:', error);
 
+      const q = query.replace(/[%_\\]/g, '\\$&');
       const { data: directResults, error: directError } = await supabase
         .from('exhibition_artworks')
         .select('*')
         .eq('exhibition_id', exhibitionId)
         .or(
-          `title.ilike.%${query}%,title_en.ilike.%${query}%,artist.ilike.%${query}%,artist_en.ilike.%${query}%`
+          `title.ilike.%${q}%,title_en.ilike.%${q}%,artist.ilike.%${q}%,artist_en.ilike.%${q}%`
         )
         .order('display_order', { ascending: true })
         .limit(limit);

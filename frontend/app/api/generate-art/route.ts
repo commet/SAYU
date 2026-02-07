@@ -26,7 +26,6 @@ export async function POST(request: NextRequest) {
     // Replicate API 키 확인
     const apiKey = process.env.REPLICATE_API_TOKEN || process.env.REPLICATE_API_KEY;
     console.log('API Key available:', !!apiKey);
-    console.log('API Key starts with:', apiKey ? apiKey.substring(0, 8) + '...' : 'none');
     
     if (!apiKey) {
       console.error('❌ Replicate API key not found');
@@ -78,10 +77,10 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('❌ Replicate API error:', response.status, errorText);
-      return NextResponse.json({ 
-        success: false, 
-        error: `Replicate API error: ${response.status} - ${errorText}` 
-      }, { status: response.status });
+      return NextResponse.json({
+        success: false,
+        error: 'Art generation service error. Please try again later.'
+      }, { status: 502 });
     }
 
     const prediction = await response.json();

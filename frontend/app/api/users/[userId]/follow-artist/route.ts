@@ -1,31 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(
   request: NextRequest,
   { params }: { params: { userId: string } }
 ) {
   try {
-    // Check if Supabase is configured
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    if (!supabaseUrl || !supabaseKey) {
+    if (authError || !user) {
       return NextResponse.json(
-        { error: 'Service temporarily unavailable' },
-        { status: 503 }
+        { error: 'Unauthorized' },
+        { status: 401 }
       );
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey);
-    const { userId } = params;
+    // Verify the authenticated user matches the URL userId
+    if (user.id !== params.userId) {
+      return NextResponse.json(
+        { error: 'Forbidden' },
+        { status: 403 }
+      );
+    }
+
     const { artistId } = await request.json();
 
-    // Create follow record
+    // Create follow record (RLS ensures user can only create own follows)
     const { data: follow, error: followError } = await supabase
       .from('artist_follows')
       .insert({
-        user_id: userId,
+        user_id: user.id,
         artist_id: artistId,
         followed_at: new Date().toISOString(),
         notification_settings: {
@@ -46,23 +51,11 @@ export async function POST(
     }
 
     // Get artist data
-    const { data: artist, error: artistError } = await supabase
+    const { data: artist } = await supabase
       .from('artists')
       .select('*')
       .eq('id', artistId)
       .single();
-
-    if (artistError) {
-      console.error('Error fetching artist:', artistError);
-    }
-
-    // Update artist follow count
-    if (artist) {
-      await supabase
-        .from('artists')
-        .update({ follow_count: (artist.follow_count || 0) + 1 })
-        .eq('id', artistId);
-    }
 
     return NextResponse.json({
       follow,

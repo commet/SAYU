@@ -4,8 +4,9 @@ import { createClient } from '@supabase/supabase-js';
 export async function GET(request: NextRequest) {
   try {
     // Check if Supabase is configured
+    // Read-only public route - use anon key to respect RLS
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
       return NextResponse.json(
@@ -39,7 +40,8 @@ export async function GET(request: NextRequest) {
       query = query.eq('era', era);
     }
     if (search) {
-      query = query.or(`name.ilike.%${search}%,bio.ilike.%${search}%`);
+      const s = search.replace(/[%_\\]/g, '\\$&');
+      query = query.or(`name.ilike.%${s}%,bio.ilike.%${s}%`);
     }
 
     // Apply sorting

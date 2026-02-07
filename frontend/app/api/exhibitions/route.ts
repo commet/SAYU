@@ -93,7 +93,8 @@ export async function GET(request: NextRequest) {
     }
     
     if (search) {
-      query = query.or(`title_local.ilike.%${search}%,title_en.ilike.%${search}%,venue_name.ilike.%${search}%,description.ilike.%${search}%`);
+      const s = search.replace(/[%_\\]/g, '\\$&');
+      query = query.or(`title_local.ilike.%${s}%,title_en.ilike.%${s}%,venue_name.ilike.%${s}%,description.ilike.%${s}%`);
     }
     
     // Apply sorting and pagination

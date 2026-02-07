@@ -31,7 +31,9 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
-    const sortBy = searchParams.get('sortBy') || 'created_at';
+    const ALLOWED_SORT_COLUMNS = ['created_at', 'updated_at', 'type', 'status', 'rating'];
+    const rawSortBy = searchParams.get('sortBy') || 'created_at';
+    const sortBy = ALLOWED_SORT_COLUMNS.includes(rawSortBy) ? rawSortBy : 'created_at';
     const sortOrder = searchParams.get('sortOrder') || 'desc';
 
     // Build query
@@ -49,7 +51,8 @@ export async function GET(request: NextRequest) {
     if (startDate) query = query.gte('created_at', startDate);
     if (endDate) query = query.lte('created_at', endDate);
     if (search) {
-      query = query.or(`message.ilike.%${search}%,email.ilike.%${search}%`);
+      const s = search.replace(/[%_\\]/g, '\\$&');
+      query = query.or(`message.ilike.%${s}%,email.ilike.%${s}%`);
     }
 
     // Apply sorting

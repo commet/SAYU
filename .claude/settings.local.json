@@ -41,7 +41,10 @@
       "WebSearch",
       "Skill(bmad:bmm:workflows:create-product-brief)",
       "Bash(npx claude-code-templates@latest --agent development-tools/code-reviewer --yes)",
-      "Bash(npx claude-code-templates@latest --agent security/security-auditor,web-tools/react-performance-optimizer,web-tools/nextjs-architecture-expert,development-tools/performance-profiler,database/supabase-schema-architect --yes)"
+      "Bash(npx claude-code-templates@latest --agent security/security-auditor,web-tools/react-performance-optimizer,web-tools/nextjs-architecture-expert,development-tools/performance-profiler,database/supabase-schema-architect --yes)",
+      "WebFetch(domain:www.anthropic.com)",
+      "WebFetch(domain:www.nxcode.io)",
+      "WebFetch(domain:dev.to)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

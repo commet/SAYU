@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/client'
-
-const supabase = createClient()
+import { createClient } from '@/lib/supabase/server'
 import Papa from 'papaparse'
 
 interface ExhibitionData {
@@ -104,7 +102,7 @@ function generateUUID(): string {
 }
 
 // 미술관 찾기 또는 생성
-async function findOrCreateVenue(venueName: string) {
+async function findOrCreateVenue(supabase: any, venueName: string) {
   // 기존 미술관 찾기
   const { data: existingVenue } = await supabase
     .from('venues_simple')
@@ -147,14 +145,14 @@ function calculateExhibitionStatus(startDate: string, endDate: string): string {
 }
 
 // 전시 데이터를 DB 형식으로 변환
-async function convertToDbFormat(exhibitions: ExhibitionData[]): Promise<ParsedExhibition[]> {
+async function convertToDbFormat(supabase: any, exhibitions: ExhibitionData[]): Promise<ParsedExhibition[]> {
   const converted: ParsedExhibition[] = []
   const newVenues = new Set<string>()
   
   for (const exhibition of exhibitions) {
     try {
       // 미술관 ID 찾기/생성
-      const venueId = await findOrCreateVenue(exhibition.venue_name)
+      const venueId = await findOrCreateVenue(supabase, exhibition.venue_name)
       
       // 마스터 레코드 생성
       const masterId = generateUUID()
@@ -233,7 +231,7 @@ async function convertToDbFormat(exhibitions: ExhibitionData[]): Promise<ParsedE
 }
 
 // 일괄 삽입/업데이트 실행
-async function executeBulkUpdate(parsedExhibitions: ParsedExhibition[]): Promise<{
+async function executeBulkUpdate(supabase: any, parsedExhibitions: ParsedExhibition[]): Promise<{
   inserted: number
   updated: number
   errors: string[]
@@ -299,8 +297,24 @@ async function executeBulkUpdate(parsedExhibitions: ParsedExhibition[]): Promise
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient()
+
+    // Admin auth check
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
+      .single()
+    if (!profile?.is_admin) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const { data, format = 'csv' } = await request.json()
-    
+
     if (!data) {
       return NextResponse.json(
         { error: '데이터가 제공되지 않았습니다' },
@@ -339,11 +353,11 @@ export async function POST(request: NextRequest) {
     
     // 3. DB 형식으로 변환
     console.log('🔄 DB 형식 변환 중...')
-    const parsedExhibitions = await convertToDbFormat(exhibitions)
-    
+    const parsedExhibitions = await convertToDbFormat(supabase, exhibitions)
+
     // 4. 일괄 업데이트 실행
     console.log('💾 데이터베이스 업데이트 실행 중...')
-    const result = await executeBulkUpdate(parsedExhibitions)
+    const result = await executeBulkUpdate(supabase, parsedExhibitions)
     
     const response: BulkUpdateResult = {
       success: true,

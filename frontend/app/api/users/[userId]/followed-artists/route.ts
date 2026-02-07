@@ -1,33 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { userId: string } }
 ) {
   try {
-    // Check if Supabase is configured
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    if (!supabaseUrl || !supabaseKey) {
+    if (authError || !user) {
       return NextResponse.json(
-        { error: 'Service temporarily unavailable' },
-        { status: 503 }
+        { error: 'Unauthorized' },
+        { status: 401 }
       );
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey);
-    const { userId } = params;
+    // Verify the authenticated user matches the URL userId
+    if (user.id !== params.userId) {
+      return NextResponse.json(
+        { error: 'Forbidden' },
+        { status: 403 }
+      );
+    }
 
-    // Get followed artists for user
+    // Get followed artists for user (RLS ensures access to own data)
     const { data: follows, error: followError } = await supabase
       .from('artist_follows')
       .select(`
         *,
         artist:artists(*)
       `)
-      .eq('user_id', userId);
+      .eq('user_id', user.id);
 
     if (followError) {
       console.error('Error fetching follows:', followError);

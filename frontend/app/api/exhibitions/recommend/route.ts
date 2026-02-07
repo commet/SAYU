@@ -9,9 +9,9 @@ import {
 } from '@sayu/shared/apt-exhibition-matching';
 import { APT_PROMPT_PROFILES } from '@sayu/shared/apt-ai-prompt-mapping';
 
-// Supabase 클라이언트 초기화
+// Supabase 클라이언트 초기화 (read-only public route - anon key respects RLS)
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 const supabase = supabaseUrl && supabaseKey
   ? createClient(supabaseUrl, supabaseKey)

@@ -288,10 +288,12 @@ function getPageSuggestions(page: string, personality: string): string[] {
 
 // OPTIONS 요청 처리 (CORS)
 export async function OPTIONS(request: NextRequest) {
+  const origin = request.headers.get('origin') || '';
+  const allowed = origin === 'https://sayu.my' || origin.endsWith('.vercel.app') ? origin : '';
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': allowed,
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     },

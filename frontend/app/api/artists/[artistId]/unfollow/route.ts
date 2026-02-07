@@ -1,27 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { auth } from '@clerk/nextjs/server';
+import { createClient } from '@/lib/supabase/server';
 
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { artistId: string } }
 ) {
   try {
-    // Check if Supabase is configured
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    if (!supabaseUrl || !supabaseKey) {
-      return NextResponse.json(
-        { error: 'Service temporarily unavailable' },
-        { status: 503 }
-      );
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseKey);
-    const { userId } = auth();
-    
-    if (!userId) {
+    if (authError || !user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -30,11 +18,11 @@ export async function DELETE(
 
     const { artistId } = params;
 
-    // Delete follow record
+    // Delete follow record (RLS ensures user can only delete own follows)
     const { error: deleteError } = await supabase
       .from('artist_follows')
       .delete()
-      .eq('user_id', userId)
+      .eq('user_id', user.id)
       .eq('artist_id', artistId);
 
     if (deleteError) {
@@ -43,20 +31,6 @@ export async function DELETE(
         { error: 'Failed to unfollow artist' },
         { status: 500 }
       );
-    }
-
-    // Update artist follow count
-    const { data: artist } = await supabase
-      .from('artists')
-      .select('follow_count')
-      .eq('id', artistId)
-      .single();
-
-    if (artist && artist.follow_count > 0) {
-      await supabase
-        .from('artists')
-        .update({ follow_count: artist.follow_count - 1 })
-        .eq('id', artistId);
     }
 
     return NextResponse.json({
