@@ -9,7 +9,7 @@ import type { RoundType, WorldcupSession } from '@sayu/shared/exhibition-worldcu
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { round_type, exhibition_visit_id, exhibition_id } = body;
+    const { round_type, exhibition_visit_id, exhibition_id, mode } = body;
 
     // 유효성 검사
     if (!round_type || ![8, 16, 32, 64].includes(round_type)) {
@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
         exhibition_visit_id: exhibition_visit_id || null,
         exhibition_id: exhibition_id || null,
         round_type: round_type as RoundType,
+        mode: mode || 'artwork',
         status: 'setup',
         current_match_index: 0,
         total_matches: round_type - 1,

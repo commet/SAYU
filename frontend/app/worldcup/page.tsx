@@ -4,16 +4,23 @@ import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { WorldcupContainer } from '@/components/worldcup';
+import type { WorldcupMode } from '@sayu/shared/exhibition-worldcup-types';
 
 function WorldcupPageContent() {
   const searchParams = useSearchParams();
   const exhibitionVisitId = searchParams.get('visitId') || undefined;
   const exhibitionId = searchParams.get('exhibitionId') || undefined;
+  const modeParam = searchParams.get('mode');
+  const initialMode =
+    modeParam === 'exhibition' || modeParam === 'artwork'
+      ? (modeParam as WorldcupMode)
+      : undefined;
 
   return (
     <WorldcupContainer
       exhibitionVisitId={exhibitionVisitId}
       exhibitionId={exhibitionId}
+      initialMode={initialMode}
     />
   );
 }

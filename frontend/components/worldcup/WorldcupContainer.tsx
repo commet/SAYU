@@ -3,16 +3,23 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWorldcupStore } from '@/lib/stores/worldcup-store';
+import { ModeSelector } from './ModeSelector';
 import { SetupPhase } from './SetupPhase';
+import { ExhibitionSetupPhase } from './ExhibitionSetupPhase';
 import { MatchView } from './MatchView';
 import { ResultView } from './ResultView';
-import type { RoundType } from '@sayu/shared/exhibition-worldcup-types';
+import type {
+  RoundType,
+  WorldcupMode,
+  ExhibitionWorldcupTheme,
+} from '@sayu/shared/exhibition-worldcup-types';
 
-type Phase = 'setup' | 'tournament' | 'result';
+type Phase = 'mode-select' | 'setup' | 'tournament' | 'result';
 
 interface WorldcupContainerProps {
   exhibitionVisitId?: string;
   exhibitionId?: string;
+  initialMode?: WorldcupMode;
 }
 
 // Ambient Background Component
@@ -49,12 +56,15 @@ function AmbientBackground() {
 export function WorldcupContainer({
   exhibitionVisitId,
   exhibitionId,
+  initialMode,
 }: WorldcupContainerProps) {
   const {
     session,
     participants,
     currentMatch,
     winner,
+    mode,
+    setMode,
     setSession,
     addParticipant,
     removeParticipant,
@@ -67,18 +77,31 @@ export function WorldcupContainer({
     getProgress,
   } = useWorldcupStore();
 
-  const [phase, setPhase] = useState<Phase>('setup');
+  const [phase, setPhase] = useState<Phase>(initialMode ? 'setup' : 'mode-select');
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Set initial mode from prop
+  useEffect(() => {
+    if (initialMode) {
+      setMode(initialMode);
+    }
+  }, [initialMode, setMode]);
 
   useEffect(() => {
     if (session?.status === 'completed' && winner) {
       setPhase('result');
     } else if (session?.status === 'in_progress' && currentMatch) {
       setPhase('tournament');
-    } else {
-      setPhase('setup');
     }
   }, [session?.status, winner, currentMatch]);
+
+  const handleSelectMode = useCallback(
+    (selectedMode: WorldcupMode) => {
+      setMode(selectedMode);
+      setPhase('setup');
+    },
+    [setMode]
+  );
 
   const handleCreateSession = useCallback(
     async (roundType: RoundType) => {
@@ -92,6 +115,7 @@ export function WorldcupContainer({
             round_type: roundType,
             exhibition_visit_id: exhibitionVisitId,
             exhibition_id: exhibitionId,
+            mode,
           }),
         });
 
@@ -109,6 +133,45 @@ export function WorldcupContainer({
       }
     },
     [exhibitionVisitId, exhibitionId, setSession, setLoading]
+  );
+
+  const handleExhibitionStart = useCallback(
+    async (round: RoundType, theme: ExhibitionWorldcupTheme) => {
+      try {
+        setLoading(true);
+        setIsProcessing(true);
+
+        const response = await fetch('/api/worldcup/sessions/exhibition', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ round, theme }),
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.data) {
+          const {
+            session: newSession,
+            participants: newParticipants,
+            matches,
+          } = data.data;
+
+          setSession(newSession);
+          useWorldcupStore.setState({ participants: newParticipants });
+          startTournament(matches);
+          setPhase('tournament');
+        } else {
+          console.error('Failed to start exhibition worldcup:', data.error);
+          alert(data.error || '전시 월드컵 시작에 실패했습니다.');
+        }
+      } catch (error) {
+        console.error('Exhibition worldcup error:', error);
+      } finally {
+        setLoading(false);
+        setIsProcessing(false);
+      }
+    },
+    [setSession, startTournament, setLoading]
   );
 
   const handleStartTournament = useCallback(async () => {
@@ -199,7 +262,7 @@ export function WorldcupContainer({
 
   const handleRestart = useCallback(() => {
     reset();
-    setPhase('setup');
+    setPhase('mode-select');
   }, [reset]);
 
   return (
@@ -208,9 +271,21 @@ export function WorldcupContainer({
 
       <div className="relative z-10">
         <AnimatePresence mode="wait">
-          {phase === 'setup' && (
+          {phase === 'mode-select' && (
             <motion.div
-              key="setup"
+              key="mode-select"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4 }}
+            >
+              <ModeSelector onSelectMode={handleSelectMode} />
+            </motion.div>
+          )}
+
+          {phase === 'setup' && mode === 'artwork' && (
+            <motion.div
+              key="setup-artwork"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
@@ -223,6 +298,21 @@ export function WorldcupContainer({
                 onAddParticipant={addParticipant}
                 onRemoveParticipant={removeParticipant}
                 onStartTournament={handleStartTournament}
+                isProcessing={isProcessing}
+              />
+            </motion.div>
+          )}
+
+          {phase === 'setup' && mode === 'exhibition' && (
+            <motion.div
+              key="setup-exhibition"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4 }}
+            >
+              <ExhibitionSetupPhase
+                onStart={handleExhibitionStart}
                 isProcessing={isProcessing}
               />
             </motion.div>
@@ -256,6 +346,7 @@ export function WorldcupContainer({
               <ResultView
                 sessionId={session?.id || ''}
                 winner={winner}
+                mode={mode}
                 onRestart={handleRestart}
               />
             </motion.div>

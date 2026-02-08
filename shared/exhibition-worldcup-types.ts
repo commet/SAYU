@@ -12,11 +12,18 @@
 /**
  * 월드컵 세션
  */
+export type WorldcupMode = 'artwork' | 'exhibition';
+
+export type ExhibitionWorldcupTheme = 'korean' | 'international' | 'ongoing' | 'all';
+
 export interface WorldcupSession {
   id: string;
   user_id?: string;
   exhibition_visit_id?: string;
   exhibition_id?: string;
+
+  // 모드
+  mode: WorldcupMode;
 
   // 설정
   round_type: RoundType;
@@ -49,6 +56,10 @@ export interface WorldcupParticipant {
   // 작품 소스
   source_type: ParticipantSourceType;
   artwork_id?: string;
+
+  // 전시 참조 (exhibition 모드)
+  exhibition_ref_id?: string;
+  description?: string;
 
   // 업로드 이미지
   temp_image_url?: string;
@@ -135,7 +146,7 @@ export type RoundType = 8 | 16 | 32 | 64;
 
 export type WorldcupStatus = 'setup' | 'in_progress' | 'completed' | 'abandoned';
 
-export type ParticipantSourceType = 'uploaded' | 'artwork' | 'manual';
+export type ParticipantSourceType = 'uploaded' | 'artwork' | 'manual' | 'exhibition';
 
 export type ShareType = 'link' | 'image';
 
@@ -521,7 +532,7 @@ export function isWorldcupParticipant(obj: unknown): obj is WorldcupParticipant 
     obj !== null &&
     typeof (obj as WorldcupParticipant).id === 'string' &&
     typeof (obj as WorldcupParticipant).session_id === 'string' &&
-    ['uploaded', 'artwork', 'manual'].includes(
+    ['uploaded', 'artwork', 'manual', 'exhibition'].includes(
       (obj as WorldcupParticipant).source_type
     )
   );

@@ -12,6 +12,7 @@ import type {
   WorldcupState,
   PendingParticipant,
   RoundType,
+  WorldcupMode,
   WORLDCUP_STORAGE_KEYS,
 } from '@sayu/shared/exhibition-worldcup-types';
 import {
@@ -22,6 +23,10 @@ import {
 } from '@sayu/shared/exhibition-worldcup-types';
 
 interface WorldcupStore extends WorldcupState {
+  // Mode
+  mode: WorldcupMode;
+  setMode: (mode: WorldcupMode) => void;
+
   // Setup Actions
   setSession: (session: WorldcupSession) => void;
   addParticipant: (participant: WorldcupParticipant) => void;
@@ -65,6 +70,15 @@ export const useWorldcupStore = create<WorldcupStore>()(
   persist(
     (set, get) => ({
       ...initialState,
+
+      // ========================================
+      // Mode
+      // ========================================
+      mode: 'artwork' as WorldcupMode,
+
+      setMode: (mode: WorldcupMode) => {
+        set({ mode });
+      },
 
       // ========================================
       // Setup Actions
@@ -226,7 +240,7 @@ export const useWorldcupStore = create<WorldcupStore>()(
       // ========================================
 
       reset: () => {
-        set(initialState);
+        set({ ...initialState, mode: 'artwork' as WorldcupMode });
         localStorage.removeItem('sayu:worldcup:current_session');
       },
 
@@ -291,6 +305,7 @@ export const useWorldcupStore = create<WorldcupStore>()(
         currentMatch: state.currentMatch,
         winner: state.winner,
         rankings: state.rankings,
+        mode: state.mode,
       }),
     }
   )
@@ -312,6 +327,7 @@ export const selectIsCompleted = (state: WorldcupStore) =>
   state.session?.status === 'completed';
 export const selectIsInProgress = (state: WorldcupStore) =>
   state.session?.status === 'in_progress';
+export const selectMode = (state: WorldcupStore) => state.mode;
 
 // ========================================
 // Utility Functions
