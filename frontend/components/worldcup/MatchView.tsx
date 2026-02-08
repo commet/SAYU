@@ -307,6 +307,7 @@ function ExhibitionCard({
   const startDate = exhibitionData?.start_date;
   const endDate = exhibitionData?.end_date;
   const category = exhibitionData?.category;
+  const venueName = exhibitionData?.venue_name;
 
   const dateRange =
     startDate && endDate
@@ -360,9 +361,9 @@ function ExhibitionCard({
           >
             {participant.title || '제목 없음'}
           </h3>
-          {participant.artist && (
+          {(venueName || participant.artist) && (
             <p className="text-white/50 text-sm font-light mb-2">
-              {participant.artist}
+              {venueName || participant.artist}
             </p>
           )}
           {dateRange && (
