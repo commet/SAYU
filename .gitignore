@@ -10,13 +10,27 @@ lerna-debug.log*
 nul
 **/nul
 
-# Environment variables
+# Environment variables (SECURITY: Never commit real credentials)
 .env
 .env.*
 !.env.example
 !.env.security-example
 backend/.env*
 frontend/.env*
+
+# Backend environment files with real credentials
+backend/.env
+backend/.env.cloudinary
+backend/.env.naver
+backend/.env.places
+backend/.env.production
+backend/.env.test
+backend/.env.development
+
+# Keep only .example files
+!backend/.env.example
+!backend/.env.*.example
+!data/crawlers/*/.env.example
 
 # Runtime data
 pids

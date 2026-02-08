@@ -116,6 +116,7 @@ const healthRoutes = require('./routes/health');
 const artCounselorRoutes = require('./routes/artCounselorRoutes');
 const consentRoutes = require('./routes/consentRoutes');
 const moodAtlasRoutes = require('./routes/moodAtlasRoutes');
+const exhibitionPipelineRoutes = require('./routes/exhibitionPipelineRoutes');
 
 const app = express();
 
@@ -379,6 +380,7 @@ app.use('/api/journey', require('./routes/journey')); // 7일 여정 시스템
 app.use('/api/venues', venueRoutes); // 다국어 지원 venue API
 app.use('/api/artvee-artworks', artveeArtworkRoutes); // Artvee 작품-작가 연결 API
 app.use('/api/artist-apt', artistAPTRoutes); // 작가 APT 매칭 시스템
+app.use('/api/exhibition-pipeline', exhibitionPipelineRoutes); // 전시 데이터 파이프라인
 
 // Duplicate health check endpoint removed - using the comprehensive one above (lines 174-186)
 
@@ -437,6 +439,14 @@ async function startServer() {
       const globalMuseumCronManager = require('./cron/globalMuseumCron');
       globalMuseumCronManager.startAllJobs();
       log.info('Global Museum Collection cron jobs initialized');
+    }
+
+    // Initialize Exhibition Pipeline cron jobs
+    if (process.env.NODE_ENV === 'production' || process.env.ENABLE_EXHIBITION_PIPELINE === 'true') {
+      const { getExhibitionPipeline } = require('./services/exhibition-pipeline');
+      const pipeline = getExhibitionPipeline();
+      pipeline.startCron();
+      log.info('Exhibition Pipeline cron jobs initialized');
     }
     
     const server = app.listen(PORT, '0.0.0.0', () => {
