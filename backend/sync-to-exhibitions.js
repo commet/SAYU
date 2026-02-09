@@ -249,6 +249,74 @@ async function mapCultureEvents() {
   return inserted + updated;
 }
 
+async function mapExhibitionIntegrated() {
+  console.log('\n--- Mapping source_exhibition_integrated → exhibitions ---');
+
+  const items = await fetchAll('source_exhibition_integrated', [
+    q => q.not('start_date', 'is', null),
+    q => q.not('end_date', 'is', null)
+  ]);
+  console.log(`  Found ${items.length} integrated exhibitions with dates`);
+
+  let inserted = 0, updated = 0, errors = 0;
+
+  for (const item of items) {
+    const titleLocal = isKorean(item.title_clean) ? item.title_clean : item.title_clean;
+    const titleEn = isKorean(item.title_clean) ? null : item.title_clean;
+
+    const row = {
+      title_en: titleEn,
+      title_local: titleLocal,
+      venue_name: item.event_site || item.institution || null,
+      venue_country: 'KR',
+      start_date: item.start_date,
+      end_date: item.end_date,
+      status: calcStatus(item.start_date, item.end_date),
+      description: item.description || null,
+      artists: item.author ? item.author.split(/[,，、]/).map(s => s.trim()).filter(Boolean) : null,
+      admission_fee: item.charge || null,
+      source: 'exhibition_integrated',
+      source_url: item.url || null,
+      website_url: item.url || null,
+      tags: [item.institution || '', item.genre || '전시'].filter(Boolean),
+      metadata: {
+        source_table: 'source_exhibition_integrated',
+        source_id: item.id,
+        local_id: item.local_id,
+        institution: item.institution,
+        image_url: item.image_url,
+        contact_point: item.contact_point,
+        contributor: item.contributor,
+        audience: item.audience,
+        duration: item.duration
+      },
+      collected_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    const { data: existing } = await supabase
+      .from('exhibitions')
+      .select('id')
+      .eq('source', 'exhibition_integrated')
+      .contains('metadata', { local_id: item.local_id })
+      .maybeSingle();
+
+    if (existing) {
+      const { error: upErr } = await supabase.from('exhibitions').update(row).eq('id', existing.id);
+      if (upErr) { errors++; } else { updated++; }
+    } else {
+      const { error: inErr } = await supabase.from('exhibitions').insert(row);
+      if (inErr) {
+        if (errors < 3) console.log(`  Insert error: ${inErr.message}`);
+        errors++;
+      } else { inserted++; }
+    }
+  }
+
+  console.log(`  Exhibition Integrated: ${inserted} inserted, ${updated} updated, ${errors} errors`);
+  return inserted + updated;
+}
+
 async function updateStatuses() {
   console.log('\n--- Updating exhibition statuses ---');
   const today = new Date().toISOString().split('T')[0];
@@ -278,6 +346,7 @@ async function run() {
   const mmcaCount = await mapMMCA();
   const aicCount = await mapAIC();
   const cultureCount = await mapCultureEvents();
+  const integratedCount = await mapExhibitionIntegrated();
   await updateStatuses();
 
   // Final stats

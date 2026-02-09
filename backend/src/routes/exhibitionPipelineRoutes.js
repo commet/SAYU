@@ -52,7 +52,7 @@ router.post('/run/:source', async (req, res) => {
   const pipeline = getExhibitionPipeline();
   const { source } = req.params;
 
-  const validSources = ['mmca', 'culture_events', 'aic'];
+  const validSources = ['mmca', 'culture_events', 'exhibition_integrated', 'aic'];
   if (!validSources.includes(source)) {
     return res.status(400).json({
       status: 'error',

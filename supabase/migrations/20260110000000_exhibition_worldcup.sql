@@ -162,7 +162,7 @@ CREATE INDEX IF NOT EXISTS idx_worldcup_matches_round
 CREATE INDEX IF NOT EXISTS idx_temp_worldcup_images_session
     ON temp_worldcup_images(session_id);
 CREATE INDEX IF NOT EXISTS idx_temp_worldcup_images_expires
-    ON temp_worldcup_images(expires_at) WHERE expires_at > NOW();
+    ON temp_worldcup_images(expires_at);
 
 -- 공유 인덱스
 CREATE INDEX IF NOT EXISTS idx_worldcup_shares_code

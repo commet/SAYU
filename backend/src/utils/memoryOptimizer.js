@@ -252,7 +252,7 @@ class MemoryOptimizer extends EventEmitter {
    */
   cleanupCaches() {
     // Express 캐시 정리
-    if (global.app && global.app.cache) {
+    if (global.app && global.app.cache && typeof global.app.cache.clear === 'function') {
       global.app.cache.clear();
     }
 

@@ -2,7 +2,6 @@
   "permissions": {
     "allow": [
       "Bash(node:*)",
-      "Bash(node:*)",
       "Bash(npm install:*)",
       "Bash(find:*)",
       "Bash(npm init:*)",
@@ -20,12 +19,8 @@
       "Bash(npx eslint:*)",
       "Bash(npx @sentry/wizard@latest:*)",
       "Bash(curl:*)",
-      "Bash(npm run typecheck:*)",
-      "Bash(npm run build:*)",
-      "Bash(npx tsc:*)",
       "Bash(git push:*)",
       "Bash(SKIP_ENV_VALIDATION=true npx next build)",
-      "Bash(git push:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git pull:*)",
@@ -44,10 +39,16 @@
       "Bash(npx claude-code-templates@latest --agent security/security-auditor,web-tools/react-performance-optimizer,web-tools/nextjs-architecture-expert,development-tools/performance-profiler,database/supabase-schema-architect --yes)",
       "WebFetch(domain:www.anthropic.com)",
       "WebFetch(domain:www.nxcode.io)",
-      "WebFetch(domain:dev.to)"
+      "WebFetch(domain:dev.to)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(cmd //c \"taskkill /F /PID 10968\")",
+      "Bash(cmd //c \"taskkill /F /IM node.exe\")",
+      "Bash(wc:*)",
+      "Bash(npx supabase db execute:*)"
     ],
     "deny": [],
-    "defaultMode": "acceptEdits"
+    "defaultMode": "bypassPermissions"
   },
   "mcpServers": {
     "serena": {
@@ -72,6 +73,10 @@
         "mcp",
         "serve"
       ]
+    },
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=hgltvdshuyfffskvjmst"
     }
   }
 }

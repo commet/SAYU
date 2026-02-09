@@ -285,6 +285,84 @@ async function collectAIC(supabase) {
   return upserted;
 }
 
+// ===== Exhibition Integrated Raw Collector =====
+
+async function collectExhibitionIntegrated(supabase) {
+  const API_KEY = process.env.KCISA_EXHIBITION_API_KEY;
+  if (!API_KEY) { log.warn('[Cron:Integrated] No KCISA_EXHIBITION_API_KEY'); return 0; }
+
+  log.info('[Cron:Integrated] Collecting from 전시정보(통합) API...');
+  const BASE = 'https://api.kcisa.kr/openapi/API_CCA_145/request';
+  const PAGE_SIZE = 100;
+  let page = 1, total = 0, allItems = [];
+
+  while (true) {
+    try {
+      const url = `${BASE}?serviceKey=${encodeURIComponent(API_KEY)}&numOfRows=${PAGE_SIZE}&pageNo=${page}`;
+      const xml = await fetchRetry(url, 4, { timeout: 60000 });
+      const { items, total: t } = parseIntegratedXML(xml);
+      if (page === 1) { total = t; log.info(`[Cron:Integrated] Total: ${total}`); }
+      if (items.length === 0) break;
+      for (const item of items) { if (item.LOCAL_ID) allItems.push(item); }
+      if (page * PAGE_SIZE >= total) break;
+      page++;
+      await delay(1000);
+    } catch (e) {
+      log.warn(`[Cron:Integrated] Page ${page} failed: ${e.message}`);
+      if (page * PAGE_SIZE >= total && total > 0) break;
+      page++;
+      await delay(5000);
+    }
+  }
+
+  // Dedup
+  const seen = new Map();
+  for (const item of allItems) { if (!seen.has(item.LOCAL_ID)) seen.set(item.LOCAL_ID, item); }
+  const unique = [...seen.values()];
+  log.info(`[Cron:Integrated] Collected ${allItems.length}, Unique: ${unique.length}`);
+
+  let upserted = 0;
+  for (let i = 0; i < unique.length; i += 30) {
+    const rows = unique.slice(i, i + 30).map(item => {
+      const dates = parsePeriod(item.PERIOD);
+      return {
+        local_id: item.LOCAL_ID, title: item.TITLE, title_clean: decodeHtml(item.TITLE),
+        institution: item.CNTC_INSTT_NM || null, genre: item.GENRE || null,
+        period: item.PERIOD || null, event_period: item.EVENT_PERIOD || null,
+        start_date: dates.start, end_date: dates.end, event_site: item.EVENT_SITE || null,
+        charge: item.CHARGE || null, contact_point: item.CONTACT_POINT || null,
+        url: item.URL || null, image_url: item.IMAGE_OBJECT || null,
+        description: decodeHtml(item.DESCRIPTION), author: item.AUTHOR || null,
+        contributor: item.CONTRIBUTOR || null, audience: item.AUDIENCE || null,
+        duration: item.DURATION || null, view_count: parseInt(item.VIEW_COUNT) || 0,
+        raw_data: item, collected_at: new Date().toISOString()
+      };
+    });
+    const { data, error } = await supabase.from('source_exhibition_integrated').upsert(rows, { onConflict: 'local_id', ignoreDuplicates: false }).select('id');
+    if (!error) upserted += (data?.length || 0);
+  }
+
+  log.info(`[Cron:Integrated] Done: ${upserted} upserted`);
+  return upserted;
+}
+
+function parseIntegratedXML(xml) {
+  const items = [];
+  const totalMatch = /<totalCount>(\d+)<\/totalCount>/i.exec(xml);
+  const total = totalMatch ? parseInt(totalMatch[1]) : 0;
+  const re = /<item>([\s\S]*?)<\/item>/gi;
+  let m;
+  while ((m = re.exec(xml)) !== null) {
+    const item = {};
+    for (const f of ['TITLE','CNTC_INSTT_NM','COLLECTED_DATE','ISSUED_DATE','DESCRIPTION','IMAGE_OBJECT','LOCAL_ID','URL','VIEW_COUNT','SUB_DESCRIPTION','SPATIAL_COVERAGE','EVENT_SITE','GENRE','DURATION','NUMBER_PAGES','TABLE_OF_CONTENTS','AUTHOR','CONTACT_POINT','ACTOR','CONTRIBUTOR','AUDIENCE','CHARGE','PERIOD','EVENT_PERIOD']) {
+      const fm = new RegExp(`<${f}>([\\s\\S]*?)</${f}>`, 'i').exec(m[1]);
+      if (fm) item[f] = fm[1].replace(/<!\[CDATA\[(.*?)\]\]>/gs, '$1').trim();
+    }
+    if (item.TITLE) items.push(item);
+  }
+  return { items, total };
+}
+
 // ===== Exhibitions Mapping =====
 
 const MMCA_VENUES = {
@@ -372,6 +450,30 @@ async function mapToExhibitions(supabase) {
   log.info(`[Cron:Map] Culture Events: ${ins} inserted, ${upd} updated`);
   totalInserted += ins; totalUpdated += upd;
 
+  // Map Exhibition Integrated
+  const intItems = await fetchAll(supabase, 'source_exhibition_integrated', [q => q.not('start_date','is',null), q => q.not('end_date','is',null)]);
+  ins = 0; upd = 0;
+  for (const item of intItems) {
+    const row = {
+      title_en: isKorean(item.title_clean) ? null : item.title_clean,
+      title_local: item.title_clean, venue_name: item.event_site || item.institution || null,
+      venue_country: 'KR', start_date: item.start_date, end_date: item.end_date,
+      status: calcStatus(item.start_date, item.end_date),
+      description: item.description || null,
+      artists: item.author ? item.author.split(/[,，、]/).map(s => s.trim()).filter(Boolean) : null,
+      admission_fee: item.charge || null,
+      source: 'exhibition_integrated', source_url: item.url || null, website_url: item.url || null,
+      tags: [item.institution || '', item.genre || '전시'].filter(Boolean),
+      metadata: { source_table: 'source_exhibition_integrated', source_id: item.id, local_id: item.local_id, institution: item.institution, image_url: item.image_url, contact_point: item.contact_point, contributor: item.contributor, audience: item.audience, duration: item.duration },
+      collected_at: new Date().toISOString(), updated_at: new Date().toISOString()
+    };
+    const { data: existing } = await supabase.from('exhibitions').select('id').eq('source','exhibition_integrated').contains('metadata',{local_id:item.local_id}).maybeSingle();
+    if (existing) { const { error } = await supabase.from('exhibitions').update(row).eq('id',existing.id); if (!error) upd++; }
+    else { const { error } = await supabase.from('exhibitions').insert(row); if (!error) ins++; }
+  }
+  log.info(`[Cron:Map] Exhibition Integrated: ${ins} inserted, ${upd} updated`);
+  totalInserted += ins; totalUpdated += upd;
+
   // Update statuses
   const today = new Date().toISOString().split('T')[0];
   const { data: ended } = await supabase.from('exhibitions').update({ status: 'ended', updated_at: new Date().toISOString() }).lt('end_date', today).neq('status', 'ended').not('end_date', 'is', null).select('id');
@@ -402,6 +504,7 @@ class ExhibitionPipeline {
       const supabase = getSupabaseAdmin();
       results.sources.mmca = await collectMMCA(supabase);
       results.sources.culture_events = await collectCultureEvents(supabase);
+      results.sources.exhibition_integrated = await collectExhibitionIntegrated(supabase);
       results.sources.aic = await collectAIC(supabase);
       results.mapping = await mapToExhibitions(supabase);
     } catch (e) {
@@ -422,7 +525,7 @@ class ExhibitionPipeline {
     this.isRunning = true;
     try {
       const supabase = getSupabaseAdmin();
-      const collectors = { mmca: collectMMCA, culture_events: collectCultureEvents, aic: collectAIC };
+      const collectors = { mmca: collectMMCA, culture_events: collectCultureEvents, exhibition_integrated: collectExhibitionIntegrated, aic: collectAIC };
       if (!collectors[name]) return { status: 'error', error: `Unknown source: ${name}` };
       const count = await collectors[name](supabase);
       const mapping = await mapToExhibitions(supabase);
@@ -438,6 +541,7 @@ class ExhibitionPipeline {
         const supabase = getSupabaseAdmin();
         await collectMMCA(supabase);
         await collectCultureEvents(supabase);
+        await collectExhibitionIntegrated(supabase);
         await mapToExhibitions(supabase);
         log.info('[Cron] Korean sources done');
       } catch (e) { log.error(`[Cron] Korean error: ${e.message}`); }
@@ -482,7 +586,7 @@ class ExhibitionPipeline {
       lastRun: this.lastRun,
       lastResults: this.lastResults,
       cronActive: this.cronJobs.length > 0,
-      sources: ['mmca', 'culture_events', 'aic']
+      sources: ['mmca', 'culture_events', 'exhibition_integrated', 'aic']
     };
   }
 }
