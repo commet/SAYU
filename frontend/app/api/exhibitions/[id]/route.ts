@@ -59,13 +59,13 @@ export async function GET(
     // Transform data to match frontend interface
     const transformedData = {
       id: data.id,
-      title: extractTitle(data.description, data.venue_name || data.venue),
+      title: data.title_local || data.title_en || extractTitle(data.description, data.venue_name || data.venue),
       venue: data.venue || data.venue_name || '',
       location: data.location || data.venue_city || '',
       startDate: data.start_date || data.startDate || '',
       endDate: data.end_date || data.endDate || '',
       description: data.description || '',
-      image: data.image_url || data.image || null,
+      image: data.image_url || null,
       category: data.category || '미술',
       price: data.price || data.admission_fee || '정보 없음',
       status: determineStatus(data.start_date, data.end_date),

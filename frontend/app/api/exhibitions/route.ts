@@ -21,6 +21,7 @@ interface ExhibitionRow {
   view_count?: number;
   like_count?: number;
   featured?: boolean;
+  metadata?: Record<string, unknown>;
 }
 
 interface TransformedExhibition {
@@ -38,13 +39,6 @@ interface TransformedExhibition {
   viewCount: number;
   likeCount: number;
   featured: boolean;
-}
-
-interface ExhibitionStats {
-  ongoing: number;
-  upcoming: number;
-  ended: number;
-  total: number;
 }
 
 // Cache duration: 5 minutes (in seconds for HTTP cache headers)
@@ -173,7 +167,7 @@ export async function GET(request: NextRequest) {
       startDate: ex.start_date,
       endDate: ex.end_date,
       description: ex.description,
-      image: ex.image_url,
+      image: ex.image_url || undefined,
       category: ex.category || '미술',
       price: ex.price || ex.admission_fee || '정보 없음',
       status: determineStatus(ex.start_date, ex.end_date),
@@ -198,6 +192,15 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Exhibitions API error:', errorMessage);
+
+    const now = new Date();
+    const fallbackStart = new Date(now);
+    fallbackStart.setDate(fallbackStart.getDate() - 7);
+    const fallbackEnd = new Date(now);
+    fallbackEnd.setDate(fallbackEnd.getDate() + 21);
+
+    const fallbackStartDate = toISODate(fallbackStart);
+    const fallbackEndDate = toISODate(fallbackEnd);
     
     // Return fallback data on error
     const fallbackData = [
@@ -206,13 +209,13 @@ export async function GET(request: NextRequest) {
         title: '이불: 1998년 이후',
         venue: '리움미술관',
         location: '서울',
-        startDate: '2025-09-04',
-        endDate: '2026-01-04',
+        startDate: fallbackStartDate,
+        endDate: fallbackEndDate,
         description: '한국 현대미술을 대표하는 이불 작가의 대규모 회고전',
         image: 'https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=800&h=600&fit=crop',
         category: '현대미술',
         price: '성인 20,000원',
-        status: 'upcoming',
+        status: determineStatus(fallbackStartDate, fallbackEndDate),
         viewCount: 156,
         likeCount: 42,
         featured: true
@@ -237,4 +240,8 @@ function determineStatus(startDate: string, endDate: string): 'ongoing' | 'upcom
   if (now < start) return 'upcoming';
   if (now > end) return 'ended';
   return 'ongoing';
+}
+
+function toISODate(date: Date): string {
+  return date.toISOString().split('T')[0];
 }

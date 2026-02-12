@@ -1,6 +1,31 @@
 const { supabaseAdmin } = require('../config/supabase-client');
 const { log } = require('../config/logger');
 
+function clearAuthContext(req) {
+  req.user = null;
+  req.userId = null;
+  req.userEmail = null;
+  req.userRole = null;
+}
+
+function attachAuthContext(req, user, profile) {
+  const resolvedProfile = profile || null;
+  const resolvedUserId = resolvedProfile?.id || null;
+  const resolvedRole = resolvedProfile?.role || user?.user_metadata?.role || null;
+  const resolvedEmail = user?.email || null;
+
+  req.user = {
+    ...user,
+    userId: resolvedUserId,
+    profile: resolvedProfile,
+    role: resolvedRole,
+    email: resolvedEmail
+  };
+  req.userId = resolvedUserId;
+  req.userEmail = resolvedEmail;
+  req.userRole = resolvedRole;
+}
+
 /**
  * Supabase Authentication Middleware
  * Verifies JWT tokens from Supabase Auth
@@ -72,14 +97,10 @@ const authenticateUser = async (req, res, next) => {
           code: 'PROFILE_CREATE_ERROR'
         });
       }
-
-      req.user = { ...user, profile: newProfile };
+      attachAuthContext(req, user, newProfile);
     } else {
-      req.user = { ...user, profile };
+      attachAuthContext(req, user, profile);
     }
-
-    // Add user ID for convenience
-    req.userId = profile?.id || req.user.profile.id;
 
     next();
   } catch (error) {
@@ -101,16 +122,14 @@ const optionalAuth = async (req, res, next) => {
 
     if (!authHeader) {
       // No auth header, proceed without user
-      req.user = null;
-      req.userId = null;
+      clearAuthContext(req);
       return next();
     }
 
     const token = authHeader.split(' ')[1];
 
     if (!token) {
-      req.user = null;
-      req.userId = null;
+      clearAuthContext(req);
       return next();
     }
 
@@ -119,8 +138,7 @@ const optionalAuth = async (req, res, next) => {
 
     if (error || !user) {
       // Invalid token, proceed without user
-      req.user = null;
-      req.userId = null;
+      clearAuthContext(req);
       return next();
     }
 
@@ -131,15 +149,17 @@ const optionalAuth = async (req, res, next) => {
       .eq('auth_id', user.id)
       .single();
 
-    req.user = profile ? { ...user, profile } : null;
-    req.userId = profile?.id || null;
+    if (!profile) {
+      clearAuthContext(req);
+      return next();
+    }
+    attachAuthContext(req, user, profile);
 
     next();
   } catch (error) {
     // Error in auth, proceed without user
     log.warn('Optional auth error:', error.message);
-    req.user = null;
-    req.userId = null;
+    clearAuthContext(req);
     next();
   }
 };
@@ -153,7 +173,7 @@ const requireAdmin = async (req, res, next) => {
     // First authenticate the user
     await authenticateUser(req, res, async () => {
       // Check if user has admin role
-      const userRole = req.user?.profile?.role || req.user?.user_metadata?.role;
+      const userRole = req.userRole || req.user?.profile?.role || req.user?.user_metadata?.role;
 
       if (userRole !== 'admin') {
         return res.status(403).json({

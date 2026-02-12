@@ -308,6 +308,7 @@ function ExhibitionCard({
   const endDate = exhibitionData?.end_date;
   const category = exhibitionData?.category;
   const venueName = exhibitionData?.venue_name;
+  const imageUrl = participant.image_url || exhibitionData?.image_url;
 
   const dateRange =
     startDate && endDate
@@ -322,62 +323,115 @@ function ExhibitionCard({
       disabled={isDisabled}
       className={cn(
         'flex-1 relative overflow-hidden transition-all min-h-[40vh] md:min-h-0',
-        'focus:outline-none flex items-center justify-center',
+        'focus:outline-none',
+        imageUrl ? '' : 'flex items-center justify-center',
         isDisabled && !isSelected && !isLoser ? 'cursor-not-allowed' : 'cursor-pointer'
       )}
       animate={{
         scale: isSelected ? 1.02 : isLoser ? 0.96 : 1,
         opacity: isLoser ? 0.3 : 1,
+        filter: imageUrl && isLoser ? 'grayscale(100%)' : 'grayscale(0%)',
       }}
       transition={{ duration: 0.4 }}
-      whileHover={!isDisabled ? { scale: 1.01, backgroundColor: 'rgba(255,255,255,0.03)' } : {}}
+      whileHover={!isDisabled ? { scale: 1.01, backgroundColor: imageUrl ? undefined : 'rgba(255,255,255,0.03)' } : {}}
       whileTap={!isDisabled ? { scale: 0.99 } : {}}
     >
-      {/* Background gradient */}
-      <div
-        className={cn(
-          'absolute inset-0 transition-all duration-400',
-          isSelected
-            ? 'bg-gradient-to-br from-violet-900/30 via-indigo-900/20 to-transparent'
-            : 'bg-gradient-to-br from-white/[0.02] to-transparent'
-        )}
-      />
-
-      {/* Exhibition Info */}
-      <div className="relative z-10 p-8 max-w-sm text-left">
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          {category && (
-            <span className="inline-block text-[10px] uppercase tracking-[0.15em] text-violet-400/60 mb-3 px-2 py-1 border border-violet-500/20 rounded-sm">
-              {category}
-            </span>
-          )}
-          <h3
-            className="text-xl md:text-2xl font-light mb-3 line-clamp-3 text-white/90 leading-relaxed"
-            style={{ fontFamily: 'var(--font-serif, Georgia, serif)' }}
-          >
-            {participant.title || '제목 없음'}
-          </h3>
-          {(venueName || participant.artist) && (
-            <p className="text-white/50 text-sm font-light mb-2">
-              {venueName || participant.artist}
-            </p>
-          )}
-          {dateRange && (
-            <p className="text-white/30 text-xs font-light mb-3">
-              {dateRange}
-            </p>
-          )}
-          {participant.description && (
-            <p className="text-white/30 text-xs font-light line-clamp-2 leading-relaxed">
-              {participant.description}
-            </p>
-          )}
-        </motion.div>
-      </div>
+      {imageUrl ? (
+        <>
+          {/* Background Image */}
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${imageUrl})` }}
+          />
+          {/* Gradient Overlay */}
+          <div
+            className={cn(
+              'absolute inset-0 transition-all duration-400',
+              isSelected
+                ? 'bg-gradient-to-t from-violet-900/80 via-violet-900/30 to-transparent'
+                : 'bg-gradient-to-t from-black/80 via-black/30 to-transparent',
+              !isDisabled && 'hover:from-white/20 hover:via-transparent'
+            )}
+          />
+          {/* Exhibition Info - Bottom */}
+          <div className="absolute bottom-0 left-0 right-0 p-6 text-left">
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              {category && (
+                <span className="inline-block text-[10px] uppercase tracking-[0.15em] text-violet-300/80 mb-2 px-2 py-0.5 border border-violet-400/30 rounded-sm backdrop-blur-sm bg-black/20">
+                  {category}
+                </span>
+              )}
+              <h3
+                className="text-xl md:text-2xl font-light mb-1 line-clamp-2 text-white"
+                style={{ fontFamily: 'var(--font-serif, Georgia, serif)' }}
+              >
+                {participant.title || '제목 없음'}
+              </h3>
+              {(venueName || participant.artist) && (
+                <p className="text-white/60 text-sm font-light">
+                  {venueName || participant.artist}
+                </p>
+              )}
+              {dateRange && (
+                <p className="text-white/40 text-xs font-light mt-1">
+                  {dateRange}
+                </p>
+              )}
+            </motion.div>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Background gradient (no image) */}
+          <div
+            className={cn(
+              'absolute inset-0 transition-all duration-400',
+              isSelected
+                ? 'bg-gradient-to-br from-violet-900/30 via-indigo-900/20 to-transparent'
+                : 'bg-gradient-to-br from-white/[0.02] to-transparent'
+            )}
+          />
+          {/* Exhibition Info - Center */}
+          <div className="relative z-10 p-8 max-w-sm text-left">
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              {category && (
+                <span className="inline-block text-[10px] uppercase tracking-[0.15em] text-violet-400/60 mb-3 px-2 py-1 border border-violet-500/20 rounded-sm">
+                  {category}
+                </span>
+              )}
+              <h3
+                className="text-xl md:text-2xl font-light mb-3 line-clamp-3 text-white/90 leading-relaxed"
+                style={{ fontFamily: 'var(--font-serif, Georgia, serif)' }}
+              >
+                {participant.title || '제목 없음'}
+              </h3>
+              {(venueName || participant.artist) && (
+                <p className="text-white/50 text-sm font-light mb-2">
+                  {venueName || participant.artist}
+                </p>
+              )}
+              {dateRange && (
+                <p className="text-white/30 text-xs font-light mb-3">
+                  {dateRange}
+                </p>
+              )}
+              {participant.description && (
+                <p className="text-white/30 text-xs font-light line-clamp-2 leading-relaxed">
+                  {participant.description}
+                </p>
+              )}
+            </motion.div>
+          </div>
+        </>
+      )}
 
       {/* Selection Indicator */}
       <AnimatePresence>

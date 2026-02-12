@@ -8,14 +8,12 @@ import { useAuthGate } from '@/hooks/useAuthGate';
 import { useActivityTracker } from '@/hooks/useActivityTracker';
 import { useLanguage } from '@/contexts/LanguageContext';
 import toast from 'react-hot-toast';
-import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import {
   Search,
   Heart,
   AlertCircle,
-  Loader2,
 } from 'lucide-react';
 import { ExhibitionPlaceholder } from '@/components/exhibitions/ExhibitionPlaceholder';
 
@@ -39,6 +37,8 @@ const t = {
     addedToSaved: 'Added to saved',
     removedFromSaved: 'Removed from saved',
     loginToSave: 'Login to save exhibitions.',
+    recommendedForYou: 'Recommended for You',
+    matchScore: 'Match',
   },
   ko: {
     title: '전시',
@@ -58,20 +58,10 @@ const t = {
     addedToSaved: '저장되었습니다',
     removedFromSaved: '저장 취소되었습니다',
     loginToSave: '전시를 저장하려면 로그인이 필요합니다.',
+    recommendedForYou: '당신을 위한 추천',
+    matchScore: '매칭',
   },
 };
-
-const ExhibitionMap = dynamic(
-  () => import('@/components/exhibitions/ExhibitionMap'),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="w-full h-[400px] bg-neutral-100 flex items-center justify-center rounded-lg">
-        <Loader2 className="w-8 h-8 animate-spin text-neutral-400" />
-      </div>
-    ),
-  }
-);
 
 interface TransformedExhibition {
   id: string;
@@ -88,6 +78,20 @@ interface TransformedExhibition {
   viewCount?: number;
   likeCount?: number;
   featured?: boolean;
+}
+
+interface SavedExhibitionRow {
+  exhibition_id: string;
+}
+
+interface RecommendationExhibition {
+  id: string;
+  title_local?: string;
+  title_en?: string;
+  venue_name?: string;
+  image_url?: string;
+  image?: string;
+  matchScore?: number;
 }
 
 const ExhibitionSkeleton = () => (
@@ -109,12 +113,13 @@ export default function ExhibitionsPage() {
   const { language } = useLanguage();
   const texts = t[language];
 
-  const [activeTab, setActiveTab] = useState<'all' | 'ongoing' | 'upcoming'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'ongoing' | 'upcoming' | 'ended'>('all');
   const [exhibitions, setExhibitions] = useState<TransformedExhibition[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [savedExhibitions, setSavedExhibitions] = useState<Set<string>>(new Set());
+  const [recommendations, setRecommendations] = useState<RecommendationExhibition[]>([]);
 
   const featuredExhibition = useMemo(() => {
     if (loading || exhibitions.length === 0) return null;
@@ -149,19 +154,29 @@ export default function ExhibitionsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [texts.error]);
 
   const fetchSavedExhibitions = useCallback(async () => {
-    const localSaved = localStorage.getItem('savedExhibitions');
-    if (localSaved) setSavedExhibitions(new Set(JSON.parse(localSaved)));
+    try {
+      const localSaved = localStorage.getItem('savedExhibitions');
+      if (localSaved) {
+        const parsed = JSON.parse(localSaved);
+        if (Array.isArray(parsed)) {
+          setSavedExhibitions(new Set(parsed.filter((id): id is string => typeof id === 'string')));
+        }
+      }
+    } catch (parseError) {
+      console.warn('Failed to parse saved exhibitions from localStorage:', parseError);
+      localStorage.removeItem('savedExhibitions');
+    }
 
     if (!user) return;
     try {
       const response = await fetch('/api/exhibitions/save');
       if (response.ok) {
-        const result = await response.json();
+        const result: { localOnly?: boolean; data?: SavedExhibitionRow[] } = await response.json();
         if (!result.localOnly && result.data) {
-          const savedIds = new Set(result.data.map((item: any) => item.exhibition_id));
+          const savedIds = new Set(result.data.map((item) => item.exhibition_id));
           setSavedExhibitions(savedIds);
           localStorage.setItem('savedExhibitions', JSON.stringify(Array.from(savedIds)));
         }
@@ -191,19 +206,44 @@ export default function ExhibitionsPage() {
 
     if (user) {
       try {
-        await fetch('/api/exhibitions/save', {
+        const response = await fetch('/api/exhibitions/save', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ exhibitionId: exhibitionId, action: isSaved ? 'unsave' : 'save' }),
         });
-      } catch (error) { console.error('Failed to sync saved exhibitions:', error); }
+        if (!response.ok) {
+          throw new Error(`Sync failed with status ${response.status}`);
+        }
+      } catch (error) {
+        console.error('Failed to sync saved exhibitions:', error);
+        const rollbackSet = new Set(savedExhibitions);
+        setSavedExhibitions(rollbackSet);
+        localStorage.setItem('savedExhibitions', JSON.stringify(Array.from(rollbackSet)));
+        toast.error(texts.error);
+      }
     }
-  }, [user, savedExhibitions, requireAuth]);
+  }, [user, savedExhibitions, requireAuth, texts]);
+
+  const fetchRecommendations = useCallback(async () => {
+    if (!user?.aptType) return;
+    try {
+      const response = await fetch(`/api/exhibitions/recommend?apt=${user.aptType}&limit=6`);
+      if (response.ok) {
+        const result: { success?: boolean; data?: { recommendations?: RecommendationExhibition[] } } = await response.json();
+        if (result.success && Array.isArray(result.data?.recommendations)) {
+          setRecommendations(result.data.recommendations);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch recommendations:', err);
+    }
+  }, [user?.aptType]);
 
   useEffect(() => {
     fetchExhibitions();
     fetchSavedExhibitions();
-  }, [fetchExhibitions, fetchSavedExhibitions]);
+    fetchRecommendations();
+  }, [fetchExhibitions, fetchSavedExhibitions, fetchRecommendations]);
 
   const filteredExhibitions = useMemo(() => {
     let filtered = exhibitions.filter(ex => ex.id !== featuredExhibition?.id);
@@ -222,11 +262,18 @@ export default function ExhibitionsPage() {
 
   const ExhibitionCard = ({ exhibition }: { exhibition: TransformedExhibition }) => {
     const dateLocale = language === 'ko' ? 'ko-KR' : 'en-US';
-    const dates = `${new Date(exhibition.startDate).toLocaleDateString(dateLocale, { month: 'short', day: 'numeric' })} - ${new Date(exhibition.endDate).toLocaleDateString(dateLocale, { month: 'short', day: 'numeric' })}`;
+    const startDate = new Date(exhibition.startDate);
+    const endDate = new Date(exhibition.endDate);
+    const hasValidDates = !Number.isNaN(startDate.getTime()) && !Number.isNaN(endDate.getTime());
+    const dates = hasValidDates
+      ? `${startDate.toLocaleDateString(dateLocale, { month: 'short', day: 'numeric' })} - ${endDate.toLocaleDateString(dateLocale, { month: 'short', day: 'numeric' })}`
+      : '-';
 
     let statusText: string;
     if (exhibition.status === 'ongoing') {
-      const daysLeft = Math.ceil((new Date(exhibition.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+      const daysLeft = hasValidDates
+        ? Math.ceil((endDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+        : 0;
       statusText = (daysLeft > 0 && daysLeft <= 14) ? texts.endsIn(daysLeft) : texts.ongoing;
     } else {
       statusText = exhibition.status === 'upcoming' ? texts.upcoming : texts.ended;
@@ -323,6 +370,49 @@ export default function ExhibitionsPage() {
           </section>
         )}
 
+        {recommendations.length > 0 && (
+          <section className="mb-12 md:mb-16">
+            <div className="flex items-baseline gap-3 mb-6">
+              <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">{texts.recommendedForYou}</h2>
+              <div className="h-px flex-1 bg-neutral-200" />
+            </div>
+            <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
+              {recommendations.map((rec) => (
+                <div
+                  key={rec.id}
+                  className="flex-none w-52 cursor-pointer group"
+                  onClick={() => router.push(`/exhibitions/${rec.id}`)}
+                >
+                  <div className="aspect-[3/4] border border-neutral-200 group-hover:border-neutral-900 transition-colors duration-300 overflow-hidden mb-3 relative bg-neutral-50 rounded-sm">
+                    {(rec.image_url || rec.image) ? (
+                      <Image
+                        src={rec.image_url || rec.image}
+                        alt={rec.title_local || rec.title_en || 'recommended exhibition'}
+                        fill
+                        sizes="208px"
+                        className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                      />
+                    ) : (
+                      <ExhibitionPlaceholder
+                        title={rec.title_local || rec.title_en || ''}
+                        venue={rec.venue_name || ''}
+                        variant="card"
+                      />
+                    )}
+                    <div className="absolute top-2 right-2 px-2 py-0.5 bg-black/70 text-white text-[10px] font-medium rounded-full backdrop-blur-sm">
+                      {texts.matchScore} {Math.round((rec.matchScore ?? 0) * 100)}%
+                    </div>
+                  </div>
+                  <h3 className="text-sm font-medium text-black line-clamp-2 leading-snug mb-1">
+                    {rec.title_local || rec.title_en}
+                  </h3>
+                  <p className="text-xs text-neutral-500 font-light">{rec.venue_name}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md pt-4 pb-4 border-b border-neutral-200 mb-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex gap-8 sm:gap-12">
@@ -330,6 +420,7 @@ export default function ExhibitionsPage() {
                 { id: 'all', label: texts.all },
                 { id: 'ongoing', label: texts.ongoing },
                 { id: 'upcoming', label: texts.upcoming },
+                { id: 'ended', label: texts.ended },
               ] as const).map(tab => (
                 <button
                   key={tab.id}

@@ -3,6 +3,14 @@ const { v4: uuidv4 } = require('uuid');
 // const { addRequestContext } = require('../config/sentry');
 const { log } = require('../config/logger');
 
+function getRequestUserId(req) {
+  return req.userId || req.user?.userId || req.user?.id || null;
+}
+
+function getRequestUserRole(req) {
+  return req.userRole || req.user?.role || req.user?.profile?.role || req.user?.user_metadata?.role || null;
+}
+
 // Add request context for logging and tracing
 const requestContext = (req, res, next) => {
   // Generate unique request ID
@@ -95,7 +103,7 @@ const enhancedRequestLogger = (req, res, next) => {
       responseSize,
       ip: req.ip,
       userAgent: req.headers['user-agent'],
-      userId: req.userId || null
+      userId: getRequestUserId(req)
     };
 
     // Add query params if present
@@ -122,7 +130,7 @@ const enhancedRequestLogger = (req, res, next) => {
       log.performance('Slow request detected', duration, {
         requestId: req.id,
         endpoint: `${req.method} ${req.originalUrl}`,
-        userId: req.userId
+        userId: getRequestUserId(req)
       });
     }
   });
@@ -133,17 +141,24 @@ const enhancedRequestLogger = (req, res, next) => {
 // User context middleware - adds user info to logging context
 const userContext = (req, res, next) => {
   // This runs after authentication middleware
-  if (req.userId) {
+  const resolvedUserId = getRequestUserId(req);
+  const resolvedUserRole = getRequestUserRole(req);
+
+  if (resolvedUserId) {
+    // Normalize aliases for downstream middleware/handlers.
+    req.userId = resolvedUserId;
+    req.userRole = resolvedUserRole;
+
     req.userContext = {
-      id: req.userId,
-      role: req.userRole
+      id: resolvedUserId,
+      role: resolvedUserRole
     };
 
     // Add to logging context
     log.debug('User context established', {
       requestId: req.id,
-      userId: req.userId,
-      userRole: req.userRole
+      userId: resolvedUserId,
+      userRole: resolvedUserRole
     });
   }
 
@@ -172,7 +187,7 @@ const performanceMonitor = (req, res, next) => {
         requestId: req.id,
         endpoint: `${req.method} ${req.originalUrl}`,
         memoryUsage,
-        userId: req.userId
+        userId: getRequestUserId(req)
       });
     }
   });

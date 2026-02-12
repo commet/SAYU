@@ -84,6 +84,7 @@ async function mapMMCA() {
       description: item.description || null,
       artists: item.artists ? item.artists.split(/[,，、]/).map(s => s.trim()).filter(Boolean) : null,
       admission_fee: item.charge || null,
+      image_url: item.image_url || null,
       source: 'mmca',
       source_url: 'https://www.mmca.go.kr',
       tags: ['국립현대미술관', 'MMCA', item.category || ''].filter(Boolean),
@@ -143,6 +144,7 @@ async function mapAIC() {
       status: calcStatus(item.start_date, item.end_date),
       description: item.short_description || item.description || null,
       admission_fee: null,
+      image_url: item.image_full_url || null,
       source: 'aic',
       source_url: item.web_url || 'https://www.artic.edu',
       website_url: item.web_url || null,
@@ -151,7 +153,6 @@ async function mapAIC() {
         source_table: 'source_aic',
         source_id: item.id,
         aic_id: item.aic_id,
-        image_url: item.image_full_url,
         artwork_count: item.artwork_count,
         artist_count: item.artist_count,
         aic_status: item.aic_status
@@ -210,6 +211,7 @@ async function mapCultureEvents() {
       status: calcStatus(item.start_date, item.end_date),
       description: item.description || null,
       admission_fee: item.charge || null,
+      image_url: item.image_url || null,
       source: 'culture_events',
       source_url: item.url || null,
       website_url: item.url || null,
@@ -219,8 +221,7 @@ async function mapCultureEvents() {
         source_id: item.id,
         ext_id: item.ext_id,
         contact_point: item.contact_point,
-        view_count: item.view_count,
-        image_url: item.image_url
+        view_count: item.view_count
       },
       collected_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
@@ -275,6 +276,7 @@ async function mapExhibitionIntegrated() {
       description: item.description || null,
       artists: item.author ? item.author.split(/[,，、]/).map(s => s.trim()).filter(Boolean) : null,
       admission_fee: item.charge || null,
+      image_url: item.image_url || null,
       source: 'exhibition_integrated',
       source_url: item.url || null,
       website_url: item.url || null,
@@ -284,7 +286,6 @@ async function mapExhibitionIntegrated() {
         source_id: item.id,
         local_id: item.local_id,
         institution: item.institution,
-        image_url: item.image_url,
         contact_point: item.contact_point,
         contributor: item.contributor,
         audience: item.audience,
@@ -314,6 +315,89 @@ async function mapExhibitionIntegrated() {
   }
 
   console.log(`  Exhibition Integrated: ${inserted} inserted, ${updated} updated, ${errors} errors`);
+  return inserted + updated;
+}
+
+// Gallery venue info for known galleries
+const GALLERY_VENUES = {
+  kukje:          { name: '국제갤러리', city: '서울', country: 'KR', address: '서울특별시 종로구 삼청로 54' },
+  pkm:            { name: 'PKM갤러리', city: '서울', country: 'KR', address: '서울특별시 종로구 삼청로 75' },
+  ropac:          { name: '타데우스 로팍 서울', city: '서울', country: 'KR', address: '서울특별시 용산구 독서당로 122-1' },
+  lehmann_maupin: { name: '리만머핀 서울', city: '서울', country: 'KR', address: '서울특별시 한남동' },
+  pace:           { name: '페이스갤러리 서울', city: '서울', country: 'KR', address: '서울특별시 용산구 이태원로 267' },
+  artmap_kr:      { name: null, city: null, country: 'KR', address: null }, // varies per exhibition
+  neolook:        { name: null, city: null, country: 'KR', address: null }, // varies per exhibition
+};
+
+async function mapGalleries() {
+  console.log('\n--- Mapping source_galleries → exhibitions ---');
+
+  // Check if table exists
+  const { error: testErr } = await supabase.from('source_galleries').select('id').limit(1);
+  if (testErr && testErr.message.includes('does not exist')) {
+    console.log('  source_galleries table does not exist yet. Skipping.');
+    return 0;
+  }
+
+  // Include items even without dates - gallery exhibitions are still valuable
+  const items = await fetchAll('source_galleries');
+  console.log(`  Found ${items.length} gallery exhibitions with dates`);
+
+  let inserted = 0, updated = 0, errors = 0;
+
+  for (const item of items) {
+    const venueInfo = GALLERY_VENUES[item.gallery_slug] || {};
+
+    const titleLocal = isKorean(item.title) ? item.title : null;
+    const titleEn = isKorean(item.title) ? null : item.title;
+
+    const row = {
+      title_en: titleEn,
+      title_local: titleLocal || item.title,
+      venue_name: item.venue_name || venueInfo.name || item.gallery_slug,
+      venue_city: venueInfo.city || '서울',
+      venue_country: venueInfo.country || 'KR',
+      venue_address: item.venue_address || venueInfo.address || null,
+      start_date: item.start_date,
+      end_date: item.end_date,
+      status: calcStatus(item.start_date, item.end_date),
+      description: item.description || null,
+      artists: item.artist ? item.artist.split(/[,，、&]/).map(s => s.trim()).filter(Boolean) : null,
+      image_url: item.image_url || null,
+      source: `gallery_${item.gallery_slug}`,
+      source_url: item.source_url || null,
+      tags: [item.venue_name || venueInfo.name, item.medium, item.exhibition_type, '사립갤러리'].filter(Boolean),
+      metadata: {
+        source_table: 'source_galleries',
+        source_id: item.id,
+        gallery_slug: item.gallery_slug,
+        external_id: item.external_id,
+      },
+      collected_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    // Check if exists
+    const { data: existing } = await supabase
+      .from('exhibitions')
+      .select('id')
+      .eq('source', `gallery_${item.gallery_slug}`)
+      .contains('metadata', { external_id: item.external_id })
+      .maybeSingle();
+
+    if (existing) {
+      const { error: upErr } = await supabase.from('exhibitions').update(row).eq('id', existing.id);
+      if (upErr) { errors++; } else { updated++; }
+    } else {
+      const { error: inErr } = await supabase.from('exhibitions').insert(row);
+      if (inErr) {
+        if (errors < 3) console.log(`  Insert error: ${inErr.message}`);
+        errors++;
+      } else { inserted++; }
+    }
+  }
+
+  console.log(`  Galleries: ${inserted} inserted, ${updated} updated, ${errors} errors`);
   return inserted + updated;
 }
 
@@ -347,6 +431,7 @@ async function run() {
   const aicCount = await mapAIC();
   const cultureCount = await mapCultureEvents();
   const integratedCount = await mapExhibitionIntegrated();
+  const galleryCount = await mapGalleries();
   await updateStatuses();
 
   // Final stats

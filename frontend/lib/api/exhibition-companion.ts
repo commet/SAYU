@@ -494,5 +494,33 @@ export const exhibitionCompanionApi = {
       .eq('id', matchId);
 
     if (error) throw error;
-  }
+  },
+
+  // 내 동행 요청 목록 (CreateCompanionRequest에서 사용)
+  async getMyCompanionRequests(): Promise<CompanionRequest[]> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const { data, error } = await supabase
+      .from('exhibition_companion_requests')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  },
+
+  // 특정 전시+날짜의 active 요청 수 조회
+  async getRequestsByDate(exhibitionId: string, date: string): Promise<CompanionRequest[]> {
+    const { data, error } = await supabase
+      .from('exhibition_companion_requests')
+      .select('*')
+      .eq('exhibition_id', exhibitionId)
+      .eq('preferred_date', date)
+      .eq('status', 'active');
+
+    if (error) throw error;
+    return data || [];
+  },
 };

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { useSearchParams } from 'next/navigation';
@@ -11,9 +12,11 @@ import { useLanguage } from '@/contexts/LanguageContext';
 // Tabs
 import CollectionsTab from '@/components/gallery/CollectionsTab';
 import TimelineTab from '@/components/gallery/TimelineTab';
-import MapTab from '@/components/gallery/MapTab';
 import EmotionsTab from '@/components/gallery/EmotionsTab';
 import DiscoverTab from '@/components/gallery/DiscoverTab';
+
+// MapTab uses Leaflet which requires window - must be dynamic imported
+const MapTab = dynamic(() => import('@/components/gallery/MapTab'), { ssr: false });
 
 type TabType = 'collections' | 'timeline' | 'map' | 'emotions' | 'discover';
 

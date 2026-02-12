@@ -1,8 +1,68 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+interface Venue {
+  id: string;
+  name: string;
+  name_en: string;
+  lat: number;
+  lng: number;
+  district: string;
+  type: string;
+  address: string;
+  website: string;
+  apt_compatibility: Record<string, number>;
+}
+
+interface ExhibitionMapRow {
+  id: string;
+  external_id?: string;
+  title?: string;
+  venue?: string;
+  venue_address?: string;
+  start_date: string;
+  end_date: string;
+  description?: string;
+  image_url?: string;
+  ticket_url?: string;
+  category?: string;
+  recommended_apt?: string[];
+  apt_weights?: Record<string, number>;
+  status?: string;
+  venue_coordinates?: { lat: number; lng: number } | null;
+  venue_district?: string;
+  venue_type?: string;
+  source?: string;
+  created_at?: string;
+}
+
+interface EnhancedExhibition {
+  id: string;
+  external_id?: string;
+  title?: string;
+  venue_name?: string;
+  venue_name_en?: string;
+  lat: number;
+  lng: number;
+  district: string;
+  venue_type: string;
+  venue_address?: string;
+  start_date: string;
+  end_date: string;
+  description?: string;
+  image_url?: string;
+  ticket_url?: string;
+  category: string;
+  recommended_apt: string[];
+  apt_compatibility: Record<string, number>;
+  status: 'ongoing' | 'upcoming' | 'ended';
+  days_remaining: number;
+  source?: string;
+  tags: string[];
+}
+
 // Seoul venue coordinates with enhanced APT compatibility
-const SEOUL_VENUES = [
+const SEOUL_VENUES: Venue[] = [
   {
     id: 'mmca-seoul',
     name: '국립현대미술관 서울',
@@ -37,8 +97,7 @@ const SEOUL_VENUES = [
       'SAMC': 0.90, // 사슴 - 평화로운 전시 분위기
       'LREC': 0.85, // 고슴도치 - 접근 가능한 현대미술
       'SRMF': 0.80, // 코끼리 - 대중적 전시
-      'SAEC': 0.75, // 펭귄 - 세련된 공간
-      'SREC': 0.85  // 오리 - 편안한 관람
+      'SAEC': 0.75  // 펭귄 - 세련된 공간
     }
   },
   {
@@ -180,7 +239,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const { data: exhibitions, error } = await query;
+    const { data: exhibitionsData, error } = await query;
 
     if (error) {
       console.error('Supabase query error:', error);
@@ -190,7 +249,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (!exhibitions || exhibitions.length === 0) {
+    const exhibitions = (exhibitionsData || []) as ExhibitionMapRow[];
+
+    if (exhibitions.length === 0) {
       // Return sample data if no real exhibitions found
       return NextResponse.json({
         success: true,
@@ -203,7 +264,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Enhance exhibition data with venue information and APT matching
-    const enhancedExhibitions = exhibitions.map(exhibition => {
+    const enhancedExhibitions: EnhancedExhibition[] = exhibitions.map((exhibition) => {
       // Find matching venue
       const venue = findMatchingVenue(exhibition.venue, SEOUL_VENUES);
       
@@ -227,7 +288,7 @@ export async function GET(request: NextRequest) {
       const startDate = new Date(exhibition.start_date);
       const endDate = new Date(exhibition.end_date);
       
-      let currentStatus = 'upcoming';
+      let currentStatus: 'ongoing' | 'upcoming' | 'ended' = 'upcoming';
       if (now >= startDate && now <= endDate) {
         currentStatus = 'ongoing';
       } else if (now > endDate) {
@@ -258,7 +319,7 @@ export async function GET(request: NextRequest) {
         source: exhibition.source,
         tags: generateExhibitionTags(exhibition)
       };
-    }).filter(Boolean); // Remove null values
+    }).filter((exhibition): exhibition is EnhancedExhibition => exhibition !== null);
 
     // Sort by relevance (ongoing first, then upcoming, then by start date)
     enhancedExhibitions.sort((a, b) => {
@@ -306,14 +367,14 @@ export async function GET(request: NextRequest) {
 }
 
 // Helper function to find matching venue
-function findMatchingVenue(venueName: string, venues: any[]) {
+function findMatchingVenue(venueName: string | null | undefined, venues: Venue[]): Venue | null {
   if (!venueName) return null;
   
   const cleanName = venueName.toLowerCase()
     .replace(/[^\w가-힣]/g, '')
     .replace(/\s+/g, '');
 
-  return venues.find(venue => {
+  return venues.find((venue) => {
     const venueCleanName = venue.name.toLowerCase()
       .replace(/[^\w가-힣]/g, '')
       .replace(/\s+/g, '');
@@ -325,7 +386,7 @@ function findMatchingVenue(venueName: string, venues: any[]) {
 }
 
 // Generate APT recommendations based on exhibition content
-function generateAPTRecommendations(exhibition: any, venue: any) {
+function generateAPTRecommendations(exhibition: ExhibitionMapRow, venue: Venue | null): string[] {
   const recommendations = new Set<string>();
   const title = exhibition.title?.toLowerCase() || '';
   const description = exhibition.description?.toLowerCase() || '';
@@ -361,8 +422,8 @@ function generateAPTRecommendations(exhibition: any, venue: any) {
   // Venue-based recommendations
   if (venue?.apt_compatibility) {
     Object.entries(venue.apt_compatibility)
-      .filter(([_, score]) => (score as number) >= 0.8)
-      .forEach(([type, _]) => recommendations.add(type));
+      .filter(([, score]) => score >= 0.8)
+      .forEach(([type]) => recommendations.add(type));
   }
 
   // Ensure minimum recommendations
@@ -374,8 +435,8 @@ function generateAPTRecommendations(exhibition: any, venue: any) {
 }
 
 // Generate exhibition tags
-function generateExhibitionTags(exhibition: any) {
-  const tags = [];
+function generateExhibitionTags(exhibition: ExhibitionMapRow): string[] {
+  const tags: string[] = [];
   const title = exhibition.title?.toLowerCase() || '';
   const description = exhibition.description?.toLowerCase() || '';
   

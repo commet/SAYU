@@ -38,11 +38,11 @@ export async function POST(request: NextRequest) {
     // DB columns: title_en, title_local, artists (array), exhibition_type, venue_name, venue_country
     let query = supabase
       .from('exhibitions')
-      .select('id, title_en, title_local, artists, description, start_date, end_date, exhibition_type, tags, venue_name, venue_country, status');
+      .select('id, title_en, title_local, artists, description, start_date, end_date, exhibition_type, tags, venue_name, venue_country, status, image_url');
 
     if (theme === 'korean') {
       query = query.or(
-        'source.eq.culture_events,source.eq.mmca,source.eq.MMCA,source.eq.한국관광공사,source.eq.artmap,source.eq.culture_portal,source.eq.seoul_museum_official,source.eq.seoul_arts_center,source.eq.leeum_official,source.eq.ddp_official,source.eq.national_museum_official,source.eq.kukje_gallery_web'
+        'source.eq.culture_events,source.eq.mmca,source.eq.MMCA,source.eq.한국관광공사,source.eq.artmap,source.eq.culture_portal,source.eq.seoul_museum_official,source.eq.seoul_arts_center,source.eq.leeum_official,source.eq.ddp_official,source.eq.national_museum_official,source.eq.kukje_gallery_web,source.eq.exhibition_integrated'
       );
     } else if (theme === 'international') {
       query = query.or(
@@ -116,6 +116,7 @@ export async function POST(request: NextRequest) {
       title: ex.title_en || ex.title_local,
       artist: Array.isArray(ex.artists) ? ex.artists.join(', ') : null,
       description: ex.description?.slice(0, 200) || null,
+      image_url: ex.image_url || null,
       seed_position: index,
     }));
 
@@ -147,6 +148,7 @@ export async function POST(request: NextRequest) {
               status: ex.status,
               venue_name: ex.venue_name,
               venue_country: ex.venue_country,
+              image_url: ex.image_url,
             }
           : null,
       };

@@ -3,6 +3,24 @@ const TokenService = require('../services/tokenService');
 const { verifySupabaseToken, requireAdmin: supabaseRequireAdmin } = require('./supabaseAuth');
 const { isSupabaseConfigured } = require('../config/supabase');
 
+function applyAuthContext(req, { userId, email, role, tokenId }) {
+  req.userId = userId;
+  req.userEmail = email;
+  req.userRole = role || 'user';
+
+  if (tokenId) {
+    req.tokenId = tokenId;
+  }
+
+  req.user = {
+    ...(req.user || {}),
+    id: userId,
+    userId,
+    email,
+    role: role || 'user'
+  };
+}
+
 const authMiddleware = async (req, res, next) => {
   // If Supabase is configured, use Supabase auth
   if (isSupabaseConfigured()) {
@@ -26,10 +44,12 @@ const authMiddleware = async (req, res, next) => {
 
     // Verify the access token
     const decoded = TokenService.verifyAccessToken(token);
-    req.userId = decoded.userId;
-    req.userEmail = decoded.email;
-    req.userRole = decoded.role || 'user';
-    req.tokenId = decoded.jti; // JWT ID for tracking
+    applyAuthContext(req, {
+      userId: decoded.userId,
+      email: decoded.email,
+      role: decoded.role,
+      tokenId: decoded.jti
+    });
     next();
   } catch (error) {
     if (error.message.includes('expired')) {
@@ -75,9 +95,12 @@ const adminMiddleware = async (req, res, next) => {
       return res.status(403).json({ error: 'Admin access required' });
     }
 
-    req.userId = decoded.userId;
-    req.userEmail = decoded.email;
-    req.userRole = decoded.role;
+    applyAuthContext(req, {
+      userId: decoded.userId,
+      email: decoded.email,
+      role: decoded.role,
+      tokenId: decoded.jti
+    });
     next();
   } catch (error) {
     if (error.message.includes('expired')) {

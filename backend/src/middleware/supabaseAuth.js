@@ -1,6 +1,20 @@
 const { getSupabaseAdmin } = require('../config/supabase');
 const { log } = require('../config/logger');
 
+function attachUnifiedAuthContext(req, userId, email, profile) {
+  const role = profile?.role || (profile?.is_admin ? 'admin' : 'user');
+  req.userId = userId;
+  req.userEmail = email;
+  req.userRole = role;
+  req.user = {
+    id: userId,
+    userId,
+    email,
+    role,
+    ...(profile || {})
+  };
+}
+
 /**
  * Middleware to verify Supabase JWT tokens
  */
@@ -38,12 +52,8 @@ async function verifySupabaseToken(req, res, next) {
       log.error('Error fetching user profile:', profileError);
     }
 
-    // Attach user and profile to request
-    req.user = {
-      id: user.id,
-      email: user.email,
-      ...profile
-    };
+    // Attach user/profile aliases for backward compatibility
+    attachUnifiedAuthContext(req, user.id, user.email, profile);
 
     next();
   } catch (error) {
@@ -89,11 +99,7 @@ async function optionalAuth(req, res, next) {
         .eq('id', user.id)
         .single();
 
-      req.user = {
-        id: user.id,
-        email: user.email,
-        ...profile
-      };
+      attachUnifiedAuthContext(req, user.id, user.email, profile);
     }
 
     next();

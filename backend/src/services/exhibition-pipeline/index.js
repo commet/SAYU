@@ -391,6 +391,7 @@ async function mapToExhibitions(supabase) {
       status: calcStatus(item.start_date, item.end_date),
       description: item.description || null,
       artists: item.artists ? item.artists.split(/[,，、]/).map(s => s.trim()).filter(Boolean) : null,
+      image_url: item.image_url || null,
       admission_fee: item.charge || null, source: 'mmca', source_url: 'https://www.mmca.go.kr',
       tags: ['국립현대미술관', 'MMCA', item.category || ''].filter(Boolean),
       metadata: { source_table: 'source_mmca', source_id: item.id, publisher_id: item.publisher_id, venue_room: item.venue_room, organizer: item.organizer },
@@ -415,10 +416,11 @@ async function mapToExhibitions(supabase) {
       start_date: item.start_date, end_date: item.end_date,
       status: calcStatus(item.start_date, item.end_date),
       description: item.short_description || item.description || null,
+      image_url: item.image_full_url || null,
       source: 'aic', source_url: item.web_url || 'https://www.artic.edu',
       website_url: item.web_url || null,
       tags: ['Art Institute of Chicago', 'Chicago', 'International'],
-      metadata: { source_table: 'source_aic', source_id: item.id, aic_id: item.aic_id, image_url: item.image_full_url, artwork_count: item.artwork_count, artist_count: item.artist_count, aic_status: item.aic_status },
+      metadata: { source_table: 'source_aic', source_id: item.id, aic_id: item.aic_id, artwork_count: item.artwork_count, artist_count: item.artist_count, aic_status: item.aic_status },
       collected_at: new Date().toISOString(), updated_at: new Date().toISOString()
     };
     const { data: existing } = await supabase.from('exhibitions').select('id').eq('source','aic').contains('metadata',{aic_id:item.aic_id}).maybeSingle();
@@ -438,9 +440,10 @@ async function mapToExhibitions(supabase) {
       venue_country: 'KR', start_date: item.start_date, end_date: item.end_date,
       status: calcStatus(item.start_date, item.end_date),
       description: item.description || null, admission_fee: item.charge || null,
+      image_url: item.image_url || null,
       source: 'culture_events', source_url: item.url || null, website_url: item.url || null,
       tags: ['문화체육관광부', item.dtype || '전시'].filter(Boolean),
-      metadata: { source_table: 'source_culture_events', source_id: item.id, ext_id: item.ext_id, contact_point: item.contact_point, view_count: item.view_count, image_url: item.image_url },
+      metadata: { source_table: 'source_culture_events', source_id: item.id, ext_id: item.ext_id, contact_point: item.contact_point, view_count: item.view_count },
       collected_at: new Date().toISOString(), updated_at: new Date().toISOString()
     };
     const { data: existing } = await supabase.from('exhibitions').select('id').eq('source','culture_events').contains('metadata',{ext_id:item.ext_id}).maybeSingle();
@@ -462,9 +465,10 @@ async function mapToExhibitions(supabase) {
       description: item.description || null,
       artists: item.author ? item.author.split(/[,，、]/).map(s => s.trim()).filter(Boolean) : null,
       admission_fee: item.charge || null,
+      image_url: item.image_url || null,
       source: 'exhibition_integrated', source_url: item.url || null, website_url: item.url || null,
       tags: [item.institution || '', item.genre || '전시'].filter(Boolean),
-      metadata: { source_table: 'source_exhibition_integrated', source_id: item.id, local_id: item.local_id, institution: item.institution, image_url: item.image_url, contact_point: item.contact_point, contributor: item.contributor, audience: item.audience, duration: item.duration },
+      metadata: { source_table: 'source_exhibition_integrated', source_id: item.id, local_id: item.local_id, institution: item.institution, contact_point: item.contact_point, contributor: item.contributor, audience: item.audience, duration: item.duration },
       collected_at: new Date().toISOString(), updated_at: new Date().toISOString()
     };
     const { data: existing } = await supabase.from('exhibitions').select('id').eq('source','exhibition_integrated').contains('metadata',{local_id:item.local_id}).maybeSingle();
