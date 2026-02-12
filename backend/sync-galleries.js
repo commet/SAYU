@@ -679,7 +679,7 @@ async function scrapeArtmapKR() {
     // ARTMAP loads data via AJAX POST to /data/new_exhibition.php
     // `start` is the offset, returns 4 items per request
     const batchSize = 4;
-    for (let start = 0; start < 120; start += batchSize) {
+    for (let start = 0; start < 500; start += batchSize) {
       await delay(1500);
       const page = Math.floor(start / batchSize) + 1;
       console.log(`  Fetching ARTMAP offset ${start} (page ${page})...`);
@@ -935,6 +935,402 @@ async function scrapeNeolook() {
   return results;
 }
 
+// ─── 8. Gagosian (worldwide) ──────────────────────────────────────────────
+
+async function scrapeGagosian() {
+  console.log('\n--- Scraping Gagosian ---');
+  const results = [];
+
+  try {
+    const html = await fetchPage('https://gagosian.com/exhibitions/');
+    const $ = cheerio.load(html);
+
+    // Gagosian uses Next.js SSR with JSON data. Look for exhibition links.
+    const seen = new Set();
+    $('a[href*="/exhibitions/"]').each((_, el) => {
+      const $a = $(el);
+      const href = $a.attr('href');
+      if (!href || href === '/exhibitions/' || href === '/exhibitions/archive/' || seen.has(href)) return;
+      if (!/\/exhibitions\/[a-z0-9-]+/.test(href)) return;
+      seen.add(href);
+
+      const h4 = $a.find('h4').first().text().trim();
+      const fullText = $a.text().trim();
+      const imgSrc = $a.find('img').first().attr('src') || null;
+
+      // Extract title, artist, dates from text
+      let title = h4 || '';
+      if (!title) return;
+
+      // Try to find dates in fullText
+      let dateText = '';
+      const dateMatch = fullText.match(
+        /(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}\s*[–—-]\s*(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}/i
+      ) || fullText.match(
+        /(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}\s*[–—-]\s*(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}/i
+      );
+      if (dateMatch) dateText = dateMatch[0];
+      const dates = parseDate(dateText);
+
+      // Try to find location
+      let location = '';
+      const locMatch = fullText.match(/(?:New York|Los Angeles|London|Paris|Rome|Hong Kong|Geneva|Athens|Basel)/i);
+      if (locMatch) location = locMatch[0];
+
+      const slug = href.replace(/^\/exhibitions\//, '').replace(/\/$/, '');
+      const fullUrl = `https://gagosian.com${href}`;
+
+      results.push({
+        gallery_slug: 'gagosian',
+        external_id: slug,
+        title,
+        artist: null,
+        venue_name: location ? `Gagosian ${location}` : 'Gagosian',
+        venue_address: null,
+        start_date: dates?.start || null,
+        end_date: dates?.end || null,
+        description: null,
+        image_url: imgSrc,
+        source_url: fullUrl,
+        medium: null,
+        exhibition_type: 'gallery',
+        raw_data: { slug, title, dateText, location }
+      });
+      console.log(`  ${title} | ${location || '?'} | ${dateText || 'no date'}`);
+    });
+  } catch (e) {
+    console.log(`  Gagosian scraper error: ${e.message}`);
+  }
+
+  console.log(`  Gagosian: ${results.length} exhibitions found`);
+  return results;
+}
+
+// ─── 9. Perrotin (worldwide) ─────────────────────────────────────────────
+
+async function scrapePerrotin() {
+  console.log('\n--- Scraping Perrotin ---');
+  const results = [];
+
+  try {
+    const html = await fetchPage('https://www.perrotin.com/exhibitions');
+    const $ = cheerio.load(html);
+
+    // Perrotin embeds Schema.org JSON-LD for each exhibition
+    const seen = new Set();
+    $('script[type="application/ld+json"]').each((_, el) => {
+      try {
+        const json = JSON.parse($(el).html());
+        if (json['@type'] !== 'Event' || !json.name) return;
+        const key = `${json.name}_${json.startDate}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+
+        const artists = (json.performer || []).map(p => p.name).filter(Boolean);
+        const loc = json.location || {};
+        const placeName = loc.name || '';
+        const address = loc.address || '';
+
+        results.push({
+          gallery_slug: 'perrotin',
+          external_id: `${json.name}_${json.startDate}`.replace(/\s+/g, '_').substring(0, 100),
+          title: json.name,
+          artist: artists.join(', ') || null,
+          venue_name: placeName ? `Perrotin ${placeName}` : 'Perrotin',
+          venue_address: address || null,
+          start_date: json.startDate || null,
+          end_date: json.endDate || null,
+          description: json.description || null,
+          image_url: (json.image && json.image[0]) || null,
+          source_url: json.url || 'https://www.perrotin.com/exhibitions',
+          medium: null,
+          exhibition_type: 'gallery',
+          raw_data: { jsonld: true, artists, location: placeName }
+        });
+        console.log(`  ${json.name} | ${placeName || '?'} | ${json.startDate || 'no date'}`);
+      } catch (_) {}
+    });
+
+    // Fallback: parse HTML cards if no JSON-LD found
+    if (results.length === 0) {
+      console.log('  No JSON-LD found, trying HTML parsing...');
+      // Structure: h3=location, h4=artist, h3=title, p=dates
+      $('h3, h4').each((_, el) => {
+        const text = $(el).text().trim();
+        if (text) console.log(`  Found ${el.tagName}: ${text.substring(0, 60)}`);
+      });
+    }
+  } catch (e) {
+    console.log(`  Perrotin scraper error: ${e.message}`);
+  }
+
+  console.log(`  Perrotin: ${results.length} exhibitions found`);
+  return results;
+}
+
+// ─── 10. Lisson Gallery (worldwide) ──────────────────────────────────────
+
+async function scrapeLisson() {
+  console.log('\n--- Scraping Lisson Gallery ---');
+  const results = [];
+
+  try {
+    const html = await fetchPage('https://www.lissongallery.com/exhibitions');
+    const $ = cheerio.load(html);
+
+    // Lisson has TWO <a> tags per exhibition: first=image, second=text
+    // Group by href, merge image + text data
+    const byHref = {};
+    $('a[href*="/exhibitions/"]').each((_, el) => {
+      const $a = $(el);
+      const href = $a.attr('href');
+      if (!href || href === '/exhibitions' || href === '/exhibitions/' ||
+          href.includes('/year/')) return;
+
+      if (!byHref[href]) byHref[href] = { img: null, imgAlt: null, text: '' };
+      const imgEl = $a.find('img').first();
+      if (imgEl.length) {
+        byHref[href].img = imgEl.attr('src') || imgEl.attr('data-src') || null;
+        byHref[href].imgAlt = imgEl.attr('alt') || null;
+      }
+      const text = $a.text().replace(/\s+/g, ' ').trim();
+      if (text.length > byHref[href].text.length) byHref[href].text = text;
+    });
+
+    for (const [href, data] of Object.entries(byHref)) {
+      const fullText = data.text;
+      if (!fullText || fullText.length < 3) continue;
+
+      // Dates: "11 February – 11 April 2026" or "11 February 2026 – 11 April 2026"
+      let dateText = '';
+      const dateMatch = fullText.match(
+        /\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s*[–—-]\s*\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}/i
+      ) || fullText.match(
+        /\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}\s*[–—-]\s*\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}/i
+      );
+      if (dateMatch) dateText = dateMatch[0];
+      const dates = parseDate(dateText);
+
+      let location = '';
+      const locMatch = fullText.match(/(?:London|New York|Shanghai|Beijing|East Hampton)/i);
+      if (locMatch) location = locMatch[0];
+
+      let title = fullText;
+      if (dateText) title = title.replace(dateText, '');
+      if (location) title = title.replace(location, '');
+      title = title.replace(/\s+/g, ' ').trim();
+      if (!title || title.length < 2) continue;
+
+      const slug = href.replace(/^\/exhibitions\//, '').replace(/\/$/, '');
+
+      results.push({
+        gallery_slug: 'lisson',
+        external_id: slug,
+        title,
+        artist: data.imgAlt || null,
+        venue_name: location ? `Lisson Gallery ${location}` : 'Lisson Gallery',
+        venue_address: null,
+        start_date: dates?.start || null,
+        end_date: dates?.end || null,
+        description: null,
+        image_url: data.img,
+        source_url: `https://www.lissongallery.com${href}`,
+        medium: null,
+        exhibition_type: 'gallery',
+        raw_data: { slug, title, dateText, location, imgAlt: data.imgAlt }
+      });
+      console.log(`  ${title.substring(0, 50)} | ${location || '?'} | ${dateText || 'no date'}`);
+    }
+  } catch (e) {
+    console.log(`  Lisson scraper error: ${e.message}`);
+  }
+
+  console.log(`  Lisson: ${results.length} exhibitions found`);
+  return results;
+}
+
+// ─── 11. Sprüth Magers (worldwide) ──────────────────────────────────────
+
+async function scrapeSpruthMagers() {
+  console.log('\n--- Scraping Sprüth Magers ---');
+  const results = [];
+
+  try {
+    const html = await fetchPage('https://spruethmagers.com/exhibitions/');
+    const $ = cheerio.load(html);
+
+    // Sprüth Magers has TWO <a> tags per exhibition: first=image, second=text
+    // Group by href, merge image + text data
+    const byHref = {};
+    $('a[href*="exhibitions"]').each((_, el) => {
+      const $a = $(el);
+      const href = $a.attr('href') || '';
+      const slugMatch = href.match(/\/exhibitions\/([a-zA-Z0-9][\w-]+[^/])\/?$/);
+      if (!slugMatch) return;
+      const slug = slugMatch[1];
+      if (slug === 'upcoming' || slug === 'past') return;
+
+      if (!byHref[href]) byHref[href] = { slug, img: null, imgAlt: null, text: '' };
+      const imgEl = $a.find('img').first();
+      if (imgEl.length) {
+        byHref[href].img = imgEl.attr('src') || null;
+        byHref[href].imgAlt = imgEl.attr('alt') || null;
+      }
+      const text = $a.text().replace(/\s+/g, ' ').trim();
+      if (text.length > byHref[href].text.length) byHref[href].text = text;
+    });
+
+    for (const [href, data] of Object.entries(byHref)) {
+      const fullText = data.text;
+      // Parse from text content OR img alt (format: "Artist – Title – Location")
+      const altParts = (data.imgAlt || '').split(/\s*[–—-]\s*/);
+
+      let artist = null, exhibTitle = '', location = '';
+
+      if (fullText && fullText.length > 5) {
+        // Text link has: "ArtistTitleDate Location Description..."
+        // Try to extract date first
+        let dateText = '';
+        const dateMatch = fullText.match(
+          /(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}\s*[–—-]\s*(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}/i
+        ) || fullText.match(
+          /(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}\s*[–—-]\s*(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}/i
+        );
+        if (dateMatch) dateText = dateMatch[0];
+        const dates = parseDate(dateText);
+
+        const locMatch = fullText.match(/(?:Berlin|London|Los Angeles|Seoul|New York)/i);
+        if (locMatch) location = locMatch[0];
+
+        // Use alt text for structured artist/title
+        if (altParts.length >= 2) {
+          artist = altParts[0].trim();
+          exhibTitle = altParts.length >= 3 ? altParts[1].trim() : '';
+          if (!location && altParts.length >= 3) location = altParts[altParts.length - 1].trim();
+        }
+
+        const title = exhibTitle || artist || data.slug.replace(/-/g, ' ');
+
+        results.push({
+          gallery_slug: 'spruth_magers',
+          external_id: data.slug,
+          title: artist && exhibTitle ? `${artist} - ${exhibTitle}` : title,
+          artist,
+          venue_name: location ? `Sprüth Magers ${location}` : 'Sprüth Magers',
+          venue_address: null,
+          start_date: dates?.start || null,
+          end_date: dates?.end || null,
+          description: null,
+          image_url: data.img,
+          source_url: href,
+          medium: null,
+          exhibition_type: 'gallery',
+          raw_data: { slug: data.slug, artist, title: exhibTitle, dateText, location }
+        });
+        console.log(`  ${artist || ''} - ${exhibTitle || '?'} | ${location || '?'} | ${dateText || 'no date'}`);
+      } else if (altParts.length >= 2) {
+        // Fallback: parse from img alt only
+        artist = altParts[0].trim();
+        exhibTitle = altParts.length >= 3 ? altParts[1].trim() : '';
+        location = altParts[altParts.length - 1].trim();
+
+        results.push({
+          gallery_slug: 'spruth_magers',
+          external_id: data.slug,
+          title: artist && exhibTitle ? `${artist} - ${exhibTitle}` : artist,
+          artist,
+          venue_name: location ? `Sprüth Magers ${location}` : 'Sprüth Magers',
+          venue_address: null,
+          start_date: null,
+          end_date: null,
+          description: null,
+          image_url: data.img,
+          source_url: href,
+          medium: null,
+          exhibition_type: 'gallery',
+          raw_data: { slug: data.slug, artist, title: exhibTitle, location, fromAlt: true }
+        });
+        console.log(`  ${artist} - ${exhibTitle || '?'} | ${location || '?'} | (from alt)`);
+      }
+    }
+  } catch (e) {
+    console.log(`  Sprüth Magers scraper error: ${e.message}`);
+  }
+
+  console.log(`  Sprüth Magers: ${results.length} exhibitions found`);
+  return results;
+}
+
+// ─── 12. Arario Gallery (Seoul/Shanghai/Cheonan) ─────────────────────────
+
+async function scrapeArario() {
+  console.log('\n--- Scraping Arario Gallery ---');
+  const results = [];
+
+  try {
+    const html = await fetchPage('https://www.arariogallery.com/exhibitions/');
+    const $ = cheerio.load(html);
+
+    const seen = new Set();
+    $('a[href*="/exhibitions/"]').each((_, el) => {
+      const $a = $(el);
+      const href = $a.attr('href');
+      if (!href || href === '/exhibitions/' || href.includes('/archive/') || seen.has(href)) return;
+      seen.add(href);
+
+      const fullText = $a.text().trim();
+      const imgSrc = $a.find('img').first().attr('src') || null;
+      if (!fullText || fullText.length < 3) return;
+
+      // Date patterns
+      let dateText = '';
+      const dateMatch = fullText.match(
+        /(\d{1,2})\s+(\w+)\s+(\d{4})\s*[-–—]\s*(\d{1,2})\s+(\w+)\s+(\d{4})/i
+      ) || fullText.match(
+        /(\d{1,2})\s+(\w+)\s*[-–—]\s*(\d{1,2})\s+(\w+)\s+(\d{4})/i
+      );
+      if (dateMatch) dateText = dateMatch[0];
+      const dates = parseDate(dateText);
+
+      let location = '';
+      const locMatch = fullText.match(/(?:Seoul|Shanghai|Cheonan)/i);
+      if (locMatch) location = locMatch[0];
+
+      // Title: remove date/location/type from text
+      let title = fullText;
+      if (dateText) title = title.replace(dateText, '');
+      if (location) title = title.replace(new RegExp(location, 'i'), '');
+      title = title.replace(/(?:SOLO|GROUP)\s+EXHIBITION/i, '').replace(/\s+/g, ' ').trim();
+      if (!title || title.length < 2) return;
+
+      const slug = href.replace(/^.*\/exhibitions\//, '').replace(/\/$/, '');
+
+      results.push({
+        gallery_slug: 'arario',
+        external_id: slug,
+        title,
+        artist: null,
+        venue_name: location ? `Arario Gallery ${location}` : 'Arario Gallery',
+        venue_address: location === 'Seoul' ? '서울특별시 종로구 북촌로5길 84' : null,
+        start_date: dates?.start || null,
+        end_date: dates?.end || null,
+        description: null,
+        image_url: imgSrc,
+        source_url: href.startsWith('http') ? href : `https://www.arariogallery.com${href}`,
+        medium: null,
+        exhibition_type: 'gallery',
+        raw_data: { slug, title, dateText, location }
+      });
+      console.log(`  ${title.substring(0, 50)} | ${location || '?'} | ${dateText || 'no date'}`);
+    });
+  } catch (e) {
+    console.log(`  Arario scraper error: ${e.message}`);
+  }
+
+  console.log(`  Arario: ${results.length} exhibitions found`);
+  return results;
+}
+
 // ─── Main run function ────────────────────────────────────────────────────
 
 async function run() {
@@ -982,7 +1378,12 @@ CREATE INDEX idx_source_galleries_dates ON source_galleries(start_date, end_date
     { name: 'Lehmann Maupin', fn: scrapeLehmann },
     { name: 'Pace', fn: scrapePace },
     { name: 'ARTMAP', fn: scrapeArtmapKR },
-    { name: 'Neolook', fn: scrapeNeolook }
+    { name: 'Neolook', fn: scrapeNeolook },
+    { name: 'Gagosian', fn: scrapeGagosian },
+    { name: 'Perrotin', fn: scrapePerrotin },
+    { name: 'Lisson', fn: scrapeLisson },
+    { name: 'Sprüth Magers', fn: scrapeSpruthMagers },
+    { name: 'Arario', fn: scrapeArario }
   ];
 
   for (const scraper of scrapers) {

@@ -327,6 +327,11 @@ const GALLERY_VENUES = {
   pace:           { name: '페이스갤러리 서울', city: '서울', country: 'KR', address: '서울특별시 용산구 이태원로 267' },
   artmap_kr:      { name: null, city: null, country: 'KR', address: null }, // varies per exhibition
   neolook:        { name: null, city: null, country: 'KR', address: null }, // varies per exhibition
+  gagosian:       { name: 'Gagosian', city: null, country: null, address: null }, // multiple locations
+  perrotin:       { name: 'Perrotin', city: null, country: null, address: null }, // multiple locations
+  lisson:         { name: 'Lisson Gallery', city: null, country: null, address: null }, // multiple locations
+  spruth_magers:  { name: 'Sprüth Magers', city: null, country: null, address: null }, // multiple locations
+  arario:         { name: '아라리오갤러리', city: '서울', country: 'KR', address: '서울특별시 종로구 북촌로5길 84' },
 };
 
 async function mapGalleries() {
