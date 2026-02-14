@@ -1,76 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
-// Types for exhibition data
-interface ExhibitionRow {
-  id: string;
-  title_local?: string;
-  title_en?: string;
-  title?: string;
-  venue_name?: string;
-  venue?: string;
-  venue_city?: string;
-  location?: string;
-  start_date: string;
-  end_date: string;
-  description?: string;
-  image_url?: string;
-  category?: string;
-  price?: string;
-  admission_fee?: string;
-  view_count?: number;
-  like_count?: number;
-  featured?: boolean;
-  metadata?: Record<string, unknown>;
-}
-
-interface TransformedExhibition {
-  id: string;
-  title: string;
-  venue: string;
-  location: string;
-  startDate: string;
-  endDate: string;
-  description?: string;
-  image?: string;
-  category: string;
-  price: string;
-  status: 'ongoing' | 'upcoming' | 'ended';
-  viewCount: number;
-  likeCount: number;
-  featured: boolean;
-}
-
-// Cache duration: 5 minutes (in seconds for HTTP cache headers)
 const CACHE_MAX_AGE = 300;
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get('limit') || '20');
+    const limit = Math.min(parseInt(searchParams.get('limit') || '40'), 200);
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    // Check environment variables
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      return NextResponse.json({
-        success: false,
-        data: [],
-        error: 'Database connection not configured'
-      });
+      return NextResponse.json({ success: false, data: [], error: 'Database connection not configured' });
     }
-    
+
     const supabase = await createClient();
-    
-    // Build query with pagination
+
     let query = supabase
       .from('exhibitions')
-      .select('*', { count: 'exact' });
-    
-    // Apply filters if provided
+      .select('id,title_local,title_en,venue_name,venue_city,venue_country,start_date,end_date,description,image_url,admission_fee,artists,tags,source,source_url,status,metadata', { count: 'exact' });
+
+    // Status filter
     const status = searchParams.get('status');
-    const category = searchParams.get('category');
-    const search = searchParams.get('search');
-    
     if (status && status !== 'all') {
       const now = new Date().toISOString();
       if (status === 'ongoing') {
@@ -81,167 +31,161 @@ export async function GET(request: NextRequest) {
         query = query.lt('end_date', now);
       }
     }
-    
-    if (category && category !== 'all') {
-      query = query.eq('category', category);
+
+    // City filter
+    const city = searchParams.get('city');
+    if (city && city !== 'all') {
+      query = query.eq('venue_city', city);
     }
-    
+
+    // Country filter
+    const country = searchParams.get('country');
+    if (country && country !== 'all') {
+      query = query.eq('venue_country', country);
+    }
+
+    // Closing soon filter (within 7 days)
+    const closingSoon = searchParams.get('closing_soon');
+    if (closingSoon === 'true') {
+      const now = new Date();
+      const soon = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      query = query.gte('end_date', now.toISOString()).lte('end_date', soon.toISOString());
+    }
+
+    // Search
+    const search = searchParams.get('search');
     if (search) {
       const s = search.replace(/[%_\\]/g, '\\$&');
       query = query.or(`title_local.ilike.%${s}%,title_en.ilike.%${s}%,venue_name.ilike.%${s}%,description.ilike.%${s}%`);
     }
-    
-    // Apply sorting and pagination
-    query = query
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
-    
-    // Execute query with timeout
+
+    // Sorting: prioritize ongoing, then by start_date desc
+    const sort = searchParams.get('sort');
+    if (sort === 'closing_soon') {
+      query = query.order('end_date', { ascending: true });
+    } else {
+      query = query.order('start_date', { ascending: false, nullsFirst: false });
+    }
+
+    query = query.range(offset, offset + limit - 1);
+
     const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('Query timeout')), 5000);
+      setTimeout(() => reject(new Error('Query timeout')), 8000);
     });
 
-    const queryResult = await Promise.race([
-      query,
-      timeoutPromise
-    ]);
-
-    const { data: exhibitions, error, count } = queryResult as {
-      data: ExhibitionRow[] | null;
-      error: { message: string } | null;
-      count: number | null;
-    };
+    const queryResult = await Promise.race([query, timeoutPromise]) as any;
+    const { data: exhibitions, error, count } = queryResult;
 
     if (error) {
       console.error('Supabase query error:', error);
-      return NextResponse.json({
-        success: false,
-        data: [],
-        error: error.message
-      });
+      return NextResponse.json({ success: false, data: [], error: error.message });
     }
-    
-    // Get total statistics for all exhibitions (not just current page)
+
+    // Stats only on first page
     let totalStats = null;
-    if (offset === 0) { // Only fetch stats on first page
+    if (offset === 0) {
       try {
         const now = new Date().toISOString();
-        
-        // Get counts for each status
-        const [ongoingResult, upcomingResult, endedResult, totalResult] = await Promise.all([
-          supabase.from('exhibitions').select('*', { count: 'exact', head: true })
-            .lte('start_date', now).gte('end_date', now),
-          supabase.from('exhibitions').select('*', { count: 'exact', head: true })
-            .gt('start_date', now),
-          supabase.from('exhibitions').select('*', { count: 'exact', head: true })
-            .lt('end_date', now),
+        const [ongoingR, upcomingR, endedR, totalR] = await Promise.all([
+          supabase.from('exhibitions').select('*', { count: 'exact', head: true }).lte('start_date', now).gte('end_date', now),
+          supabase.from('exhibitions').select('*', { count: 'exact', head: true }).gt('start_date', now),
+          supabase.from('exhibitions').select('*', { count: 'exact', head: true }).lt('end_date', now),
           supabase.from('exhibitions').select('*', { count: 'exact', head: true })
         ]);
-        
         totalStats = {
-          ongoing: ongoingResult.count || 0,
-          upcoming: upcomingResult.count || 0,
-          ended: endedResult.count || 0,
-          total: totalResult.count || 0
+          ongoing: ongoingR.count || 0,
+          upcoming: upcomingR.count || 0,
+          ended: endedR.count || 0,
+          total: totalR.count || 0
         };
-        
-        console.log('Total statistics:', totalStats);
-      } catch (statsError) {
-        console.error('Failed to fetch statistics:', statsError);
-        // Use approximate counts as fallback
-        totalStats = {
-          ongoing: count ? Math.floor(count * 0.4) : 50,
-          upcoming: count ? Math.floor(count * 0.3) : 30,
-          ended: count ? Math.floor(count * 0.3) : 30,
-          total: count || 110
-        };
+      } catch {
+        totalStats = null;
       }
     }
 
-    // Transform data efficiently
-    const transformedData: TransformedExhibition[] = (exhibitions || []).map((ex) => ({
-      id: ex.id,
-      title: ex.title_local || ex.title_en || ex.title || `${ex.venue_name || '미지의 장소'} 전시`,
-      venue: ex.venue_name || ex.venue || '미지의 장소',
-      location: ex.venue_city || ex.location || '서울',
-      startDate: ex.start_date,
-      endDate: ex.end_date,
-      description: ex.description,
-      image: ex.image_url || undefined,
-      category: ex.category || '미술',
-      price: ex.price || ex.admission_fee || '정보 없음',
-      status: determineStatus(ex.start_date, ex.end_date),
-      viewCount: ex.view_count || 0,
-      likeCount: ex.like_count || 0,
-      featured: ex.featured || false
-    }));
-    
+    // Get unique cities for filter options (first page only)
+    let cities: string[] = [];
+    if (offset === 0) {
+      try {
+        const { data: cityData } = await supabase
+          .from('exhibitions')
+          .select('venue_city')
+          .not('venue_city', 'is', null)
+          .neq('venue_city', '')
+          .limit(1000);
+
+        const citySet = new Map<string, number>();
+        (cityData || []).forEach(r => {
+          if (r.venue_city) citySet.set(r.venue_city, (citySet.get(r.venue_city) || 0) + 1);
+        });
+        cities = [...citySet.entries()]
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 30)
+          .map(([city]) => city);
+      } catch {
+        cities = [];
+      }
+    }
+
+    const transformedData = (exhibitions || []).map((ex: any) => {
+      const titleLocal = ex.title_local || '';
+      const titleEn = ex.title_en || '';
+      const daysUntilEnd = ex.end_date ? Math.ceil((new Date(ex.end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
+
+      return {
+        id: ex.id,
+        title: titleLocal || titleEn || `${ex.venue_name || ''} Exhibition`,
+        titleEn: titleEn || null,
+        titleLocal: titleLocal || null,
+        venue: ex.venue_name || '',
+        location: ex.venue_city || '',
+        country: ex.venue_country || '',
+        startDate: ex.start_date,
+        endDate: ex.end_date,
+        description: ex.description || undefined,
+        image: ex.image_url || undefined,
+        price: ex.admission_fee || undefined,
+        status: determineStatus(ex.start_date, ex.end_date),
+        closingSoon: daysUntilEnd !== null && daysUntilEnd >= 0 && daysUntilEnd <= 7,
+        daysLeft: daysUntilEnd,
+        artists: ex.artists || undefined,
+        tags: ex.tags || undefined,
+        source: ex.source || undefined,
+        featured: false
+      };
+    });
+
     const response = NextResponse.json({
       success: true,
       data: transformedData,
       total: count || transformedData.length,
-      totalStats: totalStats,
+      totalStats,
+      cities,
+      hasMore: (offset + limit) < (count || 0),
       timestamp: new Date().toISOString()
     });
 
-    // Set HTTP cache headers for CDN/browser caching
     response.headers.set('Cache-Control', `public, s-maxage=${CACHE_MAX_AGE}, stale-while-revalidate=60`);
-
     return response;
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Exhibitions API error:', errorMessage);
 
-    const now = new Date();
-    const fallbackStart = new Date(now);
-    fallbackStart.setDate(fallbackStart.getDate() - 7);
-    const fallbackEnd = new Date(now);
-    fallbackEnd.setDate(fallbackEnd.getDate() + 21);
-
-    const fallbackStartDate = toISODate(fallbackStart);
-    const fallbackEndDate = toISODate(fallbackEnd);
-    
-    // Return fallback data on error
-    const fallbackData = [
-      {
-        id: 'fallback-1',
-        title: '이불: 1998년 이후',
-        venue: '리움미술관',
-        location: '서울',
-        startDate: fallbackStartDate,
-        endDate: fallbackEndDate,
-        description: '한국 현대미술을 대표하는 이불 작가의 대규모 회고전',
-        image: 'https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=800&h=600&fit=crop',
-        category: '현대미술',
-        price: '성인 20,000원',
-        status: determineStatus(fallbackStartDate, fallbackEndDate),
-        viewCount: 156,
-        likeCount: 42,
-        featured: true
-      }
-    ];
-    
     return NextResponse.json({
       success: false,
-      data: fallbackData,
-      error: 'Service temporarily unavailable',
-      fallback: true
+      data: [],
+      error: 'Service temporarily unavailable'
     });
   }
 }
 
-// Helper function to determine exhibition status
 function determineStatus(startDate: string, endDate: string): 'ongoing' | 'upcoming' | 'ended' {
+  if (!startDate || !endDate) return 'upcoming';
   const now = new Date();
   const start = new Date(startDate);
   const end = new Date(endDate);
-  
   if (now < start) return 'upcoming';
   if (now > end) return 'ended';
   return 'ongoing';
-}
-
-function toISODate(date: Date): string {
-  return date.toISOString().split('T')[0];
 }

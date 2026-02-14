@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+function determineStatus(startDate: string | null, endDate: string | null): 'ongoing' | 'upcoming' | 'ended' {
+  if (!startDate || !endDate) return 'upcoming';
+  const now = new Date();
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  if (now < start) return 'upcoming';
+  if (now > end) return 'ended';
+  return 'ongoing';
+}
+
 export async function GET(
   request: NextRequest,
   context: { params: { id: string } }
@@ -11,7 +21,7 @@ export async function GET(
 
     const { data, error } = await supabase
       .from('exhibitions')
-      .select('*')
+      .select('id,title_local,title_en,venue_name,venue_city,venue_country,venue_address,start_date,end_date,description,image_url,admission_fee,artists,tags,source,source_url,status,metadata')
       .eq('id', id)
       .single();
 
@@ -23,62 +33,72 @@ export async function GET(
       );
     }
 
-    // Helper function to extract title from description (same as main API)
-    const extractTitle = (description: string, venue: string): string => {
-      if (!description) return `${venue} 전시`;
-      
-      // 1. Extract from brackets
-      const allBracketMatches = description.matchAll(/《([^》]+)》|<([^>]+)>|「([^」]+)」|『([^』]+)』/g);
-      for (const match of allBracketMatches) {
-        const title = (match[1] || match[2] || match[3] || match[4])?.trim();
-        if (title && title.length >= 2 && title.length <= 60) {
-          return title;
-        }
-      }
-      
-      // 2. Special handling for DAF
-      if (description.includes('DAF') && description.includes('SUMMER FESTIVAL')) {
-        return 'DAF 2025 SUMMER FESTIVAL';
-      }
-      
-      // 3. Fallback
-      return `${venue} 전시`;
-    };
+    const titleLocal = data.title_local || '';
+    const titleEn = data.title_en || '';
+    const daysUntilEnd = data.end_date
+      ? Math.ceil((new Date(data.end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+      : null;
+    const exStatus = determineStatus(data.start_date, data.end_date);
 
-    // Helper function to determine exhibition status
-    const determineStatus = (startDate: string, endDate: string): 'ongoing' | 'upcoming' | 'ended' => {
-      const now = new Date();
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-      
-      if (now < start) return 'upcoming';
-      if (now > end) return 'ended';
-      return 'ongoing';
-    };
-
-    // Transform data to match frontend interface
     const transformedData = {
       id: data.id,
-      title: data.title_local || data.title_en || extractTitle(data.description, data.venue_name || data.venue),
-      venue: data.venue || data.venue_name || '',
-      location: data.location || data.venue_city || '',
-      startDate: data.start_date || data.startDate || '',
-      endDate: data.end_date || data.endDate || '',
+      title: titleLocal || titleEn || `${data.venue_name || ''} Exhibition`,
+      titleEn: titleEn || null,
+      titleLocal: titleLocal || null,
+      venue: data.venue_name || '',
+      location: data.venue_city || '',
+      country: data.venue_country || '',
+      address: data.venue_address || '',
+      startDate: data.start_date,
+      endDate: data.end_date,
       description: data.description || '',
       image: data.image_url || null,
-      category: data.category || '미술',
-      price: data.price || data.admission_fee || '정보 없음',
-      status: determineStatus(data.start_date, data.end_date),
-      viewCount: data.view_count || 0,
-      likeCount: data.like_count || 0,
-      distance: data.distance || null,
-      featured: data.featured || false
+      price: data.admission_fee || null,
+      status: exStatus,
+      closingSoon: daysUntilEnd !== null && daysUntilEnd >= 0 && daysUntilEnd <= 7,
+      daysLeft: daysUntilEnd,
+      artists: data.artists || null,
+      tags: data.tags || null,
+      source: data.source || null,
+      sourceUrl: data.source_url || null,
     };
 
-    return NextResponse.json({
+    // Fetch related exhibitions (same venue or city, limit 4)
+    let related: any[] = [];
+    try {
+      const conditions = [];
+      if (data.venue_name) conditions.push(`venue_name.eq.${data.venue_name}`);
+      if (data.venue_city) conditions.push(`venue_city.eq.${data.venue_city}`);
+
+      if (conditions.length > 0) {
+        const { data: relatedData } = await supabase
+          .from('exhibitions')
+          .select('id,title_local,title_en,venue_name,venue_city,image_url,start_date,end_date')
+          .or(conditions.join(','))
+          .neq('id', id)
+          .order('start_date', { ascending: false, nullsFirst: false })
+          .limit(4);
+
+        related = (relatedData || []).map((r: any) => ({
+          id: r.id,
+          title: r.title_local || r.title_en || `${r.venue_name || ''} Exhibition`,
+          venue: r.venue_name || '',
+          location: r.venue_city || '',
+          image: r.image_url || null,
+          status: determineStatus(r.start_date, r.end_date),
+        }));
+      }
+    } catch {
+      // related exhibitions are optional
+    }
+
+    const response = NextResponse.json({
       success: true,
-      data: transformedData
+      data: transformedData,
+      related,
     });
+    response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=60');
+    return response;
 
   } catch (error) {
     console.error('API error:', error);

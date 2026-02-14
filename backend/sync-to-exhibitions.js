@@ -318,6 +318,50 @@ async function mapExhibitionIntegrated() {
   return inserted + updated;
 }
 
+// Extract city from venue name, description, or address text
+function extractCity(text) {
+  if (!text) return null;
+  const cities = [
+    'New York', 'Los Angeles', 'London', 'Paris', 'Berlin', 'Tokyo', 'Seoul',
+    'Shanghai', 'Hong Kong', 'Rome', 'Milan', 'Amsterdam', 'Brussels', 'Vienna',
+    'Zurich', 'Basel', 'Geneva', 'Dubai', 'São Paulo', 'Mexico City', 'Sydney',
+    'Melbourne', 'Mumbai', 'Beijing', 'Singapore', 'Istanbul', 'Athens', 'Barcelona',
+    'Madrid', 'Lisbon', 'Copenhagen', 'Stockholm', 'Oslo', 'Helsinki', 'Prague',
+    'Warsaw', 'Budapest', 'Chicago', 'San Francisco', 'Miami', 'Houston',
+    'Philadelphia', 'Boston', 'Washington', 'Toronto', 'Montreal', 'Vancouver',
+    'Taipei', 'Bangkok', 'Jakarta', 'Manila', 'Riyadh', 'Doha', 'Abu Dhabi',
+    'Cape Town', 'Johannesburg', 'Lagos', 'Nairobi', 'Cairo', 'Cleveland',
+    'Cambridge', 'Salzburg', 'Cheonan', 'East Hampton', '과천', '청주', '대구',
+    '부산', '광주', '대전', '인천', '울산', '제주'
+  ];
+  for (const city of cities) {
+    if (text.includes(city)) return city;
+  }
+  return null;
+}
+
+// Map country from city
+function cityToCountry(city) {
+  if (!city) return null;
+  const map = {
+    'New York': 'US', 'Los Angeles': 'US', 'Chicago': 'US', 'San Francisco': 'US',
+    'Miami': 'US', 'Houston': 'US', 'Philadelphia': 'US', 'Boston': 'US',
+    'Washington': 'US', 'Cleveland': 'US', 'Cambridge': 'US',
+    'London': 'GB', 'Paris': 'FR', 'Berlin': 'DE', 'Tokyo': 'JP', 'Seoul': 'KR',
+    'Shanghai': 'CN', 'Hong Kong': 'HK', 'Beijing': 'CN', 'Taipei': 'TW',
+    'Rome': 'IT', 'Milan': 'IT', 'Amsterdam': 'NL', 'Brussels': 'BE',
+    'Vienna': 'AT', 'Zurich': 'CH', 'Basel': 'CH', 'Geneva': 'CH',
+    'Barcelona': 'ES', 'Madrid': 'ES', 'Lisbon': 'PT',
+    'Copenhagen': 'DK', 'Stockholm': 'SE', 'Oslo': 'NO', 'Helsinki': 'FI',
+    'Prague': 'CZ', 'Warsaw': 'PL', 'Budapest': 'HU', 'Athens': 'GR',
+    'Istanbul': 'TR', 'Dubai': 'AE', 'Doha': 'QA', 'Abu Dhabi': 'AE',
+    'Singapore': 'SG', 'Bangkok': 'TH', 'Mumbai': 'IN', 'Sydney': 'AU',
+    'Melbourne': 'AU', 'Toronto': 'CA', 'Montreal': 'CA', 'Vancouver': 'CA',
+    'São Paulo': 'BR', 'Mexico City': 'MX', 'Salzburg': 'AT',
+  };
+  return map[city] || null;
+}
+
 // Gallery venue info for known galleries
 const GALLERY_VENUES = {
   kukje:          { name: '국제갤러리', city: '서울', country: 'KR', address: '서울특별시 종로구 삼청로 54' },
@@ -360,7 +404,7 @@ async function mapGalleries() {
       title_en: titleEn,
       title_local: titleLocal || item.title,
       venue_name: item.venue_name || venueInfo.name || item.gallery_slug,
-      venue_city: venueInfo.city || '서울',
+      venue_city: venueInfo.city || extractCity(item.venue_name) || '서울',
       venue_country: venueInfo.country || 'KR',
       venue_address: item.venue_address || venueInfo.address || null,
       start_date: item.start_date,
@@ -406,6 +450,265 @@ async function mapGalleries() {
   return inserted + updated;
 }
 
+// ─── New International Sources ────────────────────────────────────────
+
+async function mapCleveland() {
+  console.log('\n--- Mapping source_cleveland → exhibitions ---');
+  const { error: testErr } = await supabase.from('source_cleveland').select('id').limit(1);
+  if (testErr && testErr.message.includes('does not exist')) {
+    console.log('  source_cleveland table does not exist yet. Skipping.');
+    return 0;
+  }
+
+  const items = await fetchAll('source_cleveland', [
+    q => q.not('start_date', 'is', null)
+  ]);
+  console.log(`  Found ${items.length} Cleveland exhibitions`);
+
+  let inserted = 0, updated = 0, errors = 0;
+  for (const item of items) {
+    const venueName = item.venue_name || 'Cleveland Museum of Art';
+    const venueCity = item.venue_city || extractCity(venueName) || 'Cleveland';
+
+    const row = {
+      title_en: item.title,
+      title_local: item.title,
+      venue_name: venueName,
+      venue_city: venueCity,
+      venue_country: cityToCountry(venueCity) || 'US',
+      start_date: item.start_date,
+      end_date: item.end_date,
+      status: calcStatus(item.start_date, item.end_date),
+      source: 'cleveland',
+      source_url: 'https://www.clevelandart.org/exhibitions',
+      tags: ['Cleveland Museum of Art', 'International'],
+      metadata: { source_table: 'source_cleveland', source_id: item.id, external_id: item.external_id },
+      collected_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    const { data: existing } = await supabase.from('exhibitions').select('id')
+      .eq('source', 'cleveland').contains('metadata', { external_id: item.external_id }).maybeSingle();
+
+    if (existing) {
+      const { error: upErr } = await supabase.from('exhibitions').update(row).eq('id', existing.id);
+      if (upErr) errors++; else updated++;
+    } else {
+      const { error: inErr } = await supabase.from('exhibitions').insert(row);
+      if (inErr) { if (errors < 3) console.log(`  Insert error: ${inErr.message}`); errors++; }
+      else inserted++;
+    }
+  }
+
+  console.log(`  Cleveland: ${inserted} inserted, ${updated} updated, ${errors} errors`);
+  return inserted + updated;
+}
+
+async function mapWhitney() {
+  console.log('\n--- Mapping source_whitney → exhibitions ---');
+  const { error: testErr } = await supabase.from('source_whitney').select('id').limit(1);
+  if (testErr && testErr.message.includes('does not exist')) {
+    console.log('  source_whitney table does not exist yet. Skipping.');
+    return 0;
+  }
+
+  const items = await fetchAll('source_whitney', [q => q.not('start_date', 'is', null)]);
+  console.log(`  Found ${items.length} Whitney exhibitions`);
+
+  let inserted = 0, updated = 0, errors = 0;
+  for (const item of items) {
+    const sourceUrl = item.url_slug ? `https://whitney.org${item.url_slug}` : 'https://whitney.org/exhibitions';
+    const row = {
+      title_en: item.title,
+      title_local: item.title,
+      venue_name: 'Whitney Museum of American Art',
+      venue_city: 'New York',
+      venue_country: 'US',
+      venue_address: '99 Gansevoort St, New York, NY 10014, USA',
+      start_date: item.start_date,
+      end_date: item.end_date,
+      status: calcStatus(item.start_date, item.end_date),
+      description: item.description || null,
+      source: 'whitney',
+      source_url: sourceUrl,
+      tags: ['Whitney Museum', 'New York', 'International'],
+      metadata: { source_table: 'source_whitney', source_id: item.id, external_id: item.external_id },
+      collected_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    const { data: existing } = await supabase.from('exhibitions').select('id')
+      .eq('source', 'whitney').contains('metadata', { external_id: item.external_id }).maybeSingle();
+
+    if (existing) {
+      const { error: upErr } = await supabase.from('exhibitions').update(row).eq('id', existing.id);
+      if (upErr) errors++; else updated++;
+    } else {
+      const { error: inErr } = await supabase.from('exhibitions').insert(row);
+      if (inErr) { if (errors < 3) console.log(`  Insert error: ${inErr.message}`); errors++; }
+      else inserted++;
+    }
+  }
+
+  console.log(`  Whitney: ${inserted} inserted, ${updated} updated, ${errors} errors`);
+  return inserted + updated;
+}
+
+async function mapParis() {
+  console.log('\n--- Mapping source_paris → exhibitions ---');
+  const { error: testErr } = await supabase.from('source_paris').select('id').limit(1);
+  if (testErr && testErr.message.includes('does not exist')) {
+    console.log('  source_paris table does not exist yet. Skipping.');
+    return 0;
+  }
+
+  const items = await fetchAll('source_paris');
+  console.log(`  Found ${items.length} Paris events`);
+
+  let inserted = 0, updated = 0, errors = 0;
+  for (const item of items) {
+    const row = {
+      title_en: item.title,
+      title_local: item.title,
+      venue_name: item.venue_name || null,
+      venue_city: 'Paris',
+      venue_country: 'FR',
+      venue_address: item.venue_address || null,
+      venue_lat: item.lat || null,
+      venue_lng: item.lng || null,
+      start_date: item.start_date,
+      end_date: item.end_date,
+      status: calcStatus(item.start_date, item.end_date),
+      description: item.description || null,
+      image_url: item.image_url || null,
+      admission_fee: item.price_type === 'gratuit' ? 'Free' : (item.price_detail || null),
+      source: 'paris',
+      source_url: item.source_url || null,
+      tags: ['Paris', 'France', 'International', item.tags].filter(Boolean),
+      metadata: { source_table: 'source_paris', source_id: item.id, external_id: item.external_id },
+      collected_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    const { data: existing } = await supabase.from('exhibitions').select('id')
+      .eq('source', 'paris').contains('metadata', { external_id: item.external_id }).maybeSingle();
+
+    if (existing) {
+      const { error: upErr } = await supabase.from('exhibitions').update(row).eq('id', existing.id);
+      if (upErr) errors++; else updated++;
+    } else {
+      const { error: inErr } = await supabase.from('exhibitions').insert(row);
+      if (inErr) { if (errors < 3) console.log(`  Insert error: ${inErr.message}`); errors++; }
+      else inserted++;
+    }
+  }
+
+  console.log(`  Paris: ${inserted} inserted, ${updated} updated, ${errors} errors`);
+  return inserted + updated;
+}
+
+async function mapBerlin() {
+  console.log('\n--- Mapping source_berlin → exhibitions ---');
+  const { error: testErr } = await supabase.from('source_berlin').select('id').limit(1);
+  if (testErr && testErr.message.includes('does not exist')) {
+    console.log('  source_berlin table does not exist yet. Skipping.');
+    return 0;
+  }
+
+  // Only map exhibition-flagged events
+  const items = await fetchAll('source_berlin', [q => q.eq('is_exhibition', true)]);
+  console.log(`  Found ${items.length} Berlin exhibitions`);
+
+  let inserted = 0, updated = 0, errors = 0;
+  for (const item of items) {
+    const row = {
+      title_en: item.title,
+      title_local: item.title,
+      venue_name: item.venue_name || null,
+      venue_city: 'Berlin',
+      venue_country: 'DE',
+      start_date: item.start_date,
+      end_date: item.end_date,
+      status: calcStatus(item.start_date, item.end_date),
+      admission_fee: item.admission_type === 'ticketType.freeOfCharge' ? 'Free' : null,
+      source: 'berlin',
+      source_url: 'https://www.kulturdaten.berlin',
+      tags: ['Berlin', 'Germany', 'International'],
+      metadata: { source_table: 'source_berlin', source_id: item.id, external_id: item.external_id },
+      collected_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    const { data: existing } = await supabase.from('exhibitions').select('id')
+      .eq('source', 'berlin').contains('metadata', { external_id: item.external_id }).maybeSingle();
+
+    if (existing) {
+      const { error: upErr } = await supabase.from('exhibitions').update(row).eq('id', existing.id);
+      if (upErr) errors++; else updated++;
+    } else {
+      const { error: inErr } = await supabase.from('exhibitions').insert(row);
+      if (inErr) { if (errors < 3) console.log(`  Insert error: ${inErr.message}`); errors++; }
+      else inserted++;
+    }
+  }
+
+  console.log(`  Berlin: ${inserted} inserted, ${updated} updated, ${errors} errors`);
+  return inserted + updated;
+}
+
+async function mapEflux() {
+  console.log('\n--- Mapping source_eflux → exhibitions ---');
+  const { error: testErr } = await supabase.from('source_eflux').select('id').limit(1);
+  if (testErr && testErr.message.includes('does not exist')) {
+    console.log('  source_eflux table does not exist yet. Skipping.');
+    return 0;
+  }
+
+  const items = await fetchAll('source_eflux');
+  console.log(`  Found ${items.length} e-flux announcements`);
+
+  let inserted = 0, updated = 0, errors = 0;
+  for (const item of items) {
+    const city = item.city || extractCity(item.venue || '') || null;
+    const country = cityToCountry(city) || null;
+
+    const row = {
+      title_en: item.title,
+      title_local: item.title,
+      venue_name: item.venue || null,
+      venue_city: city,
+      venue_country: country,
+      start_date: item.start_date,
+      end_date: item.end_date,
+      status: calcStatus(item.start_date, item.end_date),
+      description: item.description || null,
+      image_url: item.image_url || null,
+      artists: item.artists || null,
+      source: 'eflux',
+      source_url: item.source_url || 'https://www.e-flux.com/announcements/',
+      tags: ['e-flux', city, 'International'].filter(Boolean),
+      metadata: { source_table: 'source_eflux', source_id: item.id, external_id: item.external_id },
+      collected_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    const { data: existing } = await supabase.from('exhibitions').select('id')
+      .eq('source', 'eflux').contains('metadata', { external_id: item.external_id }).maybeSingle();
+
+    if (existing) {
+      const { error: upErr } = await supabase.from('exhibitions').update(row).eq('id', existing.id);
+      if (upErr) errors++; else updated++;
+    } else {
+      const { error: inErr } = await supabase.from('exhibitions').insert(row);
+      if (inErr) { if (errors < 3) console.log(`  Insert error: ${inErr.message}`); errors++; }
+      else inserted++;
+    }
+  }
+
+  console.log(`  e-flux: ${inserted} inserted, ${updated} updated, ${errors} errors`);
+  return inserted + updated;
+}
+
 async function updateStatuses() {
   console.log('\n--- Updating exhibition statuses ---');
   const today = new Date().toISOString().split('T')[0];
@@ -437,6 +740,11 @@ async function run() {
   const cultureCount = await mapCultureEvents();
   const integratedCount = await mapExhibitionIntegrated();
   const galleryCount = await mapGalleries();
+  const clevelandCount = await mapCleveland();
+  const whitneyCount = await mapWhitney();
+  const parisCount = await mapParis();
+  const berlinCount = await mapBerlin();
+  const efluxCount = await mapEflux();
   await updateStatuses();
 
   // Final stats

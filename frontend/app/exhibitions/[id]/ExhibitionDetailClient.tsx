@@ -3,10 +3,23 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Calendar, MapPin, Heart, Eye, Clock } from 'lucide-react';
+import {
+  ArrowLeft,
+  Calendar,
+  MapPin,
+  Heart,
+  Clock,
+  Share2,
+  ExternalLink,
+  Tag,
+  User,
+} from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { ExhibitionPlaceholder } from '@/components/exhibitions/ExhibitionPlaceholder';
 
-// 기록 시스템 컴포넌트
+// Visit recording system
 import StartVisitButton from '@/components/exhibition/StartVisitButton';
 import VisitProgressHeader from '@/components/exhibition/VisitProgressHeader';
 import FloatingRecordButton from '@/components/exhibition/FloatingRecordButton';
@@ -16,34 +29,94 @@ import { useVisitStore } from '@/lib/stores/visit-store';
 interface Exhibition {
   id: string;
   title: string;
+  titleEn?: string | null;
+  titleLocal?: string | null;
   venue: string;
   location: string;
+  country?: string;
+  address?: string;
   startDate: string;
   endDate: string;
   description: string;
-  image?: string;
-  category?: string;
-  price?: string;
+  image?: string | null;
+  price?: string | null;
   status: 'ongoing' | 'upcoming' | 'ended';
-  viewCount?: number;
-  likeCount?: number;
-  distance?: string;
-  featured?: boolean;
+  closingSoon?: boolean;
+  daysLeft?: number | null;
+  artists?: string[] | null;
+  tags?: string[] | null;
+  source?: string | null;
+  sourceUrl?: string | null;
 }
 
-interface ExhibitionDetailClientProps {
+interface RelatedExhibition {
   id: string;
+  title: string;
+  venue: string;
+  location: string;
+  image?: string | null;
+  status: 'ongoing' | 'upcoming' | 'ended';
 }
 
-export default function ExhibitionDetailClient({ id }: ExhibitionDetailClientProps) {
-  const router = useRouter();
-  const [exhibition, setExhibition] = useState<Exhibition | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
+const t = {
+  en: {
+    back: 'Back',
+    ongoing: 'Now Open',
+    upcoming: 'Upcoming',
+    ended: 'Ended',
+    closingIn: (days: number) => `Closing in ${days} days`,
+    about: 'About',
+    visitInfo: 'Visit Information',
+    artists: 'Artists',
+    admission: 'Admission',
+    address: 'Address',
+    source: 'Source',
+    viewSource: 'View original',
+    related: 'Related Exhibitions',
+    startVisit: 'Start Visit Recording',
+    share: 'Share',
+    noDescription: 'No description available.',
+    free: 'Free',
+    backToList: 'Browse Exhibitions',
+    notFound: 'Exhibition not found',
+    notFoundDesc: 'This exhibition may have been removed or the link is incorrect.',
+    loading: 'Loading exhibition...',
+  },
+  ko: {
+    back: '뒤로',
+    ongoing: '전시 중',
+    upcoming: '예정',
+    ended: '종료',
+    closingIn: (days: number) => `${days}일 후 종료`,
+    about: '전시 소개',
+    visitInfo: '관람 정보',
+    artists: '참여 작가',
+    admission: '입장료',
+    address: '주소',
+    source: '출처',
+    viewSource: '원본 보기',
+    related: '관련 전시',
+    startVisit: '관람 기록 시작',
+    share: '공유',
+    noDescription: '전시 설명이 제공되지 않았습니다.',
+    free: '무료',
+    backToList: '전시 목록',
+    notFound: '전시를 찾을 수 없습니다',
+    notFoundDesc: '전시가 삭제되었거나 링크가 잘못되었을 수 있습니다.',
+    loading: '전시 정보를 불러오는 중...',
+  },
+};
 
-  // 기록 시스템 상태
+export default function ExhibitionDetailClient({ id }: { id: string }) {
+  const router = useRouter();
+  const { language } = useLanguage();
+  const texts = t[language];
+  const [exhibition, setExhibition] = useState<Exhibition | null>(null);
+  const [related, setRelated] = useState<RelatedExhibition[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [liked, setLiked] = useState(false);
+
   const {
     currentVisit,
     isRecording,
@@ -54,118 +127,64 @@ export default function ExhibitionDetailClient({ id }: ExhibitionDetailClientPro
     isRecordModalOpen,
   } = useVisitStore();
 
-  // 현재 전시의 관람이 진행 중인지 확인
   const isCurrentExhibitionVisit = isRecording && currentVisit?.exhibition_id === id;
 
   useEffect(() => {
-    if (id) {
-      fetchExhibition(id);
-    }
+    if (!id) return;
+    (async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/exhibitions/${id}`);
+        if (!res.ok) throw new Error('Not found');
+        const result = await res.json();
+        if (result.success && result.data) {
+          setExhibition(result.data);
+          setRelated(result.related || []);
+        } else {
+          throw new Error('No data');
+        }
+      } catch {
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, [id]);
 
-  const fetchExhibition = async (exhibitionId: string) => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/exhibitions/${exhibitionId}`);
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch exhibition');
-      }
-
-      const result = await response.json();
-      if (result.success && result.data) {
-        setExhibition(result.data);
-        setLikeCount(result.data.likeCount || 0);
-      } else {
-        throw new Error('No exhibition data found');
-      }
-    } catch (err) {
-      setError('전시 정보를 불러오는데 실패했습니다');
-      console.error('Error fetching exhibition:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLike = async () => {
+  const handleShare = async () => {
     if (!exhibition) return;
-
-    try {
-      const response = await fetch(`/api/exhibitions/${exhibition.id}/like`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success) {
-          setLiked(!liked);
-          setLikeCount(result.data.likeCount);
-        }
-      }
-    } catch (err) {
-      console.error('Error liking exhibition:', err);
+    const url = window.location.href;
+    if (navigator.share) {
+      try { await navigator.share({ title: exhibition.title, url }); } catch {}
+    } else {
+      await navigator.clipboard.writeText(url);
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ko-KR', {
+  const handleLike = () => setLiked(v => !v);
+
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return '';
+    const locale = language === 'ko' ? 'ko-KR' : 'en-US';
+    return new Date(dateString).toLocaleDateString(locale, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
     });
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'ongoing':
-        return 'bg-green-500 text-white';
-      case 'upcoming':
-        return 'bg-blue-500 text-white';
-      case 'ended':
-        return 'bg-gray-500 text-white';
-      default:
-        return 'bg-gray-500 text-white';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'ongoing':
-        return '진행중';
-      case 'upcoming':
-        return '예정';
-      case 'ended':
-        return '종료';
-      default:
-        return status;
-    }
-  };
-
-  // 관람 시작 핸들러
-  const handleVisitStarted = (visitId: string) => {
-    console.log('Visit started:', visitId);
-  };
-
-  // 관람 종료 핸들러
-  const handleVisitEnded = () => {
-    console.log('Visit ended');
-    router.push('/exhibitions/history');
-  };
-
-  // 작품 선택 핸들러
-  const handleArtworkSelected = (artwork: any) => {
-    console.log('Artwork recorded:', artwork);
+  const statusConfig = {
+    ongoing: { label: texts.ongoing, color: 'bg-green-600' },
+    upcoming: { label: texts.upcoming, color: 'bg-blue-600' },
+    ended: { label: texts.ended, color: 'bg-neutral-500' },
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p className="text-white text-lg">전시 정보를 불러오는 중...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto mb-4" />
+          <p className="text-neutral-500 text-sm">{texts.loading}</p>
         </div>
       </div>
     );
@@ -173,198 +192,312 @@ export default function ExhibitionDetailClient({ id }: ExhibitionDetailClientPro
 
   if (error || !exhibition) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-white mb-4">전시를 찾을 수 없습니다</h2>
-          <p className="text-white/80 mb-8">{error}</p>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center max-w-md px-6">
+          <h2 className="text-2xl font-light text-black mb-3">{texts.notFound}</h2>
+          <p className="text-neutral-500 mb-8 text-sm">{texts.notFoundDesc}</p>
           <button
             onClick={() => router.push('/exhibitions')}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg"
+            className="px-6 py-2.5 bg-black text-white text-sm rounded-sm hover:bg-neutral-800 transition-colors"
           >
-            전시 목록으로 돌아가기
+            {texts.backToList}
           </button>
         </div>
       </div>
     );
   }
 
+  const sc = statusConfig[exhibition.status];
+  const hasDates = exhibition.startDate || exhibition.endDate;
+  const hasArtists = exhibition.artists && exhibition.artists.length > 0;
+  const hasTags = exhibition.tags && exhibition.tags.length > 0;
+  const hasDescription = exhibition.description && exhibition.description.length > 0;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-      {/* 관람 진행 헤더 */}
+    <div className="min-h-screen bg-white">
+      {/* Visit progress header */}
       {isCurrentExhibitionVisit && currentVisit && (
         <div className="sticky top-0 z-30">
           <VisitProgressHeader
             visit={currentVisit}
             elapsedSeconds={elapsedSeconds}
             recordCount={recordedArtworks.length}
-            onEndVisit={handleVisitEnded}
+            onEndVisit={() => router.push('/exhibitions/history')}
           />
         </div>
       )}
 
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-4 mb-8"
+      {/* Back button */}
+      <div className="max-w-screen-lg mx-auto px-4 sm:px-6 pt-6">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-2 text-neutral-500 hover:text-black transition-colors text-sm"
         >
-          <button
-            onClick={() => router.back()}
-            className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            뒤로가기
-          </button>
-        </motion.div>
+          <ArrowLeft className="w-4 h-4" />
+          {texts.back}
+        </button>
+      </div>
 
-        {/* Exhibition Details */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden"
-        >
-          {/* Hero Section */}
-          <div className="relative h-64 bg-gradient-to-r from-purple-500 to-pink-500">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-6xl mb-4">🎨</div>
-                <div className="absolute top-4 right-4">
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(exhibition.status)}`}
-                  >
-                    {getStatusText(exhibition.status)}
+      {/* Hero Image */}
+      <div className="max-w-screen-lg mx-auto px-4 sm:px-6 mt-6">
+        <div className="relative aspect-[16/9] sm:aspect-[2/1] overflow-hidden bg-neutral-100 border border-neutral-200">
+          {exhibition.image ? (
+            <Image
+              src={exhibition.image}
+              alt={exhibition.title}
+              fill
+              className="object-cover"
+              priority
+              sizes="(max-width: 1024px) 100vw, 1024px"
+            />
+          ) : (
+            <ExhibitionPlaceholder
+              title={exhibition.title}
+              venue={exhibition.venue}
+              variant="featured"
+            />
+          )}
+          {/* Status badge */}
+          <div className="absolute top-4 left-4">
+            <span className={`px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white rounded-sm ${sc.color}`}>
+              {exhibition.closingSoon && exhibition.daysLeft != null && exhibition.daysLeft >= 0
+                ? texts.closingIn(exhibition.daysLeft)
+                : sc.label}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div className="max-w-screen-lg mx-auto px-4 sm:px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          {/* Left: Main info */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Title */}
+            <div>
+              <h1 className="text-3xl md:text-4xl font-light text-black tracking-tight leading-tight">
+                {exhibition.title}
+              </h1>
+              {exhibition.titleEn && exhibition.titleLocal && exhibition.titleEn !== exhibition.title && (
+                <p className="text-lg text-neutral-400 font-light mt-2">{exhibition.titleEn}</p>
+              )}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 text-sm text-neutral-600">
+                <span className="font-medium">{exhibition.venue}</span>
+                {exhibition.location && (
+                  <span className="flex items-center gap-1 text-neutral-400">
+                    <MapPin className="w-3.5 h-3.5" />
+                    {exhibition.location}{exhibition.country ? `, ${exhibition.country}` : ''}
                   </span>
-                </div>
+                )}
+                {hasDates && (
+                  <span className="flex items-center gap-1 text-neutral-400">
+                    <Calendar className="w-3.5 h-3.5" />
+                    {formatDate(exhibition.startDate)}{exhibition.endDate ? ` \u2013 ${formatDate(exhibition.endDate)}` : ''}
+                  </span>
+                )}
               </div>
             </div>
+
+            {/* Actions */}
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={handleLike}
+                className={`flex items-center gap-2 px-4 py-2 border rounded-sm text-sm transition-colors ${
+                  liked ? 'bg-red-50 border-red-200 text-red-600' : 'border-neutral-200 text-neutral-600 hover:border-neutral-400'
+                }`}
+              >
+                <Heart className={`w-4 h-4 ${liked ? 'fill-red-500' : ''}`} />
+                {liked ? (language === 'ko' ? '저장됨' : 'Saved') : (language === 'ko' ? '저장' : 'Save')}
+              </button>
+              <button
+                onClick={handleShare}
+                className="flex items-center gap-2 px-4 py-2 border border-neutral-200 rounded-sm text-sm text-neutral-600 hover:border-neutral-400 transition-colors"
+              >
+                <Share2 className="w-4 h-4" />
+                {texts.share}
+              </button>
+              {!isCurrentExhibitionVisit && exhibition.status === 'ongoing' && (
+                <StartVisitButton
+                  exhibitionId={exhibition.id}
+                  exhibitionTitle={exhibition.title}
+                  onStarted={() => {}}
+                  className="px-4 py-2 bg-black text-white text-sm rounded-sm hover:bg-neutral-800 transition-colors"
+                />
+              )}
+            </div>
+
+            {/* Description */}
+            {hasDescription && (
+              <section>
+                <h2 className="text-xs uppercase tracking-widest text-neutral-900 font-medium mb-4">{texts.about}</h2>
+                <div className="h-px bg-neutral-200 mb-4" />
+                <p className="text-neutral-600 leading-relaxed text-sm whitespace-pre-line">
+                  {exhibition.description}
+                </p>
+              </section>
+            )}
+
+            {/* Artists */}
+            {hasArtists && (
+              <section>
+                <h2 className="text-xs uppercase tracking-widest text-neutral-900 font-medium mb-4 flex items-center gap-2">
+                  <User className="w-3.5 h-3.5" />
+                  {texts.artists}
+                </h2>
+                <div className="h-px bg-neutral-200 mb-4" />
+                <div className="flex flex-wrap gap-2">
+                  {exhibition.artists!.map((artist, i) => (
+                    <span
+                      key={i}
+                      className="px-3 py-1.5 bg-neutral-100 text-neutral-700 text-sm rounded-sm"
+                    >
+                      {artist}
+                    </span>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Tags */}
+            {hasTags && (
+              <section>
+                <div className="flex flex-wrap gap-2">
+                  {exhibition.tags!.map((tag, i) => (
+                    <span
+                      key={i}
+                      className="flex items-center gap-1 px-2.5 py-1 border border-neutral-200 text-neutral-500 text-xs rounded-sm"
+                    >
+                      <Tag className="w-3 h-3" />
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
 
-          {/* Content */}
-          <div className="p-8">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Main Info */}
-              <div className="lg:col-span-2">
-                <h1 className="text-3xl md:text-4xl font-bold text-white mb-6">
-                  {exhibition.title}
-                </h1>
+          {/* Right: Sidebar */}
+          <div className="space-y-6">
+            {/* Visit Info Card */}
+            <div className="border border-neutral-200 p-6 space-y-4">
+              <h3 className="text-xs uppercase tracking-widest text-neutral-900 font-medium">{texts.visitInfo}</h3>
+              <div className="h-px bg-neutral-100" />
 
-                <div className="space-y-4 mb-6">
-                  <div className="flex items-center gap-3 text-white/80">
-                    <Calendar className="w-5 h-5" />
-                    <span>
-                      {formatDate(exhibition.startDate)} - {formatDate(exhibition.endDate)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-3 text-white/80">
-                    <Clock className="w-5 h-5" />
-                    <span>상태: {getStatusText(exhibition.status)}</span>
-                  </div>
+              <div className="space-y-3 text-sm">
+                <div>
+                  <p className="text-neutral-400 text-xs uppercase tracking-wider mb-1">{language === 'ko' ? '장소' : 'Venue'}</p>
+                  <p className="text-neutral-900 font-medium">{exhibition.venue}</p>
                 </div>
 
-                <div className="prose prose-invert max-w-none">
-                  <p className="text-white/80 leading-relaxed">{exhibition.description}</p>
-                </div>
+                {exhibition.address && (
+                  <div>
+                    <p className="text-neutral-400 text-xs uppercase tracking-wider mb-1">{texts.address}</p>
+                    <p className="text-neutral-600">{exhibition.address}</p>
+                  </div>
+                )}
 
-                {exhibition.category && (
-                  <div className="flex flex-wrap gap-2 mt-6">
-                    <span className="bg-white/20 px-3 py-1 rounded-full text-sm text-white">
-                      {exhibition.category}
-                    </span>
+                {exhibition.location && (
+                  <div>
+                    <p className="text-neutral-400 text-xs uppercase tracking-wider mb-1">{language === 'ko' ? '도시' : 'City'}</p>
+                    <p className="text-neutral-600">{exhibition.location}{exhibition.country ? `, ${exhibition.country}` : ''}</p>
+                  </div>
+                )}
+
+                {hasDates && (
+                  <div>
+                    <p className="text-neutral-400 text-xs uppercase tracking-wider mb-1">{language === 'ko' ? '기간' : 'Dates'}</p>
+                    <p className="text-neutral-600">
+                      {formatDate(exhibition.startDate)}
+                      {exhibition.endDate ? ` \u2013 ${formatDate(exhibition.endDate)}` : ''}
+                    </p>
+                  </div>
+                )}
+
+                {exhibition.price && (
+                  <div>
+                    <p className="text-neutral-400 text-xs uppercase tracking-wider mb-1">{texts.admission}</p>
+                    <p className="text-neutral-600">{exhibition.price}</p>
+                  </div>
+                )}
+
+                {exhibition.source && (
+                  <div>
+                    <p className="text-neutral-400 text-xs uppercase tracking-wider mb-1">{texts.source}</p>
+                    <p className="text-neutral-500 text-xs">{exhibition.source}</p>
                   </div>
                 )}
               </div>
 
-              {/* Sidebar */}
-              <div className="space-y-6">
-                {/* Venue Information */}
-                <div className="bg-white/10 rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-white mb-4">장소 정보</h3>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-white/80">
-                      <MapPin className="w-4 h-4" />
-                      <span>{exhibition.venue}</span>
-                    </div>
-                    <p className="text-sm text-white/60">{exhibition.location}</p>
-                  </div>
-                </div>
-
-                {/* Stats */}
-                <div className="bg-white/10 rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-white mb-4">통계</h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-white/80 flex items-center gap-2">
-                        <Eye className="w-4 h-4" />
-                        조회수
-                      </span>
-                      <span className="text-white font-semibold">{exhibition.viewCount}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-white/80 flex items-center gap-2">
-                        <Heart className="w-4 h-4" />
-                        좋아요
-                      </span>
-                      <span className="text-white font-semibold">{likeCount}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="space-y-3">
-                  <button
-                    onClick={handleLike}
-                    className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg font-semibold transition-all ${
-                      liked
-                        ? 'bg-red-500 text-white'
-                        : 'bg-white/20 text-white hover:bg-white/30'
-                    }`}
-                  >
-                    <Heart className={`w-5 h-5 ${liked ? 'fill-current' : ''}`} />
-                    {liked ? '좋아요 취소' : '좋아요'}
-                  </button>
-
-                  {!isCurrentExhibitionVisit && exhibition.status === 'ongoing' && (
-                    <div className="pt-2">
-                      <StartVisitButton
-                        exhibitionId={exhibition.id}
-                        exhibitionTitle={exhibition.title}
-                        onStarted={handleVisitStarted}
-                        className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* Admission */}
-                <div className="bg-white/10 rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-white mb-4">입장료</h3>
-                  <p className="text-white/80">{exhibition.price || '정보 없음'}</p>
-                </div>
-              </div>
+              {exhibition.sourceUrl && (
+                <a
+                  href={exhibition.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full py-2.5 border border-neutral-200 text-sm text-neutral-600 hover:border-neutral-400 hover:text-black transition-colors rounded-sm"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  {texts.viewSource}
+                </a>
+              )}
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Related Actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mt-8 text-center"
-        >
+        {/* Related Exhibitions */}
+        {related.length > 0 && (
+          <section className="mt-16">
+            <div className="flex items-baseline gap-3 mb-6">
+              <h2 className="text-sm uppercase tracking-widest text-neutral-900 font-medium">{texts.related}</h2>
+              <div className="h-px flex-1 bg-neutral-200" />
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {related.map((r) => (
+                <Link
+                  key={r.id}
+                  href={`/exhibitions/${r.id}`}
+                  className="group"
+                >
+                  <div className="aspect-[3/4] border border-neutral-200 group-hover:border-neutral-900 transition-colors duration-300 overflow-hidden mb-3 relative bg-neutral-50">
+                    {r.image ? (
+                      <Image
+                        src={r.image}
+                        alt={r.title}
+                        fill
+                        sizes="(max-width: 768px) 50vw, 25vw"
+                        className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                      />
+                    ) : (
+                      <ExhibitionPlaceholder
+                        title={r.title}
+                        venue={r.venue}
+                        variant="card"
+                      />
+                    )}
+                  </div>
+                  <h3 className="text-sm font-medium text-black line-clamp-2 leading-snug">{r.title}</h3>
+                  <p className="text-xs text-neutral-500 font-light mt-1">{r.venue}</p>
+                  {r.location && (
+                    <p className="text-[11px] text-neutral-400 font-light">{r.location}</p>
+                  )}
+                  <div className="h-px bg-neutral-900 mt-2 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300" />
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Back to list */}
+        <div className="mt-16 mb-8 text-center">
           <Link
             href="/exhibitions"
-            className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-black text-white text-sm rounded-sm hover:bg-neutral-800 transition-colors"
           >
-            다른 전시 보기
+            {texts.backToList}
           </Link>
-        </motion.div>
+        </div>
       </div>
 
-      {/* 플로팅 기록 버튼 */}
+      {/* Floating record button */}
       {isCurrentExhibitionVisit && currentVisit && (
         <FloatingRecordButton
           visitId={currentVisit.id}
@@ -373,14 +506,14 @@ export default function ExhibitionDetailClient({ id }: ExhibitionDetailClientPro
         />
       )}
 
-      {/* 작품 검색 및 기록 모달 */}
+      {/* Artwork search modal */}
       {isCurrentExhibitionVisit && currentVisit && (
         <ArtworkSearchModal
           isOpen={isRecordModalOpen}
           onClose={closeRecordModal}
           exhibitionId={exhibition.id}
           visitId={currentVisit.id}
-          onArtworkSelected={handleArtworkSelected}
+          onArtworkSelected={() => {}}
         />
       )}
     </div>
