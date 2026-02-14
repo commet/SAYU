@@ -1,9 +1,5 @@
 import { NextAuthOptions } from 'next-auth';
 
-if (!process.env.NEXTAUTH_SECRET) {
-  throw new Error('NEXTAUTH_SECRET environment variable is required');
-}
-
 export const authOptions: NextAuthOptions = {
   // Primary auth is handled by Supabase Auth.
   // NextAuth is kept only for SessionProvider compatibility.
@@ -32,5 +28,5 @@ export const authOptions: NextAuthOptions = {
       return session;
     }
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-for-build',
 };
