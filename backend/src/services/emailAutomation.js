@@ -1,11 +1,15 @@
 const cron = require('node-cron');
 const { pool } = require('../config/database');
+const { getSupabaseAdmin } = require('../config/supabase');
 const emailService = require('./emailService');
 const { logger } = require('../config/logger');
 
 class EmailAutomationService {
   constructor() {
     this.jobs = new Map();
+    this.weeklyFeedbackRecipients = this.parseWeeklyRecipients(
+      process.env.WEEKLY_FEEDBACK_SUMMARY_RECIPIENTS || 'yclee913@gmail.com'
+    );
     this.initializeScheduledJobs();
   }
 
@@ -15,6 +19,11 @@ class EmailAutomationService {
     // Weekly insights - Every Sunday at 9 AM
     this.scheduleJob('weekly-insights', '0 9 * * 0', () => {
       this.sendWeeklyInsights();
+    });
+
+    // Weekly admin feedback summary - Every Sunday at 9:30 AM
+    this.scheduleJob('weekly-feedback-summary', '30 9 * * 0', () => {
+      this.sendWeeklyFeedbackSummary();
     });
 
     // Re-engagement emails - Daily at 10 AM
@@ -84,6 +93,201 @@ class EmailAutomationService {
     } catch (error) {
       logger.error('Weekly insights job failed:', error);
     }
+  }
+
+  parseWeeklyRecipients(rawRecipients) {
+    return String(rawRecipients)
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean);
+  }
+
+  async sendWeeklyFeedbackSummary() {
+    logger.info('Starting weekly feedback summary email send...');
+
+    try {
+      if (!this.weeklyFeedbackRecipients.length) {
+        logger.warn('No weekly feedback summary recipients configured');
+        return;
+      }
+
+      const summary = await this.generateWeeklyFeedbackSummary();
+      if (!summary) {
+        logger.warn('Weekly feedback summary skipped: summary generation returned no result');
+        return;
+      }
+
+      for (const recipient of this.weeklyFeedbackRecipients) {
+        try {
+          await emailService.sendWeeklyFeedbackSummaryEmail(recipient, summary);
+          logger.info(`Weekly feedback summary sent to ${recipient}`);
+        } catch (error) {
+          logger.error(`Failed to send weekly feedback summary to ${recipient}:`, error);
+        }
+      }
+
+      logger.info(`Weekly feedback summary process completed for ${this.weeklyFeedbackRecipients.length} recipients`);
+    } catch (error) {
+      logger.error('Weekly feedback summary job failed:', error);
+    }
+  }
+
+  async generateWeeklyFeedbackSummary() {
+    const supabaseAdmin = getSupabaseAdmin();
+
+    if (!supabaseAdmin) {
+      logger.warn('Supabase admin is not configured. Skipping weekly feedback summary email.');
+      return null;
+    }
+
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const prevWeekStart = new Date(weekAgo.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const [currentWeekResult, previousWeekResult] = await Promise.all([
+      supabaseAdmin
+        .from('feedback')
+        .select('id, type, status, rating, message, context, created_at')
+        .gte('created_at', weekAgo.toISOString())
+        .lte('created_at', now.toISOString()),
+      supabaseAdmin
+        .from('feedback')
+        .select('id')
+        .gte('created_at', prevWeekStart.toISOString())
+        .lt('created_at', weekAgo.toISOString())
+    ]);
+
+    if (currentWeekResult.error) {
+      throw currentWeekResult.error;
+    }
+
+    if (previousWeekResult.error) {
+      throw previousWeekResult.error;
+    }
+
+    const feedbackRows = Array.isArray(currentWeekResult.data) ? currentWeekResult.data : [];
+    const previousCount = Array.isArray(previousWeekResult.data) ? previousWeekResult.data.length : 0;
+
+    const totalFeedback = feedbackRows.length;
+    const unresolvedCount = feedbackRows.filter(
+      (row) => row.status === 'new' || row.status === 'in_review'
+    ).length;
+    const resolvedCount = feedbackRows.filter((row) => row.status === 'resolved').length;
+    const bugCount = feedbackRows.filter((row) => row.type === 'bug').length;
+
+    const ratings = feedbackRows
+      .map((row) => Number(row.rating))
+      .filter((value) => Number.isFinite(value) && value > 0);
+
+    const averageRating = ratings.length
+      ? (ratings.reduce((acc, curr) => acc + curr, 0) / ratings.length).toFixed(2)
+      : '0.00';
+
+    const weekOverWeekChange = previousCount > 0
+      ? `${(((totalFeedback - previousCount) / previousCount) * 100).toFixed(1)}%`
+      : totalFeedback > 0
+        ? '+100.0%'
+        : '0.0%';
+
+    const pageCount = {};
+    const featureCount = {};
+    const issueCategoryCount = {
+      bug: 0,
+      recommendation: 0,
+      performance: 0,
+      auth: 0,
+      ui: 0,
+      other: 0
+    };
+
+    feedbackRows.forEach((row) => {
+      const page = typeof row.context?.page === 'string' ? row.context.page.trim() : '';
+      const feature = typeof row.context?.feature === 'string' ? row.context.feature.trim() : '';
+      if (page) pageCount[page] = (pageCount[page] || 0) + 1;
+      if (feature) featureCount[feature] = (featureCount[feature] || 0) + 1;
+
+      const rawText = `${row.message || ''} ${page} ${feature}`.toLowerCase();
+      if (row.type === 'bug' || rawText.includes('bug') || rawText.includes('오류')) {
+        issueCategoryCount.bug += 1;
+      } else if (rawText.includes('recommend') || rawText.includes('추천')) {
+        issueCategoryCount.recommendation += 1;
+      } else if (rawText.includes('slow') || rawText.includes('lag') || rawText.includes('느리')) {
+        issueCategoryCount.performance += 1;
+      } else if (rawText.includes('login') || rawText.includes('auth') || rawText.includes('로그인')) {
+        issueCategoryCount.auth += 1;
+      } else if (rawText.includes('ui') || rawText.includes('ux') || rawText.includes('화면')) {
+        issueCategoryCount.ui += 1;
+      } else {
+        issueCategoryCount.other += 1;
+      }
+    });
+
+    const topPages = Object.entries(pageCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+    const topFeatures = Object.entries(featureCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+    const topIssues = Object.entries(issueCategoryCount)
+      .sort((a, b) => b[1] - a[1])
+      .filter(([, count]) => count > 0)
+      .slice(0, 5);
+
+    const issueLabelMap = {
+      bug: 'Bug / Error',
+      recommendation: 'Recommendation Quality',
+      performance: 'Performance',
+      auth: 'Authentication',
+      ui: 'UI/UX',
+      other: 'Other'
+    };
+
+    const topIssuesHtml = this.buildHtmlList(
+      topIssues.map(([key, count]) => `${issueLabelMap[key] || key}: ${count}`)
+    );
+    const topPagesHtml = this.buildHtmlList(topPages.map(([name, count]) => `${name}: ${count}`));
+    const topFeaturesHtml = this.buildHtmlList(topFeatures.map(([name, count]) => `${name}: ${count}`));
+
+    const actionItems = [];
+    if (topIssues.length > 0) {
+      actionItems.push(`P1: Stabilize ${issueLabelMap[topIssues[0][0]] || topIssues[0][0]} issues first.`);
+    }
+    if (unresolvedCount > 0) {
+      actionItems.push(`P1: Triage ${unresolvedCount} unresolved feedback items.`);
+    }
+    if (topPages.length > 0) {
+      actionItems.push(`P2: Review UX on top complaint page: ${topPages[0][0]}.`);
+    }
+    if (topFeatures.length > 0) {
+      actionItems.push(`P2: Re-check feature behavior for: ${topFeatures[0][0]}.`);
+    }
+    if (actionItems.length === 0) {
+      actionItems.push('No high-risk items detected this week. Keep monitoring trend lines.');
+    }
+
+    return {
+      weekRange: this.getWeekRange(),
+      generatedAt: now.toISOString(),
+      totalFeedback,
+      unresolvedCount,
+      resolvedCount,
+      bugCount,
+      averageRating,
+      weekOverWeekChange,
+      topIssuesHtml,
+      topPagesHtml,
+      topFeaturesHtml,
+      actionItemsHtml: this.buildHtmlList(actionItems)
+    };
+  }
+
+  buildHtmlList(items) {
+    if (!items || items.length === 0) {
+      return '<p style=\"margin:0;color:#6b7280;\">No data</p>';
+    }
+
+    const listItems = items.map((item) => `<li style=\"margin-bottom:6px;\">${item}</li>`).join('');
+    return `<ul style=\"margin:0;padding-left:18px;color:#111827;\">${listItems}</ul>`;
   }
 
   async generateWeeklyInsights(userId) {
@@ -326,6 +530,10 @@ class EmailAutomationService {
   // Manual trigger methods for testing
   async triggerWeeklyInsights() {
     await this.sendWeeklyInsights();
+  }
+
+  async triggerWeeklyFeedbackSummary() {
+    await this.sendWeeklyFeedbackSummary();
   }
 
   async triggerReEngagement() {

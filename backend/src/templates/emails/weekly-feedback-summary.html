@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAYU Weekly Feedback Summary</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f3f4f6;
+      font-family: Arial, sans-serif;
+      color: #111827;
+    }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+    }
+    .header {
+      padding: 24px;
+      background: #111827;
+      color: #ffffff;
+    }
+    .title {
+      font-size: 22px;
+      font-weight: 700;
+      margin: 0 0 6px 0;
+    }
+    .sub {
+      font-size: 13px;
+      color: #d1d5db;
+      margin: 0;
+    }
+    .content {
+      padding: 20px 24px 24px 24px;
+    }
+    .metrics {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 20px 0;
+    }
+    .metrics td {
+      border: 1px solid #e5e7eb;
+      padding: 10px;
+      font-size: 13px;
+    }
+    .label {
+      width: 50%;
+      color: #374151;
+      background: #f9fafb;
+    }
+    .value {
+      font-weight: 700;
+      color: #111827;
+    }
+    .card {
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 12px;
+      background: #fafafa;
+    }
+    .card h3 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: #111827;
+    }
+    .footer {
+      padding: 16px 24px;
+      background: #f9fafb;
+      border-top: 1px solid #e5e7eb;
+      color: #6b7280;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <p class="title">SAYU Weekly Feedback Summary</p>
+      <p class="sub">Range: {{weekRange}}</p>
+      <p class="sub">Generated at: {{generatedAt}}</p>
+    </div>
+
+    <div class="content">
+      <table class="metrics">
+        <tr>
+          <td class="label">Total Feedback</td>
+          <td class="value">{{totalFeedback}}</td>
+        </tr>
+        <tr>
+          <td class="label">Unresolved</td>
+          <td class="value">{{unresolvedCount}}</td>
+        </tr>
+        <tr>
+          <td class="label">Resolved</td>
+          <td class="value">{{resolvedCount}}</td>
+        </tr>
+        <tr>
+          <td class="label">Bug Reports</td>
+          <td class="value">{{bugCount}}</td>
+        </tr>
+        <tr>
+          <td class="label">Average Rating</td>
+          <td class="value">{{averageRating}}</td>
+        </tr>
+        <tr>
+          <td class="label">Week-over-Week Change</td>
+          <td class="value">{{weekOverWeekChange}}</td>
+        </tr>
+      </table>
+
+      <div class="card">
+        <h3>Top Issue Categories</h3>
+        {{topIssuesHtml}}
+      </div>
+
+      <div class="card">
+        <h3>Top Pages</h3>
+        {{topPagesHtml}}
+      </div>
+
+      <div class="card">
+        <h3>Top Features</h3>
+        {{topFeaturesHtml}}
+      </div>
+
+      <div class="card">
+        <h3>Recommended Action Items</h3>
+        {{actionItemsHtml}}
+      </div>
+    </div>
+
+    <div class="footer">
+      This is an automated admin summary email from SAYU.
+    </div>
+  </div>
+</body>
+</html>

@@ -12,9 +12,9 @@ interface FeedbackRow {
   message: string;
   email: string | null;
   context: Record<string, unknown> | null;
-  user_agent: string | null;
-  url: string | null;
-  client_ip: string | null;
+  user_agent?: string | null;
+  url?: string | null;
+  client_ip?: string | null;
   status: FeedbackStatus;
   admin_notes: string | null;
   reviewed_by: string | null;
@@ -28,12 +28,27 @@ interface ActivityRow {
   activity_type: string;
 }
 
+interface UserIdRow {
+  user_id: string | null;
+}
+
 interface FeedbackFilters {
   type?: FeedbackType;
   status?: FeedbackStatus;
   startDate?: string;
   endDate?: string;
   search?: string;
+}
+
+interface PipelineSnapshot {
+  windowDays: number;
+  newUsers: number;
+  activeUsers: number;
+  feedbackUsers: number;
+  repeatFeedbackUsers: number;
+  activationRate: number;
+  feedbackRate: number;
+  repeatRate: number;
 }
 
 const ALLOWED_SORT_COLUMNS = ['created_at', 'updated_at', 'type', 'status', 'rating'] as const;
@@ -47,19 +62,33 @@ interface QueryChain {
   or: (condition: string) => QueryChain;
 }
 
+function normalizeDateBoundary(rawDate: string | null, mode: 'start' | 'end'): string | undefined {
+  if (!rawDate) return undefined;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) return undefined;
+
+  const time = mode === 'start' ? 'T00:00:00.000Z' : 'T23:59:59.999Z';
+  const parsed = new Date(`${rawDate}${time}`);
+  if (Number.isNaN(parsed.getTime())) return undefined;
+  return parsed.toISOString();
+}
+
+function normalizeSearchKeyword(rawSearch: string | null): string | undefined {
+  if (!rawSearch) return undefined;
+  const trimmed = rawSearch.trim();
+  if (!trimmed) return undefined;
+  return trimmed.slice(0, 120);
+}
+
 function normalizeFilters(searchParams: URLSearchParams): FeedbackFilters {
   const type = searchParams.get('type');
   const status = searchParams.get('status');
-  const startDate = searchParams.get('startDate');
-  const endDate = searchParams.get('endDate');
-  const search = searchParams.get('search');
 
   return {
     type: type && type !== 'all' ? (type as FeedbackType) : undefined,
     status: status && status !== 'all' ? (status as FeedbackStatus) : undefined,
-    startDate: startDate || undefined,
-    endDate: endDate || undefined,
-    search: search?.trim() || undefined,
+    startDate: normalizeDateBoundary(searchParams.get('startDate'), 'start'),
+    endDate: normalizeDateBoundary(searchParams.get('endDate'), 'end'),
+    search: normalizeSearchKeyword(searchParams.get('search')),
   };
 }
 
@@ -71,7 +100,7 @@ function applyFeedbackFilters<T>(query: T, filters: FeedbackFilters): T {
   if (filters.startDate) nextQuery = nextQuery.gte('created_at', filters.startDate);
   if (filters.endDate) nextQuery = nextQuery.lte('created_at', filters.endDate);
   if (filters.search) {
-    const s = filters.search.replace(/[%_\\]/g, '\\$&');
+    const s = filters.search.replace(/[%_\\]/g, '\\$&').replace(/,/g, ' ');
     nextQuery = nextQuery.or(`message.ilike.%${s}%,email.ilike.%${s}%`);
   }
   return nextQuery as unknown as T;
@@ -118,17 +147,32 @@ async function fetchFeedbackRows(supabase: ServerSupabase, filters: FeedbackFilt
   page?: number;
   limit?: number;
   count?: boolean;
+  selectColumns?: string;
 }) {
   const selectWithRelations = `
-    *,
+    id,
+    user_id,
+    type,
+    rating,
+    message,
+    email,
+    context,
+    url,
+    status,
+    admin_notes,
+    reviewed_by,
+    reviewed_at,
+    created_at,
+    updated_at,
     user:profiles!feedback_user_id_fkey(username, email, personality_type),
     reviewer:profiles!feedback_reviewed_by_fkey(username, email)
   `;
 
   const selectFallback = '*';
+  const selectColumns = options.selectColumns || (options.includeRelations ? selectWithRelations : selectFallback);
   let query = supabase
     .from('feedback')
-    .select(options.includeRelations ? selectWithRelations : selectFallback, { count: options.count ? 'exact' : undefined });
+    .select(selectColumns, { count: options.count ? 'exact' : undefined });
 
   query = applyFeedbackFilters(query, filters);
   query = query.order(options.orderBy, { ascending: options.ascending });
@@ -178,8 +222,12 @@ function buildInsights(rows: FeedbackRow[], activityRows: ActivityRow[]) {
 
     const page = extractContextValue(row.context, 'page');
     const feature = extractContextValue(row.context, 'feature');
-    byPage[page] = (byPage[page] || 0) + 1;
-    byFeature[feature] = (byFeature[feature] || 0) + 1;
+    if (page !== 'unknown') {
+      byPage[page] = (byPage[page] || 0) + 1;
+    }
+    if (feature !== 'unknown') {
+      byFeature[feature] = (byFeature[feature] || 0) + 1;
+    }
 
     if (row.rating && row.rating > 0) {
       ratingSum += row.rating;
@@ -278,6 +326,66 @@ function buildCsv(rows: FeedbackRow[]) {
   return [header.join(','), ...lines].join('\n');
 }
 
+async function buildPipelineSnapshot(supabase: ServerSupabase, windowDays = 30): Promise<PipelineSnapshot> {
+  const since = new Date();
+  since.setDate(since.getDate() - windowDays);
+  const sinceIso = since.toISOString();
+
+  const [newUsersResult, activeUsersResult, feedbackUsersResult] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .gte('created_at', sinceIso),
+    supabase
+      .from('user_activities')
+      .select('user_id')
+      .gte('created_at', sinceIso)
+      .not('user_id', 'is', null),
+    supabase
+      .from('feedback')
+      .select('user_id')
+      .gte('created_at', sinceIso)
+      .not('user_id', 'is', null),
+  ]);
+
+  const newUsers = newUsersResult.error ? 0 : (newUsersResult.count || 0);
+
+  const activeUserSet = new Set(
+    ((activeUsersResult.data || []) as UserIdRow[])
+      .map((row) => row.user_id)
+      .filter((value): value is string => Boolean(value))
+  );
+
+  const feedbackUserIds = ((feedbackUsersResult.data || []) as UserIdRow[])
+    .map((row) => row.user_id)
+    .filter((value): value is string => Boolean(value));
+  const feedbackUserSet = new Set(feedbackUserIds);
+
+  const feedbackCountByUser: Record<string, number> = {};
+  feedbackUserIds.forEach((userId) => {
+    feedbackCountByUser[userId] = (feedbackCountByUser[userId] || 0) + 1;
+  });
+
+  const activeUsers = activeUserSet.size;
+  const feedbackUsers = feedbackUserSet.size;
+  const repeatFeedbackUsers = Object.values(feedbackCountByUser).filter((count) => count >= 2).length;
+
+  const activationRate = newUsers > 0 ? Number(((activeUsers / newUsers) * 100).toFixed(1)) : 0;
+  const feedbackRate = activeUsers > 0 ? Number(((feedbackUsers / activeUsers) * 100).toFixed(1)) : 0;
+  const repeatRate = feedbackUsers > 0 ? Number(((repeatFeedbackUsers / feedbackUsers) * 100).toFixed(1)) : 0;
+
+  return {
+    windowDays,
+    newUsers,
+    activeUsers,
+    feedbackUsers,
+    repeatFeedbackUsers,
+    activationRate,
+    feedbackRate,
+    repeatRate,
+  };
+}
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
@@ -304,6 +412,7 @@ export async function GET(request: NextRequest) {
         includeRelations: false,
         orderBy: sortBy,
         ascending: sortOrder === 'asc',
+        selectColumns: 'id, created_at, type, status, rating, message, email, context, url, admin_notes, reviewed_at',
       });
 
       if (exportResult.error) throw exportResult.error;
@@ -332,6 +441,7 @@ export async function GET(request: NextRequest) {
       includeRelations: false,
       orderBy: 'created_at',
       ascending: false,
+      selectColumns: 'id, user_id, type, status, rating, context, created_at',
     });
 
     if (statsResult.error) throw statsResult.error;
@@ -358,6 +468,7 @@ export async function GET(request: NextRequest) {
     }
 
     const insights = buildInsights(fullRows, activityRows);
+    const pipeline30d = await buildPipelineSnapshot(supabase, 30);
     const total = pageResult.count || 0;
 
     return NextResponse.json({
@@ -384,6 +495,7 @@ export async function GET(request: NextRequest) {
         topFeatures: insights.topFeatures,
         topActivityTypes: insights.topActivityTypes,
         trend14d: insights.trend14d,
+        pipeline30d,
       },
     });
   } catch (error) {

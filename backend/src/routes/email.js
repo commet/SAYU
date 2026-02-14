@@ -277,6 +277,9 @@ router.post('/trigger/:campaign', auth, async (req, res) => {
       case 'weekly-insights':
         await emailAutomation.triggerWeeklyInsights();
         break;
+      case 'weekly-feedback-summary':
+        await emailAutomation.triggerWeeklyFeedbackSummary();
+        break;
       case 're-engagement':
         await emailAutomation.triggerReEngagement();
         break;

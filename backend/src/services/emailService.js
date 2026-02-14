@@ -11,9 +11,14 @@ class EmailService {
 
   async initializeTransporter() {
     try {
-      // Configure transporter based on environment
-      if (process.env.NODE_ENV === 'production') {
-        // Production: Use SMTP service (SendGrid, Mailgun, etc.)
+      const hasSmtpCredentials = Boolean(process.env.EMAIL_USER && process.env.EMAIL_PASSWORD);
+      const shouldUseConfiguredSmtp =
+        process.env.EMAIL_FORCE_SMTP === 'true' ||
+        process.env.NODE_ENV === 'production' ||
+        hasSmtpCredentials;
+
+      // Use configured SMTP (production by default, or explicit override in development)
+      if (shouldUseConfiguredSmtp) {
         this.transporter = nodemailer.createTransport({
           service: process.env.EMAIL_SERVICE || 'SendGrid',
           auth: {
@@ -150,6 +155,29 @@ class EmailService {
         newDiscoveries: insights.newDiscoveries,
         topArtwork: insights.topArtwork,
         personalizedRecommendations: insights.recommendations
+      }
+    });
+  }
+
+  // Weekly admin feedback summary email
+  async sendWeeklyFeedbackSummaryEmail(recipientEmail, summary) {
+    return this.sendEmail({
+      to: recipientEmail,
+      subject: `[SAYU] Weekly Feedback Summary - ${summary.weekRange}`,
+      templateName: 'weekly-feedback-summary',
+      variables: {
+        weekRange: summary.weekRange,
+        generatedAt: summary.generatedAt,
+        totalFeedback: summary.totalFeedback,
+        unresolvedCount: summary.unresolvedCount,
+        resolvedCount: summary.resolvedCount,
+        bugCount: summary.bugCount,
+        averageRating: summary.averageRating,
+        weekOverWeekChange: summary.weekOverWeekChange,
+        topIssuesHtml: summary.topIssuesHtml,
+        topPagesHtml: summary.topPagesHtml,
+        topFeaturesHtml: summary.topFeaturesHtml,
+        actionItemsHtml: summary.actionItemsHtml
       }
     });
   }
