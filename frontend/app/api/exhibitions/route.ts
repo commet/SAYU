@@ -131,6 +131,7 @@ export async function GET(request: NextRequest) {
       const titleLocal = ex.title_local || '';
       const titleEn = ex.title_en || '';
       const daysUntilEnd = ex.end_date ? Math.ceil((new Date(ex.end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
+      const daysUntilStart = ex.start_date ? Math.ceil((new Date(ex.start_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
 
       return {
         id: ex.id,
@@ -148,6 +149,7 @@ export async function GET(request: NextRequest) {
         status: determineStatus(ex.start_date, ex.end_date),
         closingSoon: daysUntilEnd !== null && daysUntilEnd >= 0 && daysUntilEnd <= 7,
         daysLeft: daysUntilEnd,
+        daysUntilStart: daysUntilStart !== null && daysUntilStart > 0 ? daysUntilStart : null,
         artists: ex.artists || undefined,
         tags: ex.tags || undefined,
         source: ex.source || undefined,

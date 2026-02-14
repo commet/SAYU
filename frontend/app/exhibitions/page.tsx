@@ -88,6 +88,7 @@ interface Exhibition {
   status: 'ongoing' | 'upcoming' | 'ended';
   closingSoon?: boolean;
   daysLeft?: number | null;
+  daysUntilStart?: number | null;
   artists?: string[];
   tags?: string[];
   source?: string;
@@ -124,6 +125,21 @@ const CITY_TABS = [
   { id: 'Paris', labelEn: 'Paris', labelKo: '파리' },
   { id: 'Berlin', labelEn: 'Berlin', labelKo: '베를린' },
 ];
+
+const CITY_KO: Record<string, string> = {
+  'Seoul': '서울', 'Busan': '부산', 'Daegu': '대구', 'Incheon': '인천',
+  'Gwangju': '광주', 'Daejeon': '대전', 'Ulsan': '울산', 'Jeju': '제주',
+  'Gwacheon': '과천', 'Cheongju': '청주', 'Cheonan': '천안', 'Suwon': '수원',
+  'Gyeongju': '경주', 'Paju': '파주',
+  'Tokyo': '도쿄', 'New York': '뉴욕', 'London': '런던', 'Paris': '파리',
+  'Berlin': '베를린', 'Chicago': '시카고', 'Cleveland': '클리블랜드',
+  'Los Angeles': 'LA', 'San Francisco': '샌프란시스코',
+  'Amsterdam': '암스테르담', 'Rome': '로마', 'Milan': '밀라노',
+  'Venice': '베니스', 'Vienna': '비엔나', 'Madrid': '마드리드',
+  'Barcelona': '바르셀로나', 'Shanghai': '상하이', 'Beijing': '베이징',
+  'Hong Kong': '홍콩', 'Taipei': '타이베이', 'Singapore': '싱가포르',
+  'Sydney': '시드니', 'Melbourne': '멜버른',
+};
 
 const PAGE_SIZE = 40;
 
@@ -356,7 +372,7 @@ export default function ExhibitionsPage() {
     const extra = apiCities
       .filter(c => !staticIds.has(c) && c !== '')
       .slice(0, 8)
-      .map(c => ({ id: c, labelEn: c, labelKo: c }));
+      .map(c => ({ id: c, labelEn: c, labelKo: CITY_KO[c] || c }));
     return [...CITY_TABS, ...extra];
   }, [apiCities]);
 
@@ -393,12 +409,24 @@ export default function ExhibitionsPage() {
               title={exhibition.title}
               venue={exhibition.venue}
               variant="card"
+              category={exhibition.tags?.[0] || undefined}
             />
           )}
           {showClosingSoon && (
             <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-1 bg-red-600 text-white text-[10px] font-semibold uppercase tracking-wider rounded-sm">
               <Clock className="w-3 h-3" />
               {texts.endsIn(exhibition.daysLeft!)}
+            </div>
+          )}
+          {!showClosingSoon && exhibition.status === 'upcoming' && exhibition.daysUntilStart && exhibition.daysUntilStart > 0 && (
+            <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-1 bg-blue-600 text-white text-[10px] font-semibold uppercase tracking-wider rounded-sm">
+              <Clock className="w-3 h-3" />
+              {language === 'ko' ? `${exhibition.daysUntilStart}일 후 시작` : `In ${exhibition.daysUntilStart}d`}
+            </div>
+          )}
+          {!showClosingSoon && exhibition.status === 'ongoing' && exhibition.daysLeft != null && exhibition.daysLeft > 7 && (
+            <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-1 bg-emerald-600 text-white text-[10px] font-semibold uppercase tracking-wider rounded-sm">
+              {language === 'ko' ? '전시중' : 'Now Open'}
             </div>
           )}
           <button
@@ -426,7 +454,8 @@ export default function ExhibitionsPage() {
           {exhibition.location && (
             <p className="text-[11px] text-neutral-400 font-light flex items-center gap-1">
               <MapPin className="w-3 h-3" />
-              {exhibition.location}{exhibition.country ? `, ${exhibition.country}` : ''}
+              {language === 'ko' ? (CITY_KO[exhibition.location] || exhibition.location) : exhibition.location}
+              {exhibition.country ? `, ${exhibition.country}` : ''}
             </p>
           )}
         </div>
@@ -473,6 +502,7 @@ export default function ExhibitionsPage() {
                   title={featuredExhibition.title}
                   venue={featuredExhibition.venue}
                   variant="featured"
+                  category={featuredExhibition.tags?.[0] || undefined}
                 />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />

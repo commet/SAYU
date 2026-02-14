@@ -12,10 +12,10 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
 
 // MMCA venue mapping
 const MMCA_VENUES = {
-  '과천': { name: '국립현대미술관 과천', city: '과천', address: '경기도 과천시 광명로 313' },
-  '서울': { name: '국립현대미술관 서울', city: '서울', address: '서울특별시 종로구 삼청로 30' },
-  '덕수궁': { name: '국립현대미술관 덕수궁', city: '서울', address: '서울특별시 중구 세종대로 99' },
-  '청주': { name: '국립현대미술관 청주', city: '청주', address: '충청북도 청주시 청원구 상당로 314' }
+  '과천': { name: '국립현대미술관 과천', city: 'Gwacheon', address: '경기도 과천시 광명로 313' },
+  '서울': { name: '국립현대미술관 서울', city: 'Seoul', address: '서울특별시 종로구 삼청로 30' },
+  '덕수궁': { name: '국립현대미술관 덕수궁', city: 'Seoul', address: '서울특별시 중구 세종대로 99' },
+  '청주': { name: '국립현대미술관 청주', city: 'Cheongju', address: '충청북도 청주시 청원구 상당로 314' }
 };
 
 function calcStatus(start, end) {
@@ -61,7 +61,7 @@ async function mapMMCA() {
 
   for (const item of items) {
     // Determine venue
-    let venue = { name: '국립현대미술관', city: '서울', address: '서울특별시 종로구 삼청로 30' };
+    let venue = { name: '국립현대미술관', city: 'Seoul', address: '서울특별시 종로구 삼청로 30' };
     const combined = `${item.venue_room || ''} ${item.organizer || ''}`;
     for (const [key, v] of Object.entries(MMCA_VENUES)) {
       if (combined.includes(key)) { venue = v; break; }
@@ -321,6 +321,22 @@ async function mapExhibitionIntegrated() {
 // Extract city from venue name, description, or address text
 function extractCity(text) {
   if (!text) return null;
+  // Korean patterns → English names (checked first)
+  const cityMap = [
+    { pattern: '과천', city: 'Gwacheon' },
+    { pattern: '청주', city: 'Cheongju' },
+    { pattern: '대구', city: 'Daegu' },
+    { pattern: '부산', city: 'Busan' },
+    { pattern: '광주', city: 'Gwangju' },
+    { pattern: '대전', city: 'Daejeon' },
+    { pattern: '인천', city: 'Incheon' },
+    { pattern: '울산', city: 'Ulsan' },
+    { pattern: '제주', city: 'Jeju' },
+  ];
+  for (const { pattern, city } of cityMap) {
+    if (text.includes(pattern)) return city;
+  }
+  // English cities (matched as-is)
   const cities = [
     'New York', 'Los Angeles', 'London', 'Paris', 'Berlin', 'Tokyo', 'Seoul',
     'Shanghai', 'Hong Kong', 'Rome', 'Milan', 'Amsterdam', 'Brussels', 'Vienna',
@@ -331,8 +347,7 @@ function extractCity(text) {
     'Philadelphia', 'Boston', 'Washington', 'Toronto', 'Montreal', 'Vancouver',
     'Taipei', 'Bangkok', 'Jakarta', 'Manila', 'Riyadh', 'Doha', 'Abu Dhabi',
     'Cape Town', 'Johannesburg', 'Lagos', 'Nairobi', 'Cairo', 'Cleveland',
-    'Cambridge', 'Salzburg', 'Cheonan', 'East Hampton', '과천', '청주', '대구',
-    '부산', '광주', '대전', '인천', '울산', '제주'
+    'Cambridge', 'Salzburg', 'Cheonan', 'East Hampton'
   ];
   for (const city of cities) {
     if (text.includes(city)) return city;
@@ -346,8 +361,11 @@ function cityToCountry(city) {
   const map = {
     'New York': 'US', 'Los Angeles': 'US', 'Chicago': 'US', 'San Francisco': 'US',
     'Miami': 'US', 'Houston': 'US', 'Philadelphia': 'US', 'Boston': 'US',
-    'Washington': 'US', 'Cleveland': 'US', 'Cambridge': 'US',
+    'Washington': 'US', 'Cleveland': 'US', 'Cambridge': 'US', 'East Hampton': 'US',
     'London': 'GB', 'Paris': 'FR', 'Berlin': 'DE', 'Tokyo': 'JP', 'Seoul': 'KR',
+    'Gwacheon': 'KR', 'Cheongju': 'KR', 'Daegu': 'KR', 'Busan': 'KR',
+    'Gwangju': 'KR', 'Daejeon': 'KR', 'Incheon': 'KR', 'Ulsan': 'KR',
+    'Jeju': 'KR', 'Cheonan': 'KR',
     'Shanghai': 'CN', 'Hong Kong': 'HK', 'Beijing': 'CN', 'Taipei': 'TW',
     'Rome': 'IT', 'Milan': 'IT', 'Amsterdam': 'NL', 'Brussels': 'BE',
     'Vienna': 'AT', 'Zurich': 'CH', 'Basel': 'CH', 'Geneva': 'CH',
@@ -364,18 +382,18 @@ function cityToCountry(city) {
 
 // Gallery venue info for known galleries
 const GALLERY_VENUES = {
-  kukje:          { name: '국제갤러리', city: '서울', country: 'KR', address: '서울특별시 종로구 삼청로 54' },
-  pkm:            { name: 'PKM갤러리', city: '서울', country: 'KR', address: '서울특별시 종로구 삼청로 75' },
-  ropac:          { name: '타데우스 로팍 서울', city: '서울', country: 'KR', address: '서울특별시 용산구 독서당로 122-1' },
-  lehmann_maupin: { name: '리만머핀 서울', city: '서울', country: 'KR', address: '서울특별시 한남동' },
-  pace:           { name: '페이스갤러리 서울', city: '서울', country: 'KR', address: '서울특별시 용산구 이태원로 267' },
+  kukje:          { name: '국제갤러리', city: 'Seoul', country: 'KR', address: '서울특별시 종로구 삼청로 54' },
+  pkm:            { name: 'PKM갤러리', city: 'Seoul', country: 'KR', address: '서울특별시 종로구 삼청로 75' },
+  ropac:          { name: '타데우스 로팍 서울', city: 'Seoul', country: 'KR', address: '서울특별시 용산구 독서당로 122-1' },
+  lehmann_maupin: { name: '리만머핀 서울', city: 'Seoul', country: 'KR', address: '서울특별시 한남동' },
+  pace:           { name: '페이스갤러리 서울', city: 'Seoul', country: 'KR', address: '서울특별시 용산구 이태원로 267' },
   artmap_kr:      { name: null, city: null, country: 'KR', address: null }, // varies per exhibition
   neolook:        { name: null, city: null, country: 'KR', address: null }, // varies per exhibition
   gagosian:       { name: 'Gagosian', city: null, country: null, address: null }, // multiple locations
   perrotin:       { name: 'Perrotin', city: null, country: null, address: null }, // multiple locations
   lisson:         { name: 'Lisson Gallery', city: null, country: null, address: null }, // multiple locations
   spruth_magers:  { name: 'Sprüth Magers', city: null, country: null, address: null }, // multiple locations
-  arario:         { name: '아라리오갤러리', city: '서울', country: 'KR', address: '서울특별시 종로구 북촌로5길 84' },
+  arario:         { name: '아라리오갤러리', city: 'Seoul', country: 'KR', address: '서울특별시 종로구 북촌로5길 84' },
 };
 
 async function mapGalleries() {
@@ -404,7 +422,7 @@ async function mapGalleries() {
       title_en: titleEn,
       title_local: titleLocal || item.title,
       venue_name: item.venue_name || venueInfo.name || item.gallery_slug,
-      venue_city: venueInfo.city || extractCity(item.venue_name) || '서울',
+      venue_city: venueInfo.city || extractCity(item.venue_name) || 'Seoul',
       venue_country: venueInfo.country || 'KR',
       venue_address: item.venue_address || venueInfo.address || null,
       start_date: item.start_date,

@@ -1022,19 +1022,38 @@ async function scrapePerrotin() {
       try {
         const json = JSON.parse($(el).html());
         if (json['@type'] !== 'Event' || !json.name) return;
-        const key = `${json.name}_${json.startDate}`;
+
+        const artists = (json.performer || []).map(p => p.name).filter(Boolean);
+
+        // Bug fix: make "Untitled" exhibitions distinguishable by appending artist name
+        let title = json.name;
+        if (title.toLowerCase() === 'untitled' && artists.length > 0) {
+          title = `Untitled - ${artists.join(', ')}`;
+        }
+
+        const key = `${title}_${json.startDate}`;
         if (seen.has(key)) return;
         seen.add(key);
 
-        const artists = (json.performer || []).map(p => p.name).filter(Boolean);
         const loc = json.location || {};
         const placeName = loc.name || '';
         const address = loc.address || '';
 
+        // Bug fix: validate source_url - JSON-LD can have relative or malformed URLs
+        let sourceUrl = 'https://www.perrotin.com/exhibitions';
+        if (json.url) {
+          if (json.url.startsWith('http://') || json.url.startsWith('https://')) {
+            sourceUrl = json.url;
+          } else if (json.url.startsWith('/')) {
+            sourceUrl = 'https://www.perrotin.com' + json.url;
+          }
+          // else: malformed URL (e.g. "https//..."), use fallback
+        }
+
         results.push({
           gallery_slug: 'perrotin',
-          external_id: `${json.name}_${json.startDate}`.replace(/\s+/g, '_').substring(0, 100),
-          title: json.name,
+          external_id: `${title}_${json.startDate}`.replace(/\s+/g, '_').substring(0, 100),
+          title: title,
           artist: artists.join(', ') || null,
           venue_name: placeName && !placeName.toLowerCase().startsWith('perrotin') ? `Perrotin ${placeName}` : (placeName || 'Perrotin'),
           venue_address: address || null,
@@ -1042,12 +1061,12 @@ async function scrapePerrotin() {
           end_date: json.endDate || null,
           description: json.description || null,
           image_url: (json.image ? (Array.isArray(json.image) ? json.image[0] : json.image) : null),
-          source_url: json.url || 'https://www.perrotin.com/exhibitions',
+          source_url: sourceUrl,
           medium: null,
           exhibition_type: 'gallery',
           raw_data: { jsonld: true, artists, location: placeName }
         });
-        console.log(`  ${json.name} | ${placeName || '?'} | ${json.startDate || 'no date'}`);
+        console.log(`  ${title} | ${placeName || '?'} | ${json.startDate || 'no date'}`);
       } catch (_) {}
     });
 
