@@ -4,18 +4,19 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { 
-  Home, 
-  Search, 
-  MessageSquare, 
-  User, 
+import {
+  Home,
+  Search,
+  MessageSquare,
+  User,
   Palette,
   Menu,
   X,
   Calendar,
   Building2,
   Archive,
-  GalleryVerticalEnd
+  GalleryVerticalEnd,
+  Trophy,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -44,14 +45,20 @@ const navigationItems = [
     icon: Archive,
     description: 'Your exhibition insights'
   },
-  { 
-    href: '/gallery', 
-    label: 'Gallery', 
+  {
+    href: '/worldcup',
+    label: 'Worldcup',
+    icon: Trophy,
+    description: 'Exhibition ideal type tournament'
+  },
+  {
+    href: '/gallery',
+    label: 'Gallery',
     icon: Search,
     description: 'Explore curated artworks'
   },
-  { 
-    href: '/museums', 
+  {
+    href: '/museums',
     label: 'Museums', 
     icon: Building2,
     description: 'Browse museum collections'

@@ -2,118 +2,243 @@
 
 import React, { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Globe, Clock, Layers, Loader2 } from 'lucide-react';
+import { MapPin, Globe, Clock, Layers, Loader2, ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { RoundType, ExhibitionWorldcupTheme } from '@sayu/shared/exhibition-worldcup-types';
 
 interface ExhibitionSetupPhaseProps {
-  onStart: (round: RoundType, theme: ExhibitionWorldcupTheme) => Promise<void>;
+  onStart: (round: RoundType, theme: ExhibitionWorldcupTheme, city?: string) => Promise<void>;
+  onBack?: () => void;
   isProcessing: boolean;
 }
 
-const THEME_OPTIONS: {
-  value: ExhibitionWorldcupTheme;
-  icon: typeof MapPin;
+interface CategoryOption {
+  id: string;
+  theme: ExhibitionWorldcupTheme;
+  city?: string;
   label: string;
+  labelEn: string;
   description: string;
-}[] = [
+  icon: typeof MapPin;
+  color: string;
+}
+
+const CITY_OPTIONS: CategoryOption[] = [
   {
-    value: 'korean',
+    id: 'seoul',
+    theme: 'korean',
+    city: 'Seoul',
+    label: '서울',
+    labelEn: 'Seoul',
+    description: '한국 미술관 & 갤러리',
     icon: MapPin,
-    label: '국내 전시',
-    description: '한국에서 열리는 전시들',
+    color: 'text-rose-400',
   },
   {
-    value: 'international',
-    icon: Globe,
-    label: '해외 전시',
-    description: '글로벌 미술관의 전시들',
+    id: 'nyc',
+    theme: 'international',
+    city: 'New York',
+    label: '뉴욕',
+    labelEn: 'NYC',
+    description: 'MET, 휘트니 등',
+    icon: MapPin,
+    color: 'text-blue-400',
   },
   {
-    value: 'ongoing',
+    id: 'london',
+    theme: 'international',
+    city: 'London',
+    label: '런던',
+    labelEn: 'London',
+    description: '테이트, 내셔널 등',
+    icon: MapPin,
+    color: 'text-emerald-400',
+  },
+  {
+    id: 'paris',
+    theme: 'international',
+    city: 'Paris',
+    label: '파리',
+    labelEn: 'Paris',
+    description: '루브르, 오르세 등',
+    icon: MapPin,
+    color: 'text-amber-400',
+  },
+  {
+    id: 'berlin',
+    theme: 'international',
+    city: 'Berlin',
+    label: '베를린',
+    labelEn: 'Berlin',
+    description: '베를린 갤러리 등',
+    icon: MapPin,
+    color: 'text-orange-400',
+  },
+  {
+    id: 'tokyo',
+    theme: 'international',
+    city: 'Tokyo',
+    label: '도쿄',
+    labelEn: 'Tokyo',
+    description: '모리, 국립미술관 등',
+    icon: MapPin,
+    color: 'text-pink-400',
+  },
+];
+
+const THEME_OPTIONS: CategoryOption[] = [
+  {
+    id: 'ongoing',
+    theme: 'ongoing',
+    label: '진행중인 전시',
+    labelEn: 'Ongoing',
+    description: '지금 방문 가능한 전시',
     icon: Clock,
-    label: '현재 진행중',
-    description: '지금 방문할 수 있는 전시',
+    color: 'text-green-400',
   },
   {
-    value: 'all',
+    id: 'all',
+    theme: 'all',
+    label: '전체 전시',
+    labelEn: 'All',
+    description: '9,300+ 전시 랜덤',
     icon: Layers,
-    label: '전체',
-    description: '모든 전시 데이터에서 선택',
+    color: 'text-violet-400',
   },
 ];
 
-const ROUND_OPTIONS: { value: RoundType; label: string; matches: number }[] = [
-  { value: 8, label: '8강', matches: 7 },
-  { value: 16, label: '16강', matches: 15 },
-  { value: 32, label: '32강', matches: 31 },
+const ROUND_OPTIONS: { value: RoundType; label: string; matchCount: number }[] = [
+  { value: 8, label: '8강', matchCount: 7 },
+  { value: 16, label: '16강', matchCount: 15 },
+  { value: 32, label: '32강', matchCount: 31 },
 ];
 
-export function ExhibitionSetupPhase({ onStart, isProcessing }: ExhibitionSetupPhaseProps) {
-  const [selectedTheme, setSelectedTheme] = useState<ExhibitionWorldcupTheme | null>(null);
+export function ExhibitionSetupPhase({ onStart, onBack, isProcessing }: ExhibitionSetupPhaseProps) {
+  const [selectedCategory, setSelectedCategory] = useState<CategoryOption | null>(null);
   const [selectedRound, setSelectedRound] = useState<RoundType>(16);
 
   const handleStart = useCallback(async () => {
-    if (!selectedTheme) return;
-    await onStart(selectedRound, selectedTheme);
-  }, [selectedTheme, selectedRound, onStart]);
+    if (!selectedCategory) return;
+    await onStart(selectedRound, selectedCategory.theme, selectedCategory.city);
+  }, [selectedCategory, selectedRound, onStart]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6">
+      {/* Back button */}
+      {onBack && (
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          onClick={onBack}
+          className="fixed top-6 left-6 z-30 p-2 text-white/40 hover:text-white/70 transition-colors"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </motion.button>
+      )}
+
+      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-10"
+        className="text-center mb-8"
       >
-        <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-violet-400/20 to-indigo-600/20 flex items-center justify-center border border-violet-500/30 mb-6">
-          <MapPin className="w-8 h-8 text-violet-400" />
+        <div className="w-14 h-14 mx-auto rounded-full bg-gradient-to-br from-violet-400/20 to-indigo-600/20 flex items-center justify-center border border-violet-500/30 mb-5">
+          <Globe className="w-7 h-7 text-violet-400" />
         </div>
-        <p className="text-[10px] uppercase tracking-[0.3em] text-white/30 mb-4">
+        <p className="text-[10px] uppercase tracking-[0.3em] text-white/30 mb-3">
           Exhibition Worldcup
         </p>
         <h1
-          className="text-2xl md:text-3xl text-white/90 font-light leading-relaxed mb-3"
+          className="text-2xl md:text-3xl text-white/90 font-light leading-relaxed mb-2"
           style={{ fontFamily: 'var(--font-serif, Georgia, serif)' }}
         >
           나의 이상형 전시 찾기
         </h1>
         <p className="text-white/40 text-sm font-light max-w-sm mx-auto">
-          다양한 전시 중 가장 끌리는 전시를 골라보세요
+          도시 또는 테마를 선택해 이상형 전시를 골라보세요
         </p>
       </motion.div>
 
-      <div className="w-full max-w-md space-y-6">
-        {/* Theme Selection */}
+      <div className="w-full max-w-lg space-y-6">
+        {/* City Selection */}
         <div>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-white/30 text-center mb-4">
-            테마 선택
+          <p className="text-[10px] uppercase tracking-[0.2em] text-white/30 text-center mb-3">
+            도시별
           </p>
-          <div className="grid grid-cols-2 gap-3">
-            {THEME_OPTIONS.map((option, index) => {
-              const Icon = option.icon;
+          <div className="grid grid-cols-3 gap-2">
+            {CITY_OPTIONS.map((option, index) => {
+              const isSelected = selectedCategory?.id === option.id;
               return (
                 <motion.button
-                  key={option.value}
+                  key={option.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 + index * 0.05 }}
-                  onClick={() => setSelectedTheme(option.value)}
+                  transition={{ delay: 0.05 + index * 0.04 }}
+                  onClick={() => setSelectedCategory(isSelected ? null : option)}
+                  className={cn(
+                    'p-3 rounded-sm transition-all duration-200 text-center',
+                    'border',
+                    isSelected
+                      ? 'bg-violet-500/10 border-violet-500/40 ring-1 ring-violet-500/20'
+                      : 'bg-white/[0.02] border-white/10 hover:bg-white/[0.05] hover:border-white/20'
+                  )}
+                >
+                  <div
+                    className={cn(
+                      'text-base font-light mb-0.5',
+                      isSelected ? 'text-white/90' : 'text-white/70'
+                    )}
+                  >
+                    {option.label}
+                  </div>
+                  <div className="text-[10px] text-white/30">
+                    {option.labelEn}
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Theme Selection */}
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-white/30 text-center mb-3">
+            테마별
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {THEME_OPTIONS.map((option, index) => {
+              const Icon = option.icon;
+              const isSelected = selectedCategory?.id === option.id;
+              return (
+                <motion.button
+                  key={option.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 + index * 0.05 }}
+                  onClick={() => setSelectedCategory(isSelected ? null : option)}
                   className={cn(
                     'p-4 rounded-sm transition-all duration-200 text-left',
                     'border',
-                    selectedTheme === option.value
-                      ? 'bg-violet-500/10 border-violet-500/40'
+                    isSelected
+                      ? 'bg-violet-500/10 border-violet-500/40 ring-1 ring-violet-500/20'
                       : 'bg-white/[0.02] border-white/10 hover:bg-white/[0.05] hover:border-white/20'
                   )}
                 >
                   <Icon
                     className={cn(
-                      'w-5 h-5 mb-2',
-                      selectedTheme === option.value ? 'text-violet-400' : 'text-white/40'
+                      'w-4 h-4 mb-2',
+                      isSelected ? 'text-violet-400' : 'text-white/40'
                     )}
                   />
-                  <div className="text-sm font-light text-white/90">{option.label}</div>
-                  <div className="text-[11px] text-white/40 mt-0.5">{option.description}</div>
+                  <div
+                    className={cn(
+                      'text-sm font-light',
+                      isSelected ? 'text-white/90' : 'text-white/70'
+                    )}
+                  >
+                    {option.label}
+                  </div>
+                  <div className="text-[10px] text-white/30 mt-0.5">{option.description}</div>
                 </motion.button>
               );
             })}
@@ -124,12 +249,12 @@ export function ExhibitionSetupPhase({ onStart, isProcessing }: ExhibitionSetupP
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
+          transition={{ delay: 0.4 }}
         >
-          <p className="text-[10px] uppercase tracking-[0.2em] text-white/30 text-center mb-4">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-white/30 text-center mb-3">
             토너먼트 규모
           </p>
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             {ROUND_OPTIONS.map((option) => (
               <button
                 key={option.value}
@@ -150,7 +275,7 @@ export function ExhibitionSetupPhase({ onStart, isProcessing }: ExhibitionSetupP
                 >
                   {option.label}
                 </div>
-                <div className="text-[10px] text-white/30">{option.matches}회 선택</div>
+                <div className="text-[10px] text-white/30">{option.matchCount}회 선택</div>
               </button>
             ))}
           </div>
@@ -160,27 +285,29 @@ export function ExhibitionSetupPhase({ onStart, isProcessing }: ExhibitionSetupP
         <motion.button
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.5 }}
           onClick={handleStart}
-          disabled={!selectedTheme || isProcessing}
+          disabled={!selectedCategory || isProcessing}
           className={cn(
             'w-full py-4 rounded-sm font-light text-base transition-all',
-            selectedTheme
+            selectedCategory
               ? 'bg-gradient-to-r from-violet-500/80 to-indigo-500/80 text-white hover:from-violet-500 hover:to-indigo-500'
               : 'bg-white/[0.05] text-white/30 cursor-not-allowed border border-white/10'
           )}
-          whileHover={selectedTheme && !isProcessing ? { scale: 1.01 } : {}}
-          whileTap={selectedTheme && !isProcessing ? { scale: 0.99 } : {}}
+          whileHover={selectedCategory && !isProcessing ? { scale: 1.01 } : {}}
+          whileTap={selectedCategory && !isProcessing ? { scale: 0.99 } : {}}
         >
           {isProcessing ? (
             <span className="flex items-center justify-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin" />
               전시 데이터 준비 중...
             </span>
-          ) : selectedTheme ? (
-            '전시 월드컵 시작'
+          ) : selectedCategory ? (
+            <span>
+              {selectedCategory.label} {selectedRound}강 시작
+            </span>
           ) : (
-            '테마를 선택하세요'
+            '도시 또는 테마를 선택하세요'
           )}
         </motion.button>
       </div>

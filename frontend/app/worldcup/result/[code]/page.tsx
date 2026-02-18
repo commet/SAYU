@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   Crown,
+  MapPin,
   ExternalLink,
   AlertCircle,
   Sparkles,
@@ -44,11 +45,13 @@ function AmbientBackground() {
 
 export default function SharedResultPage() {
   const params = useParams();
-  const code = params.code as string;
+  const code = (params?.code as string) || '';
 
   const [result, setResult] = useState<ShareResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const isExhibitionMode = result?.session?.mode === 'exhibition';
 
   useEffect(() => {
     async function fetchResult() {
@@ -65,7 +68,7 @@ export default function SharedResultPage() {
         } else {
           setError(data.error || '결과를 찾을 수 없습니다.');
         }
-      } catch (err) {
+      } catch {
         setError('결과를 불러오는데 실패했습니다.');
       } finally {
         setIsLoading(false);
@@ -107,8 +110,8 @@ export default function SharedResultPage() {
             href="/worldcup"
             className={cn(
               "px-6 py-3 rounded-sm text-sm font-light transition-all",
-              "bg-gradient-to-r from-amber-500/80 to-yellow-500/80 text-white",
-              "hover:from-amber-500 hover:to-yellow-500"
+              "bg-gradient-to-r from-violet-500/80 to-indigo-500/80 text-white",
+              "hover:from-violet-500 hover:to-indigo-500"
             )}
           >
             나도 해보기
@@ -119,7 +122,6 @@ export default function SharedResultPage() {
   }
 
   const { winner, rankings } = result;
-
   return (
     <div className="min-h-screen relative">
       <AmbientBackground />
@@ -148,7 +150,10 @@ export default function SharedResultPage() {
               delay: Math.random() * 2,
             }}
           >
-            <Sparkles className="text-amber-400/30 w-4 h-4" />
+            <Sparkles className={cn(
+              'w-4 h-4',
+              isExhibitionMode ? 'text-violet-400/30' : 'text-amber-400/30'
+            )} />
           </motion.div>
         ))}
       </motion.div>
@@ -162,29 +167,46 @@ export default function SharedResultPage() {
             className="bg-[#0f0f10] rounded-sm overflow-hidden border border-white/10"
           >
             {/* Winner Header */}
-            <div className="bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 p-6 text-center border-b border-amber-500/20">
+            <div className={cn(
+              'p-6 text-center border-b',
+              isExhibitionMode
+                ? 'bg-gradient-to-r from-violet-500/20 via-indigo-500/20 to-violet-500/20 border-violet-500/20'
+                : 'bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 border-amber-500/20'
+            )}>
               <motion.div
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: 'spring', stiffness: 200 }}
                 className="mb-3"
               >
-                <div className="w-14 h-14 mx-auto rounded-full bg-gradient-to-br from-amber-400/30 to-yellow-600/30 flex items-center justify-center border border-amber-400/40">
-                  <Crown className="w-7 h-7 text-amber-400" />
+                <div className={cn(
+                  'w-14 h-14 mx-auto rounded-full bg-gradient-to-br flex items-center justify-center border',
+                  isExhibitionMode
+                    ? 'from-violet-400/30 to-indigo-600/30 border-violet-400/40'
+                    : 'from-amber-400/30 to-yellow-600/30 border-amber-400/40'
+                )}>
+                  {isExhibitionMode ? (
+                    <MapPin className="w-7 h-7 text-violet-400" />
+                  ) : (
+                    <Crown className="w-7 h-7 text-amber-400" />
+                  )}
                 </div>
               </motion.div>
-              <p className="text-[10px] uppercase tracking-[0.3em] text-amber-400/60 mb-1">
+              <p className={cn(
+                'text-[10px] uppercase tracking-[0.3em] mb-1',
+                isExhibitionMode ? 'text-violet-400/60' : 'text-amber-400/60'
+              )}>
                 Shared Result
               </p>
               <h1
                 className="text-lg font-light text-white/90"
                 style={{ fontFamily: 'var(--font-serif, Georgia, serif)' }}
               >
-                전시 월드컵 결과
+                {isExhibitionMode ? '전시 월드컵 결과' : '작품 월드컵 결과'}
               </h1>
             </div>
 
-            {/* Winner Artwork */}
+            {/* Winner Content */}
             {winner && (
               <motion.div
                 className="p-6"
@@ -193,24 +215,36 @@ export default function SharedResultPage() {
                 transition={{ delay: 0.2 }}
               >
                 <div className="text-center mb-3">
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-amber-400/60">최애 작품</span>
+                  <span className={cn(
+                    'text-[10px] uppercase tracking-[0.2em]',
+                    isExhibitionMode ? 'text-violet-400/60' : 'text-amber-400/60'
+                  )}>
+                    {isExhibitionMode ? '이상형 전시' : '최애 작품'}
+                  </span>
                 </div>
-                <div className="aspect-square rounded-sm overflow-hidden mb-4 border border-white/10">
-                  <img
-                    src={winner.image_url || '/images/placeholder-artwork.png'}
-                    alt={winner.title || '우승 작품'}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+                {winner.image_url && (
+                  <div className={cn(
+                    'rounded-sm overflow-hidden mb-4 border border-white/10',
+                    isExhibitionMode ? 'aspect-[16/9]' : 'aspect-square'
+                  )}>
+                    <img
+                      src={winner.image_url}
+                      alt={winner.title || '우승'}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
                 <h2
                   className="text-lg font-light text-center text-white/90 mb-1"
                   style={{ fontFamily: 'var(--font-serif, Georgia, serif)' }}
                 >
                   {winner.title || '제목 없음'}
                 </h2>
-                <p className="text-white/40 text-sm text-center font-light">
-                  {winner.artist || '작가 미상'}
-                </p>
+                {winner.artist && (
+                  <p className="text-white/40 text-sm text-center font-light">
+                    {winner.artist}
+                  </p>
+                )}
               </motion.div>
             )}
 
@@ -226,7 +260,7 @@ export default function SharedResultPage() {
                   최종 순위
                 </p>
                 <div className="space-y-2">
-                  {rankings.slice(1, 4).map((ranking, index) => (
+                  {rankings.slice(1, 5).map((ranking, index) => (
                     <motion.div
                       key={ranking.participant_id}
                       initial={{ opacity: 0, x: -10 }}
@@ -236,10 +270,12 @@ export default function SharedResultPage() {
                     >
                       <div
                         className={cn(
-                          'w-6 h-6 rounded-full flex items-center justify-center text-xs font-light',
+                          'w-6 h-6 rounded-full flex items-center justify-center text-xs font-light shrink-0',
                           ranking.rank === 2
                             ? 'bg-gray-400/20 text-gray-300 border border-gray-400/30'
-                            : 'bg-amber-700/20 text-amber-300/80 border border-amber-700/30'
+                            : ranking.rank === 3
+                              ? 'bg-amber-700/20 text-amber-300/80 border border-amber-700/30'
+                              : 'bg-white/10 text-white/50 border border-white/20'
                         )}
                       >
                         {ranking.rank}
@@ -248,7 +284,7 @@ export default function SharedResultPage() {
                         <img
                           src={ranking.image_url}
                           alt={ranking.title || ''}
-                          className="w-10 h-10 rounded-sm object-cover"
+                          className="w-10 h-10 rounded-sm object-cover shrink-0"
                         />
                       )}
                       <div className="flex-1 min-w-0">
@@ -264,7 +300,9 @@ export default function SharedResultPage() {
 
             {/* Watermark */}
             <div className="px-6 pb-4 text-center">
-              <p className="text-[10px] text-white/20 tracking-wider">SAYU Exhibition Worldcup</p>
+              <p className="text-[10px] text-white/20 tracking-wider">
+                {isExhibitionMode ? 'SAYU Exhibition Worldcup' : 'SAYU Artwork Worldcup'}
+              </p>
             </div>
           </motion.div>
 
@@ -279,9 +317,10 @@ export default function SharedResultPage() {
               href="/worldcup"
               className={cn(
                 "w-full py-4 rounded-sm font-light text-sm transition-all",
-                "bg-gradient-to-r from-amber-500/80 to-yellow-500/80 text-white",
-                "hover:from-amber-500 hover:to-yellow-500",
-                "flex items-center justify-center gap-2"
+                "text-white flex items-center justify-center gap-2",
+                isExhibitionMode
+                  ? "bg-gradient-to-r from-violet-500/80 to-indigo-500/80 hover:from-violet-500 hover:to-indigo-500"
+                  : "bg-gradient-to-r from-amber-500/80 to-yellow-500/80 hover:from-amber-500 hover:to-yellow-500"
               )}
             >
               나도 해보기

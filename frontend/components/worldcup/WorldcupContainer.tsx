@@ -136,7 +136,7 @@ export function WorldcupContainer({
   );
 
   const handleExhibitionStart = useCallback(
-    async (round: RoundType, theme: ExhibitionWorldcupTheme) => {
+    async (round: RoundType, theme: ExhibitionWorldcupTheme, city?: string) => {
       try {
         setLoading(true);
         setIsProcessing(true);
@@ -144,7 +144,7 @@ export function WorldcupContainer({
         const response = await fetch('/api/worldcup/sessions/exhibition', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ round, theme }),
+          body: JSON.stringify({ round, theme, city }),
         });
 
         const data = await response.json();
@@ -313,6 +313,7 @@ export function WorldcupContainer({
             >
               <ExhibitionSetupPhase
                 onStart={handleExhibitionStart}
+                onBack={() => setPhase('mode-select')}
                 isProcessing={isProcessing}
               />
             </motion.div>

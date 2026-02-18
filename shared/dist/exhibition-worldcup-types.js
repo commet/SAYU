@@ -104,7 +104,7 @@ function isWorldcupParticipant(obj) {
         obj !== null &&
         typeof obj.id === 'string' &&
         typeof obj.session_id === 'string' &&
-        ['uploaded', 'artwork', 'manual'].includes(obj.source_type));
+        ['uploaded', 'artwork', 'manual', 'exhibition'].includes(obj.source_type));
 }
 /**
  * WorldcupMatch 타입 가드

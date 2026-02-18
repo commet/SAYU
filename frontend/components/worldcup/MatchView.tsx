@@ -28,6 +28,10 @@ export function MatchView({
   const roundLabel = getCurrentRoundLabel();
   const isExhibitionMode = mode === 'exhibition';
 
+  // Calculate round-specific progress (e.g., "8강 3/4 매치")
+  const roundMatchCount = Math.pow(2, match.round - 1);
+  const roundMatchProgress = `${match.round_match_index + 1}/${roundMatchCount}`;
+
   const handleSelect = useCallback(
     (side: 'a' | 'b') => {
       if (isProcessing || selected) return;
@@ -48,9 +52,28 @@ export function MatchView({
     [isProcessing, selected, participantA?.id, participantB?.id, matchStartTime, onSelectWinner]
   );
 
+  // Reset selection on new match
   useEffect(() => {
     setSelected(null);
   }, [match.id]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (isProcessing || selected) return;
+
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+        e.preventDefault();
+        handleSelect('a');
+      } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+        e.preventDefault();
+        handleSelect('b');
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isProcessing, selected, handleSelect]);
 
   if (!participantA || !participantB) {
     return (
@@ -64,26 +87,30 @@ export function MatchView({
     );
   }
 
-  const accentColor = isExhibitionMode ? 'violet' : 'amber';
-
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="p-5 text-center border-b border-white/10 bg-white/[0.02]"
+        className="p-4 text-center border-b border-white/10 bg-white/[0.02]"
       >
-        <p className={cn(
-          'font-light text-lg mb-1',
-          isExhibitionMode ? 'text-violet-400/80' : 'text-amber-400/80'
-        )}>
-          {roundLabel}
+        <div className="flex items-center justify-center gap-3 mb-1">
+          <p className={cn(
+            'font-light text-lg',
+            isExhibitionMode ? 'text-violet-400/80' : 'text-amber-400/80'
+          )}>
+            {roundLabel}
+          </p>
+          <span className="text-white/20 text-xs">|</span>
+          <p className="text-xs text-white/40">
+            {roundMatchProgress} 매치
+          </p>
+        </div>
+        <p className="text-[10px] text-white/30 mb-2">
+          {progress.current + 1} / {progress.total} 전체 진행
         </p>
-        <p className="text-xs text-white/40">
-          {progress.current + 1} / {progress.total} 매치
-        </p>
-        <div className="w-full max-w-xs mx-auto mt-3 h-1 bg-white/10 rounded-full overflow-hidden">
+        <div className="w-full max-w-xs mx-auto h-1 bg-white/10 rounded-full overflow-hidden">
           <motion.div
             className={cn(
               'h-full bg-gradient-to-r',
@@ -96,6 +123,10 @@ export function MatchView({
             transition={{ duration: 0.4, ease: 'easeOut' }}
           />
         </div>
+        {/* Keyboard hint */}
+        <p className="text-[9px] text-white/20 mt-2 hidden md:block">
+          Keyboard: &larr; / A = left &middot; &rarr; / D = right
+        </p>
       </motion.div>
 
       {/* Match Area */}
@@ -104,7 +135,7 @@ export function MatchView({
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
           <motion.div
             className={cn(
-              'w-16 h-16 rounded-full bg-[#0a0a0b] flex items-center justify-center shadow-2xl border-2',
+              'w-14 h-14 rounded-full bg-[#0a0a0b] flex items-center justify-center shadow-2xl border-2',
               isExhibitionMode ? 'border-violet-500/60' : 'border-amber-500/60'
             )}
             initial={{ scale: 0, rotate: -180 }}
@@ -171,7 +202,7 @@ export function MatchView({
 }
 
 // ============================================================================
-// Artwork Card (기존 이미지 기반 카드)
+// Artwork Card
 // ============================================================================
 
 interface CardProps {
@@ -251,48 +282,16 @@ function ArtworkCard({
       </div>
 
       {/* Selection Indicator */}
-      <AnimatePresence>
-        {isSelected && (
-          <motion.div
-            className="absolute inset-0 flex items-center justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              className="w-24 h-24 rounded-full bg-amber-500/20 flex items-center justify-center backdrop-blur-sm border border-amber-400/30"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 300 }}
-            >
-              <motion.span
-                className="text-5xl text-amber-400"
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: 'spring', stiffness: 300, delay: 0.1 }}
-              >
-                &#10003;
-              </motion.span>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <SelectionOverlay isSelected={isSelected} color="amber" />
 
       {/* Side Color Indicator */}
-      <div
-        className={cn(
-          'absolute w-1 transition-all duration-300',
-          side === 'a'
-            ? 'left-0 top-0 bottom-0 bg-gradient-to-b from-blue-400/60 to-blue-600/60'
-            : 'right-0 top-0 bottom-0 bg-gradient-to-b from-red-400/60 to-red-600/60'
-        )}
-      />
+      <SideIndicator side={side} />
     </motion.button>
   );
 }
 
 // ============================================================================
-// Exhibition Card (전시 정보 텍스트 기반 카드)
+// Exhibition Card
 // ============================================================================
 
 function ExhibitionCard({
@@ -308,6 +307,8 @@ function ExhibitionCard({
   const endDate = exhibitionData?.end_date;
   const category = exhibitionData?.category;
   const venueName = exhibitionData?.venue_name;
+  const venueCity = exhibitionData?.venue_city;
+  const status = exhibitionData?.status;
   const imageUrl = participant.image_url || exhibitionData?.image_url;
 
   const dateRange =
@@ -317,6 +318,8 @@ function ExhibitionCard({
         ? `${formatDate(startDate)} ~`
         : '';
 
+  const hasImage = !!imageUrl;
+
   return (
     <motion.button
       onClick={onClick}
@@ -324,19 +327,19 @@ function ExhibitionCard({
       className={cn(
         'flex-1 relative overflow-hidden transition-all min-h-[40vh] md:min-h-0',
         'focus:outline-none',
-        imageUrl ? '' : 'flex items-center justify-center',
+        !hasImage && 'flex items-center justify-center',
         isDisabled && !isSelected && !isLoser ? 'cursor-not-allowed' : 'cursor-pointer'
       )}
       animate={{
         scale: isSelected ? 1.02 : isLoser ? 0.96 : 1,
         opacity: isLoser ? 0.3 : 1,
-        filter: imageUrl && isLoser ? 'grayscale(100%)' : 'grayscale(0%)',
+        filter: hasImage && isLoser ? 'grayscale(100%)' : 'grayscale(0%)',
       }}
       transition={{ duration: 0.4 }}
-      whileHover={!isDisabled ? { scale: 1.01, backgroundColor: imageUrl ? undefined : 'rgba(255,255,255,0.03)' } : {}}
+      whileHover={!isDisabled ? { scale: 1.01, backgroundColor: hasImage ? undefined : 'rgba(255,255,255,0.03)' } : {}}
       whileTap={!isDisabled ? { scale: 0.99 } : {}}
     >
-      {imageUrl ? (
+      {hasImage ? (
         <>
           {/* Background Image */}
           <div
@@ -354,26 +357,39 @@ function ExhibitionCard({
             )}
           />
           {/* Exhibition Info - Bottom */}
-          <div className="absolute bottom-0 left-0 right-0 p-6 text-left">
+          <div className="absolute bottom-0 left-0 right-0 p-5 text-left">
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
             >
-              {category && (
-                <span className="inline-block text-[10px] uppercase tracking-[0.15em] text-violet-300/80 mb-2 px-2 py-0.5 border border-violet-400/30 rounded-sm backdrop-blur-sm bg-black/20">
-                  {category}
-                </span>
-              )}
+              {/* Badges row */}
+              <div className="flex items-center gap-1.5 mb-2 flex-wrap">
+                {venueCity && (
+                  <span className="inline-block text-[9px] uppercase tracking-[0.1em] text-white/80 px-1.5 py-0.5 border border-white/20 rounded-sm backdrop-blur-sm bg-black/30">
+                    {venueCity}
+                  </span>
+                )}
+                {status === 'ongoing' && (
+                  <span className="inline-block text-[9px] uppercase tracking-[0.1em] text-green-300/90 px-1.5 py-0.5 border border-green-400/30 rounded-sm backdrop-blur-sm bg-black/30">
+                    진행중
+                  </span>
+                )}
+                {category && (
+                  <span className="inline-block text-[9px] uppercase tracking-[0.1em] text-violet-300/80 px-1.5 py-0.5 border border-violet-400/20 rounded-sm backdrop-blur-sm bg-black/30">
+                    {category}
+                  </span>
+                )}
+              </div>
               <h3
-                className="text-xl md:text-2xl font-light mb-1 line-clamp-2 text-white"
+                className="text-lg md:text-xl font-light mb-1 line-clamp-2 text-white"
                 style={{ fontFamily: 'var(--font-serif, Georgia, serif)' }}
               >
                 {participant.title || '제목 없음'}
               </h3>
-              {(venueName || participant.artist) && (
-                <p className="text-white/60 text-sm font-light">
-                  {venueName || participant.artist}
+              {venueName && (
+                <p className="text-white/60 text-sm font-light line-clamp-1">
+                  {venueName}
                 </p>
               )}
               {dateRange && (
@@ -402,20 +418,38 @@ function ExhibitionCard({
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
             >
-              {category && (
-                <span className="inline-block text-[10px] uppercase tracking-[0.15em] text-violet-400/60 mb-3 px-2 py-1 border border-violet-500/20 rounded-sm">
-                  {category}
-                </span>
-              )}
+              {/* Badges row */}
+              <div className="flex items-center gap-1.5 mb-3 flex-wrap">
+                {venueCity && (
+                  <span className="inline-block text-[9px] uppercase tracking-[0.1em] text-white/60 px-1.5 py-0.5 border border-white/15 rounded-sm">
+                    {venueCity}
+                  </span>
+                )}
+                {status === 'ongoing' && (
+                  <span className="inline-block text-[9px] uppercase tracking-[0.1em] text-green-400/70 px-1.5 py-0.5 border border-green-500/20 rounded-sm">
+                    진행중
+                  </span>
+                )}
+                {category && (
+                  <span className="inline-block text-[9px] uppercase tracking-[0.1em] text-violet-400/60 px-1.5 py-0.5 border border-violet-500/20 rounded-sm">
+                    {category}
+                  </span>
+                )}
+              </div>
               <h3
                 className="text-xl md:text-2xl font-light mb-3 line-clamp-3 text-white/90 leading-relaxed"
                 style={{ fontFamily: 'var(--font-serif, Georgia, serif)' }}
               >
                 {participant.title || '제목 없음'}
               </h3>
-              {(venueName || participant.artist) && (
-                <p className="text-white/50 text-sm font-light mb-2">
-                  {venueName || participant.artist}
+              {venueName && (
+                <p className="text-white/50 text-sm font-light mb-1">
+                  {venueName}
+                </p>
+              )}
+              {participant.artist && (
+                <p className="text-white/40 text-xs font-light mb-2">
+                  {participant.artist}
                 </p>
               )}
               {dateRange && (
@@ -424,7 +458,7 @@ function ExhibitionCard({
                 </p>
               )}
               {participant.description && (
-                <p className="text-white/30 text-xs font-light line-clamp-2 leading-relaxed">
+                <p className="text-white/25 text-xs font-light line-clamp-2 leading-relaxed">
                   {participant.description}
                 </p>
               )}
@@ -434,45 +468,73 @@ function ExhibitionCard({
       )}
 
       {/* Selection Indicator */}
-      <AnimatePresence>
-        {isSelected && (
-          <motion.div
-            className="absolute inset-0 flex items-center justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              className="w-24 h-24 rounded-full bg-violet-500/20 flex items-center justify-center backdrop-blur-sm border border-violet-400/30"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 300 }}
-            >
-              <motion.span
-                className="text-5xl text-violet-400"
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: 'spring', stiffness: 300, delay: 0.1 }}
-              >
-                &#10003;
-              </motion.span>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <SelectionOverlay isSelected={isSelected} color="violet" />
 
       {/* Side Color Indicator */}
-      <div
-        className={cn(
-          'absolute w-1 transition-all duration-300',
-          side === 'a'
-            ? 'left-0 top-0 bottom-0 bg-gradient-to-b from-blue-400/60 to-blue-600/60'
-            : 'right-0 top-0 bottom-0 bg-gradient-to-b from-red-400/60 to-red-600/60'
-        )}
-      />
+      <SideIndicator side={side} />
     </motion.button>
   );
 }
+
+// ============================================================================
+// Shared Sub-components
+// ============================================================================
+
+function SelectionOverlay({ isSelected, color }: { isSelected: boolean; color: 'amber' | 'violet' }) {
+  return (
+    <AnimatePresence>
+      {isSelected && (
+        <motion.div
+          className="absolute inset-0 flex items-center justify-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <motion.div
+            className={cn(
+              'w-20 h-20 rounded-full flex items-center justify-center backdrop-blur-sm border',
+              color === 'amber'
+                ? 'bg-amber-500/20 border-amber-400/30'
+                : 'bg-violet-500/20 border-violet-400/30'
+            )}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 300 }}
+          >
+            <motion.span
+              className={cn(
+                'text-4xl',
+                color === 'amber' ? 'text-amber-400' : 'text-violet-400'
+              )}
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: 'spring', stiffness: 300, delay: 0.1 }}
+            >
+              &#10003;
+            </motion.span>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+function SideIndicator({ side }: { side: 'a' | 'b' }) {
+  return (
+    <div
+      className={cn(
+        'absolute w-1 transition-all duration-300',
+        side === 'a'
+          ? 'left-0 top-0 bottom-0 bg-gradient-to-b from-blue-400/60 to-blue-600/60'
+          : 'right-0 top-0 bottom-0 bg-gradient-to-b from-red-400/60 to-red-600/60'
+      )}
+    />
+  );
+}
+
+// ============================================================================
+// Helpers
+// ============================================================================
 
 function formatDate(dateStr: string): string {
   try {

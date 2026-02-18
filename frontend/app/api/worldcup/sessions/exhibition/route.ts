@@ -2,6 +2,28 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import type { RoundType, ExhibitionWorldcupTheme } from '@sayu/shared/exhibition-worldcup-types';
 
+// City name mappings for flexible matching
+const CITY_FILTERS: Record<string, string[]> = {
+  Seoul: ['Seoul', '서울'],
+  'New York': ['New York', 'NYC'],
+  London: ['London'],
+  Paris: ['Paris'],
+  Berlin: ['Berlin'],
+  Tokyo: ['Tokyo', '東京'],
+  Chicago: ['Chicago'],
+  Cleveland: ['Cleveland'],
+  'Los Angeles': ['Los Angeles', 'LA'],
+};
+
+function shuffleArray<T>(arr: T[]): T[] {
+  const shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 /**
  * POST /api/worldcup/sessions/exhibition
  * 전시 월드컵 세션 생성 + 참가자 자동 등록 + 브래킷 생성
@@ -9,9 +31,10 @@ import type { RoundType, ExhibitionWorldcupTheme } from '@sayu/shared/exhibition
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { round, theme } = body as {
+    const { round, theme, city } = body as {
       round: RoundType;
       theme: ExhibitionWorldcupTheme;
+      city?: string;
     };
 
     if (!round || ![8, 16, 32].includes(round)) {
@@ -34,26 +57,34 @@ export async function POST(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser();
 
-    // 테마별 전시 필터링
-    // DB columns: title_en, title_local, artists (array), exhibition_type, venue_name, venue_country
+    // Build query with filtering
     let query = supabase
       .from('exhibitions')
-      .select('id, title_en, title_local, artists, description, start_date, end_date, exhibition_type, tags, venue_name, venue_country, status, image_url');
+      .select('id, title_en, title_local, artists, description, start_date, end_date, exhibition_type, tags, venue_name, venue_city, venue_country, status, image_url');
 
-    if (theme === 'korean') {
+    // City-based filtering (takes priority over theme)
+    if (city) {
+      const cityNames = CITY_FILTERS[city] || [city];
+      if (cityNames.length === 1) {
+        query = query.eq('venue_city', cityNames[0]);
+      } else {
+        query = query.or(cityNames.map(c => `venue_city.eq.${c}`).join(','));
+      }
+    } else if (theme === 'korean') {
       query = query.or(
-        'source.eq.culture_events,source.eq.mmca,source.eq.MMCA,source.eq.한국관광공사,source.eq.artmap,source.eq.culture_portal,source.eq.seoul_museum_official,source.eq.seoul_arts_center,source.eq.leeum_official,source.eq.ddp_official,source.eq.national_museum_official,source.eq.kukje_gallery_web,source.eq.exhibition_integrated'
+        'source.eq.culture_events,source.eq.mmca,source.eq.MMCA,source.eq.artmap,source.eq.culture_portal,source.eq.exhibition_integrated,source.eq.gallery'
       );
     } else if (theme === 'international') {
       query = query.or(
-        'source.eq.aic,source.eq.chicago_art_api,source.eq.manual,source.eq.manual_met_2025,source.eq.met_museum_verified'
+        'source.eq.aic,source.eq.chicago_art_api,source.eq.manual,source.eq.manual_met_2025,source.eq.met_museum_verified,source.eq.cleveland,source.eq.whitney,source.eq.eflux,source.eq.paris_opendata,source.eq.berlin_kultur'
       );
     } else if (theme === 'ongoing') {
       query = query.eq('status', 'ongoing');
     }
     // 'all' = no filter
 
-    const { data: exhibitions, error: fetchError } = await query.limit(300);
+    // Fetch a larger pool for better variety
+    const { data: exhibitions, error: fetchError } = await query.limit(500);
 
     if (fetchError) {
       console.error('Failed to fetch exhibitions:', fetchError);
@@ -63,7 +94,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // title이 있는 것만 필터
+    // Filter: must have a title
     const withTitle = (exhibitions || []).filter(
       (ex) => ex.title_en || ex.title_local
     );
@@ -72,21 +103,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: `Not enough exhibitions for ${round} round. Found ${withTitle.length}.`,
+          error: `선택한 조건의 전시가 부족합니다 (${withTitle.length}개). ${round}개 이상 필요합니다.`,
         },
         { status: 400 }
       );
     }
 
-    // Fisher-Yates 셔플 후 round 수만큼 선택
-    const shuffled = [...withTitle];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    const selected = shuffled.slice(0, round);
+    // Prioritize exhibitions with images for better visual experience
+    const withImages = withTitle.filter(ex => ex.image_url);
+    const withoutImages = withTitle.filter(ex => !ex.image_url);
 
-    // 세션 생성
+    // Shuffle each group, then prefer with-images first
+    const pool = [...shuffleArray(withImages), ...shuffleArray(withoutImages)];
+    const selected = pool.slice(0, round);
+
+    // Create session
     const { data: session, error: sessionError } = await supabase
       .from('exhibition_worldcup_sessions')
       .insert({
@@ -108,7 +139,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 참가자 등록 - DB 컬럼명을 participant 컬럼에 매핑
+    // Register participants
     const participantRows = selected.map((ex, index) => ({
       session_id: session.id,
       source_type: 'exhibition' as const,
@@ -134,7 +165,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 추가 전시 정보를 클라이언트에 전달
+    // Enrich participants with exhibition metadata for the client
     const enrichedParticipants = participants.map((p) => {
       const ex = selected.find((e) => e.id === p.exhibition_ref_id);
       return {
@@ -147,6 +178,7 @@ export async function POST(request: NextRequest) {
               tags: ex.tags,
               status: ex.status,
               venue_name: ex.venue_name,
+              venue_city: ex.venue_city,
               venue_country: ex.venue_country,
               image_url: ex.image_url,
             }
@@ -154,9 +186,9 @@ export async function POST(request: NextRequest) {
       };
     });
 
-    // 브래킷 생성 (첫 라운드 매치들)
+    // Create bracket (first round matches)
     const startRound = Math.log2(round);
-    const matchRows = [];
+    const matchRows: any[] = [];
     for (let i = 0; i < round / 2; i++) {
       matchRows.push({
         session_id: session.id,
@@ -181,7 +213,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 세션 상태를 in_progress로 업데이트
+    // Update session status to in_progress
     const { data: updatedSession } = await supabase
       .from('exhibition_worldcup_sessions')
       .update({

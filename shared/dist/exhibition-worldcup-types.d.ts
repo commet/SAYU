@@ -7,11 +7,14 @@
 /**
  * 월드컵 세션
  */
+export type WorldcupMode = 'artwork' | 'exhibition';
+export type ExhibitionWorldcupTheme = 'korean' | 'international' | 'ongoing' | 'all';
 export interface WorldcupSession {
     id: string;
     user_id?: string;
     exhibition_visit_id?: string;
     exhibition_id?: string;
+    mode: WorldcupMode;
     round_type: RoundType;
     status: WorldcupStatus;
     current_match_index: number;
@@ -31,6 +34,8 @@ export interface WorldcupParticipant {
     session_id: string;
     source_type: ParticipantSourceType;
     artwork_id?: string;
+    exhibition_ref_id?: string;
+    description?: string;
     temp_image_url?: string;
     temp_image_path?: string;
     title?: string;
@@ -87,7 +92,7 @@ export interface WorldcupShare {
 }
 export type RoundType = 8 | 16 | 32 | 64;
 export type WorldcupStatus = 'setup' | 'in_progress' | 'completed' | 'abandoned';
-export type ParticipantSourceType = 'uploaded' | 'artwork' | 'manual';
+export type ParticipantSourceType = 'uploaded' | 'artwork' | 'manual' | 'exhibition';
 export type ShareType = 'link' | 'image';
 /**
  * 월드컵 스토어 상태

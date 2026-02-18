@@ -8,9 +8,9 @@ import type { WorldcupMode } from '@sayu/shared/exhibition-worldcup-types';
 
 function WorldcupPageContent() {
   const searchParams = useSearchParams();
-  const exhibitionVisitId = searchParams.get('visitId') || undefined;
-  const exhibitionId = searchParams.get('exhibitionId') || undefined;
-  const modeParam = searchParams.get('mode');
+  const exhibitionVisitId = searchParams?.get('visitId') || undefined;
+  const exhibitionId = searchParams?.get('exhibitionId') || undefined;
+  const modeParam = searchParams?.get('mode');
   const initialMode =
     modeParam === 'exhibition' || modeParam === 'artwork'
       ? (modeParam as WorldcupMode)

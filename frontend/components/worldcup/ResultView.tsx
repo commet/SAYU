@@ -58,9 +58,8 @@ const APT_LABELS: Record<string, string> = {
 
 function analyzeExhibitionPreferences(
   chosen: WorldcupParticipant[],
-  allParticipants: WorldcupParticipant[]
+  _allParticipants: WorldcupParticipant[]
 ): APTAnalysisResult {
-  // 선택된 전시의 키워드에서 장르 추론
   const chosenKeywords = chosen.flatMap((p) => {
     const words: string[] = [];
     if (p.title) words.push(...p.title.split(/[\s,/]+/));
@@ -73,11 +72,8 @@ function analyzeExhibitionPreferences(
 
   const chosenGenres = inferGenresFromKeywords(chosenKeywords);
 
-  // 각 APT 유형과의 매칭 점수 계산
   let bestApt = 'LAEF';
   let bestScore = -1;
-
-  const aptScores: Record<string, number> = {};
 
   for (const [aptCode, prefs] of Object.entries(APT_GENRE_PREFERENCES)) {
     let score = 0;
@@ -86,14 +82,12 @@ function analyzeExhibitionPreferences(
       else if (prefs.compatible.includes(genre)) score += 2;
       else if (prefs.neutral.includes(genre)) score += 1;
     }
-    aptScores[aptCode] = score;
     if (score > bestScore) {
       bestScore = score;
       bestApt = aptCode;
     }
   }
 
-  // 4축 점수 계산
   const axisScores = [
     {
       axis: 'L/S',
@@ -134,6 +128,12 @@ export function ResultView({ sessionId, winner, mode, onRestart }: ResultViewPro
   const resultCardRef = useRef<HTMLDivElement>(null);
 
   const isExhibitionMode = mode === 'exhibition';
+  const winnerExhibition = (winner as any)?._exhibition;
+  const winnerImageUrl =
+    winner.image_url ||
+    winnerExhibition?.image_url ||
+    winner.temp_image_url;
+  const hasWinnerImage = !!winnerImageUrl;
 
   useEffect(() => {
     async function fetchData() {
@@ -180,11 +180,10 @@ export function ResultView({ sessionId, winner, mode, onRestart }: ResultViewPro
     fetchData();
   }, [sessionId]);
 
-  // APT 분석 (exhibition 모드만)
+  // APT analysis (exhibition mode only)
   useEffect(() => {
     if (!isExhibitionMode || participants.length === 0) return;
 
-    // 승자 포함 선택된 참가자들 = wins > 0
     const chosen = participants.filter((p) => p.wins > 0);
     const analysis = analyzeExhibitionPreferences(chosen, participants);
     setAptAnalysis(analysis);
@@ -255,11 +254,6 @@ export function ResultView({ sessionId, winner, mode, onRestart }: ResultViewPro
       handleCopyUrl();
     }
   }, [shareUrl, winner.title, handleCopyUrl, isExhibitionMode]);
-
-  const winnerImageUrl =
-    winner.image_url ||
-    winner.temp_image_url ||
-    '/images/placeholder-artwork.png';
 
   return (
     <div className="min-h-screen p-6">
@@ -359,48 +353,54 @@ export function ResultView({ sessionId, winner, mode, onRestart }: ResultViewPro
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
           >
-            {isExhibitionMode ? (
-              // Exhibition mode: text-based winner display
-              <div className="text-center mb-4 py-4">
-                <h2
-                  className="text-2xl font-light text-white/90 mb-3 leading-relaxed"
-                  style={{ fontFamily: 'var(--font-serif, Georgia, serif)' }}
-                >
-                  {winner.title || '제목 없음'}
-                </h2>
-                {winner.artist && (
-                  <p className="text-white/50 text-sm font-light mb-2">
-                    {winner.artist}
-                  </p>
-                )}
-                {winner.description && (
-                  <p className="text-white/30 text-xs font-light max-w-xs mx-auto leading-relaxed">
-                    {winner.description}
-                  </p>
-                )}
+            {/* Winner Image (both modes) */}
+            {hasWinnerImage && (
+              <div className={cn(
+                'rounded-sm overflow-hidden mb-4 border border-white/10',
+                isExhibitionMode ? 'aspect-[16/9]' : 'aspect-square'
+              )}>
+                <img
+                  src={winnerImageUrl}
+                  alt={winner.title || '우승'}
+                  className="w-full h-full object-cover"
+                  crossOrigin="anonymous"
+                />
               </div>
-            ) : (
-              // Artwork mode: image-based winner display
-              <>
-                <div className="aspect-square rounded-sm overflow-hidden mb-4 border border-white/10">
-                  <img
-                    src={winnerImageUrl}
-                    alt={winner.title || '우승 작품'}
-                    className="w-full h-full object-cover"
-                    crossOrigin="anonymous"
-                  />
-                </div>
-                <h2
-                  className="text-lg font-light text-center text-white/90 mb-1"
-                  style={{ fontFamily: 'var(--font-serif, Georgia, serif)' }}
-                >
-                  {winner.title || '제목 없음'}
-                </h2>
-                <p className="text-white/40 text-sm text-center font-light">
+            )}
+
+            {/* Winner Info */}
+            <div className="text-center">
+              <h2
+                className={cn(
+                  'font-light text-white/90 mb-1 leading-relaxed',
+                  hasWinnerImage ? 'text-lg' : 'text-2xl mb-3 py-2'
+                )}
+                style={{ fontFamily: 'var(--font-serif, Georgia, serif)' }}
+              >
+                {winner.title || '제목 없음'}
+              </h2>
+              {isExhibitionMode ? (
+                <>
+                  {winnerExhibition?.venue_name && (
+                    <p className="text-white/50 text-sm font-light">
+                      {winnerExhibition.venue_name}
+                      {winnerExhibition?.venue_city && (
+                        <span className="text-white/30"> / {winnerExhibition.venue_city}</span>
+                      )}
+                    </p>
+                  )}
+                  {winner.artist && (
+                    <p className="text-white/40 text-xs font-light mt-1">
+                      {winner.artist}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p className="text-white/40 text-sm font-light">
                   {winner.artist || '작가 미상'}
                 </p>
-              </>
-            )}
+              )}
+            </div>
           </motion.div>
 
           {/* APT Analysis (exhibition mode only) */}
@@ -429,9 +429,11 @@ export function ResultView({ sessionId, winner, mode, onRestart }: ResultViewPro
                     <div key={score.axis} className="flex items-center gap-3">
                       <span className="text-[10px] text-white/30 w-8 shrink-0">{score.axis}</span>
                       <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                        <div
+                        <motion.div
                           className="h-full bg-gradient-to-r from-violet-500/80 to-indigo-400/80 rounded-full"
-                          style={{ width: `${score.value}%` }}
+                          initial={{ width: 0 }}
+                          animate={{ width: `${score.value}%` }}
+                          transition={{ delay: 1.0, duration: 0.6, ease: 'easeOut' }}
                         />
                       </div>
                       <span className="text-[10px] text-white/40 w-24 text-right shrink-0">
@@ -456,7 +458,7 @@ export function ResultView({ sessionId, winner, mode, onRestart }: ResultViewPro
                 최종 순위
               </p>
               <div className="space-y-2">
-                {rankings.slice(1, 4).map((ranking, index) => (
+                {rankings.slice(1, 5).map((ranking, index) => (
                   <motion.div
                     key={ranking.participant_id}
                     initial={{ opacity: 0, x: -10 }}
@@ -466,19 +468,21 @@ export function ResultView({ sessionId, winner, mode, onRestart }: ResultViewPro
                   >
                     <div
                       className={cn(
-                        'w-6 h-6 rounded-full flex items-center justify-center text-xs font-light',
+                        'w-6 h-6 rounded-full flex items-center justify-center text-xs font-light shrink-0',
                         ranking.rank === 2
                           ? 'bg-gray-400/20 text-gray-300 border border-gray-400/30'
-                          : 'bg-amber-700/20 text-amber-300/80 border border-amber-700/30'
+                          : ranking.rank === 3
+                            ? 'bg-amber-700/20 text-amber-300/80 border border-amber-700/30'
+                            : 'bg-white/10 text-white/50 border border-white/20'
                       )}
                     >
                       {ranking.rank}
                     </div>
-                    {!isExhibitionMode && ranking.image_url && (
+                    {ranking.image_url && (
                       <img
                         src={ranking.image_url}
                         alt={ranking.title || ''}
-                        className="w-10 h-10 rounded-sm object-cover"
+                        className="w-10 h-10 rounded-sm object-cover shrink-0"
                         crossOrigin="anonymous"
                       />
                     )}

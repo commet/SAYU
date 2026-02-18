@@ -12,6 +12,7 @@ import {
   Calendar,
   GalleryVerticalEnd,
   HeartHandshake,
+  Trophy,
   Menu,
   X,
   ChevronDown,
@@ -59,6 +60,7 @@ const navGroups: NavGroup[] = [
       { path: '/dashboard', icon: LayoutDashboard, label: { en: 'Dashboard', ko: '대시보드' }, requiresAuth: true },
       { path: '/gallery', icon: GalleryVerticalEnd, label: { en: 'Gallery', ko: '갤러리' }, requiresAuth: true },
       { path: '/exhibitions', icon: Calendar, label: { en: 'Exhibitions', ko: '전시' }, requiresAuth: true },
+      { path: '/worldcup', icon: Trophy, label: { en: 'Worldcup', ko: '전시 월드컵' } },
     ],
   },
   {

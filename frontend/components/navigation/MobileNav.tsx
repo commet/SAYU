@@ -16,6 +16,7 @@ import {
   LogOut,
   ChevronRight,
   HeartHandshake,
+  Trophy,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
@@ -53,6 +54,7 @@ const drawerMenuItems = [
       { icon: LayoutDashboard, label: { en: 'Dashboard', ko: '대시보드' }, path: '/dashboard', requiresAuth: true },
       { icon: GalleryVerticalEnd, label: { en: 'My Collection', ko: '내 컬렉션' }, path: '/gallery', requiresAuth: true },
       { icon: Calendar, label: { en: 'Exhibitions', ko: '전시' }, path: '/exhibitions', requiresAuth: true },
+      { icon: Trophy, label: { en: 'Worldcup', ko: '전시 월드컵' }, path: '/worldcup' },
     ],
   },
   {

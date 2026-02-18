@@ -28,7 +28,7 @@ const MODE_OPTIONS: {
     mode: 'exhibition',
     icon: MapPin,
     title: '전시 월드컵',
-    description: '5,800+ 전시 중 나의 이상형 전시를 골라보세요',
+    description: '9,300+ 전시 중 나의 이상형 전시를 골라보세요',
     accent: 'from-violet-500/20 to-indigo-600/20 border-violet-500/30',
   },
 ];
