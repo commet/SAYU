@@ -76,25 +76,35 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // 참가자 통계 업데이트 - 승자
-    await supabase.rpc('increment_participant_wins', {
-      p_id: winner_id,
-    }).catch(() => {
-      // RPC가 없으면 직접 업데이트
-      return supabase
+    // 참가자 통계 업데이트 - 승자: wins +1, total_matches +1
+    const { data: winnerParticipant } = await supabase
+      .from('exhibition_worldcup_participants')
+      .select('wins, total_matches')
+      .eq('id', winner_id)
+      .single();
+
+    if (winnerParticipant) {
+      await supabase
         .from('exhibition_worldcup_participants')
         .update({
-          wins: supabase.rpc('increment', { row_id: winner_id, col: 'wins' }) as any,
-          total_matches: supabase.rpc('increment', { row_id: winner_id, col: 'total_matches' }) as any,
+          wins: (winnerParticipant.wins || 0) + 1,
+          total_matches: (winnerParticipant.total_matches || 0) + 1,
         })
         .eq('id', winner_id);
-    });
+    }
 
-    // 패자 업데이트
+    // 패자 업데이트: total_matches +1, eliminated_round 설정
+    const { data: loserParticipant } = await supabase
+      .from('exhibition_worldcup_participants')
+      .select('total_matches')
+      .eq('id', loser_id)
+      .single();
+
     await supabase
       .from('exhibition_worldcup_participants')
       .update({
         eliminated_round: match.round,
+        total_matches: (loserParticipant?.total_matches || 0) + 1,
       })
       .eq('id', loser_id);
 
