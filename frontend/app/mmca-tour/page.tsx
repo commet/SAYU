@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -28,11 +28,7 @@ export default function MMCATourPage() {
   const [showTypeSelector, setShowTypeSelector] = useState(false);
   const [selectedType, setSelectedType] = useState<SAYUTypeCode | null>(null);
 
-  useEffect(() => {
-    fetchRecommendations();
-  }, [selectedType]);
-
-  const fetchRecommendations = async () => {
+  const fetchRecommendations = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -55,12 +51,16 @@ export default function MMCATourPage() {
           setError(data.error);
         }
       }
-    } catch (err) {
+    } catch {
       setError('추천 작품을 불러오는 데 실패했습니다.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedType]);
+
+  useEffect(() => {
+    fetchRecommendations();
+  }, [fetchRecommendations]);
 
   const handleTypeSelect = (type: SAYUTypeCode) => {
     setSelectedType(type);
@@ -351,7 +351,7 @@ function ExhibitionCard({ exhibition }: { exhibition: MMCAExhibition }) {
       </div>
       {exhibition.curatorNote && (
         <p className="text-white/50 text-xs mt-3 italic">
-          "{exhibition.curatorNote.slice(0, 100)}..."
+          &quot;{exhibition.curatorNote.slice(0, 100)}...&quot;
         </p>
       )}
     </div>

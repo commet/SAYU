@@ -1,12 +1,45 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { getArtworkById } from '@/data/mmca-tour-data';
 import { MMCATourMemberStatus } from '@/types/mmca-tour';
 import { SAYUTypeCode } from '@sayu/shared/SAYUTypeDefinitions';
 
+interface TourRow {
+  id: string;
+  created_by: string | null;
+  member_ids: string[] | null;
+  exhibition_ids: string[] | null;
+  status: string | null;
+  visit_date: string | null;
+}
+
+interface ProfileRow {
+  id: string;
+  username: string | null;
+  avatar_url: string | null;
+  personality_type: string | null;
+}
+
+interface ImpressionRow {
+  user_id: string;
+  artwork_id: string;
+  created_at: string;
+}
+
+const querySchema = z.object({
+  tourId: z.string().min(1).max(120).optional(),
+  oderId: z.string().min(1).max(120).optional(),
+});
+
+function canAccessTour(tour: TourRow | null, userId: string) {
+  if (!tour) return false;
+  if (tour.created_by === userId) return true;
+  return Array.isArray(tour.member_ids) && tour.member_ids.includes(userId);
+}
+
 /**
  * GET /api/mmca-tour/team-status
- * 팀 멤버들의 실시간 상태 조회
  */
 export async function GET(request: NextRequest) {
   try {
@@ -16,81 +49,101 @@ export async function GET(request: NextRequest) {
     if (!user) {
       return NextResponse.json({
         success: false,
-        error: 'Authentication required'
+        error: 'Authentication required',
       }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const oderId = searchParams.get('oderId');
+    const parsedQuery = querySchema.safeParse({
+      tourId: request.nextUrl.searchParams.get('tourId'),
+      oderId: request.nextUrl.searchParams.get('oderId'),
+    });
 
-    if (!oderId) {
+    if (!parsedQuery.success) {
       return NextResponse.json({
         success: false,
-        error: 'Tour ID is required'
+        error: 'Invalid query parameter',
       }, { status: 400 });
     }
 
-    // 투어 정보 조회
-    const { data: tour, error: tourError } = await supabase
+    const tourId = parsedQuery.data.tourId || parsedQuery.data.oderId;
+    if (!tourId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Tour ID is required',
+      }, { status: 400 });
+    }
+
+    const { data: tourData, error: tourError } = await supabase
       .from('mmca_tours')
-      .select('*')
-      .eq('id', oderId)
+      .select('id, created_by, member_ids, exhibition_ids, status, visit_date')
+      .eq('id', tourId)
       .single();
 
+    const tour = (tourData || null) as TourRow | null;
     if (tourError || !tour) {
       return NextResponse.json({
         success: false,
-        error: 'Tour not found'
+        error: 'Tour not found',
       }, { status: 404 });
     }
 
-    // 팀 멤버 목록
-    const memberIds = tour.member_ids || [];
+    if (!canAccessTour(tour, user.id)) {
+      return NextResponse.json({
+        success: false,
+        error: 'Forbidden',
+      }, { status: 403 });
+    }
 
-    // 멤버 프로필 조회
-    const { data: profiles } = await supabase
+    const memberIds = Array.isArray(tour.member_ids) ? tour.member_ids : [];
+    if (memberIds.length === 0) {
+      return NextResponse.json({
+        success: true,
+        data: {
+          tour,
+          members: [],
+          totalImpressions: 0,
+        },
+      });
+    }
+
+    const { data: profilesData } = await supabase
       .from('profiles')
       .select('id, username, avatar_url, personality_type')
       .in('id', memberIds);
 
-    // 각 멤버의 감상 기록 조회
-    const { data: allImpressions } = await supabase
+    const { data: impressionsData } = await supabase
       .from('mmca_tour_impressions')
       .select('user_id, artwork_id, created_at')
-      .eq('tour_id', oderId)
+      .eq('tour_id', tourId)
       .order('created_at', { ascending: false });
 
-    // 각 멤버의 추천 작품 수 조회 (나중에 개인화)
-    const totalRecommended = 5; // 기본 추천 수
+    const profiles = (profilesData || []) as ProfileRow[];
+    const allImpressions = (impressionsData || []) as ImpressionRow[];
+    const totalRecommended = 5;
 
-    // 멤버별 상태 집계
-    const memberStatuses: MMCATourMemberStatus[] = (profiles || []).map(profile => {
-      const userImpressions = (allImpressions || []).filter(
-        imp => imp.user_id === profile.id
-      );
-
+    const memberStatuses: MMCATourMemberStatus[] = profiles.map((profile) => {
+      const userImpressions = allImpressions.filter((imp) => imp.user_id === profile.id);
       const lastImpression = userImpressions[0];
-      let lastActivity = undefined;
 
-      if (lastImpression) {
-        const artwork = getArtworkById(lastImpression.artwork_id);
-        lastActivity = {
-          artworkTitle: artwork?.title || 'Unknown',
-          action: 'recorded' as const,
-          timestamp: lastImpression.created_at
-        };
-      }
+      const lastActivity = lastImpression
+        ? {
+            artworkTitle: getArtworkById(lastImpression.artwork_id)?.title || 'Unknown',
+            action: 'recorded' as const,
+            timestamp: lastImpression.created_at,
+          }
+        : undefined;
 
       return {
-        oderId: profile.id,
-        username: profile.username || '익명 사용자',
-        avatarUrl: profile.avatar_url,
+        memberId: profile.id,
+        oderId: profile.id, // Backward compatibility
+        username: profile.username || 'Anonymous User',
+        avatarUrl: profile.avatar_url || undefined,
         personalityType: (profile.personality_type || 'LAEF') as SAYUTypeCode,
         impressionCount: userImpressions.length,
-        recommendedArtworksViewed: userImpressions.length, // 추후 추적 개선
+        recommendedArtworksViewed: userImpressions.length,
         totalRecommended,
         lastActivity,
-        isOnline: true // 실시간 presence 구현 시 업데이트
+        isOnline: false,
       };
     });
 
@@ -99,14 +152,14 @@ export async function GET(request: NextRequest) {
       data: {
         tour,
         members: memberStatuses,
-        totalImpressions: (allImpressions || []).length
-      }
+        totalImpressions: allImpressions.length,
+      },
     });
   } catch (error) {
     console.error('Error fetching team status:', error);
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch team status'
+      error: 'Failed to fetch team status',
     }, { status: 500 });
   }
 }

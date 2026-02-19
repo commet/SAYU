@@ -311,21 +311,29 @@ export const useWorldcupStore = create<WorldcupStore>()(
         if (!state) return;
 
         // Re-derive currentMatchParticipants from restored data
-        if (state.currentMatch && state.participants.length > 0) {
-          const a = state.participants.find(
-            (p) => p.id === state.currentMatch?.participant_a_id
-          );
-          const b = state.participants.find(
-            (p) => p.id === state.currentMatch?.participant_b_id
-          );
+        if (state.currentMatch) {
+          if (state.participants.length > 0) {
+            const a = state.participants.find(
+              (p) => p.id === state.currentMatch?.participant_a_id
+            );
+            const b = state.participants.find(
+              (p) => p.id === state.currentMatch?.participant_b_id
+            );
 
-          if (a && b) {
-            useWorldcupStore.setState({
-              currentMatchParticipants: { a, b },
-              matchStartTime: Date.now(),
-            });
+            if (a && b) {
+              useWorldcupStore.setState({
+                currentMatchParticipants: { a, b },
+                matchStartTime: Date.now(),
+              });
+            } else {
+              // Invalid state - can't find participants, reset
+              useWorldcupStore.setState({
+                ...initialState,
+                mode: state.mode || ('artwork' as WorldcupMode),
+              });
+            }
           } else {
-            // Invalid state - can't find participants, reset
+            // currentMatch exists but no participants - corrupted state, reset
             useWorldcupStore.setState({
               ...initialState,
               mode: state.mode || ('artwork' as WorldcupMode),

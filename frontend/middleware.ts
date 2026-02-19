@@ -1,6 +1,23 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
+const EXPERIMENTAL_ROUTE_PREFIXES = [
+  '/debug',
+  '/demo',
+  '/working',
+  '/minimal',
+  '/modern',
+  '/artwork-demo',
+  '/archive',
+  '/exhibition-archive',
+];
+
+function isExperimentalRoute(pathname: string) {
+  return EXPERIMENTAL_ROUTE_PREFIXES.some((prefix) =>
+    pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+}
+
 export async function middleware(request: NextRequest) {
   // Skip middleware for Next.js internal routes and static files
   const pathname = request.nextUrl.pathname
@@ -27,6 +44,11 @@ export async function middleware(request: NextRequest) {
   if (request.headers.get('x-requested-with') === 'XMLHttpRequest' ||
       request.headers.get('accept')?.includes('application/json')) {
     return NextResponse.next()
+  }
+
+  const allowExperimentalRoutes = process.env.ENABLE_EXPERIMENTAL_ROUTES === 'true'
+  if (process.env.NODE_ENV === 'production' && !allowExperimentalRoutes && isExperimentalRoute(pathname)) {
+    return NextResponse.rewrite(new URL('/404', request.url))
   }
 
   return await updateSession(request)

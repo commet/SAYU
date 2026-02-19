@@ -3,7 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 const BACKEND_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') || 'http://localhost:3001';
 
-async function proxyRequest(request: NextRequest, context: { params: { path?: string[] } }) {
+type RouteContext = { params: Promise<{ path: string[] }> };
+
+async function proxyRequest(request: NextRequest, context: RouteContext) {
   if (!BACKEND_BASE_URL) {
     return NextResponse.json(
       { success: false, message: 'Backend API URL is not configured.' },
@@ -11,7 +13,7 @@ async function proxyRequest(request: NextRequest, context: { params: { path?: st
     );
   }
 
-  const pathSegments = context.params.path ?? [];
+  const { path: pathSegments = [] } = await context.params;
   const targetPath = pathSegments.join('/');
   const incomingUrl = new URL(request.url);
   const targetUrl = new URL(

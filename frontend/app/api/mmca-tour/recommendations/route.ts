@@ -1,22 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { recommendArtworks, getAllExhibitions } from '@/lib/mmca-tour/recommendation';
 import { SAYUTypeCode, isValidSAYUType } from '@sayu/shared/SAYUTypeDefinitions';
 
+const querySchema = z.object({
+  aptType: z.string().trim().optional(),
+  count: z.coerce.number().int().min(1).max(12).default(5),
+  exhibitions: z.string().trim().optional(),
+});
+
 /**
  * GET /api/mmca-tour/recommendations
- * APT 기반 개인화 작품 추천
+ * Returns APT-based recommendations.
  */
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const aptType = searchParams.get('aptType');
-    const count = parseInt(searchParams.get('count') || '5');
-    const exhibitionIds = searchParams.get('exhibitions')?.split(',').filter(Boolean);
+    const parsedQuery = querySchema.safeParse({
+      aptType: request.nextUrl.searchParams.get('aptType'),
+      count: request.nextUrl.searchParams.get('count') || '5',
+      exhibitions: request.nextUrl.searchParams.get('exhibitions'),
+    });
 
-    // APT 타입 검증
+    if (!parsedQuery.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid query parameter',
+      }, { status: 400 });
+    }
+
+    const aptType = parsedQuery.data.aptType || null;
+    const count = parsedQuery.data.count;
+    const exhibitionIds = parsedQuery.data.exhibitions
+      ? parsedQuery.data.exhibitions.split(',').map((value) => value.trim()).filter(Boolean)
+      : undefined;
+
     if (!aptType) {
-      // 로그인 사용자의 APT 타입 조회 시도
       const supabase = await createClient();
       const { data: { user } } = await supabase.auth.getUser();
 
@@ -39,22 +58,22 @@ export async function GET(request: NextRequest) {
             data: {
               aptType: profile.personality_type,
               recommendations,
-              exhibitions: getAllExhibitions()
-            }
+              exhibitions: getAllExhibitions(),
+            },
           });
         }
       }
 
       return NextResponse.json({
         success: false,
-        error: 'APT type is required. Please complete the personality quiz first.'
+        error: 'APT type is required. Please complete the personality quiz first.',
       }, { status: 400 });
     }
 
     if (!isValidSAYUType(aptType)) {
       return NextResponse.json({
         success: false,
-        error: `Invalid APT type: ${aptType}`
+        error: `Invalid APT type: ${aptType}`,
       }, { status: 400 });
     }
 
@@ -69,14 +88,14 @@ export async function GET(request: NextRequest) {
       data: {
         aptType,
         recommendations,
-        exhibitions: getAllExhibitions()
-      }
+        exhibitions: getAllExhibitions(),
+      },
     });
   } catch (error) {
     console.error('Error generating recommendations:', error);
     return NextResponse.json({
       success: false,
-      error: 'Failed to generate recommendations'
+      error: 'Failed to generate recommendations',
     }, { status: 500 });
   }
 }

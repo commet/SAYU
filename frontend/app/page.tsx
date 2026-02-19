@@ -1,14 +1,17 @@
 ﻿'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { useResponsive } from '@/lib/responsive';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Container, Button } from '@/components/design-system';
-import { Sparkles, ArrowRight, MessageSquare, TrendingUp } from 'lucide-react';
+import { Container } from '@/components/design-system';
+import { ArrowRight, MessageSquare } from 'lucide-react';
+
+// Shared serif font style
+const serifStyle = { fontFamily: 'var(--font-cormorant), var(--font-noto-serif-kr), serif' };
 
 // Translations
 const t = {
@@ -49,8 +52,8 @@ const t = {
     communityTitle: 'Connect with Like-minded People',
     communityDescription: 'Meet people with similar Art Persona Types, share artworks, visit exhibitions together, and engage in conversations about art.',
     joinCommunity: 'Join Community',
-    exhibitionCompanion: 'Exhibition Companion · Live',
-    aptTypeMatching: 'APT Type Matching',
+    exhibitionCompanion: 'Exhibition Companion',
+    aptTypeMatching: 'Live',
     sendCompanionRequest: 'Send a companion request now...',
     // Featured Collection
     featuredCollection: 'Featured Collection',
@@ -130,8 +133,8 @@ const t = {
     communityTitle: '같은 취향의 사람들과 연결',
     communityDescription: '비슷한 Art Persona Type을 가진 사람들과 만나 작품을 공유하고, 전시를 함께 방문하며, 예술에 대한 대화를 나눠보세요.',
     joinCommunity: '커뮤니티 참여하기',
-    exhibitionCompanion: '전시 동행 · 실시간',
-    aptTypeMatching: 'APT 타입 매칭',
+    exhibitionCompanion: '전시 동행',
+    aptTypeMatching: '실시간',
     sendCompanionRequest: '지금 전시 동행 제안 보내기...',
     // Featured Collection
     featuredCollection: 'Featured Collection',
@@ -181,10 +184,10 @@ const Hero3DSection = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="h-screen bg-gradient-to-b from-neutral-50 to-white flex items-center justify-center">
+      <div className="h-screen bg-black flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-pulse w-64 h-64 bg-neutral-200 rounded-2xl mx-auto mb-4" />
-          <div className="animate-pulse w-48 h-6 bg-neutral-200 rounded mx-auto" />
+          <div className="animate-pulse w-48 h-[1px] bg-neutral-800 mx-auto mb-6" />
+          <div className="animate-pulse w-32 h-[1px] bg-neutral-800 mx-auto" />
         </div>
       </div>
     ),
@@ -386,9 +389,9 @@ export default function HomePage() {
   ];
 
   const communityFeedsLocalized = [
-    { name: 'sj.moment', msg: texts.saturdayExhibition, badge: 'LAEF · 96%', tone: 'bg-emerald-500 text-white' },
-    { name: 'art_watcher', msg: texts.cafeGathering, badge: 'SRMC · 82%', tone: 'bg-blue-500 text-white' },
-    { name: 'gallery_buddy', msg: texts.openingRunTeam, badge: 'LAMF · 78%', tone: 'bg-amber-500 text-white' },
+    { name: 'sj.moment', msg: texts.saturdayExhibition, badge: 'LAEF · 96%' },
+    { name: 'art_watcher', msg: texts.cafeGathering, badge: 'SRMC · 82%' },
+    { name: 'gallery_buddy', msg: texts.openingRunTeam, badge: 'LAMF · 78%' },
   ];
 
   // if (isMobile) return <MobileHomePage />;
@@ -401,303 +404,364 @@ export default function HomePage() {
   }, [aptSlidesLocalized.length]);
 
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div className="min-h-screen bg-[#fafaf8] text-neutral-900">
       {/* 3D Hero Section */}
       <Hero3DSection />
 
-      {/* Features Section */}
-      <section className="py-12 md:py-20 border-t border-neutral-200">
+      {/* ── Features Section (APT Test) ── */}
+      <section className="py-20 md:py-28 lg:py-32 bg-[#fafaf8]">
         <Container size="2xl">
-          <div className="text-center mb-12 md:mb-20">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4 text-black">{texts.featuresTitle}</h2>
-            <p className="text-base md:text-lg lg:text-xl text-black">{texts.featuresSubtitle}</p>
+          <div className="text-center mb-16 md:mb-24">
+            <h2
+              className="text-3xl md:text-4xl lg:text-5xl font-light mb-4 md:mb-5 text-neutral-900"
+              style={{ ...serifStyle, wordBreak: 'keep-all' }}
+            >
+              {texts.featuresTitle}
+            </h2>
+            <p className="text-base md:text-lg text-neutral-500 tracking-wide">{texts.featuresSubtitle}</p>
           </div>
 
-          <div className="space-y-16 md:space-y-24">
-            {/* Feature 1 - APT Test */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center">
-              <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-black text-white text-xs font-medium mb-4 rounded-full">
-                  <Sparkles className="w-3 h-3" />{texts.aptTest}
-                </div>
-                <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6 text-black whitespace-pre-line">
-                  {texts.aptTitle}
-                </h3>
-                <p className="text-sm md:text-base lg:text-lg leading-relaxed text-black mb-6 md:mb-8">
-                  {texts.aptDescription}
-                </p>
-                <Button
-                  variant="outline"
-                  className="hover:bg-[#D4A520] hover:text-white hover:border-[#D4A520]"
-                  onClick={() => router.push('/quiz')}
-                >
-                  {texts.takeTest}
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </div>
-              <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-neutral-200 bg-white/95 backdrop-blur-md shadow-xl" style={{ perspective: '1000px' }}>
-                <AnimatePresence mode="wait">
-                  {aptSlidesLocalized.map((slide, index) => index === currentAptSlide && (
-                    <motion.div
-                      key={slide.id}
-                      initial={{ rotateY: 90, opacity: 0 }}
-                      animate={{ rotateY: 0, opacity: 1 }}
-                      exit={{ rotateY: -90, opacity: 0 }}
-                      transition={{ duration: 0.6, ease: 'easeInOut' }}
-                      style={{ backfaceVisibility: 'hidden', transformStyle: 'preserve-3d' }}
-                      className={`absolute inset-0 flex flex-col p-8 ${
-                        slide.type === 'recommendation' ? 'items-stretch justify-start gap-5' : 'items-center justify-center'
-                      }`}
-                    >
-                      {slide.type === 'quiz' && (
-                        <div className="w-full space-y-6">
-                          <p className="text-2xl font-bold text-center text-black">{slide.question}</p>
-                          <div className="space-y-3">
-                            {slide.options.map((option, idx) => (
-                              <div
-                                key={option.key}
-                                className={`flex items-center gap-3 rounded-xl px-4 py-3 border-2 transition-all ${
-                                  idx === 0
-                                    ? 'bg-black text-white border-black'
-                                    : 'bg-white text-black border-neutral-200 hover:border-black'
-                                }`}
-                              >
-                                <span className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold ${
-                                  idx === 0 ? 'bg-white text-black' : 'bg-neutral-100 text-black'
-                                }`}>
-                                  {option.key}
-                                </span>
-                                <span className="font-medium">{option.label}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {slide.type === 'result' && (
-                        <div className="w-full text-center space-y-4">
-                          <div className="text-7xl mb-2">{slide.emoji}</div>
-                          <div>
-                            <h4 className="text-3xl font-bold text-black mb-1">{slide.persona}</h4>
-                            <p className="text-2xl font-bold text-neutral-800 mb-4">{slide.code}</p>
-                            <p className="text-base text-neutral-600">{slide.description}</p>
-                          </div>
-                        </div>
-                      )}
-
-                      {slide.type === 'recommendation' && (
-                        <div className="w-full space-y-5">
-                          <h4 className="text-2xl font-bold text-center text-black">{slide.title}</h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-xl overflow-hidden border border-neutral-200">
-                            {/* Left: Recommended Artworks */}
-                            <div className="bg-white p-4 space-y-3">
-                              <p className="text-sm font-semibold text-neutral-700">{texts.recommendedArtworks}</p>
-                              {slide.artworks.slice(0, 1).map((artwork) => (
-                                <div key={artwork.id} className="relative h-56 rounded-xl overflow-hidden border border-neutral-200">
-                                  <Image src={artwork.image} alt={artwork.title} fill className="object-cover" />
-                                  <div className="absolute bottom-2 left-2 text-white drop-shadow">
-                                    <p className="text-sm font-semibold">{artwork.title}</p>
-                                    <p className="text-xs text-white/80">{artwork.artist}</p>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                            {/* Right: Recommended Exhibition */}
-                            <div className="bg-neutral-900 text-white p-4 space-y-3">
-                              <p className="text-sm font-semibold text-white">{texts.recommendedExhibition}</p>
-                              <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center text-white text-lg">🏛️</div>
-                                <div className="flex-1 text-left space-y-0.5">
-                                  <p className="text-base font-bold">{slide.exhibition.name}</p>
-                                  <p className="text-sm text-white/90">{slide.exhibition.museum}</p>
-                                  <p className="text-xs text-white/60">{slide.exhibition.location}</p>
-                                  <p className="text-xs text-[#D4A520] mt-5 pt-2 border-t border-white/10">
-                                    {texts.recommendReason('LAEF')} {slide.exhibition.reason}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex gap-2 justify-center flex-wrap">
-                            {slide.tags.map((tag) => (
-                              <span key={tag} className="px-3 py-1 bg-neutral-100 text-neutral-700 text-xs rounded-full">{tag}</span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-                  {aptSlidesLocalized.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentAptSlide(index)}
-                      className={`h-1.5 transition-all rounded-full ${
-                        currentAptSlide === index ? 'w-8 bg-black' : 'w-1.5 bg-neutral-300'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-20 items-center">
+            {/* Left: text */}
+            <div>
+              <span className="text-[10px] uppercase tracking-[0.2em] text-neutral-400 font-medium">
+                {texts.aptTest}
+              </span>
+              <h3
+                className="text-2xl md:text-3xl lg:text-4xl font-light mt-4 mb-5 md:mb-7 text-neutral-900 whitespace-pre-line leading-snug"
+                style={{ ...serifStyle, wordBreak: 'keep-all' }}
+              >
+                {texts.aptTitle}
+              </h3>
+              <p
+                className="text-sm md:text-base lg:text-lg leading-relaxed text-neutral-500 mb-8 md:mb-10"
+                style={{ wordBreak: 'keep-all' }}
+              >
+                {texts.aptDescription}
+              </p>
+              <button
+                onClick={() => router.push('/quiz')}
+                className="inline-flex items-center gap-3 px-6 py-3 border border-neutral-900 text-neutral-900 text-sm tracking-wide hover:bg-neutral-900 hover:text-white transition-colors duration-300"
+              >
+                {texts.takeTest}
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
 
+            {/* Right: APT card showcase */}
+            <div className="relative aspect-[4/3] overflow-hidden border border-neutral-200 bg-white">
+              <AnimatePresence mode="wait">
+                {aptSlidesLocalized.map((slide, index) => index === currentAptSlide && (
+                  <motion.div
+                    key={slide.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5, ease: 'easeInOut' }}
+                    className={`absolute inset-0 flex flex-col p-6 md:p-8 ${
+                      slide.type === 'recommendation' ? 'items-stretch justify-start gap-4' : 'items-center justify-center'
+                    }`}
+                  >
+                    {slide.type === 'quiz' && (
+                      <div className="w-full space-y-6">
+                        <p
+                          className="text-xl md:text-2xl font-light text-center text-neutral-900"
+                          style={{ ...serifStyle, wordBreak: 'keep-all' }}
+                        >
+                          {slide.question}
+                        </p>
+                        <div className="space-y-3">
+                          {slide.options.map((option, idx) => (
+                            <div
+                              key={option.key}
+                              className={`flex items-center gap-3 px-5 py-3.5 border transition-colors duration-200 ${
+                                idx === 0
+                                  ? 'bg-neutral-900 text-white border-neutral-900'
+                                  : 'bg-white text-neutral-900 border-neutral-200 hover:border-neutral-400'
+                              }`}
+                            >
+                              <span className={`w-7 h-7 flex items-center justify-center text-xs font-medium border ${
+                                idx === 0 ? 'border-white/30 text-white' : 'border-neutral-300 text-neutral-500'
+                              }`}>
+                                {option.key}
+                              </span>
+                              <span className="text-sm" style={{ wordBreak: 'keep-all' }}>{option.label}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {slide.type === 'result' && (
+                      <div className="w-full text-center space-y-5">
+                        <div className="text-6xl">{slide.emoji}</div>
+                        <div>
+                          <h4
+                            className="text-2xl md:text-3xl font-light text-neutral-900 mb-2"
+                            style={serifStyle}
+                          >
+                            {slide.persona}
+                          </h4>
+                          <p className="text-lg tracking-[0.15em] text-neutral-400 mb-4">{slide.code}</p>
+                          <p className="text-sm text-neutral-500" style={{ wordBreak: 'keep-all' }}>{slide.description}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {slide.type === 'recommendation' && (
+                      <div className="w-full space-y-4">
+                        <h4
+                          className="text-lg md:text-xl font-light text-center text-neutral-900"
+                          style={serifStyle}
+                        >
+                          {slide.title}
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 overflow-hidden border border-neutral-200">
+                          {/* Left: Recommended Artworks */}
+                          <div className="bg-white p-4 space-y-3">
+                            <p className="text-[10px] uppercase tracking-[0.15em] text-neutral-400">{texts.recommendedArtworks}</p>
+                            {slide.artworks.slice(0, 1).map((artwork) => (
+                              <div key={artwork.id} className="relative h-48 md:h-56 overflow-hidden">
+                                <Image src={artwork.image} alt={artwork.title} fill className="object-cover" />
+                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+                                  <p className="text-sm text-white font-medium">{artwork.title}</p>
+                                  <p className="text-xs text-white/70">{artwork.artist}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          {/* Right: Recommended Exhibition */}
+                          <div className="bg-[#0a0a0a] text-white p-4 space-y-3">
+                            <p className="text-[10px] uppercase tracking-[0.15em] text-neutral-500">{texts.recommendedExhibition}</p>
+                            <div className="flex-1 text-left space-y-1">
+                              <p className="text-base font-light" style={serifStyle}>{slide.exhibition.name}</p>
+                              <p className="text-sm text-white/80">{slide.exhibition.museum}</p>
+                              <p className="text-xs text-white/50">{slide.exhibition.location}</p>
+                              <p className="text-xs text-[#D4A520] mt-4 pt-3 border-t border-white/10" style={{ wordBreak: 'keep-all' }}>
+                                {texts.recommendReason('LAEF')} {slide.exhibition.reason}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-3 justify-center flex-wrap">
+                          {slide.tags.map((tag) => (
+                            <span key={tag} className="text-[10px] uppercase tracking-[0.12em] text-neutral-400">{tag}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+              {/* Slide indicators */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                {aptSlidesLocalized.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentAptSlide(index)}
+                    className={`h-[2px] transition-all duration-300 ${
+                      currentAptSlide === index ? 'w-8 bg-neutral-900' : 'w-4 bg-neutral-300'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         </Container>
       </section>
 
-      {/* Gallery Section - DARK THEME FULL WIDTH */}
-      <section className="py-12 md:py-20 bg-neutral-950">
+      {/* ── Gallery Section ── */}
+      <section className="py-20 md:py-28 lg:py-32 bg-[#0a0a0a]">
         <Container size="2xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/95 backdrop-blur-md shadow-xl p-6">
-              <div className="flex h-full flex-col gap-3">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-20 items-center">
+            {/* Left: marquee artwork scroll */}
+            <div className="relative aspect-[4/3] overflow-hidden bg-[#111] p-5 md:p-6">
+              <div className="flex h-full flex-col gap-4">
                 <div className="relative flex-1 overflow-hidden">
                   <motion.div
-                    className="flex gap-3"
-                    animate={{
-                      x: ['0%', '-33.33%'],
-                    }}
+                    className="flex gap-4"
+                    animate={{ x: ['0%', '-33.33%'] }}
                     transition={{
-                      x: {
-                        repeat: Infinity,
-                        repeatType: 'loop',
-                        duration: 15,
-                        ease: 'linear',
-                      },
+                      x: { repeat: Infinity, repeatType: 'loop', duration: 18, ease: 'linear' },
                     }}
                   >
                     {[...galleryArtworksLocalized, ...galleryArtworksLocalized, ...galleryArtworksLocalized].map((art, idx) => (
-                      <div key={`${art.id}-${idx}`} className="relative w-[200px] aspect-[3/4] rounded-xl overflow-hidden border border-neutral-800 shadow-lg flex-shrink-0">
+                      <div key={`${art.id}-${idx}`} className="relative w-[180px] md:w-[200px] aspect-[3/4] overflow-hidden flex-shrink-0">
                         <Image src={art.image} alt={art.title} fill className="object-cover" />
-                        <div className="absolute bottom-2 left-2 right-2 text-white text-xs drop-shadow">
-                          <p className="font-semibold truncate">{art.title}</p>
-                          <p className="text-white/80 truncate">{art.artist}</p>
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                          <p className="text-xs text-white font-medium truncate">{art.title}</p>
+                          <p className="text-[10px] text-white/60 truncate">{art.artist}</p>
                         </div>
                       </div>
                     ))}
                   </motion.div>
                 </div>
-                <div className="flex justify-between items-center text-xs text-neutral-400">
-                  <div className="flex gap-2 flex-wrap">
-                    <span className="px-2 py-1 rounded-full bg-neutral-800">{texts.expressionism}</span>
-                    <span className="px-2 py-1 rounded-full bg-neutral-800">{texts.baroque}</span>
-                    <span className="px-2 py-1 rounded-full bg-neutral-800">{texts.ukiyoe}</span>
+                <div className="flex justify-between items-center text-[10px] text-neutral-500">
+                  <div className="flex gap-3">
+                    <span className="uppercase tracking-[0.12em]">{texts.expressionism}</span>
+                    <span className="uppercase tracking-[0.12em]">{texts.baroque}</span>
+                    <span className="uppercase tracking-[0.12em]">{texts.ukiyoe}</span>
                   </div>
-                  <span className="text-neutral-500 whitespace-nowrap">{texts.recommended} · 10,000+ {texts.artworks}</span>
+                  <span className="whitespace-nowrap tracking-wide">{texts.recommended} / 10,000+ {texts.artworks}</span>
                 </div>
               </div>
             </div>
+
+            {/* Right: text */}
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#D4A520] text-white text-xs font-medium mb-4 rounded-full">{texts.gallery}</div>
-              <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6 text-white">{texts.galleryTitle}</h3>
-              <p className="text-sm md:text-base lg:text-lg leading-relaxed text-neutral-300 mb-6 md:mb-8">{texts.galleryDescription}</p>
-              <Button
-                variant="outline"
-                className="bg-white text-black border-white hover:bg-[#D4A520] hover:text-white hover:border-[#D4A520]"
+              <span className="text-[10px] uppercase tracking-[0.2em] text-[#D4A520] font-medium">
+                {texts.gallery}
+              </span>
+              <h3
+                className="text-2xl md:text-3xl lg:text-4xl font-light mt-4 mb-5 md:mb-7 text-white leading-snug"
+                style={{ ...serifStyle, wordBreak: 'keep-all' }}
+              >
+                {texts.galleryTitle}
+              </h3>
+              <p
+                className="text-sm md:text-base lg:text-lg leading-relaxed text-neutral-400 mb-8 md:mb-10"
+                style={{ wordBreak: 'keep-all' }}
+              >
+                {texts.galleryDescription}
+              </p>
+              <button
                 onClick={() => router.push('/gallery')}
+                className="inline-flex items-center gap-3 px-6 py-3 border border-white/30 text-white text-sm tracking-wide hover:bg-white hover:text-neutral-900 transition-colors duration-300"
               >
                 {texts.exploreGallery}
                 <ArrowRight className="w-4 h-4" />
-              </Button>
+              </button>
             </div>
           </div>
         </Container>
       </section>
 
-      {/* Community Section */}
-      <section className="py-20">
+      {/* ── Community Section ── */}
+      <section className="py-20 md:py-28 lg:py-32 bg-[#fafaf8]">
         <Container size="2xl">
-          <div className="grid grid-cols-2 gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-20 items-center">
+            {/* Left: text */}
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-black text-white text-xs font-medium mb-4 rounded-full">{texts.community}</div>
-              <h3 className="text-4xl font-bold mb-6 text-black">{texts.communityTitle}</h3>
-              <p className="text-lg leading-relaxed text-black mb-8">{texts.communityDescription}</p>
-              <Button
-                variant="outline"
-                className="hover:bg-[#D4A520] hover:text-white hover:border-[#D4A520]"
+              <span className="text-[10px] uppercase tracking-[0.2em] text-neutral-400 font-medium">
+                {texts.community}
+              </span>
+              <h3
+                className="text-2xl md:text-3xl lg:text-4xl font-light mt-4 mb-5 md:mb-7 text-neutral-900 leading-snug"
+                style={{ ...serifStyle, wordBreak: 'keep-all' }}
+              >
+                {texts.communityTitle}
+              </h3>
+              <p
+                className="text-sm md:text-base lg:text-lg leading-relaxed text-neutral-500 mb-8 md:mb-10"
+                style={{ wordBreak: 'keep-all' }}
+              >
+                {texts.communityDescription}
+              </p>
+              <button
                 onClick={() => router.push('/community')}
+                className="inline-flex items-center gap-3 px-6 py-3 border border-neutral-900 text-neutral-900 text-sm tracking-wide hover:bg-neutral-900 hover:text-white transition-colors duration-300"
               >
                 {texts.joinCommunity}
                 <ArrowRight className="w-4 h-4" />
-              </Button>
+              </button>
             </div>
-            <div className="bg-white/95 backdrop-blur-md border border-neutral-200 rounded-2xl shadow-xl p-6 space-y-3">
-              <div className="flex items-center justify-between">
+
+            {/* Right: chat feed mockup */}
+            <div className="border border-neutral-200 bg-white p-5 md:p-6 space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
                 <div className="flex items-center gap-2">
-                  <MessageSquare className="w-5 h-5 text-neutral-700" />
-                  <span className="text-sm font-semibold text-neutral-800">{texts.exhibitionCompanion}</span>
+                  <MessageSquare className="w-4 h-4 text-neutral-400" />
+                  <span className="text-sm text-neutral-800">{texts.exhibitionCompanion}</span>
                 </div>
-                <span className="text-xs text-neutral-500">{texts.aptTypeMatching}</span>
+                <span className="text-[10px] uppercase tracking-[0.12em] text-neutral-400">{texts.aptTypeMatching}</span>
               </div>
               <div className="space-y-2">
                 {communityFeedsLocalized.map((feed) => (
-                  <div key={feed.name} className="rounded-xl bg-white border border-neutral-200 shadow-md p-4 flex items-center justify-between hover:shadow-lg transition-shadow">
-                    <div>
-                      <p className="text-sm font-semibold text-neutral-900">@{feed.name}</p>
-                      <p className="text-sm text-neutral-700">{feed.msg}</p>
+                  <div
+                    key={feed.name}
+                    className="border border-neutral-100 p-4 flex items-center justify-between hover:border-neutral-300 transition-colors duration-200"
+                  >
+                    <div className="min-w-0 flex-1 mr-4">
+                      <p className="text-xs text-neutral-400 mb-0.5">@{feed.name}</p>
+                      <p className="text-sm text-neutral-700 truncate" style={{ wordBreak: 'keep-all' }}>{feed.msg}</p>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${feed.tone}`}>{feed.badge}</span>
+                    <span className="text-[10px] tracking-[0.1em] text-neutral-400 whitespace-nowrap border border-neutral-200 px-2 py-1">
+                      {feed.badge}
+                    </span>
                   </div>
                 ))}
               </div>
-              <div className="text-sm text-neutral-600 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4" />
+              <p className="text-xs text-neutral-400 pt-2" style={{ wordBreak: 'keep-all' }}>
                 {texts.sendCompanionRequest}
-              </div>
+              </p>
             </div>
           </div>
+        </Container>
+      </section>
 
-          {/* Divider */}
-          <div className="mt-16 mb-10 border-t border-neutral-200"></div>
-
-          <div className="space-y-12">
-            {/* Featured Collection */}
-            <div className="space-y-8">
-              <div className="flex items-end justify-between">
-                <div>
-                  <h2 className="text-5xl font-bold mb-2 text-black">{texts.featuredCollection}</h2>
-                  <p className="text-lg text-neutral-800">{texts.curatedMasterpieces}</p>
-                </div>
-                <Button
-                  variant="ghost"
-                  className="hover:bg-[#D4A520]/10 text-neutral-800"
-                  onClick={() => router.push('/gallery')}
-                >
-                  {texts.viewAll}
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </div>
-              <div className="grid grid-cols-3 gap-6">
-                {collectionArtworksLocalized.map((art) => (
-                  <div key={art.id} className="group cursor-pointer">
-                    <div className="relative aspect-[4/5] bg-neutral-200 overflow-hidden mb-3 rounded-2xl border border-neutral-200 shadow-lg hover:shadow-xl transition-all duration-500">
-                      <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-105 transition duration-500" />
-                    </div>
-                    <p className="font-semibold mb-1 text-black">{art.title}</p>
-                    <p className="text-sm text-neutral-600">{art.artist}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Final CTA */}
-            <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl text-center py-8 md:py-12 lg:py-16 px-4 md:px-8 space-y-4 md:space-y-6">
-              <h2 className="text-3xl md:text-4xl lg:text-6xl font-bold text-black">{texts.ctaTitle}</h2>
-              <p className="text-sm md:text-base lg:text-xl text-neutral-700 leading-relaxed">
-                {texts.ctaDescription}
-                <br />
-                {texts.todayDiscovered(todayUsers)}
-              </p>
-              <Button
-                variant="primary"
-                className="bg-[#D4A520] text-white hover:bg-[#B8860B] transition-all duration-300"
-                onClick={() => router.push('/quiz')}
+      {/* ── Featured Collection ── */}
+      <section className="py-20 md:py-28 lg:py-32 bg-white">
+        <Container size="2xl">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 md:mb-16 gap-4">
+            <div>
+              <h2
+                className="text-2xl md:text-3xl lg:text-4xl font-light text-neutral-900 mb-2"
+                style={serifStyle}
               >
-                {texts.startFree}
-                <Sparkles className="w-5 h-5" />
-              </Button>
+                {texts.featuredCollection}
+              </h2>
+              <p className="text-sm text-neutral-400" style={{ wordBreak: 'keep-all' }}>{texts.curatedMasterpieces}</p>
             </div>
+            <button
+              onClick={() => router.push('/gallery')}
+              className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 transition-colors duration-200"
+            >
+              {texts.viewAll}
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+            {collectionArtworksLocalized.map((art) => (
+              <div key={art.id} className="group cursor-pointer">
+                <div className="relative aspect-[4/5] bg-neutral-100 overflow-hidden mb-4">
+                  <Image
+                    src={art.image}
+                    alt={art.title}
+                    fill
+                    className="object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
+                  />
+                </div>
+                <p className="text-sm font-medium text-neutral-900 mb-0.5" style={{ wordBreak: 'keep-all' }}>{art.title}</p>
+                <p className="text-xs text-neutral-400">{art.artist}</p>
+              </div>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      {/* ── Final CTA ── */}
+      <section className="py-20 md:py-28 lg:py-36 bg-[#0a0a0a]">
+        <Container size="2xl">
+          <div className="text-center max-w-2xl mx-auto">
+            <h2
+              className="text-3xl md:text-4xl lg:text-5xl font-light text-white mb-5 md:mb-6"
+              style={{ ...serifStyle, wordBreak: 'keep-all' }}
+            >
+              {texts.ctaTitle}
+            </h2>
+            <p className="text-sm md:text-base text-neutral-400 leading-relaxed mb-2" style={{ wordBreak: 'keep-all' }}>
+              {texts.ctaDescription}
+            </p>
+            <p className="text-sm text-neutral-500 mb-8 md:mb-10">
+              {texts.todayDiscovered(todayUsers)}
+            </p>
+            <button
+              onClick={() => router.push('/quiz')}
+              className="inline-flex items-center gap-3 px-8 py-3.5 bg-[#D4A520] text-white text-sm tracking-wide hover:bg-[#B8860B] transition-colors duration-300"
+            >
+              {texts.startFree}
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
         </Container>
       </section>

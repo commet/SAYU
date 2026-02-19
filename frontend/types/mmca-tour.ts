@@ -189,7 +189,8 @@ export const APT_ARTWORK_PREFERENCES: Record<SAYUTypeCode, APTArtworkPreferences
 // ==================== 감상 기록 (Impression) ====================
 export interface MMCAImpression {
   id: string;
-  oderId: string;
+  tourId?: string;
+  oderId?: string;
   artworkId: string;
   rating: 'love' | 'like' | 'neutral' | 'dislike'; // 좋아요 정도
   emotionTags: string[]; // 감정 태그들
@@ -231,6 +232,7 @@ export interface MMCATour {
 
 // ==================== 팀원 상태 (Member Status) ====================
 export interface MMCATourMemberStatus {
+  memberId?: string;
   oderId: string;
   username: string;
   avatarUrl?: string;
@@ -265,7 +267,8 @@ export interface MMCATourPreviewResponse {
 }
 
 export interface RecordImpressionRequest {
-  oderId: string;
+  tourId?: string;
+  oderId?: string;
   artworkId: string;
   rating: MMCAImpression['rating'];
   emotionTags: string[];
