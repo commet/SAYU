@@ -2,6 +2,8 @@ import { Suspense } from 'react';
 import { getCachedGalleryStats } from '@/lib/supabase/gallery.server';
 import GalleryClient from '@/components/gallery/GalleryClient';
 
+export const dynamic = 'force-dynamic';
+
 // Server Component - 데이터 프리로딩
 async function GalleryWithData() {
   // 서버에서 초기 데이터 로드 (React.cache로 중복 제거)

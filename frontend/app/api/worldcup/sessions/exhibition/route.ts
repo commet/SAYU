@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       );
     } else if (theme === 'international') {
       query = query.or(
-        'source.eq.aic,source.eq.chicago_art_api,source.eq.manual,source.eq.manual_met_2025,source.eq.met_museum_verified,source.eq.cleveland,source.eq.whitney,source.eq.eflux,source.eq.paris_opendata,source.eq.berlin_kultur'
+        'source.eq.aic,source.eq.harvard,source.eq.chicago_art_api,source.eq.manual,source.eq.manual_met_2025,source.eq.met_museum_verified,source.eq.cleveland,source.eq.whitney,source.eq.eflux,source.eq.paris_opendata,source.eq.berlin_kultur'
       );
     } else if (theme === 'ongoing') {
       query = query.eq('status', 'ongoing');

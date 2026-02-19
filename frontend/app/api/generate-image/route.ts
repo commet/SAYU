@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-// 서버 사이드에서만 API 키 사용
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY, // NEXT_PUBLIC_ 없음!
-});
-
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting 체크 (간단한 예시)
-    const ip = request.headers.get('x-forwarded-for') || 'unknown';
-    
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json({ error: 'OPENAI_API_KEY not configured' }, { status: 503 });
+    }
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
     const { prompt, size = '1024x1024' } = await request.json();
     
     if (!prompt) {

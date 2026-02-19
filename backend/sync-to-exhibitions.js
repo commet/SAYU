@@ -185,6 +185,65 @@ async function mapAIC() {
   return inserted + updated;
 }
 
+async function mapHarvard() {
+  console.log('\n--- Mapping source_harvard → exhibitions ---');
+
+  const items = await fetchAll('source_harvard');
+  console.log(`  Found ${items.length} Harvard exhibitions`);
+
+  let inserted = 0, updated = 0, errors = 0;
+
+  for (const item of items) {
+    const venue = (item.venues && item.venues[0]) || {};
+    const row = {
+      title_en: item.title,
+      title_local: item.title,
+      venue_name: venue.name || 'Harvard Art Museums',
+      venue_city: venue.city || 'Cambridge',
+      venue_country: 'US',
+      start_date: item.start_date,
+      end_date: item.end_date_parsed,
+      status: calcStatus(item.start_date, item.end_date_parsed),
+      description: item.short_description || item.description || null,
+      admission_fee: null,
+      source: 'harvard',
+      source_url: item.exhibition_url || 'https://harvardartmuseums.org',
+      website_url: item.exhibition_url || null,
+      tags: ['Harvard Art Museums', 'Cambridge', 'International'],
+      metadata: {
+        source_table: 'source_harvard',
+        source_id: item.id,
+        harvard_id: item.harvard_id,
+        image_url: item.primary_image_url,
+        people: item.people
+      },
+      collected_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    const { data: existing } = await supabase
+      .from('exhibitions')
+      .select('id')
+      .eq('source', 'harvard')
+      .contains('metadata', { harvard_id: item.harvard_id })
+      .maybeSingle();
+
+    if (existing) {
+      const { error: upErr } = await supabase.from('exhibitions').update(row).eq('id', existing.id);
+      if (upErr) { errors++; } else { updated++; }
+    } else {
+      const { error: inErr } = await supabase.from('exhibitions').insert(row);
+      if (inErr) {
+        if (errors < 3) console.log(`  Insert error: ${inErr.message}`);
+        errors++;
+      } else { inserted++; }
+    }
+  }
+
+  console.log(`  Harvard: ${inserted} inserted, ${updated} updated, ${errors} errors`);
+  return inserted + updated;
+}
+
 async function mapCultureEvents() {
   console.log('\n--- Mapping source_culture_events → exhibitions ---');
 
@@ -755,6 +814,7 @@ async function run() {
 
   const mmcaCount = await mapMMCA();
   const aicCount = await mapAIC();
+  const harvardCount = await mapHarvard();
   const cultureCount = await mapCultureEvents();
   const integratedCount = await mapExhibitionIntegrated();
   const galleryCount = await mapGalleries();

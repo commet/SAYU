@@ -6,7 +6,7 @@
  *
  * Schedule:
  * - Korean sources (MMCA + Culture Events): Daily at 4:00 AM KST
- * - International (AIC): Weekly Monday at 3:00 AM KST
+ * - International (AIC + Harvard): Weekly Monday at 3:00 AM KST
  * - Exhibitions mapping + status update: Daily at 5:00 AM KST (after collection)
  */
 
@@ -285,6 +285,55 @@ async function collectAIC(supabase) {
   return upserted;
 }
 
+// ===== Harvard Raw Collector =====
+
+async function collectHarvard(supabase) {
+  const API_KEY = process.env.HARVARD_API_KEY;
+  if (!API_KEY) { log.warn('[Cron:Harvard] No HARVARD_API_KEY'); return 0; }
+
+  log.info('[Cron:Harvard] Collecting...');
+  let page = 1, allItems = [];
+
+  while (page <= 20) {
+    try {
+      const url = `https://api.harvardartmuseums.org/exhibition?apikey=${API_KEY}&size=100&page=${page}&sort=begindate&sortorder=desc`;
+      const raw = await fetchRetry(url, 3, { headers: { 'User-Agent': 'SAYU Art Platform', 'Accept': 'application/json' } });
+      const data = JSON.parse(raw);
+      const items = data?.records || [];
+      if (items.length === 0) break;
+      allItems.push(...items);
+      if (!data.info?.next || allItems.length >= (data.info?.totalrecords || 0)) break;
+      page++;
+      await delay(500);
+    } catch (e) { log.error(`[Cron:Harvard] Page ${page} error: ${e.message}`); break; }
+  }
+
+  log.info(`[Cron:Harvard] Collected ${allItems.length} items`);
+
+  let upserted = 0;
+  for (let i = 0; i < allItems.length; i += 30) {
+    const rows = allItems.slice(i, i + 30).filter(it => it.exhibitionid && it.title).map(item => {
+      const startMatch = (item.begindate || '').match(/(\d{4}-\d{2}-\d{2})/);
+      const endMatch = (item.enddate || '').match(/(\d{4}-\d{2}-\d{2})/);
+      return {
+        harvard_id: item.exhibitionid, title: item.title,
+        short_description: decodeHtml(item.shortdescription),
+        description: decodeHtml(item.description)?.slice(0, 5000),
+        begin_date: item.begindate || null, end_date: item.enddate || null,
+        start_date: startMatch ? startMatch[1] : null, end_date_parsed: endMatch ? endMatch[1] : null,
+        primary_image_url: item.primaryimageurl || null, exhibition_url: item.url || null,
+        venues: item.venues || [], people: item.people || [], images: item.images || [],
+        raw_data: item, collected_at: new Date().toISOString()
+      };
+    });
+    const { data, error } = await supabase.from('source_harvard').upsert(rows, { onConflict: 'harvard_id', ignoreDuplicates: false }).select('id');
+    if (!error) upserted += (data?.length || 0);
+  }
+
+  log.info(`[Cron:Harvard] Done: ${upserted} upserted`);
+  return upserted;
+}
+
 // ===== Exhibition Integrated Raw Collector =====
 
 async function collectExhibitionIntegrated(supabase) {
@@ -430,6 +479,31 @@ async function mapToExhibitions(supabase) {
   log.info(`[Cron:Map] AIC: ${ins} inserted, ${upd} updated`);
   totalInserted += ins; totalUpdated += upd;
 
+  // Map Harvard
+  const harvardItems = await fetchAll(supabase, 'source_harvard');
+  ins = 0; upd = 0;
+  for (const item of harvardItems) {
+    const venue = (item.venues && item.venues[0]) || {};
+    const row = {
+      title_en: item.title, title_local: item.title,
+      venue_name: venue.name || 'Harvard Art Museums',
+      venue_city: venue.city || 'Cambridge', venue_country: 'US',
+      start_date: item.start_date, end_date: item.end_date_parsed,
+      status: calcStatus(item.start_date, item.end_date_parsed),
+      description: item.short_description || item.description || null,
+      source: 'harvard', source_url: item.exhibition_url || 'https://harvardartmuseums.org',
+      website_url: item.exhibition_url || null,
+      tags: ['Harvard Art Museums', 'Cambridge', 'International'],
+      metadata: { source_table: 'source_harvard', source_id: item.id, harvard_id: item.harvard_id, image_url: item.primary_image_url, people: item.people },
+      collected_at: new Date().toISOString(), updated_at: new Date().toISOString()
+    };
+    const { data: existing } = await supabase.from('exhibitions').select('id').eq('source','harvard').contains('metadata',{harvard_id:item.harvard_id}).maybeSingle();
+    if (existing) { const { error } = await supabase.from('exhibitions').update(row).eq('id',existing.id); if (!error) upd++; }
+    else { const { error } = await supabase.from('exhibitions').insert(row); if (!error) ins++; }
+  }
+  log.info(`[Cron:Map] Harvard: ${ins} inserted, ${upd} updated`);
+  totalInserted += ins; totalUpdated += upd;
+
   // Map Culture Events
   const cultureItems = await fetchAll(supabase, 'source_culture_events', [q => q.not('start_date','is',null), q => q.not('end_date','is',null)]);
   ins = 0; upd = 0;
@@ -510,6 +584,7 @@ class ExhibitionPipeline {
       results.sources.culture_events = await collectCultureEvents(supabase);
       results.sources.exhibition_integrated = await collectExhibitionIntegrated(supabase);
       results.sources.aic = await collectAIC(supabase);
+      results.sources.harvard = await collectHarvard(supabase);
       results.mapping = await mapToExhibitions(supabase);
     } catch (e) {
       log.error(`[Pipeline] Fatal: ${e.message}`);
@@ -529,7 +604,7 @@ class ExhibitionPipeline {
     this.isRunning = true;
     try {
       const supabase = getSupabaseAdmin();
-      const collectors = { mmca: collectMMCA, culture_events: collectCultureEvents, exhibition_integrated: collectExhibitionIntegrated, aic: collectAIC };
+      const collectors = { mmca: collectMMCA, culture_events: collectCultureEvents, exhibition_integrated: collectExhibitionIntegrated, aic: collectAIC, harvard: collectHarvard };
       if (!collectors[name]) return { status: 'error', error: `Unknown source: ${name}` };
       const count = await collectors[name](supabase);
       const mapping = await mapToExhibitions(supabase);
@@ -557,6 +632,7 @@ class ExhibitionPipeline {
       try {
         const supabase = getSupabaseAdmin();
         await collectAIC(supabase);
+        await collectHarvard(supabase);
         await mapToExhibitions(supabase);
         log.info('[Cron] International sources done');
       } catch (e) { log.error(`[Cron] International error: ${e.message}`); }
@@ -590,7 +666,7 @@ class ExhibitionPipeline {
       lastRun: this.lastRun,
       lastResults: this.lastResults,
       cronActive: this.cronJobs.length > 0,
-      sources: ['mmca', 'culture_events', 'exhibition_integrated', 'aic']
+      sources: ['mmca', 'culture_events', 'exhibition_integrated', 'aic', 'harvard']
     };
   }
 }

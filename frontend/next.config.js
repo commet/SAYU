@@ -1,3 +1,9 @@
+// Provide fallback env vars during build to prevent @supabase/ssr from throwing
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://placeholder.supabase.co';
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'placeholder';
+}
+
 /** @type {import('next').NextConfig} */
 const withPWA = require('next-pwa')({
   dest: 'public',

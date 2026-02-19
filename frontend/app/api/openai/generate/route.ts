@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-// 서버 사이드에서만 실행 - API 키가 브라우저에 노출되지 않음!
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY, // NEXT_PUBLIC_ 없음!
-});
-
 export async function POST(request: NextRequest) {
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json({ error: 'OPENAI_API_KEY not configured' }, { status: 503 });
+    }
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
     const { prompt, style, size = "1024x1024" } = await request.json();
     
     if (!prompt) {
