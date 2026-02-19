@@ -128,27 +128,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .from('quiz_results')
           .select('*')
           .eq('user_id', userData.id)
-          .single();
+          .maybeSingle();
 
         if (error) {
-          // 406 = RLS policy issue, PGRST116 = no rows found - both are ok
-          if (error.status !== 406 && error.code !== 'PGRST116') {
-            console.error('Error fetching quiz results:', {
-              message: error.message,
-              code: error.code,
-              details: error.details,
-              hint: error.hint,
-              statusCode: error.status
-            });
-          }
-          // If no quiz results, return user data which might have personality_type
+          console.error('Error fetching quiz results:', error.message);
           return userData.personality_type ? {
             personality_type: userData.personality_type,
             quiz_completed: userData.quiz_completed
           } : null;
         }
-        
-        console.log('Quiz results fetched from DB:', data?.personality_type);
+
+        if (!data) {
+          return userData.personality_type ? {
+            personality_type: userData.personality_type,
+            quiz_completed: userData.quiz_completed
+          } : null;
+        }
+
         return data;
       } catch (err) {
         // Silently handle quiz_results table access issues

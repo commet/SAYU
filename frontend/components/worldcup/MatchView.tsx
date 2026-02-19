@@ -19,11 +19,16 @@ export function MatchView({
   progress,
   isProcessing,
 }: MatchViewProps) {
-  const { currentMatchParticipants, matchStartTime, getCurrentRoundLabel, mode } = useWorldcupStore();
+  const { currentMatchParticipants, matchStartTime, getCurrentRoundLabel, mode, participants } = useWorldcupStore();
   const [selected, setSelected] = useState<'a' | 'b' | null>(null);
 
-  const participantA = currentMatchParticipants.a;
-  const participantB = currentMatchParticipants.b;
+  // Use currentMatchParticipants with fallback lookup from participants array
+  const participantA = currentMatchParticipants.a
+    || participants.find((p) => p.id === match.participant_a_id)
+    || null;
+  const participantB = currentMatchParticipants.b
+    || participants.find((p) => p.id === match.participant_b_id)
+    || null;
 
   const roundLabel = getCurrentRoundLabel();
   const isExhibitionMode = mode === 'exhibition';
