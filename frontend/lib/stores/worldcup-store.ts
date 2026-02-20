@@ -40,6 +40,13 @@ interface WorldcupStore extends WorldcupState {
   advanceToNextMatch: (nextMatch: WorldcupMatch) => void;
   completeTournament: (winner: WorldcupParticipant, rankings: WorldcupParticipant[]) => void;
 
+  // Client-side bracket progression
+  currentRoundMatches: WorldcupMatch[];
+  currentRoundIndex: number;
+  roundWinners: string[]; // winner IDs collected during current round
+  advanceInRound: () => boolean; // returns false if round is complete
+  generateNextRound: () => boolean; // returns false if tournament is complete (was final)
+
   // State Actions
   setLoading: (loading: boolean) => void;
   setMatchStartTime: () => void;
@@ -66,10 +73,17 @@ const initialState: WorldcupState = {
   rankings: [],
 };
 
+const initialBracketState = {
+  currentRoundMatches: [] as WorldcupMatch[],
+  currentRoundIndex: 0,
+  roundWinners: [] as string[],
+};
+
 export const useWorldcupStore = create<WorldcupStore>()(
   persist(
     (set, get) => ({
       ...initialState,
+      ...initialBracketState,
 
       // ========================================
       // Mode
@@ -128,6 +142,9 @@ export const useWorldcupStore = create<WorldcupStore>()(
             b: participantB || null,
           },
           matchStartTime: Date.now(),
+          currentRoundMatches: matches,
+          currentRoundIndex: 0,
+          roundWinners: [],
           session: {
             ...state.session,
             status: 'in_progress',
@@ -171,7 +188,18 @@ export const useWorldcupStore = create<WorldcupStore>()(
             : m
         );
 
-        set({ matches: updatedMatches });
+        // Also update currentRoundMatches
+        const updatedRoundMatches = state.currentRoundMatches.map((m) =>
+          m.id === state.currentMatch!.id
+            ? { ...m, winner_id: winnerId, decision_time_ms: decisionTimeMs, completed_at: new Date().toISOString() }
+            : m
+        );
+
+        set({
+          matches: updatedMatches,
+          currentRoundMatches: updatedRoundMatches,
+          roundWinners: [...state.roundWinners, winnerId],
+        });
       },
 
       advanceToNextMatch: (nextMatch: WorldcupMatch) => {
@@ -224,6 +252,103 @@ export const useWorldcupStore = create<WorldcupStore>()(
       },
 
       // ========================================
+      // Client-side bracket progression
+      // ========================================
+
+      advanceInRound: () => {
+        const state = get();
+        const nextIndex = state.currentRoundIndex + 1;
+
+        if (nextIndex >= state.currentRoundMatches.length) {
+          // Round complete
+          return false;
+        }
+
+        const nextMatch = state.currentRoundMatches[nextIndex];
+        const participantA = state.participants.find(
+          (p) => p.id === nextMatch.participant_a_id
+        );
+        const participantB = state.participants.find(
+          (p) => p.id === nextMatch.participant_b_id
+        );
+
+        const newMatchIndex = (state.session?.current_match_index || 0) + 1;
+
+        set({
+          currentMatch: nextMatch,
+          currentMatchParticipants: {
+            a: participantA || null,
+            b: participantB || null,
+          },
+          matchStartTime: Date.now(),
+          currentRoundIndex: nextIndex,
+          session: state.session
+            ? { ...state.session, current_match_index: newMatchIndex }
+            : null,
+        });
+        return true;
+      },
+
+      generateNextRound: () => {
+        const state = get();
+        const winners = state.roundWinners;
+
+        // Final was played (only 1 winner from a 1-match round = final)
+        if (winners.length < 2) {
+          return false;
+        }
+
+        // Pair winners into next round matches
+        const currentRound = state.currentRoundMatches[0]?.round;
+        const nextRound = currentRound - 1;
+
+        if (nextRound < 1) {
+          return false;
+        }
+
+        const nextMatches: WorldcupMatch[] = [];
+        const newMatchIndex = (state.session?.current_match_index || 0) + 1;
+
+        for (let i = 0; i < winners.length; i += 2) {
+          nextMatches.push({
+            id: `client-round${nextRound}-match${i / 2}`,
+            session_id: state.session?.id || '',
+            match_index: newMatchIndex + (i / 2),
+            round: nextRound,
+            round_match_index: i / 2,
+            participant_a_id: winners[i],
+            participant_b_id: winners[i + 1],
+            created_at: new Date().toISOString(),
+          });
+        }
+
+        const firstMatch = nextMatches[0];
+        const participantA = state.participants.find(
+          (p) => p.id === firstMatch.participant_a_id
+        );
+        const participantB = state.participants.find(
+          (p) => p.id === firstMatch.participant_b_id
+        );
+
+        set({
+          matches: [...state.matches, ...nextMatches],
+          currentRoundMatches: nextMatches,
+          currentRoundIndex: 0,
+          roundWinners: [],
+          currentMatch: firstMatch,
+          currentMatchParticipants: {
+            a: participantA || null,
+            b: participantB || null,
+          },
+          matchStartTime: Date.now(),
+          session: state.session
+            ? { ...state.session, current_match_index: newMatchIndex }
+            : null,
+        });
+        return true;
+      },
+
+      // ========================================
       // State Actions
       // ========================================
 
@@ -240,7 +365,7 @@ export const useWorldcupStore = create<WorldcupStore>()(
       // ========================================
 
       reset: () => {
-        set({ ...initialState, mode: 'artwork' as WorldcupMode });
+        set({ ...initialState, ...initialBracketState, mode: 'artwork' as WorldcupMode });
         localStorage.removeItem('sayu:worldcup:current_session');
       },
 
@@ -306,6 +431,9 @@ export const useWorldcupStore = create<WorldcupStore>()(
         winner: state.winner,
         rankings: state.rankings,
         mode: state.mode,
+        currentRoundMatches: state.currentRoundMatches,
+        currentRoundIndex: state.currentRoundIndex,
+        roundWinners: state.roundWinners,
       }),
       onRehydrateStorage: () => (state) => {
         if (!state) return;

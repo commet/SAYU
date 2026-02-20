@@ -52,7 +52,7 @@ export function MatchView({
 
       setTimeout(() => {
         onSelectWinner(winnerId, decisionTimeMs);
-      }, 400);
+      }, 200);
     },
     [isProcessing, selected, participantA?.id, participantB?.id, matchStartTime, onSelectWinner]
   );
@@ -103,7 +103,7 @@ export function MatchView({
         <div className="flex items-center justify-center gap-3 mb-1">
           <p className={cn(
             'font-light text-lg',
-            isExhibitionMode ? 'text-violet-400/80' : 'text-amber-400/80'
+            isExhibitionMode ? 'text-white/70' : 'text-amber-400/80'
           )}>
             {roundLabel}
           </p>
@@ -120,7 +120,7 @@ export function MatchView({
             className={cn(
               'h-full bg-gradient-to-r',
               isExhibitionMode
-                ? 'from-violet-500/80 to-indigo-400/80'
+                ? 'from-white/60 to-white/40'
                 : 'from-amber-500/80 to-yellow-400/80'
             )}
             initial={{ width: 0 }}
@@ -141,7 +141,7 @@ export function MatchView({
           <motion.div
             className={cn(
               'w-14 h-14 rounded-full bg-[#0a0a0b] flex items-center justify-center shadow-2xl border-2',
-              isExhibitionMode ? 'border-violet-500/60' : 'border-amber-500/60'
+              isExhibitionMode ? 'border-white/30' : 'border-amber-500/60'
             )}
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
@@ -149,7 +149,7 @@ export function MatchView({
           >
             <span className={cn(
               'font-light text-sm tracking-wider',
-              isExhibitionMode ? 'text-violet-400' : 'text-amber-400'
+              isExhibitionMode ? 'text-white/50' : 'text-amber-400'
             )}>
               VS
             </span>
@@ -330,7 +330,7 @@ function ExhibitionCard({
       onClick={onClick}
       disabled={isDisabled}
       className={cn(
-        'flex-1 relative overflow-hidden transition-all min-h-[40vh] md:min-h-0',
+        'flex-1 relative overflow-hidden transition-all max-h-[70vh] md:max-h-none min-h-[35vh] md:min-h-0',
         'focus:outline-none',
         !hasImage && 'flex items-center justify-center',
         isDisabled && !isSelected && !isLoser ? 'cursor-not-allowed' : 'cursor-pointer'
@@ -340,7 +340,7 @@ function ExhibitionCard({
         opacity: isLoser ? 0.3 : 1,
         filter: hasImage && isLoser ? 'grayscale(100%)' : 'grayscale(0%)',
       }}
-      transition={{ duration: 0.4 }}
+      transition={{ duration: 0.3 }}
       whileHover={!isDisabled ? { scale: 1.01, backgroundColor: hasImage ? undefined : 'rgba(255,255,255,0.03)' } : {}}
       whileTap={!isDisabled ? { scale: 0.99 } : {}}
     >
@@ -354,11 +354,11 @@ function ExhibitionCard({
           {/* Gradient Overlay */}
           <div
             className={cn(
-              'absolute inset-0 transition-all duration-400',
+              'absolute inset-0 transition-all duration-300',
               isSelected
-                ? 'bg-gradient-to-t from-violet-900/80 via-violet-900/30 to-transparent'
+                ? 'bg-gradient-to-t from-black/90 via-black/40 to-black/10'
                 : 'bg-gradient-to-t from-black/80 via-black/30 to-transparent',
-              !isDisabled && 'hover:from-white/20 hover:via-transparent'
+              !isDisabled && 'hover:from-black/60 hover:via-black/20'
             )}
           />
           {/* Exhibition Info - Bottom */}
@@ -366,7 +366,7 @@ function ExhibitionCard({
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.15 }}
             >
               {/* Badges row */}
               <div className="flex items-center gap-1.5 mb-2 flex-wrap">
@@ -381,7 +381,7 @@ function ExhibitionCard({
                   </span>
                 )}
                 {category && (
-                  <span className="inline-block text-[9px] uppercase tracking-[0.1em] text-violet-300/80 px-1.5 py-0.5 border border-violet-400/20 rounded-sm backdrop-blur-sm bg-black/30">
+                  <span className="inline-block text-[9px] uppercase tracking-[0.1em] text-white/60 px-1.5 py-0.5 border border-white/15 rounded-sm backdrop-blur-sm bg-black/30">
                     {category}
                   </span>
                 )}
@@ -402,6 +402,11 @@ function ExhibitionCard({
                   {dateRange}
                 </p>
               )}
+              {participant.description && (
+                <p className="text-white/35 text-xs font-light mt-1.5 line-clamp-2 leading-relaxed">
+                  {participant.description}
+                </p>
+              )}
             </motion.div>
           </div>
         </>
@@ -410,9 +415,9 @@ function ExhibitionCard({
           {/* Background gradient (no image) */}
           <div
             className={cn(
-              'absolute inset-0 transition-all duration-400',
+              'absolute inset-0 transition-all duration-300',
               isSelected
-                ? 'bg-gradient-to-br from-violet-900/30 via-indigo-900/20 to-transparent'
+                ? 'bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent'
                 : 'bg-gradient-to-br from-white/[0.02] to-transparent'
             )}
           />
@@ -421,7 +426,7 @@ function ExhibitionCard({
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.15 }}
             >
               {/* Badges row */}
               <div className="flex items-center gap-1.5 mb-3 flex-wrap">
@@ -436,7 +441,7 @@ function ExhibitionCard({
                   </span>
                 )}
                 {category && (
-                  <span className="inline-block text-[9px] uppercase tracking-[0.1em] text-violet-400/60 px-1.5 py-0.5 border border-violet-500/20 rounded-sm">
+                  <span className="inline-block text-[9px] uppercase tracking-[0.1em] text-white/40 px-1.5 py-0.5 border border-white/10 rounded-sm">
                     {category}
                   </span>
                 )}
@@ -463,7 +468,7 @@ function ExhibitionCard({
                 </p>
               )}
               {participant.description && (
-                <p className="text-white/25 text-xs font-light line-clamp-2 leading-relaxed">
+                <p className="text-white/25 text-xs font-light line-clamp-3 leading-relaxed">
                   {participant.description}
                 </p>
               )}
@@ -473,7 +478,7 @@ function ExhibitionCard({
       )}
 
       {/* Selection Indicator */}
-      <SelectionOverlay isSelected={isSelected} color="violet" />
+      <SelectionOverlay isSelected={isSelected} color="neutral" />
 
       {/* Side Color Indicator */}
       <SideIndicator side={side} />
@@ -485,7 +490,7 @@ function ExhibitionCard({
 // Shared Sub-components
 // ============================================================================
 
-function SelectionOverlay({ isSelected, color }: { isSelected: boolean; color: 'amber' | 'violet' }) {
+function SelectionOverlay({ isSelected, color }: { isSelected: boolean; color: 'amber' | 'neutral' }) {
   return (
     <AnimatePresence>
       {isSelected && (
@@ -500,7 +505,7 @@ function SelectionOverlay({ isSelected, color }: { isSelected: boolean; color: '
               'w-20 h-20 rounded-full flex items-center justify-center backdrop-blur-sm border',
               color === 'amber'
                 ? 'bg-amber-500/20 border-amber-400/30'
-                : 'bg-violet-500/20 border-violet-400/30'
+                : 'bg-white/10 border-white/30'
             )}
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -509,7 +514,7 @@ function SelectionOverlay({ isSelected, color }: { isSelected: boolean; color: '
             <motion.span
               className={cn(
                 'text-4xl',
-                color === 'amber' ? 'text-amber-400' : 'text-violet-400'
+                color === 'amber' ? 'text-amber-400' : 'text-white'
               )}
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}

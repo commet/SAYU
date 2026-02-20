@@ -70,7 +70,8 @@ export function WorldcupContainer({
     removeParticipant,
     startTournament,
     selectWinner,
-    advanceToNextMatch,
+    advanceInRound,
+    generateNextRound,
     completeTournament,
     setLoading,
     reset,
@@ -207,47 +208,48 @@ export function WorldcupContainer({
   }, [session?.id, setSession, startTournament, setLoading]);
 
   const handleMatchResult = useCallback(
-    async (winnerId: string, decisionTimeMs?: number) => {
+    (winnerId: string, decisionTimeMs?: number) => {
       if (!session?.id || !currentMatch?.id || isProcessing) return;
 
-      try {
-        setIsProcessing(true);
-        selectWinner(winnerId, decisionTimeMs);
+      setIsProcessing(true);
 
-        const response = await fetch(
-          `/api/worldcup/sessions/${session.id}/matches/${currentMatch.id}/result`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              winner_id: winnerId,
-              decision_time_ms: decisionTimeMs,
-            }),
-          }
-        );
+      // 1. Record winner in local state (instant)
+      selectWinner(winnerId, decisionTimeMs);
 
-        const data = await response.json();
+      // 2. Fire API call in background (no await - fire and forget)
+      fetch(
+        `/api/worldcup/sessions/${session.id}/matches/${currentMatch.id}/result`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            winner_id: winnerId,
+            decision_time_ms: decisionTimeMs,
+          }),
+        }
+      ).catch((error) => console.error('Background match result save error:', error));
 
-        if (data.success && data.data) {
-          if (data.data.completed) {
+      // 3. Client-side bracket progression (instant)
+      // Small delay for selection animation to be visible
+      setTimeout(() => {
+        const hasMoreInRound = advanceInRound();
+
+        if (!hasMoreInRound) {
+          // Round complete - generate next round or finish tournament
+          const hasNextRound = generateNextRound();
+
+          if (!hasNextRound) {
+            // Tournament complete (final was played)
             const winnerParticipant = participants.find((p) => p.id === winnerId);
             if (winnerParticipant) {
               completeTournament(winnerParticipant, []);
               setPhase('result');
             }
-          } else if (data.data.nextMatch) {
-            setTimeout(() => {
-              advanceToNextMatch(data.data.nextMatch);
-            }, 500);
           }
-        } else {
-          console.error('Failed to submit match result:', data.error);
         }
-      } catch (error) {
-        console.error('Match result error:', error);
-      } finally {
+
         setIsProcessing(false);
-      }
+      }, 200);
     },
     [
       session?.id,
@@ -256,7 +258,8 @@ export function WorldcupContainer({
       selectWinner,
       participants,
       completeTournament,
-      advanceToNextMatch,
+      advanceInRound,
+      generateNextRound,
     ]
   );
 

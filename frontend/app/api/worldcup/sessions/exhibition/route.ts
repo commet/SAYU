@@ -94,10 +94,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Filter: must have a title
-    const withTitle = (exhibitions || []).filter(
-      (ex) => ex.title_en || ex.title_local
-    );
+    // Filter: must have a title, exclude non-exhibition content
+    const NON_EXHIBITION_KEYWORDS = [
+      'yoga', 'concert', 'workshop', 'class', 'lecture', 'seminar',
+      'film', 'movie', 'screening', 'recital', 'festival', 'fair',
+      'marathon', 'run', 'walk', 'tour', 'camp', 'retreat',
+    ];
+
+    const withTitle = (exhibitions || []).filter((ex) => {
+      const title = (ex.title_en || ex.title_local || '').toLowerCase();
+      if (!title) return false;
+
+      // Exclude entries with non-exhibition keywords in title
+      for (const keyword of NON_EXHIBITION_KEYWORDS) {
+        if (title.includes(keyword)) return false;
+      }
+
+      return true;
+    });
 
     if (withTitle.length < round) {
       return NextResponse.json(
