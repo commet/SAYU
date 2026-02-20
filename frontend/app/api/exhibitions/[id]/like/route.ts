@@ -3,11 +3,11 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: exhibitionId } = await params;
     const supabase = await createClient();
-    const exhibitionId = params.id;
 
     // First get current like count
     const { data: exhibition, error: fetchError } = await supabase

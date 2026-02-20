@@ -29,11 +29,11 @@ export default function ActivityPage() {
   const [showFilters, setShowFilters] = useState(false);
 
   // Debug user authentication
-  console.log('Activity Page - User state:', { 
-    user: !!user, 
-    userId: user?.id, 
+  console.log('Activity Page - User state:', {
+    user: !!user,
+    userId: user?.id,
     loading,
-    email: user?.email 
+    email: user?.auth?.email
   });
 
   // Fetch activities and stats

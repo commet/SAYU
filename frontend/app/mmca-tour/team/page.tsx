@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, Clock, Heart, RefreshCw, Trophy, UserCircle, Users } from 'lucide-react';
 import { SAYU_TYPES } from '@sayu/shared/SAYUTypeDefinitions';
@@ -69,7 +70,15 @@ function getMemberKey(member: MMCATourMemberStatus) {
   return member.memberId || member.oderId || member.username;
 }
 
-export default function TeamPage() {
+export default function TeamPageWrapper() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin h-8 w-8 border-2 border-blue-500 border-t-transparent rounded-full" /></div>}>
+      <TeamPage />
+    </Suspense>
+  );
+}
+
+function TeamPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tourId = searchParams.get('tourId') || searchParams.get('oderId');

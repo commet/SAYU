@@ -76,7 +76,7 @@ function transformCloudinaryData(resources: any[], userType: string) {
 
 function formatTitle(parts: string[]): string {
   // 제목 포맷팅 로직
-  const titleWords = [];
+  const titleWords: string[] = [];
   for (const part of parts) {
     if (isArtistIndicator(part)) break;
     titleWords.push(part.charAt(0).toUpperCase() + part.slice(1));
@@ -88,8 +88,8 @@ function extractArtist(parts: string[]): string {
   // 작가명 추출 로직
   const artistIndicators = ['van', 'de', 'della', 'von', 'da', 'del'];
   let artistStarted = false;
-  const artistWords = [];
-  
+  const artistWords: string[] = [];
+
   for (const part of parts) {
     if (artistIndicators.includes(part.toLowerCase()) || artistStarted) {
       artistStarted = true;

@@ -41,7 +41,8 @@ export async function GET(request: Request) {
     if (!action) {
       try {
         // Try static import first (required for Vercel Edge runtime)
-        let artworksData = null;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let artworksData: any = null;
         
         try {
           // Use require for JSON (more reliable in production)

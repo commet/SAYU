@@ -3,9 +3,10 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { artistId: string } }
+  { params }: { params: Promise<{ artistId: string }> }
 ) {
   try {
+    const { artistId } = await params;
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
@@ -15,8 +16,6 @@ export async function POST(
         { status: 401 }
       );
     }
-
-    const { artistId } = params;
 
     // Check if already following
     const { data: existing } = await supabase

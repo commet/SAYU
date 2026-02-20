@@ -46,7 +46,7 @@ function parseExhibitionData(rawData: string, format: 'csv' | 'json'): Exhibitio
         header: true,
         skipEmptyLines: true,
         transform: (value, field) => {
-          if (field?.includes('price') && value) {
+          if (String(field)?.includes('price') && value) {
             return parseInt(value) || 0
           }
           return value?.trim() || ''
@@ -187,7 +187,8 @@ async function convertToDbFormat(supabase: any, exhibitions: ExhibitionData[]): 
       }
       
       // 영어 번역 레코드 (선택적)
-      let translation_en = null
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let translation_en: any = null
       if (exhibition.title_en || exhibition.description_en) {
         translation_en = {
           exhibition_id: masterId,

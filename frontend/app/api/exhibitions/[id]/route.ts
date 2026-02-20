@@ -13,11 +13,11 @@ function determineStatus(startDate: string | null, endDate: string | null): 'ong
 
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
-    const { id } = context.params;
+    const { id } = await context.params;
 
     const { data, error } = await supabase
       .from('exhibitions')
@@ -66,7 +66,7 @@ export async function GET(
     // Fetch related exhibitions (same venue or city, limit 4)
     let related: any[] = [];
     try {
-      const conditions = [];
+      const conditions: string[] = [];
       if (data.venue_name) conditions.push(`venue_name.eq.${data.venue_name}`);
       if (data.venue_city) conditions.push(`venue_city.eq.${data.venue_city}`);
 
@@ -111,11 +111,11 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
-    const { id } = context.params;
+    const { id } = await context.params;
     const body = await request.json();
 
     const { data, error } = await supabase
@@ -149,11 +149,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
-    const { id } = context.params;
+    const { id } = await context.params;
 
     const { error } = await supabase
       .from('exhibitions')

@@ -3,9 +3,10 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { artistId: string } }
+  { params }: { params: Promise<{ artistId: string }> }
 ) {
   try {
+    const { artistId } = await params;
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
@@ -15,8 +16,6 @@ export async function DELETE(
         { status: 401 }
       );
     }
-
-    const { artistId } = params;
 
     // Delete follow record (RLS ensures user can only delete own follows)
     const { error: deleteError } = await supabase

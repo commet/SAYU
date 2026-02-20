@@ -3,9 +3,10 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
+    const { userId } = await params;
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
@@ -17,7 +18,7 @@ export async function POST(
     }
 
     // Verify the authenticated user matches the URL userId
-    if (user.id !== params.userId) {
+    if (user.id !== userId) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }

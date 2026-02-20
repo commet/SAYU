@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
     if (Array.isArray(output)) {
       resultUrl = output[0] as string;
     } else {
-      resultUrl = output as string;
+      resultUrl = output as unknown as string;
     }
 
     // URL을 Base64 Data URL로 변환 (클라이언트 캐싱 지원)
@@ -236,9 +236,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       aptCode,
-      recommendedStyles: recommendedStyles.map(id => ({
-        id,
-        ...ART_STYLES[id]
+      recommendedStyles: recommendedStyles.map(styleId => ({
+        ...ART_STYLES[styleId],
+        id: styleId,
       })),
       allStyles: Object.values(ART_STYLES)
     });

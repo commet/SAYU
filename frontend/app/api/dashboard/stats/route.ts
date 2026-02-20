@@ -216,7 +216,7 @@ async function fetchUserStats(supabase: SupabaseClient, userId?: string | null) 
   let uniqueArtists = 43; // fallback
   if (artistsResult.status === 'fulfilled' && artistsResult.value.data) {
     const artists = new Set(
-      artistsResult.value.data
+      (artistsResult.value.data as any[])
         .map(item => item.artworks?.artist)
         .filter(artist => artist)
     );
@@ -257,7 +257,7 @@ async function fetchRecentActivities(supabase: SupabaseClient, userId?: string |
       return getDefaultActivities();
     }
     
-    return activities.map(activity => ({
+    return (activities as any[]).map(activity => ({
       type: activity.interaction_type,
       title: activity.artworks?.title || 'Unknown Artwork',
       artist: activity.artworks?.artist || 'Unknown Artist',
@@ -288,7 +288,7 @@ async function fetchTrendingData(supabase: SupabaseClient) {
     if (!trending) return getDefaultTrendingArtists();
     
     // Count artist interactions
-    const artistCounts = trending.reduce((acc: Record<string, number>, item) => {
+    const artistCounts = (trending as any[]).reduce((acc: Record<string, number>, item) => {
       const artist = item.artworks?.artist;
       if (artist) {
         acc[artist] = (acc[artist] || 0) + 1;
@@ -298,11 +298,11 @@ async function fetchTrendingData(supabase: SupabaseClient) {
     
     // Sort by count and return top 5
     return Object.entries(artistCounts)
-      .sort(([, a], [, b]) => b - a)
+      .sort(([, a], [, b]) => (b as number) - (a as number))
       .slice(0, 5)
       .map(([artist, count]) => ({
         name: artist,
-        change: `↑ ${Math.round((count / trending.length) * 100)}%`
+        change: `↑ ${Math.round(((count as number) / trending.length) * 100)}%`
       }));
   } catch (error) {
     console.warn('Failed to fetch trending data:', error);
