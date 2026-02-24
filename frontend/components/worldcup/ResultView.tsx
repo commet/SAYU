@@ -284,7 +284,7 @@ export function ResultView({ sessionId, winner, mode, onRestart }: ResultViewPro
           >
             <Sparkles className={cn(
               'w-5 h-5',
-              isExhibitionMode ? 'text-violet-400/40' : 'text-amber-400/40'
+              isExhibitionMode ? 'text-white/30' : 'text-amber-400/40'
             )} />
           </motion.div>
         ))}
@@ -302,7 +302,7 @@ export function ResultView({ sessionId, winner, mode, onRestart }: ResultViewPro
           <div className={cn(
             'p-6 text-center border-b',
             isExhibitionMode
-              ? 'bg-gradient-to-r from-violet-500/20 via-indigo-500/20 to-violet-500/20 border-violet-500/20'
+              ? 'bg-gradient-to-r from-white/[0.06] via-white/[0.03] to-white/[0.06] border-white/10'
               : 'bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 border-amber-500/20'
           )}>
             <motion.div
@@ -314,11 +314,11 @@ export function ResultView({ sessionId, winner, mode, onRestart }: ResultViewPro
               <div className={cn(
                 'w-16 h-16 mx-auto rounded-full bg-gradient-to-br flex items-center justify-center border',
                 isExhibitionMode
-                  ? 'from-violet-400/30 to-indigo-600/30 border-violet-400/40'
+                  ? 'from-white/15 to-white/5 border-white/20'
                   : 'from-amber-400/30 to-yellow-600/30 border-amber-400/40'
               )}>
                 {isExhibitionMode ? (
-                  <MapPin className="w-8 h-8 text-violet-400" />
+                  <MapPin className="w-8 h-8 text-white/70" />
                 ) : (
                   <Crown className="w-8 h-8 text-amber-400" />
                 )}
@@ -330,7 +330,7 @@ export function ResultView({ sessionId, winner, mode, onRestart }: ResultViewPro
               transition={{ delay: 0.5 }}
               className={cn(
                 'text-[10px] uppercase tracking-[0.3em] mb-1',
-                isExhibitionMode ? 'text-violet-400/60' : 'text-amber-400/60'
+                isExhibitionMode ? 'text-white/40' : 'text-amber-400/60'
               )}
             >
               {isExhibitionMode ? 'My Ideal Exhibition' : 'My Favorite'}
@@ -411,8 +411,8 @@ export function ResultView({ sessionId, winner, mode, onRestart }: ResultViewPro
               animate={{ opacity: 1 }}
               transition={{ delay: 0.9 }}
             >
-              <div className="border border-violet-500/20 rounded-sm p-5 bg-violet-500/[0.03]">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-violet-400/60 mb-3">
+              <div className="border border-white/10 rounded-sm p-5 bg-white/[0.02]">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-3">
                   당신의 전시 취향 분석
                 </p>
                 <p
@@ -421,7 +421,7 @@ export function ResultView({ sessionId, winner, mode, onRestart }: ResultViewPro
                 >
                   {aptAnalysis.aptLabel}
                 </p>
-                <p className="text-violet-400/80 text-sm font-light mb-4">
+                <p className="text-white/50 text-sm font-light mb-4">
                   {aptAnalysis.aptCode}
                 </p>
                 <div className="space-y-2">
@@ -430,7 +430,7 @@ export function ResultView({ sessionId, winner, mode, onRestart }: ResultViewPro
                       <span className="text-[10px] text-white/30 w-8 shrink-0">{score.axis}</span>
                       <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
                         <motion.div
-                          className="h-full bg-gradient-to-r from-violet-500/80 to-indigo-400/80 rounded-full"
+                          className="h-full bg-gradient-to-r from-white/60 to-white/40 rounded-full"
                           initial={{ width: 0 }}
                           animate={{ width: `${score.value}%` }}
                           transition={{ delay: 1.0, duration: 0.6, ease: 'easeOut' }}
@@ -521,7 +521,7 @@ export function ResultView({ sessionId, winner, mode, onRestart }: ResultViewPro
               "text-white flex items-center justify-center gap-2",
               "disabled:opacity-50 disabled:cursor-not-allowed",
               isExhibitionMode
-                ? "bg-gradient-to-r from-violet-500/80 to-indigo-500/80 hover:from-violet-500 hover:to-indigo-500"
+                ? "bg-gradient-to-r from-white/20 to-white/10 border border-white/20 hover:from-white/25 hover:to-white/15"
                 : "bg-gradient-to-r from-amber-500/80 to-yellow-500/80 hover:from-amber-500 hover:to-yellow-500"
             )}
           >

@@ -29,7 +29,7 @@ const MODE_OPTIONS: {
     icon: MapPin,
     title: '전시 월드컵',
     description: '9,300+ 전시 중 나의 이상형 전시를 골라보세요',
-    accent: 'from-violet-500/20 to-indigo-600/20 border-violet-500/30',
+    accent: 'from-white/10 to-white/5 border-white/20',
   },
 ];
 
@@ -73,7 +73,7 @@ export function ModeSelector({ onSelectMode }: ModeSelectorProps) {
                 'focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30',
                 option.mode === 'artwork'
                   ? 'border-amber-500/20 hover:border-amber-500/40'
-                  : 'border-violet-500/20 hover:border-violet-500/40'
+                  : 'border-white/15 hover:border-white/30'
               )}
             >
               <div
@@ -85,7 +85,7 @@ export function ModeSelector({ onSelectMode }: ModeSelectorProps) {
                 <Icon
                   className={cn(
                     'w-6 h-6',
-                    option.mode === 'artwork' ? 'text-amber-400' : 'text-violet-400'
+                    option.mode === 'artwork' ? 'text-amber-400' : 'text-white/70'
                   )}
                 />
               </div>

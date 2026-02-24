@@ -217,17 +217,20 @@ export function WorldcupContainer({
       selectWinner(winnerId, decisionTimeMs);
 
       // 2. Fire API call in background (no await - fire and forget)
-      fetch(
-        `/api/worldcup/sessions/${session.id}/matches/${currentMatch.id}/result`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            winner_id: winnerId,
-            decision_time_ms: decisionTimeMs,
-          }),
-        }
-      ).catch((error) => console.error('Background match result save error:', error));
+      // Skip for client-generated matches (round 2+) - they don't exist on server
+      if (!currentMatch.id.startsWith('client-')) {
+        fetch(
+          `/api/worldcup/sessions/${session.id}/matches/${currentMatch.id}/result`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              winner_id: winnerId,
+              decision_time_ms: decisionTimeMs,
+            }),
+          }
+        ).catch((error) => console.error('Background match result save error:', error));
+      }
 
       // 3. Client-side bracket progression (instant)
       // Small delay for selection animation to be visible

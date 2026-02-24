@@ -103,7 +103,7 @@ const THEME_OPTIONS: CategoryOption[] = [
     labelEn: 'All',
     description: '9,300+ 전시 랜덤',
     icon: Layers,
-    color: 'text-violet-400',
+    color: 'text-white/60',
   },
 ];
 
@@ -142,8 +142,8 @@ export function ExhibitionSetupPhase({ onStart, onBack, isProcessing }: Exhibiti
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-8"
       >
-        <div className="w-14 h-14 mx-auto rounded-full bg-gradient-to-br from-violet-400/20 to-indigo-600/20 flex items-center justify-center border border-violet-500/30 mb-5">
-          <Globe className="w-7 h-7 text-violet-400" />
+        <div className="w-14 h-14 mx-auto rounded-full bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center border border-white/20 mb-5">
+          <Globe className="w-7 h-7 text-white/60" />
         </div>
         <p className="text-[10px] uppercase tracking-[0.3em] text-white/30 mb-3">
           Exhibition Worldcup
@@ -179,7 +179,7 @@ export function ExhibitionSetupPhase({ onStart, onBack, isProcessing }: Exhibiti
                     'p-3 rounded-sm transition-all duration-200 text-center',
                     'border',
                     isSelected
-                      ? 'bg-violet-500/10 border-violet-500/40 ring-1 ring-violet-500/20'
+                      ? 'bg-white/[0.08] border-white/30 ring-1 ring-white/10'
                       : 'bg-white/[0.02] border-white/10 hover:bg-white/[0.05] hover:border-white/20'
                   )}
                 >
@@ -220,14 +220,14 @@ export function ExhibitionSetupPhase({ onStart, onBack, isProcessing }: Exhibiti
                     'p-4 rounded-sm transition-all duration-200 text-left',
                     'border',
                     isSelected
-                      ? 'bg-violet-500/10 border-violet-500/40 ring-1 ring-violet-500/20'
+                      ? 'bg-white/[0.08] border-white/30 ring-1 ring-white/10'
                       : 'bg-white/[0.02] border-white/10 hover:bg-white/[0.05] hover:border-white/20'
                   )}
                 >
                   <Icon
                     className={cn(
                       'w-4 h-4 mb-2',
-                      isSelected ? 'text-violet-400' : 'text-white/40'
+                      isSelected ? 'text-white/80' : 'text-white/40'
                     )}
                   />
                   <div
@@ -263,14 +263,14 @@ export function ExhibitionSetupPhase({ onStart, onBack, isProcessing }: Exhibiti
                   'flex-1 py-3 rounded-sm transition-all duration-200 text-center',
                   'border',
                   selectedRound === option.value
-                    ? 'bg-violet-500/10 border-violet-500/40'
+                    ? 'bg-white/[0.08] border-white/30'
                     : 'bg-white/[0.02] border-white/10 hover:bg-white/[0.05] hover:border-white/20'
                 )}
               >
                 <div
                   className={cn(
                     'text-lg font-light',
-                    selectedRound === option.value ? 'text-violet-400' : 'text-white/60'
+                    selectedRound === option.value ? 'text-white/90' : 'text-white/60'
                   )}
                 >
                   {option.label}
@@ -291,7 +291,7 @@ export function ExhibitionSetupPhase({ onStart, onBack, isProcessing }: Exhibiti
           className={cn(
             'w-full py-4 rounded-sm font-light text-base transition-all',
             selectedCategory
-              ? 'bg-gradient-to-r from-violet-500/80 to-indigo-500/80 text-white hover:from-violet-500 hover:to-indigo-500'
+              ? 'bg-gradient-to-r from-white/20 to-white/10 text-white border border-white/20 hover:from-white/25 hover:to-white/15'
               : 'bg-white/[0.05] text-white/30 cursor-not-allowed border border-white/10'
           )}
           whileHover={selectedCategory && !isProcessing ? { scale: 1.01 } : {}}
