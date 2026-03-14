@@ -1,6 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+const SOURCE_LABELS: Record<string, string> = {
+  mmca: 'MMCA (국립현대미술관)',
+  exhibition_integrated: 'KCISA 공공데이터',
+  culture_events: '문화체육관광부',
+  aic: 'Art Institute of Chicago',
+  harvard: 'Harvard Art Museums',
+  cleveland: 'Cleveland Museum of Art',
+  whitney: 'Whitney Museum',
+  paris: 'Paris Musées',
+  berlin: 'Kulturdaten Berlin',
+  eflux: 'e-flux',
+  artmap: 'ArtMap',
+};
+
+function getSourceLabel(source: string | null, metadata: any): string | null {
+  if (!source) return null;
+  if (source === 'exhibition_integrated' && metadata?.institution) {
+    return `${metadata.institution} (KCISA)`;
+  }
+  if (source.startsWith('gallery_')) {
+    return source.replace('gallery_', '').replace(/_/g, ' ');
+  }
+  return SOURCE_LABELS[source] || source;
+}
+
 function determineStatus(startDate: string | null, endDate: string | null): 'ongoing' | 'upcoming' | 'ended' {
   if (!startDate || !endDate) return 'upcoming';
   const now = new Date();
@@ -60,7 +85,8 @@ export async function GET(
       artists: data.artists || null,
       tags: data.tags || null,
       source: data.source || null,
-      sourceUrl: data.source_url || null,
+      sourceLabel: getSourceLabel(data.source, data.metadata),
+      sourceUrl: data.source_url ? data.source_url.replace(/&amp;/g, '&') : null,
     };
 
     // Fetch related exhibitions (same venue or city, limit 4)

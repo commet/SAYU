@@ -6,7 +6,7 @@
  *
  * Schedule:
  * - Korean sources (MMCA + Culture Events): Daily at 4:00 AM KST
- * - International (AIC + Harvard): Weekly Monday at 3:00 AM KST
+ * - International (AIC, Harvard, Cleveland, Whitney, Paris, Berlin): Weekly Monday at 3:00 AM KST
  * - Exhibitions mapping + status update: Daily at 5:00 AM KST (after collection)
  */
 
@@ -42,9 +42,15 @@ async function fetchRetry(url, retries = 3, options = {}) {
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 function decodeHtml(t) {
-  return (t || '').replace(/<[^>]*>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-    .replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#039;/g, "'")
-    .replace(/&middot;/g, '·').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+  return (t || '')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&#39;/g, "'")
+    .replace(/&middot;/g, '·').replace(/&nbsp;/g, ' ')
+    .replace(/&ldquo;/g, '\u201c').replace(/&rdquo;/g, '\u201d')
+    .replace(/&lsquo;/g, '\u2018').replace(/&rsquo;/g, '\u2019')
+    .replace(/&mdash;/g, '\u2014').replace(/&ndash;/g, '\u2013')
+    .replace(/<[^>]*>/g, '')
+    .replace(/\s+/g, ' ').trim();
 }
 
 function hash(str) {
@@ -412,6 +418,186 @@ function parseIntegratedXML(xml) {
   return { items, total };
 }
 
+// ===== Cleveland Raw Collector =====
+
+async function collectCleveland(supabase) {
+  log.info('[Cron:Cleveland] Collecting...');
+  let skip = 0, allItems = [];
+  while (true) {
+    try {
+      const url = `https://openaccess-api.clevelandart.org/api/exhibitions/?limit=100&skip=${skip}&opened_after=2020-01-01`;
+      const raw = await fetchRetry(url, 3, { headers: { 'User-Agent': 'SAYU Art Platform', 'Accept': 'application/json' } });
+      const parsed = JSON.parse(raw);
+      const items = parsed?.data || [];
+      if (items.length === 0) break;
+      allItems.push(...items);
+      if (items.length < 100) break;
+      skip += 100;
+      await delay(500);
+    } catch (e) { log.error(`[Cron:Cleveland] skip=${skip} error: ${e.message}`); break; }
+  }
+  log.info(`[Cron:Cleveland] Collected ${allItems.length} items`);
+
+  let upserted = 0;
+  for (let i = 0; i < allItems.length; i += 30) {
+    const rows = allItems.slice(i, i + 30).filter(ex => ex.id && ex.title).map(ex => {
+      const openDate = ex.opening_date ? ex.opening_date.split('T')[0] : null;
+      const closeDate = ex.closing_date ? ex.closing_date.split('T')[0] : null;
+      let venueName = 'Cleveland Museum of Art';
+      if (ex.venues && ex.venues.length > 0) venueName = ex.venues[0].name || venueName;
+      return {
+        external_id: String(ex.id), title: ex.title, organizer: ex.organizer || null,
+        venue_name: venueName, venue_city: 'Cleveland', venue_country: 'US',
+        start_date: openDate, end_date: closeDate,
+        venues: ex.venues || [], gallery_views_urls: ex.gallery_views_urls || [],
+        is_venue_cma: ex.is_venue_cma || false,
+        raw_data: ex, collected_at: new Date().toISOString()
+      };
+    });
+    const { data, error } = await supabase.from('source_cleveland').upsert(rows, { onConflict: 'external_id', ignoreDuplicates: false }).select('id');
+    if (!error) upserted += (data?.length || 0);
+  }
+  log.info(`[Cron:Cleveland] Done: ${upserted} upserted`);
+  return upserted;
+}
+
+// ===== Whitney Raw Collector =====
+
+async function collectWhitney(supabase) {
+  log.info('[Cron:Whitney] Collecting...');
+  let page = 1, allItems = [];
+  while (page <= 20) {
+    try {
+      const url = `https://whitney.org/api/exhibitions?page%5Bnumber%5D=${page}&page%5Bsize%5D=30`;
+      const raw = await fetchRetry(url, 3, { headers: { 'User-Agent': 'SAYU Art Platform', 'Accept': 'application/json' } });
+      const parsed = JSON.parse(raw);
+      const items = parsed?.data || [];
+      if (items.length === 0) break;
+      allItems.push(...items);
+      const totalPages = parsed?.meta?.total_pages || 0;
+      if (page >= totalPages || items.length < 30) break;
+      page++;
+      await delay(1000);
+    } catch (e) { log.error(`[Cron:Whitney] page=${page} error: ${e.message}`); break; }
+  }
+  log.info(`[Cron:Whitney] Collected ${allItems.length} items`);
+
+  // Dedup
+  const seen = new Map();
+  for (const ex of allItems) { if (ex.id && !seen.has(String(ex.id))) seen.set(String(ex.id), ex); }
+  const unique = [...seen.values()];
+
+  let upserted = 0;
+  for (let i = 0; i < unique.length; i += 30) {
+    const rows = unique.slice(i, i + 30).map(ex => {
+      const attrs = ex.attributes || {};
+      return {
+        external_id: String(ex.id), title: attrs.title || '',
+        start_date: attrs.start_time ? attrs.start_time.split('T')[0] : null,
+        end_date: attrs.end_time ? attrs.end_time.split('T')[0] : null,
+        description: attrs.primary_text ? decodeHtml(attrs.primary_text).slice(0, 5000) : null,
+        date_override: attrs.date_override || null, url_slug: attrs.url || null,
+        raw_data: ex, collected_at: new Date().toISOString()
+      };
+    });
+    const { data, error } = await supabase.from('source_whitney').upsert(rows, { onConflict: 'external_id', ignoreDuplicates: false }).select('id');
+    if (!error) upserted += (data?.length || 0);
+  }
+  log.info(`[Cron:Whitney] Done: ${upserted} upserted`);
+  return upserted;
+}
+
+// ===== Paris Raw Collector =====
+
+async function collectParis(supabase) {
+  log.info('[Cron:Paris] Collecting...');
+  const TAGS = ['expo', 'exposition', 'art', 'musée', 'galerie', 'museum', 'gallery', 'vernissage', 'biennale'];
+  const fields = 'id,event_id,url,title,lead_text,description,date_start,date_end,cover_url,address_name,address_street,address_zipcode,address_city,lat_lon,price_type,price_detail,qfap_tags';
+  let offset = 0, allItems = [];
+  while (true) {
+    try {
+      const url = `https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/que-faire-a-paris-/records?limit=100&offset=${offset}&select=${encodeURIComponent(fields)}`;
+      const raw = await fetchRetry(url, 3, { headers: { 'User-Agent': 'SAYU Art Platform', 'Accept': 'application/json' } });
+      const parsed = JSON.parse(raw);
+      const records = parsed?.results || [];
+      if (records.length === 0) break;
+      for (const rec of records) {
+        const text = `${rec.title || ''} ${rec.lead_text || ''} ${rec.address_name || ''} ${rec.qfap_tags || ''}`.toLowerCase();
+        if (TAGS.some(t => text.includes(t))) allItems.push(rec);
+      }
+      if (records.length < 100 || offset + 100 >= (parsed?.total_count || 0)) break;
+      offset += 100;
+      await delay(300);
+    } catch (e) { log.error(`[Cron:Paris] offset=${offset} error: ${e.message}`); break; }
+  }
+  log.info(`[Cron:Paris] Collected ${allItems.length} exhibition items`);
+
+  let upserted = 0;
+  for (let i = 0; i < allItems.length; i += 30) {
+    const rows = allItems.slice(i, i + 30).filter(rec => rec.title).map(rec => ({
+      external_id: String(rec.id || rec.event_id), title: rec.title,
+      venue_name: rec.address_name || null,
+      venue_address: rec.address_street ? `${rec.address_street}, ${rec.address_zipcode || ''} ${rec.address_city || 'Paris'}`.trim() : null,
+      start_date: rec.date_start ? rec.date_start.split('T')[0] : null,
+      end_date: rec.date_end ? rec.date_end.split('T')[0] : null,
+      description: rec.lead_text || (rec.description ? decodeHtml(rec.description).slice(0, 5000) : null),
+      image_url: rec.cover_url || null,
+      lat: rec.lat_lon?.lat || null, lng: rec.lat_lon?.lon || null,
+      price_type: rec.price_type || null, price_detail: rec.price_detail || null,
+      tags: rec.qfap_tags || null, source_url: rec.url || null,
+      raw_data: rec, collected_at: new Date().toISOString()
+    }));
+    const { data, error } = await supabase.from('source_paris').upsert(rows, { onConflict: 'external_id', ignoreDuplicates: false }).select('id');
+    if (!error) upserted += (data?.length || 0);
+  }
+  log.info(`[Cron:Paris] Done: ${upserted} upserted`);
+  return upserted;
+}
+
+// ===== Berlin Raw Collector =====
+
+async function collectBerlin(supabase) {
+  log.info('[Cron:Berlin] Collecting...');
+  let page = 1, allItems = [];
+  while (true) {
+    try {
+      const url = `https://api-v2.kulturdaten.berlin/api/events?page=${page}&pageSize=100`;
+      const raw = await fetchRetry(url, 3, { headers: { 'User-Agent': 'SAYU Art Platform', 'Accept': 'application/json' } });
+      const parsed = JSON.parse(raw);
+      const events = parsed?.data?.events || [];
+      if (events.length === 0) break;
+      for (const ev of events) {
+        let title = null, venueName = null;
+        if (ev.attractions?.length > 0) title = ev.attractions[0].referenceLabel?.de || ev.attractions[0].referenceLabel?.en;
+        if (ev.locations?.length > 0) venueName = ev.locations[0].referenceLabel?.de || ev.locations[0].referenceLabel?.en;
+        if (!title) continue;
+        const titleLower = title.toLowerCase();
+        const isExhibition = titleLower.includes('ausstellung') || titleLower.includes('exhibition') || titleLower.includes('expo') || titleLower.includes('galerie') || titleLower.includes('kunst') || ev.type === 'type.Exhibition';
+        allItems.push({
+          external_id: ev.identifier, title, venue_name: venueName,
+          start_date: ev.schedule?.startDate || null, end_date: ev.schedule?.endDate || null,
+          admission_type: ev.admission?.ticketType || null, event_type: ev.type || null,
+          status: ev.status || null, is_exhibition: isExhibition, raw_data: ev
+        });
+      }
+      const totalPages = Math.ceil((parsed?.data?.totalCount || 0) / 100);
+      if (page >= totalPages || events.length < 100) break;
+      page++;
+      await delay(300);
+    } catch (e) { log.error(`[Cron:Berlin] page=${page} error: ${e.message}`); break; }
+  }
+  log.info(`[Cron:Berlin] Collected ${allItems.length} items`);
+
+  let upserted = 0;
+  for (let i = 0; i < allItems.length; i += 30) {
+    const rows = allItems.slice(i, i + 30).map(item => ({ ...item, collected_at: new Date().toISOString() }));
+    const { data, error } = await supabase.from('source_berlin').upsert(rows, { onConflict: 'external_id', ignoreDuplicates: false }).select('id');
+    if (!error) upserted += (data?.length || 0);
+  }
+  log.info(`[Cron:Berlin] Done: ${upserted} upserted`);
+  return upserted;
+}
+
 // ===== Exhibitions Mapping =====
 
 const MMCA_VENUES = {
@@ -419,6 +605,27 @@ const MMCA_VENUES = {
   '서울': { name: '국립현대미술관 서울', city: '서울', address: '서울특별시 종로구 삼청로 30' },
   '덕수궁': { name: '국립현대미술관 덕수궁', city: '서울', address: '서울특별시 중구 세종대로 99' },
   '청주': { name: '국립현대미술관 청주', city: '청주', address: '충청북도 청주시 청원구 상당로 314' }
+};
+
+const GALLERY_VENUES = {
+  kukje: { name: '국제갤러리', city: 'Seoul', country: 'KR' },
+  pkm: { name: 'PKM갤러리', city: 'Seoul', country: 'KR' },
+  ropac: { name: '타데우스 로팍 서울', city: 'Seoul', country: 'KR' },
+  lehmann_maupin: { name: '리만머핀 서울', city: 'Seoul', country: 'KR' },
+  pace: { name: '페이스갤러리 서울', city: 'Seoul', country: 'KR' },
+  arario: { name: '아라리오갤러리', city: 'Seoul', country: 'KR' },
+  thepage: { name: '더페이지갤러리', city: 'Seoul', country: 'KR' },
+  baton: { name: '갤러리바톤', city: 'Seoul', country: 'KR' },
+  artsonje: { name: '아트선재센터', city: 'Seoul', country: 'KR' },
+  oci: { name: 'OCI미술관', city: 'Seoul', country: 'KR' },
+  lotte: { name: '롯데뮤지엄', city: 'Seoul', country: 'KR' },
+  leeum: { name: '리움미술관', city: 'Seoul', country: 'KR' },
+  soma: { name: '소마미술관', city: 'Seoul', country: 'KR' },
+  perigee: { name: '페리지갤러리', city: 'Seoul', country: 'KR' },
+  gladstone: { name: '글래드스톤갤러리 서울', city: 'Seoul', country: 'KR' },
+  tang: { name: '탕컨템포러리 서울', city: 'Seoul', country: 'KR' },
+  whitestone: { name: '화이트스톤갤러리 서울', city: 'Seoul', country: 'KR' },
+  savina: { name: '사비나미술관', city: 'Seoul', country: 'KR' },
 };
 
 async function mapToExhibitions(supabase) {
@@ -515,7 +722,7 @@ async function mapToExhibitions(supabase) {
       status: calcStatus(item.start_date, item.end_date),
       description: item.description || null, admission_fee: item.charge || null,
       image_url: item.image_url || null,
-      source: 'culture_events', source_url: item.url || null, website_url: item.url || null,
+      source: 'culture_events', source_url: (item.url || '').replace(/&amp;/g, '&') || null, website_url: (item.url || '').replace(/&amp;/g, '&') || null,
       tags: ['문화체육관광부', item.dtype || '전시'].filter(Boolean),
       metadata: { source_table: 'source_culture_events', source_id: item.id, ext_id: item.ext_id, contact_point: item.contact_point, view_count: item.view_count },
       collected_at: new Date().toISOString(), updated_at: new Date().toISOString()
@@ -540,7 +747,7 @@ async function mapToExhibitions(supabase) {
       artists: item.author ? item.author.split(/[,，、]/).map(s => s.trim()).filter(Boolean) : null,
       admission_fee: item.charge || null,
       image_url: item.image_url || null,
-      source: 'exhibition_integrated', source_url: item.url || null, website_url: item.url || null,
+      source: 'exhibition_integrated', source_url: (item.url || '').replace(/&amp;/g, '&') || null, website_url: (item.url || '').replace(/&amp;/g, '&') || null,
       tags: [item.institution || '', item.genre || '전시'].filter(Boolean),
       metadata: { source_table: 'source_exhibition_integrated', source_id: item.id, local_id: item.local_id, institution: item.institution, contact_point: item.contact_point, contributor: item.contributor, audience: item.audience, duration: item.duration },
       collected_at: new Date().toISOString(), updated_at: new Date().toISOString()
@@ -550,6 +757,157 @@ async function mapToExhibitions(supabase) {
     else { const { error } = await supabase.from('exhibitions').insert(row); if (!error) ins++; }
   }
   log.info(`[Cron:Map] Exhibition Integrated: ${ins} inserted, ${upd} updated`);
+  totalInserted += ins; totalUpdated += upd;
+
+  // Map Galleries
+  const { error: galTestErr } = await supabase.from('source_galleries').select('id').limit(1);
+  if (!galTestErr) {
+    const galItems = await fetchAll(supabase, 'source_galleries');
+    ins = 0; upd = 0;
+    for (const item of galItems) {
+      const venueInfo = GALLERY_VENUES[item.gallery_slug] || {};
+      const row = {
+        title_en: isKorean(item.title) ? null : item.title,
+        title_local: item.title,
+        venue_name: item.venue_name || venueInfo.name || item.gallery_slug,
+        venue_city: venueInfo.city || 'Seoul', venue_country: venueInfo.country || 'KR',
+        start_date: item.start_date, end_date: item.end_date,
+        status: calcStatus(item.start_date, item.end_date),
+        description: item.description || null,
+        artists: item.artist ? item.artist.split(/[,，、&]/).map(s => s.trim()).filter(Boolean) : null,
+        image_url: item.image_url || null,
+        source: `gallery_${item.gallery_slug}`, source_url: item.source_url || null,
+        tags: [item.venue_name || venueInfo.name, '사립갤러리'].filter(Boolean),
+        metadata: { source_table: 'source_galleries', source_id: item.id, gallery_slug: item.gallery_slug, external_id: item.external_id },
+        collected_at: new Date().toISOString(), updated_at: new Date().toISOString()
+      };
+      const { data: existing } = await supabase.from('exhibitions').select('id').eq('source',`gallery_${item.gallery_slug}`).contains('metadata',{external_id:item.external_id}).maybeSingle();
+      if (existing) { const { error } = await supabase.from('exhibitions').update(row).eq('id',existing.id); if (!error) upd++; }
+      else { const { error } = await supabase.from('exhibitions').insert(row); if (!error) ins++; }
+    }
+    log.info(`[Cron:Map] Galleries: ${ins} inserted, ${upd} updated`);
+    totalInserted += ins; totalUpdated += upd;
+  }
+
+  // Map Cleveland
+  const clevelandItems = await fetchAll(supabase, 'source_cleveland', [q => q.not('start_date','is',null)]);
+  ins = 0; upd = 0;
+  for (const item of clevelandItems) {
+    const row = {
+      title_en: item.title, title_local: item.title,
+      venue_name: item.venue_name || 'Cleveland Museum of Art',
+      venue_city: 'Cleveland', venue_country: 'US',
+      start_date: item.start_date, end_date: item.end_date,
+      status: calcStatus(item.start_date, item.end_date),
+      source: 'cleveland', source_url: 'https://www.clevelandart.org/exhibitions',
+      tags: ['Cleveland Museum of Art', 'International'],
+      metadata: { source_table: 'source_cleveland', source_id: item.id, external_id: item.external_id },
+      collected_at: new Date().toISOString(), updated_at: new Date().toISOString()
+    };
+    const { data: existing } = await supabase.from('exhibitions').select('id').eq('source','cleveland').contains('metadata',{external_id:item.external_id}).maybeSingle();
+    if (existing) { const { error } = await supabase.from('exhibitions').update(row).eq('id',existing.id); if (!error) upd++; }
+    else { const { error } = await supabase.from('exhibitions').insert(row); if (!error) ins++; }
+  }
+  log.info(`[Cron:Map] Cleveland: ${ins} inserted, ${upd} updated`);
+  totalInserted += ins; totalUpdated += upd;
+
+  // Map Whitney
+  const whitneyItems = await fetchAll(supabase, 'source_whitney', [q => q.not('start_date','is',null)]);
+  ins = 0; upd = 0;
+  for (const item of whitneyItems) {
+    const sourceUrl = item.url_slug ? `https://whitney.org${item.url_slug}` : 'https://whitney.org/exhibitions';
+    const row = {
+      title_en: item.title, title_local: item.title,
+      venue_name: 'Whitney Museum of American Art',
+      venue_city: 'New York', venue_country: 'US',
+      venue_address: '99 Gansevoort St, New York, NY 10014, USA',
+      start_date: item.start_date, end_date: item.end_date,
+      status: calcStatus(item.start_date, item.end_date),
+      description: item.description || null,
+      source: 'whitney', source_url: sourceUrl,
+      tags: ['Whitney Museum', 'New York', 'International'],
+      metadata: { source_table: 'source_whitney', source_id: item.id, external_id: item.external_id },
+      collected_at: new Date().toISOString(), updated_at: new Date().toISOString()
+    };
+    const { data: existing } = await supabase.from('exhibitions').select('id').eq('source','whitney').contains('metadata',{external_id:item.external_id}).maybeSingle();
+    if (existing) { const { error } = await supabase.from('exhibitions').update(row).eq('id',existing.id); if (!error) upd++; }
+    else { const { error } = await supabase.from('exhibitions').insert(row); if (!error) ins++; }
+  }
+  log.info(`[Cron:Map] Whitney: ${ins} inserted, ${upd} updated`);
+  totalInserted += ins; totalUpdated += upd;
+
+  // Map Paris
+  const parisItems = await fetchAll(supabase, 'source_paris');
+  ins = 0; upd = 0;
+  for (const item of parisItems) {
+    const row = {
+      title_en: item.title, title_local: item.title,
+      venue_name: item.venue_name || null,
+      venue_city: 'Paris', venue_country: 'FR',
+      venue_address: item.venue_address || null,
+      start_date: item.start_date, end_date: item.end_date,
+      status: calcStatus(item.start_date, item.end_date),
+      description: item.description || null,
+      image_url: item.image_url || null,
+      admission_fee: item.price_type === 'gratuit' ? 'Free' : (item.price_detail || null),
+      source: 'paris', source_url: item.source_url || null,
+      tags: ['Paris', 'France', 'International'],
+      metadata: { source_table: 'source_paris', source_id: item.id, external_id: item.external_id },
+      collected_at: new Date().toISOString(), updated_at: new Date().toISOString()
+    };
+    const { data: existing } = await supabase.from('exhibitions').select('id').eq('source','paris').contains('metadata',{external_id:item.external_id}).maybeSingle();
+    if (existing) { const { error } = await supabase.from('exhibitions').update(row).eq('id',existing.id); if (!error) upd++; }
+    else { const { error } = await supabase.from('exhibitions').insert(row); if (!error) ins++; }
+  }
+  log.info(`[Cron:Map] Paris: ${ins} inserted, ${upd} updated`);
+  totalInserted += ins; totalUpdated += upd;
+
+  // Map Berlin
+  const berlinItems = await fetchAll(supabase, 'source_berlin', [q => q.eq('is_exhibition',true)]);
+  ins = 0; upd = 0;
+  for (const item of berlinItems) {
+    const row = {
+      title_en: item.title, title_local: item.title,
+      venue_name: item.venue_name || null,
+      venue_city: 'Berlin', venue_country: 'DE',
+      start_date: item.start_date, end_date: item.end_date,
+      status: calcStatus(item.start_date, item.end_date),
+      admission_fee: item.admission_type === 'ticketType.freeOfCharge' ? 'Free' : null,
+      source: 'berlin', source_url: 'https://www.kulturdaten.berlin',
+      tags: ['Berlin', 'Germany', 'International'],
+      metadata: { source_table: 'source_berlin', source_id: item.id, external_id: item.external_id },
+      collected_at: new Date().toISOString(), updated_at: new Date().toISOString()
+    };
+    const { data: existing } = await supabase.from('exhibitions').select('id').eq('source','berlin').contains('metadata',{external_id:item.external_id}).maybeSingle();
+    if (existing) { const { error } = await supabase.from('exhibitions').update(row).eq('id',existing.id); if (!error) upd++; }
+    else { const { error } = await supabase.from('exhibitions').insert(row); if (!error) ins++; }
+  }
+  log.info(`[Cron:Map] Berlin: ${ins} inserted, ${upd} updated`);
+  totalInserted += ins; totalUpdated += upd;
+
+  // Map e-flux
+  const efluxItems = await fetchAll(supabase, 'source_eflux');
+  ins = 0; upd = 0;
+  for (const item of efluxItems) {
+    const row = {
+      title_en: item.title, title_local: item.title,
+      venue_name: item.venue || null,
+      venue_city: item.city || null, venue_country: null,
+      start_date: item.start_date, end_date: item.end_date,
+      status: calcStatus(item.start_date, item.end_date),
+      description: item.description || null,
+      image_url: item.image_url || null,
+      artists: item.artists || null,
+      source: 'eflux', source_url: item.source_url || 'https://www.e-flux.com/announcements/',
+      tags: ['e-flux', item.city, 'International'].filter(Boolean),
+      metadata: { source_table: 'source_eflux', source_id: item.id, external_id: item.external_id },
+      collected_at: new Date().toISOString(), updated_at: new Date().toISOString()
+    };
+    const { data: existing } = await supabase.from('exhibitions').select('id').eq('source','eflux').contains('metadata',{external_id:item.external_id}).maybeSingle();
+    if (existing) { const { error } = await supabase.from('exhibitions').update(row).eq('id',existing.id); if (!error) upd++; }
+    else { const { error } = await supabase.from('exhibitions').insert(row); if (!error) ins++; }
+  }
+  log.info(`[Cron:Map] e-flux: ${ins} inserted, ${upd} updated`);
   totalInserted += ins; totalUpdated += upd;
 
   // Update statuses
@@ -585,6 +943,10 @@ class ExhibitionPipeline {
       results.sources.exhibition_integrated = await collectExhibitionIntegrated(supabase);
       results.sources.aic = await collectAIC(supabase);
       results.sources.harvard = await collectHarvard(supabase);
+      results.sources.cleveland = await collectCleveland(supabase);
+      results.sources.whitney = await collectWhitney(supabase);
+      results.sources.paris = await collectParis(supabase);
+      results.sources.berlin = await collectBerlin(supabase);
       results.mapping = await mapToExhibitions(supabase);
     } catch (e) {
       log.error(`[Pipeline] Fatal: ${e.message}`);
@@ -604,7 +966,7 @@ class ExhibitionPipeline {
     this.isRunning = true;
     try {
       const supabase = getSupabaseAdmin();
-      const collectors = { mmca: collectMMCA, culture_events: collectCultureEvents, exhibition_integrated: collectExhibitionIntegrated, aic: collectAIC, harvard: collectHarvard };
+      const collectors = { mmca: collectMMCA, culture_events: collectCultureEvents, exhibition_integrated: collectExhibitionIntegrated, aic: collectAIC, harvard: collectHarvard, cleveland: collectCleveland, whitney: collectWhitney, paris: collectParis, berlin: collectBerlin };
       if (!collectors[name]) return { status: 'error', error: `Unknown source: ${name}` };
       const count = await collectors[name](supabase);
       const mapping = await mapToExhibitions(supabase);
@@ -633,6 +995,10 @@ class ExhibitionPipeline {
         const supabase = getSupabaseAdmin();
         await collectAIC(supabase);
         await collectHarvard(supabase);
+        await collectCleveland(supabase);
+        await collectWhitney(supabase);
+        await collectParis(supabase);
+        await collectBerlin(supabase);
         await mapToExhibitions(supabase);
         log.info('[Cron] International sources done');
       } catch (e) { log.error(`[Cron] International error: ${e.message}`); }
@@ -666,7 +1032,7 @@ class ExhibitionPipeline {
       lastRun: this.lastRun,
       lastResults: this.lastResults,
       cronActive: this.cronJobs.length > 0,
-      sources: ['mmca', 'culture_events', 'exhibition_integrated', 'aic', 'harvard']
+      sources: ['mmca', 'culture_events', 'exhibition_integrated', 'aic', 'harvard', 'cleveland', 'whitney', 'paris', 'berlin', 'galleries', 'eflux']
     };
   }
 }

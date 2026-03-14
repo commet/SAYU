@@ -1,23 +1,14 @@
 'use client';
 
-import { useCallback, useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import { Loader2, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useArtCounselorSession } from '@/hooks/useArtCounselorSession';
-import { useArtCounselorStore } from '@/lib/art-counselor/store';
-import { useShallow } from 'zustand/react/shallow';
-import { createMessage } from '@/lib/art-counselor/utils';
-import { CounselorOption } from '@/lib/art-counselor/types';
-import { ArtCounselorShell } from '@/components/art-counselor-hybrid/ArtCounselorShell';
-import { ArtworkHero } from '@/components/art-counselor-hybrid/ArtworkHero';
-import { ConversationStage } from '@/components/art-counselor-hybrid/ConversationStage';
-import { ConversationThread } from '@/components/art-counselor-hybrid/ConversationThread';
-import { OpeningStep } from '@/components/art-counselor-hybrid/OpeningStep';
-import { ExplorationStep } from '@/components/art-counselor-hybrid/ExplorationStep';
-import { ConnectionStep } from '@/components/art-counselor-hybrid/ConnectionStep';
-import { CompleteStep } from '@/components/art-counselor-hybrid/CompleteStep';
-import { SessionInsightsPanel } from '@/components/art-counselor-hybrid/SessionInsightsPanel';
+import { ChatInterface } from '@/components/art-counselor/ChatInterface';
+import { cn } from '@/lib/utils';
 
 export default function ArtCounselorSessionPage() {
   const params = useParams<{ artworkId: string }>();
@@ -29,181 +20,240 @@ export default function ArtCounselorSessionPage() {
     stage,
     messages,
     options,
-    isLoading,
+    isStreaming,
+    streamingContent,
     artwork,
-    journalPayload,
-    appendMessage,
-    setOptions,
-  } = useArtCounselorStore(
-    useShallow((state) => ({
-      stage: state.stage,
-      messages: state.messages,
-      options: state.options,
-      isLoading: state.isLoading,
-      artwork: state.artwork,
-      journalPayload: state.journalPayload,
-      appendMessage: state.appendMessage,
-      setOptions: state.setOptions,
-    }))
-  );
-
-  const {
-    resetSession,
-    loadOpening,
-    sendExploration,
-    sendConnection,
+    summary,
+    moodTags,
+    error,
+    initSession,
+    sendMessage,
+    reset,
   } = useArtCounselorSession();
 
-  useEffect(() => {
-    resetSession();
-    return () => resetSession();
-  }, [resetSession, artworkId]);
+  const aptType = user?.personalityType || user?.aptType || 'LAEF';
 
+  // Auth gate
   useEffect(() => {
     if (authLoading) return;
-
     if (!user) {
-      router.replace('/auth/sign-in');
+      router.replace('/login?redirect=/art-counselor');
       return;
     }
-
-    if (!user.personalityType) {
-      router.replace('/quiz');
-      return;
+    if (!user.personalityType && !user.aptType) {
+      router.replace('/quiz?redirect=/art-counselor');
     }
+  }, [authLoading, user, router]);
 
-    if (!artworkId) {
-      router.replace('/art-counselor');
-      return;
-    }
+  // Init session on mount
+  useEffect(() => {
+    if (authLoading || !user || !artworkId) return;
+    reset();
+    initSession(aptType);
 
-    loadOpening({ artworkId, personality: user.personalityType });
-  }, [authLoading, user, router, artworkId, loadOpening]);
+    return () => {
+      reset();
+    };
+    // Only run on mount and when artworkId changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [artworkId, authLoading]);
 
-  const ensurePersonality = useCallback(() => {
-    if (!user?.personalityType) {
-      throw new Error('Personality type is required for counselor session');
-    }
-    return user.personalityType;
-  }, [user?.personalityType]);
-
-  const handleOptionSelect = useCallback(
-    async (option: CounselorOption) => {
-      const personality = ensurePersonality();
-      if (option.id === 'free_input') {
-        return;
-      }
-
-      appendMessage(
-        createMessage('user', option.label, { stage: 'opening' })
-      );
-      setOptions([]);
-      await sendExploration({
-        artworkId,
-        personality,
-        userSelection: option.id,
-        freeText: null,
-      });
+  const handleSendMessage = useCallback(
+    (content: string, optionId?: string) => {
+      sendMessage(content, optionId);
     },
-    [
-      appendMessage,
-      ensurePersonality,
-      artworkId,
-      sendExploration,
-      setOptions,
-    ]
+    [sendMessage]
   );
 
-  const handleExplorationFreeText = useCallback(
-    async (freeText: string) => {
-      appendMessage(
-        createMessage('user', freeText, { stage: 'exploration' })
-      );
-      const personality = ensurePersonality();
-      setOptions([]);
-      await sendExploration({
-        artworkId,
-        personality,
-        userSelection: 'free_input',
-        freeText,
-      });
-    },
-    [appendMessage, ensurePersonality, artworkId, sendExploration, setOptions]
-  );
+  const handleNewSession = useCallback(() => {
+    reset();
+    router.push('/art-counselor');
+  }, [reset, router]);
 
-  const handleConnectionSubmit = useCallback(
-    async (reflection: string) => {
-      appendMessage(
-        createMessage('user', reflection, { stage: 'connection' })
-      );
-      const personality = ensurePersonality();
-      await sendConnection({ artworkId, personality, reflection });
-    },
-    [appendMessage, ensurePersonality, artworkId, sendConnection]
-  );
-
-  const handleJournalRedirect = useCallback(() => {
-    router.push('/art-counselor/journal');
+  const handleViewTimeline = useCallback(() => {
+    router.push('/art-counselor/timeline');
   }, [router]);
 
-  const conversationFooter = (() => {
-    switch (stage) {
-      case 'opening':
-        return (
-          <OpeningStep
-            options={options}
-            isLoading={isLoading}
-            onSelectOption={handleOptionSelect}
-          />
-        );
-      case 'exploration':
-        return (
-          <ExplorationStep
-            options={options}
-            isLoading={isLoading}
-            onSelectOption={handleOptionSelect}
-            onSubmitFreeText={handleExplorationFreeText}
-          />
-        );
-      case 'connection':
-        return (
-          <ConnectionStep
-            isLoading={isLoading}
-            onSubmit={handleConnectionSubmit}
-          />
-        );
-      case 'complete':
-      default:
-        return <CompleteStep payload={journalPayload} onReset={handleJournalRedirect} />;
-    }
-  })();
+  const handleBack = useCallback(() => {
+    reset();
+    router.push('/art-counselor');
+  }, [reset, router]);
+
+  // Loading state
+  if (authLoading) {
+    return (
+      <div className="fixed inset-0 bg-[#0a0a0b] flex items-center justify-center">
+        <Loader2 className="w-5 h-5 animate-spin text-white/30" />
+      </div>
+    );
+  }
+
+  // Error state
+  if (error && !artwork) {
+    return (
+      <div className="fixed inset-0 bg-[#0a0a0b] flex flex-col items-center justify-center px-6">
+        <p
+          className="text-white/60 text-lg mb-6 text-center"
+          style={{ fontFamily: 'var(--font-serif, Georgia, serif)' }}
+        >
+          잠시 문제가 생겼어요
+        </p>
+        <p className="text-white/35 text-sm mb-8 text-center">{error}</p>
+        <button
+          onClick={handleBack}
+          className={cn(
+            'px-6 py-2.5 text-sm font-light',
+            'border border-white/15 rounded-sm text-white/60',
+            'hover:bg-white/[0.06] transition-colors'
+          )}
+        >
+          돌아가기
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <ArtCounselorShell
-      artworkPanel={<ArtworkHero artwork={artwork} personality={user?.personalityType ?? null} />}
-      conversationPanel={
-        <div className="relative flex h-full flex-col">
-          <ConversationStage stage={stage} />
-          <ConversationThread messages={messages} />
-          <div className="border-t border-white/10 bg-white/[0.02]">
-            {conversationFooter}
-          </div>
-          {isLoading ? (
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-              <Loader2 className="h-6 w-6 animate-spin text-white/50" />
+    <div className="fixed inset-0 bg-[#0a0a0b] flex flex-col md:flex-row">
+      {/* ---- Left / Top: Artwork panel ---- */}
+      <div
+        className={cn(
+          // Mobile: compact sticky header
+          'relative shrink-0',
+          'h-[22vh] md:h-full',
+          'md:w-[40%] lg:w-[42%]',
+          'border-b md:border-b-0 md:border-r border-white/[0.06]'
+        )}
+      >
+        {artwork ? (
+          <>
+            {/* Back button */}
+            <button
+              onClick={handleBack}
+              className={cn(
+                'absolute top-3 left-3 z-20',
+                'p-2 rounded-full',
+                'bg-black/40 backdrop-blur-sm',
+                'text-white/50 hover:text-white/80',
+                'transition-colors'
+              )}
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+
+            {/* Artwork image */}
+            <div className="relative w-full h-full">
+              <Image
+                src={artwork.imageUrl}
+                alt={artwork.title}
+                fill
+                className="object-contain p-4 md:p-8"
+                priority
+                sizes="(max-width: 768px) 100vw, 40vw"
+              />
+
+              {/* Title overlay on mobile */}
+              <div className="absolute bottom-0 inset-x-0 md:hidden bg-gradient-to-t from-[#0a0a0b] to-transparent pt-8 pb-2 px-4">
+                <h2
+                  className="text-sm text-white/70 font-light truncate"
+                  style={{
+                    fontFamily: 'var(--font-serif, Georgia, serif)',
+                  }}
+                >
+                  {artwork.title}
+                </h2>
+                <p className="text-[11px] text-white/35 truncate">
+                  {artwork.artist}
+                </p>
+              </div>
             </div>
-          ) : null}
+
+            {/* Title below image on desktop */}
+            <div className="hidden md:block absolute bottom-6 inset-x-0 text-center px-6">
+              <h2
+                className="text-base text-white/70 font-light"
+                style={{
+                  fontFamily: 'var(--font-serif, Georgia, serif)',
+                }}
+              >
+                {artwork.title}
+              </h2>
+              <p className="text-xs text-white/35 mt-1">
+                {artwork.artist}
+                {artwork.year && ` \u00B7 ${artwork.year}`}
+              </p>
+            </div>
+          </>
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <Loader2 className="w-5 h-5 animate-spin text-white/20" />
+          </div>
+        )}
+      </div>
+
+      {/* ---- Right / Bottom: Chat panel ---- */}
+      <div className="flex-1 min-h-0 flex flex-col">
+        {/* Stage indicator */}
+        <div className="shrink-0 px-4 py-2.5 border-b border-white/[0.04]">
+          <div className="flex items-center gap-3">
+            {(['opening', 'exploring', 'connecting'] as const).map(
+              (s, i) => (
+                <div key={s} className="flex items-center gap-2">
+                  <div
+                    className={cn(
+                      'w-1.5 h-1.5 rounded-full transition-colors duration-500',
+                      stage === s || getStageIndex(stage) > i
+                        ? 'bg-white/50'
+                        : 'bg-white/10'
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      'text-[10px] uppercase tracking-widest transition-colors duration-500',
+                      stage === s ? 'text-white/40' : 'text-white/15'
+                    )}
+                  >
+                    {s === 'opening'
+                      ? '만남'
+                      : s === 'exploring'
+                        ? '탐색'
+                        : '연결'}
+                  </span>
+                </div>
+              )
+            )}
+            {stage === 'complete' && (
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-white/50" />
+                <span className="text-[10px] uppercase tracking-widest text-white/40">
+                  마무리
+                </span>
+              </div>
+            )}
+          </div>
         </div>
-      }
-      summaryPanel={
-        <SessionInsightsPanel
-          artwork={artwork}
-          personality={user?.personalityType ?? null}
-          stage={stage}
-          journalPayload={journalPayload}
-          onOpenJournal={journalPayload ? handleJournalRedirect : undefined}
-        />
-      }
-    />
+
+        {/* Chat interface */}
+        <div className="flex-1 min-h-0">
+          <ChatInterface
+            stage={stage}
+            messages={messages}
+            streamingContent={streamingContent}
+            isStreaming={isStreaming}
+            options={options}
+            summary={summary}
+            moodTags={moodTags}
+            onSendMessage={handleSendMessage}
+            onNewSession={handleNewSession}
+            onViewTimeline={handleViewTimeline}
+          />
+        </div>
+      </div>
+    </div>
   );
+}
+
+function getStageIndex(stage: string): number {
+  const order = ['opening', 'exploring', 'connecting', 'complete'];
+  return order.indexOf(stage);
 }

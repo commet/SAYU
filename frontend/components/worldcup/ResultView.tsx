@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   Download,
@@ -11,6 +11,7 @@ import {
   Sparkles,
   Crown,
   MapPin,
+  Calendar,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useWorldcupStore } from '@/lib/stores/worldcup-store';
@@ -19,10 +20,7 @@ import type {
   WorldcupRanking,
   WorldcupMode,
 } from '@sayu/shared/exhibition-worldcup-types';
-import {
-  inferGenresFromKeywords,
-  APT_GENRE_PREFERENCES,
-} from '@sayu/shared/apt-exhibition-matching';
+import { ExhibitionPlaceholder } from '@/components/exhibitions/ExhibitionPlaceholder';
 
 interface ResultViewProps {
   sessionId: string;
@@ -31,100 +29,28 @@ interface ResultViewProps {
   onRestart: () => void;
 }
 
-interface APTAnalysisResult {
-  aptCode: string;
-  aptLabel: string;
-  scores: { axis: string; label: string; value: number }[];
-}
-
-const APT_LABELS: Record<string, string> = {
-  LAEF: '고독한 감성 탐험가',
-  LAEC: '조용한 추상 분석가',
-  LAMF: '내면의 의미 추구자',
-  LAMC: '심오한 체계 탐구자',
-  LREF: '감성적 사실주의자',
-  LREC: '고전적 관찰자',
-  LRMF: '자유로운 현대 관찰자',
-  LRMC: '전통적 미학 연구자',
-  SAEF: '열정적 표현주의자',
-  SAEC: '소셜 설치 애호가',
-  SAMF: '거리예술 활동가',
-  SAMC: '문화 큐레이터',
-  SREF: '트렌디 아트 러버',
-  SREC: '인상주의 감상가',
-  SRMF: '클래식 문화 탐험가',
-  SRMC: '전통 미학 수호자',
-};
-
-function analyzeExhibitionPreferences(
-  chosen: WorldcupParticipant[],
-  _allParticipants: WorldcupParticipant[]
-): APTAnalysisResult {
-  const chosenKeywords = chosen.flatMap((p) => {
-    const words: string[] = [];
-    if (p.title) words.push(...p.title.split(/[\s,/]+/));
-    if (p.description) words.push(...p.description.split(/[\s,/]+/).slice(0, 10));
-    const ex = (p as any)._exhibition;
-    if (ex?.tags) words.push(...ex.tags);
-    if (ex?.category) words.push(ex.category);
-    return words;
-  });
-
-  const chosenGenres = inferGenresFromKeywords(chosenKeywords);
-
-  let bestApt = 'LAEF';
-  let bestScore = -1;
-
-  for (const [aptCode, prefs] of Object.entries(APT_GENRE_PREFERENCES)) {
-    let score = 0;
-    for (const genre of chosenGenres) {
-      if (prefs.preferred.includes(genre)) score += 3;
-      else if (prefs.compatible.includes(genre)) score += 2;
-      else if (prefs.neutral.includes(genre)) score += 1;
+function formatDateRange(start?: string, end?: string): string | null {
+  if (!start && !end) return null;
+  const fmt = (d: string) => {
+    try {
+      const date = new Date(d);
+      return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+    } catch {
+      return d;
     }
-    if (score > bestScore) {
-      bestScore = score;
-      bestApt = aptCode;
-    }
-  }
-
-  const axisScores = [
-    {
-      axis: 'L/S',
-      label: bestApt[0] === 'L' ? '혼자 (Lone)' : '함께 (Social)',
-      value: bestApt[0] === 'L' ? 70 : 30,
-    },
-    {
-      axis: 'A/R',
-      label: bestApt[1] === 'A' ? '추상 (Abstract)' : '구상 (Realistic)',
-      value: bestApt[1] === 'A' ? 70 : 30,
-    },
-    {
-      axis: 'E/M',
-      label: bestApt[2] === 'E' ? '감성 (Emotional)' : '의미 (Meaning)',
-      value: bestApt[2] === 'E' ? 70 : 30,
-    },
-    {
-      axis: 'F/C',
-      label: bestApt[3] === 'F' ? '자유 (Free)' : '체계 (Curated)',
-      value: bestApt[3] === 'F' ? 70 : 30,
-    },
-  ];
-
-  return {
-    aptCode: bestApt,
-    aptLabel: APT_LABELS[bestApt] || bestApt,
-    scores: axisScores,
   };
+  if (start && end) return `${fmt(start)} – ${fmt(end)}`;
+  if (start) return `${fmt(start)} –`;
+  return `– ${fmt(end!)}`;
 }
 
 export function ResultView({ sessionId, winner, mode, onRestart }: ResultViewProps) {
-  const { participants } = useWorldcupStore();
-  const [rankings, setRankings] = useState<WorldcupRanking[]>([]);
+  const { participants, matches } = useWorldcupStore();
+  const [serverRankings, setServerRankings] = useState<WorldcupRanking[]>([]);
   const [shareUrl, setShareUrl] = useState<string>('');
   const [isCopied, setIsCopied] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-  const [aptAnalysis, setAptAnalysis] = useState<APTAnalysisResult | null>(null);
+  const [winnerImageError, setWinnerImageError] = useState(false);
   const resultCardRef = useRef<HTMLDivElement>(null);
 
   const isExhibitionMode = mode === 'exhibition';
@@ -134,6 +60,36 @@ export function ResultView({ sessionId, winner, mode, onRestart }: ResultViewPro
     winnerExhibition?.image_url ||
     winner.temp_image_url;
   const hasWinnerImage = !!winnerImageUrl;
+
+  const dateRange = isExhibitionMode
+    ? formatDateRange(winnerExhibition?.start_date, winnerExhibition?.end_date)
+    : null;
+
+  // Build rankings from local match data (server may not have client-generated match results)
+  const localRankings = useMemo(() => {
+    if (serverRankings.length > 0) return serverRankings;
+
+    const winCounts = new Map<string, number>();
+    matches.forEach((m) => {
+      if (m.winner_id) {
+        winCounts.set(m.winner_id, (winCounts.get(m.winner_id) || 0) + 1);
+      }
+    });
+
+    return participants
+      .filter((p) => p.id !== winner.id)
+      .sort((a, b) => (winCounts.get(b.id) || 0) - (winCounts.get(a.id) || 0))
+      .map((p, i) => ({
+        rank: i + 2,
+        participant_id: p.id,
+        title: p.title,
+        artist: p.artist,
+        image_url: p.image_url || p.temp_image_url,
+        source_type: p.source_type,
+        wins: winCounts.get(p.id) || 0,
+        total_matches: 0,
+      }));
+  }, [serverRankings, matches, participants, winner.id]);
 
   useEffect(() => {
     async function fetchData() {
@@ -156,7 +112,7 @@ export function ResultView({ sessionId, winner, mode, onRestart }: ResultViewPro
               total_matches: p.total_matches,
             }));
 
-          setRankings(rankedParticipants);
+          setServerRankings(rankedParticipants);
         }
 
         const shareResponse = await fetch('/api/worldcup/share', {
@@ -179,15 +135,6 @@ export function ResultView({ sessionId, winner, mode, onRestart }: ResultViewPro
 
     fetchData();
   }, [sessionId]);
-
-  // APT analysis (exhibition mode only)
-  useEffect(() => {
-    if (!isExhibitionMode || participants.length === 0) return;
-
-    const chosen = participants.filter((p) => p.wins > 0);
-    const analysis = analyzeExhibitionPreferences(chosen, participants);
-    setAptAnalysis(analysis);
-  }, [isExhibitionMode, participants]);
 
   const handleDownloadImage = useCallback(async () => {
     if (!resultCardRef.current) return;
@@ -254,6 +201,8 @@ export function ResultView({ sessionId, winner, mode, onRestart }: ResultViewPro
       handleCopyUrl();
     }
   }, [shareUrl, winner.title, handleCopyUrl, isExhibitionMode]);
+
+  const totalParticipants = participants.length;
 
   return (
     <div className="min-h-screen p-6">
@@ -344,6 +293,16 @@ export function ResultView({ sessionId, winner, mode, onRestart }: ResultViewPro
             >
               {isExhibitionMode ? '나의 이상형 전시' : '나의 최애 작품'}
             </motion.h1>
+            {totalParticipants > 0 && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.65 }}
+                className="text-[10px] text-white/25 mt-1"
+              >
+                {totalParticipants}개 {isExhibitionMode ? '전시' : '작품'} 중 선택
+              </motion.p>
+            )}
           </div>
 
           {/* Winner Content */}
@@ -353,117 +312,99 @@ export function ResultView({ sessionId, winner, mode, onRestart }: ResultViewPro
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
           >
-            {/* Winner Image (both modes) */}
-            {hasWinnerImage && (
-              <div className={cn(
-                'rounded-sm overflow-hidden mb-4 border border-white/10',
-                isExhibitionMode ? 'aspect-[16/9]' : 'aspect-square'
-              )}>
+            {/* Winner Image */}
+            {isExhibitionMode ? (
+              <div className="aspect-[16/9] rounded-sm overflow-hidden mb-5 border border-white/10 relative">
+                {hasWinnerImage && !winnerImageError ? (
+                  <img
+                    src={winnerImageUrl}
+                    alt={winner.title || '우승'}
+                    className="w-full h-full object-cover"
+                    onError={() => setWinnerImageError(true)}
+                  />
+                ) : (
+                  <ExhibitionPlaceholder
+                    title={winner.title || ''}
+                    venue={winnerExhibition?.venue_name || ''}
+                    variant="featured"
+                  />
+                )}
+              </div>
+            ) : hasWinnerImage ? (
+              <div className="aspect-square rounded-sm overflow-hidden mb-5 border border-white/10">
                 <img
                   src={winnerImageUrl}
                   alt={winner.title || '우승'}
                   className="w-full h-full object-cover"
-                  crossOrigin="anonymous"
                 />
               </div>
-            )}
+            ) : null}
 
             {/* Winner Info */}
-            <div className="text-center">
+            <div className="text-center space-y-2">
               <h2
-                className={cn(
-                  'font-light text-white/90 mb-1 leading-relaxed',
-                  hasWinnerImage ? 'text-lg' : 'text-2xl mb-3 py-2'
-                )}
+                className="text-lg font-light text-white/90 leading-relaxed"
                 style={{ fontFamily: 'var(--font-serif, Georgia, serif)' }}
               >
                 {winner.title || '제목 없음'}
               </h2>
+
               {isExhibitionMode ? (
-                <>
+                <div className="space-y-1.5">
                   {winnerExhibition?.venue_name && (
-                    <p className="text-white/50 text-sm font-light">
+                    <p className="text-white/50 text-sm font-light flex items-center justify-center gap-1.5">
+                      <MapPin className="w-3 h-3 text-white/30 shrink-0" />
                       {winnerExhibition.venue_name}
                       {winnerExhibition?.venue_city && (
-                        <span className="text-white/30"> / {winnerExhibition.venue_city}</span>
+                        <span className="text-white/30">{winnerExhibition.venue_city}</span>
                       )}
                     </p>
                   )}
+                  {dateRange && (
+                    <p className="text-white/35 text-xs font-light flex items-center justify-center gap-1.5">
+                      <Calendar className="w-3 h-3 text-white/25 shrink-0" />
+                      {dateRange}
+                    </p>
+                  )}
                   {winner.artist && (
-                    <p className="text-white/40 text-xs font-light mt-1">
+                    <p className="text-white/35 text-xs font-light">
                       {winner.artist}
                     </p>
                   )}
-                </>
+                </div>
               ) : (
                 <p className="text-white/40 text-sm font-light">
                   {winner.artist || '작가 미상'}
                 </p>
               )}
+
+              {/* Description snippet */}
+              {winner.description && (
+                <p className="text-white/25 text-xs font-light leading-relaxed pt-2 max-w-sm mx-auto line-clamp-3">
+                  {winner.description}
+                </p>
+              )}
             </div>
           </motion.div>
 
-          {/* APT Analysis (exhibition mode only) */}
-          {isExhibitionMode && aptAnalysis && (
+          {/* Rankings */}
+          {localRankings.length > 0 && (
             <motion.div
               className="px-6 pb-6"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.9 }}
             >
-              <div className="border border-white/10 rounded-sm p-5 bg-white/[0.02]">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-3">
-                  당신의 전시 취향 분석
-                </p>
-                <p
-                  className="text-lg font-light text-white/90 mb-1"
-                  style={{ fontFamily: 'var(--font-serif, Georgia, serif)' }}
-                >
-                  {aptAnalysis.aptLabel}
-                </p>
-                <p className="text-white/50 text-sm font-light mb-4">
-                  {aptAnalysis.aptCode}
-                </p>
-                <div className="space-y-2">
-                  {aptAnalysis.scores.map((score) => (
-                    <div key={score.axis} className="flex items-center gap-3">
-                      <span className="text-[10px] text-white/30 w-8 shrink-0">{score.axis}</span>
-                      <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                        <motion.div
-                          className="h-full bg-gradient-to-r from-white/60 to-white/40 rounded-full"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${score.value}%` }}
-                          transition={{ delay: 1.0, duration: 0.6, ease: 'easeOut' }}
-                        />
-                      </div>
-                      <span className="text-[10px] text-white/40 w-24 text-right shrink-0">
-                        {score.label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Rankings */}
-          {rankings.length > 1 && (
-            <motion.div
-              className="px-6 pb-6"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.0 }}
-            >
               <p className="text-[10px] uppercase tracking-[0.2em] text-white/30 mb-3">
                 최종 순위
               </p>
               <div className="space-y-2">
-                {rankings.slice(1, 5).map((ranking, index) => (
+                {localRankings.slice(0, 7).map((ranking, index) => (
                   <motion.div
                     key={ranking.participant_id}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 1.1 + index * 0.1 }}
+                    transition={{ delay: 1.0 + index * 0.06 }}
                     className="flex items-center gap-3 p-3 bg-white/[0.03] border border-white/10 rounded-sm"
                   >
                     <div
@@ -483,13 +424,17 @@ export function ResultView({ sessionId, winner, mode, onRestart }: ResultViewPro
                         src={ranking.image_url}
                         alt={ranking.title || ''}
                         className="w-10 h-10 rounded-sm object-cover shrink-0"
-                        crossOrigin="anonymous"
                       />
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="font-light truncate text-sm text-white/70">
                         {ranking.title || '제목 없음'}
                       </div>
+                      {ranking.wins > 0 && (
+                        <div className="text-[10px] text-white/25 font-light">
+                          {ranking.wins}승
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 ))}

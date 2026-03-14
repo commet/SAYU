@@ -67,8 +67,8 @@ class SeoulOpenDataCollector {
         start += batchSize;
         if (start > totalCount) hasMore = false;
 
-        // Safety: max 5 batches (5000 events)
-        if (start > 5000) hasMore = false;
+        // Safety: max 10 batches (10000 events) - Seoul API has ~4000 events
+        if (start > 10000) hasMore = false;
 
         await this._delay(500);
       }

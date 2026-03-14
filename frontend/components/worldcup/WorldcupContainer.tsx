@@ -81,20 +81,19 @@ export function WorldcupContainer({
   const [phase, setPhase] = useState<Phase>(initialMode ? 'setup' : 'mode-select');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Set initial mode from prop
+  // On mount: clear any persisted completed/in-progress session so the user
+  // always starts fresh when navigating to /worldcup.
+  // Tournament completion during active play is handled explicitly by handleMatchResult.
   useEffect(() => {
+    const state = useWorldcupStore.getState();
+    if (state.session) {
+      reset();
+    }
     if (initialMode) {
       setMode(initialMode);
     }
-  }, [initialMode, setMode]);
-
-  useEffect(() => {
-    if (session?.status === 'completed' && winner) {
-      setPhase('result');
-    } else if (session?.status === 'in_progress' && currentMatch) {
-      setPhase('tournament');
-    }
-  }, [session?.status, winner, currentMatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSelectMode = useCallback(
     (selectedMode: WorldcupMode) => {

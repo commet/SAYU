@@ -72,13 +72,13 @@ function parseXML(xml) {
 
 function decodeHtml(t) {
   return (t || '')
-    .replace(/<[^>]*>/g, '')
     .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
     .replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&#39;/g, "'")
     .replace(/&middot;/g, '·').replace(/&nbsp;/g, ' ')
-    .replace(/&ldquo;/g, '"').replace(/&rdquo;/g, '"')
-    .replace(/&lsquo;/g, "'").replace(/&rsquo;/g, "'")
-    .replace(/&mdash;/g, '—').replace(/&ndash;/g, '–')
+    .replace(/&ldquo;/g, '\u201c').replace(/&rdquo;/g, '\u201d')
+    .replace(/&lsquo;/g, '\u2018').replace(/&rsquo;/g, '\u2019')
+    .replace(/&mdash;/g, '\u2014').replace(/&ndash;/g, '\u2013')
+    .replace(/<[^>]*>/g, '')
     .replace(/\s+/g, ' ').trim();
 }
 

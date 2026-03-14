@@ -71,11 +71,12 @@ class ExhibitionSync {
       admission_fee: exhibition.admission_fee || null,
       source: exhibition.source || null,
       source_url: exhibition.source_url || null,
+      image_url: exhibition.image_url || null,
       tags: exhibition.tags || [],
+      content_type: 'exhibition',
       metadata: {
         ...(exhibition.metadata || {}),
-        external_id: exhibition.external_id,
-        image_url: exhibition.image_url || null
+        external_id: exhibition.external_id
       },
       collected_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
@@ -202,10 +203,24 @@ class ExhibitionSync {
 
   _guessCity(venue, address) {
     const combined = `${venue || ''} ${address || ''}`;
-    if (combined.includes('서울') || combined.includes('Seoul')) return '서울';
-    if (combined.includes('과천') || combined.includes('Gwacheon')) return '과천';
-    if (combined.includes('청주') || combined.includes('Cheongju')) return '청주';
+    // Korean cities (standardized to English)
+    if (combined.includes('서울') || combined.includes('Seoul')) return 'Seoul';
+    if (combined.includes('과천') || combined.includes('Gwacheon')) return 'Gwacheon';
+    if (combined.includes('청주') || combined.includes('Cheongju')) return 'Cheongju';
+    if (combined.includes('부산') || combined.includes('Busan')) return 'Busan';
+    if (combined.includes('대전') || combined.includes('Daejeon')) return 'Daejeon';
+    if (combined.includes('대구') || combined.includes('Daegu')) return 'Daegu';
+    if (combined.includes('광주') || combined.includes('Gwangju')) return 'Gwangju';
+    if (combined.includes('인천') || combined.includes('Incheon')) return 'Incheon';
+    if (combined.includes('제주') || combined.includes('Jeju')) return 'Jeju';
+    if (combined.includes('수원') || combined.includes('Suwon')) return 'Suwon';
+    if (combined.includes('성남') || combined.includes('Seongnam')) return 'Seongnam';
+    if (combined.includes('고양') || combined.includes('Goyang')) return 'Goyang';
+    if (combined.includes('춘천') || combined.includes('Chuncheon')) return 'Chuncheon';
+    // International
     if (combined.includes('Chicago')) return 'Chicago';
+    if (combined.includes('Cleveland')) return 'Cleveland';
+    if (combined.includes('New York')) return 'New York';
     return null;
   }
 

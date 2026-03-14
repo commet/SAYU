@@ -9,183 +9,276 @@ interface ExhibitionPlaceholderProps {
   variant?: 'card' | 'featured';
 }
 
-// Category to gradient and icon mapping
-const categoryStyles: Record<string, { gradient: string; icon: React.ReactNode }> = {
-  '현대미술': {
-    gradient: 'from-slate-900 via-indigo-950 to-slate-800',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-8 h-8 opacity-30">
-        <rect x="3" y="3" width="18" height="18" rx="1" />
-        <circle cx="12" cy="12" r="4" />
-        <path d="M3 12h4M17 12h4M12 3v4M12 17v4" />
-      </svg>
-    ),
-  },
-  '회화': {
-    gradient: 'from-amber-900 via-orange-950 to-stone-900',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-8 h-8 opacity-30">
-        <rect x="2" y="3" width="20" height="18" rx="1" />
-        <path d="M6 21V3M18 21V3" />
-        <circle cx="12" cy="12" r="3" />
-      </svg>
-    ),
-  },
-  '조각': {
-    gradient: 'from-stone-800 via-zinc-900 to-neutral-950',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-8 h-8 opacity-30">
-        <path d="M12 2L2 7l10 5 10-5-10-5z" />
-        <path d="M2 17l10 5 10-5" />
-        <path d="M2 12l10 5 10-5" />
-      </svg>
-    ),
-  },
-  '사진': {
-    gradient: 'from-neutral-900 via-gray-950 to-zinc-900',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-8 h-8 opacity-30">
-        <rect x="2" y="4" width="20" height="16" rx="2" />
-        <circle cx="12" cy="12" r="4" />
-        <circle cx="12" cy="12" r="1.5" />
-      </svg>
-    ),
-  },
-  '설치미술': {
-    gradient: 'from-emerald-950 via-teal-950 to-slate-900',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-8 h-8 opacity-30">
-        <path d="M3 21h18M5 21V7l7-4 7 4v14" />
-        <path d="M9 21v-6h6v6" />
-      </svg>
-    ),
-  },
-  '미디어아트': {
-    gradient: 'from-violet-950 via-purple-950 to-indigo-950',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-8 h-8 opacity-30">
-        <rect x="2" y="3" width="20" height="14" rx="2" />
-        <path d="M8 21h8M12 17v4" />
-        <circle cx="12" cy="10" r="3" />
-      </svg>
-    ),
-  },
-  '공예': {
-    gradient: 'from-rose-950 via-pink-950 to-stone-900',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-8 h-8 opacity-30">
-        <path d="M12 2C8 2 6 5 6 8c0 4 6 6 6 14 0-8 6-10 6-14 0-3-2-6-6-6z" />
-      </svg>
-    ),
-  },
-  '판화': {
-    gradient: 'from-cyan-950 via-sky-950 to-slate-900',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-8 h-8 opacity-30">
-        <rect x="4" y="4" width="16" height="16" rx="1" />
-        <rect x="7" y="7" width="10" height="10" rx="1" />
-        <path d="M4 4L7 7M20 4L17 7M4 20L7 17M20 20L17 17" />
-      </svg>
-    ),
-  },
-  '드로잉': {
-    gradient: 'from-warmGray-900 via-stone-950 to-neutral-900',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-8 h-8 opacity-30">
-        <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
-      </svg>
-    ),
-  },
-  '미술': {
-    gradient: 'from-slate-800 via-gray-900 to-zinc-950',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-8 h-8 opacity-30">
-        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" />
-        <circle cx="12" cy="12" r="3" />
-      </svg>
-    ),
-  },
-};
+// Deterministic hash from string
+function hashStr(str: string): number {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash + str.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash);
+}
 
-const defaultStyle = {
-  gradient: 'from-slate-800 via-neutral-900 to-zinc-950',
-  icon: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-8 h-8 opacity-30">
-      <rect x="3" y="3" width="18" height="18" rx="2" />
-      <path d="M3 9h18M9 21V9" />
-    </svg>
-  ),
-};
+// Extract hash bits as a value in a range
+function pick(hash: number, shift: number, min: number, max: number): number {
+  return min + (((hash >> shift) & 0xff) % (max - min + 1));
+}
+
+// Curated palettes: sophisticated gallery-worthy tones
+const PALETTES = [
+  { bg: '#F0E8DE', a: '#C09060', b: '#D8B898' }, // cream & sienna
+  { bg: '#E2EAE2', a: '#7A9878', b: '#A8C0A8' }, // sage & moss
+  { bg: '#ECE2E2', a: '#B87878', b: '#D0A4A4' }, // blush & mauve
+  { bg: '#E2E6F0', a: '#7888B8', b: '#A0ACCE' }, // periwinkle
+  { bg: '#F0EADA', a: '#C0A060', b: '#D8C498' }, // buttercream
+  { bg: '#E6E6EC', a: '#8888A0', b: '#AAABBC' }, // fog & pewter
+  { bg: '#ECDCD2', a: '#B07858', b: '#D09878' }, // terracotta
+  { bg: '#DAE8EC', a: '#588A98', b: '#88B0BD' }, // seafoam
+  { bg: '#E6DFEA', a: '#9878B0', b: '#B8A0CC' }, // wisteria
+  { bg: '#E2E8D6', a: '#889858', b: '#A8B480' }, // lichen & olive
+  { bg: '#EAE0D6', a: '#A07868', b: '#C09888' }, // sandstone
+  { bg: '#E0E8EE', a: '#6080A0', b: '#88A8C0' }, // arctic blue
+];
+
+type Composition = 'circle-line' | 'overlap' | 'arc-dot' | 'blocks' | 'stripe';
+const COMPOSITIONS: Composition[] = ['circle-line', 'overlap', 'arc-dot', 'blocks', 'stripe'];
 
 export function ExhibitionPlaceholder({
   title,
   venue,
-  category = '미술',
   variant = 'card'
 }: ExhibitionPlaceholderProps) {
-  const style = useMemo(() => {
-    return categoryStyles[category] || defaultStyle;
-  }, [category]);
+  const visual = useMemo(() => {
+    const seed = title + (venue || '');
+    const h = hashStr(seed);
 
-  const truncatedTitle = useMemo(() => {
-    if (variant === 'featured') {
-      return title.length > 40 ? title.slice(0, 40) + '...' : title;
+    const palette = PALETTES[h % PALETTES.length];
+    const comp = COMPOSITIONS[(h >> 4) % COMPOSITIONS.length];
+
+    return {
+      palette,
+      comp,
+      // shape positions & sizes derived from hash bits
+      x1: pick(h, 8, 15, 65),
+      y1: pick(h, 12, 5, 55),
+      s1: pick(h, 16, 45, 75),
+      x2: pick(h, 20, 20, 70),
+      y2: pick(h, 24, 25, 65),
+      s2: pick(h, 6, 20, 40),
+      rot: pick(h, 10, -15, 15),
+    };
+  }, [title, venue]);
+
+  const { palette, comp, x1, y1, s1, x2, y2, s2, rot } = visual;
+
+  const shapes = (() => {
+    switch (comp) {
+      case 'circle-line':
+        return (
+          <>
+            {/* Large floating circle */}
+            <div
+              className="absolute rounded-full"
+              style={{
+                width: `${s1}%`,
+                aspectRatio: '1',
+                top: `${y1 - 10}%`,
+                right: `${-s1 * 0.2}%`,
+                backgroundColor: palette.a,
+                opacity: 0.14,
+              }}
+            />
+            {/* Thin accent line */}
+            <div
+              className="absolute left-[8%] right-[8%]"
+              style={{
+                top: `${y2 + 15}%`,
+                height: '1px',
+                backgroundColor: palette.a,
+                opacity: 0.25,
+                transform: `rotate(${rot * 0.4}deg)`,
+              }}
+            />
+            {/* Small accent dot */}
+            <div
+              className="absolute rounded-full"
+              style={{
+                width: `${s2 * 0.35}%`,
+                aspectRatio: '1',
+                bottom: `${y1 * 0.4 + 10}%`,
+                left: `${x2 * 0.5 + 8}%`,
+                backgroundColor: palette.b,
+                opacity: 0.3,
+              }}
+            />
+          </>
+        );
+
+      case 'overlap':
+        return (
+          <>
+            {/* Primary circle */}
+            <div
+              className="absolute rounded-full"
+              style={{
+                width: `${s1}%`,
+                aspectRatio: '1',
+                top: `${-s1 * 0.15}%`,
+                left: `${x1 * 0.5}%`,
+                backgroundColor: palette.a,
+                opacity: 0.13,
+              }}
+            />
+            {/* Secondary circle */}
+            <div
+              className="absolute rounded-full"
+              style={{
+                width: `${s2 * 1.3}%`,
+                aspectRatio: '1',
+                bottom: `${y2 * 0.3}%`,
+                right: `${x1 * 0.4 - 5}%`,
+                backgroundColor: palette.b,
+                opacity: 0.22,
+              }}
+            />
+          </>
+        );
+
+      case 'arc-dot':
+        return (
+          <>
+            {/* Large ring (stroke only) */}
+            <div
+              className="absolute rounded-full"
+              style={{
+                width: `${s1 * 2}%`,
+                aspectRatio: '1',
+                top: `${-s1 * 0.9}%`,
+                right: `${-s1 * 0.7}%`,
+                border: `1.5px solid ${palette.a}`,
+                opacity: 0.18,
+              }}
+            />
+            {/* Accent dot */}
+            <div
+              className="absolute rounded-full"
+              style={{
+                width: `${s2 * 0.35}%`,
+                aspectRatio: '1',
+                bottom: `${y2 * 0.5 + 10}%`,
+                left: `${x1 * 0.5 + 10}%`,
+                backgroundColor: palette.a,
+                opacity: 0.35,
+              }}
+            />
+            {/* Thin line from ring to dot */}
+            <div
+              className="absolute left-[15%] right-[50%]"
+              style={{
+                bottom: `${y2 * 0.5 + 12}%`,
+                height: '1px',
+                backgroundColor: palette.b,
+                opacity: 0.15,
+              }}
+            />
+          </>
+        );
+
+      case 'blocks':
+        return (
+          <>
+            {/* Horizontal block */}
+            <div
+              className="absolute"
+              style={{
+                width: `${s1 * 0.85}%`,
+                height: `${s2 * 0.28}%`,
+                top: `${y1}%`,
+                left: `${-s1 * 0.1}%`,
+                backgroundColor: palette.a,
+                opacity: 0.12,
+                transform: `rotate(${rot * 0.6}deg)`,
+              }}
+            />
+            {/* Vertical block */}
+            <div
+              className="absolute"
+              style={{
+                width: `${s2 * 0.35}%`,
+                height: `${s1 * 0.55}%`,
+                bottom: `${y2 * 0.25}%`,
+                right: `${x1 * 0.4}%`,
+                backgroundColor: palette.b,
+                opacity: 0.18,
+              }}
+            />
+            {/* Small square */}
+            <div
+              className="absolute"
+              style={{
+                width: `${s2 * 0.2}%`,
+                aspectRatio: '1',
+                top: `${y2 + 5}%`,
+                left: `${x2 * 0.6 + 10}%`,
+                backgroundColor: palette.a,
+                opacity: 0.22,
+              }}
+            />
+          </>
+        );
+
+      case 'stripe':
+        return (
+          <>
+            {/* Wide horizontal band */}
+            <div
+              className="absolute left-0 right-0"
+              style={{
+                top: `${y1 * 0.5 + 15}%`,
+                height: `${s2 * 0.7}%`,
+                backgroundColor: palette.a,
+                opacity: 0.09,
+              }}
+            />
+            {/* Circle sitting on the band */}
+            <div
+              className="absolute rounded-full"
+              style={{
+                width: `${s2 * 0.6}%`,
+                aspectRatio: '1',
+                top: `${y1 * 0.5 + 5}%`,
+                right: `${x2 * 0.5 + 8}%`,
+                backgroundColor: palette.b,
+                opacity: 0.25,
+              }}
+            />
+            {/* Thin lower line */}
+            <div
+              className="absolute left-[12%] right-[25%]"
+              style={{
+                bottom: `${25 + y2 * 0.2}%`,
+                height: '1px',
+                backgroundColor: palette.a,
+                opacity: 0.18,
+              }}
+            />
+          </>
+        );
     }
-    return title.length > 24 ? title.slice(0, 24) + '...' : title;
-  }, [title, variant]);
-
-  const truncatedVenue = useMemo(() => {
-    return venue.length > 16 ? venue.slice(0, 16) + '...' : venue;
-  }, [venue]);
+  })();
 
   if (variant === 'featured') {
     return (
-      <div className={`absolute inset-0 bg-gradient-to-br ${style.gradient}`}>
-        {/* Subtle pattern overlay */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
-
-        {/* Decorative elements */}
-        <div className="absolute top-8 left-8 text-white/20">
-          {style.icon}
-        </div>
-        <div className="absolute bottom-24 right-12 text-white/10 scale-150">
-          {style.icon}
-        </div>
-
-        {/* Gradient overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+      <div className="absolute inset-0 overflow-hidden" style={{ backgroundColor: palette.bg }}>
+        {shapes}
+        {/* Gradient overlay for featured text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
       </div>
     );
   }
 
   return (
-    <div className={`absolute inset-0 bg-gradient-to-br ${style.gradient} flex flex-col justify-between p-5`}>
-      {/* Subtle pattern overlay */}
-      <div className="absolute inset-0 opacity-[0.02]" style={{
-        backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M0 38.59l2.83-2.83 1.41 1.41L1.41 40H0v-1.41zM0 1.4l2.83 2.83 1.41-1.41L1.41 0H0v1.41zM38.59 40l-2.83-2.83 1.41-1.41L40 38.59V40h-1.41zM40 1.41l-2.83 2.83-1.41-1.41L38.59 0H40v1.41zM20 18.6l2.83-2.83 1.41 1.41L21.41 20l2.83 2.83-1.41 1.41L20 21.41l-2.83 2.83-1.41-1.41L18.59 20l-2.83-2.83 1.41-1.41L20 18.59z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-      }} />
-
-      {/* Category icon */}
-      <div className="relative z-10 text-white/20">
-        {style.icon}
-      </div>
-
-      {/* Title and venue */}
-      <div className="relative z-10 space-y-2">
-        <h4 className="text-white/90 text-sm font-light leading-tight tracking-wide">
-          {truncatedTitle}
-        </h4>
-        <p className="text-white/50 text-xs font-light uppercase tracking-widest">
-          {truncatedVenue}
-        </p>
-      </div>
-
-      {/* Subtle corner accent */}
-      <div className="absolute bottom-0 right-0 w-16 h-16 overflow-hidden">
-        <div className="absolute -bottom-8 -right-8 w-16 h-16 bg-white/[0.03] rounded-full" />
-      </div>
+    <div className="absolute inset-0 overflow-hidden" style={{ backgroundColor: palette.bg }}>
+      {shapes}
     </div>
   );
 }

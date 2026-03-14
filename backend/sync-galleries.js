@@ -1350,6 +1350,654 @@ async function scrapeArario() {
   return results;
 }
 
+// ─── 13. Artlogic CMS (shared parser) ────────────────────────────────────
+
+async function scrapeArtlogic(baseUrl, slug, venueName, venueAddress) {
+  console.log(`\n--- Scraping ${venueName} (Artlogic) ---`);
+  const results = [];
+
+  try {
+    const html = await fetchPage(`${baseUrl}/exhibitions/`);
+    const $ = cheerio.load(html);
+
+    const seen = new Set();
+    $('a[href*="/exhibitions/"]').each((_, el) => {
+      const $a = $(el);
+      const href = $a.attr('href');
+      if (!href || href === '/exhibitions/' || seen.has(href)) return;
+      // Artlogic exhibition URLs: /exhibitions/{id}-{slug}/
+      if (!/\/exhibitions\/[a-zA-Z0-9]/.test(href)) return;
+      seen.add(href);
+
+      const fullText = $a.text().replace(/\s+/g, ' ').trim();
+      const imgEl = $a.find('img').first();
+      const imgSrc = imgEl.attr('src') || imgEl.attr('data-src') || null;
+
+      if (!fullText || fullText.length < 3) return;
+
+      // Date patterns - European format: "21 November 2025—7 February 2026" or "22 January—28 February 2026"
+      let dateText = '';
+      const dateMatch = fullText.match(
+        /(\d{1,2})\s+(\w+)\s+(\d{4})\s*[-–—]\s*(\d{1,2})\s+(\w+)\s+(\d{4})/i
+      ) || fullText.match(
+        /(\d{1,2})\s+(\w+)\s*[-–—]\s*(\d{1,2})\s+(\w+)\s+(\d{4})/i
+      );
+      if (dateMatch) dateText = dateMatch[0];
+      const dates = parseDate(dateText);
+
+      // Title: remove date from text
+      let title = fullText;
+      if (dateText) title = title.replace(dateText, '');
+      title = title.replace(/\s+/g, ' ').trim();
+      if (!title || title.length < 2) return;
+
+      const exSlug = href.replace(/^.*\/exhibitions\//, '').replace(/\/$/, '');
+
+      results.push({
+        gallery_slug: slug,
+        external_id: exSlug,
+        title,
+        artist: null,
+        venue_name: venueName,
+        venue_address: venueAddress,
+        start_date: dates?.start || null,
+        end_date: dates?.end || null,
+        description: null,
+        image_url: imgSrc ? (imgSrc.startsWith('http') ? imgSrc : `${baseUrl}${imgSrc}`) : null,
+        source_url: href.startsWith('http') ? href : `${baseUrl}${href}`,
+        medium: null,
+        exhibition_type: 'gallery',
+        raw_data: { slug: exSlug, title, dateText }
+      });
+      console.log(`  ${title.substring(0, 50)} | ${dateText || 'no date'}`);
+    });
+  } catch (e) {
+    console.log(`  ${venueName} scraper error: ${e.message}`);
+  }
+
+  console.log(`  ${venueName}: ${results.length} exhibitions found`);
+  return results;
+}
+
+// ─── 14. The Page Gallery (더페이지갤러리) ─────────────────────────────────
+
+async function scrapeThePage() {
+  return scrapeArtlogic(
+    'https://www.thepage-gallery.com',
+    'thepage',
+    '더페이지갤러리 The Page Gallery',
+    '서울특별시 성동구 서울숲2길 32-14'
+  );
+}
+
+// ─── 15. Gallery Baton (갤러리바톤) ───────────────────────────────────────
+
+async function scrapeBaton() {
+  return scrapeArtlogic(
+    'https://www.gallerybaton.com',
+    'baton',
+    '갤러리바톤 Gallery Baton',
+    '서울특별시 용산구 독서당로 116'
+  );
+}
+
+// ─── 16. Art Sonje Center (아트선재센터) ──────────────────────────────────
+
+async function scrapeArtsonje() {
+  console.log('\n--- Scraping Art Sonje Center ---');
+  const results = [];
+
+  try {
+    const html = await fetchPage('https://artsonje.org/exhibition-program/exhibition/');
+    const $ = cheerio.load(html);
+
+    const links = [];
+    $('a[href*="/exhibition/"]').each((_, el) => {
+      const href = $(el).attr('href');
+      if (!href || href.includes('/exhibition-program/') || links.includes(href)) return;
+      if (/\/exhibition\/[a-z0-9-]+/.test(href)) links.push(href);
+    });
+
+    console.log(`  Found ${links.length} exhibition links`);
+
+    for (const link of links.slice(0, 20)) {
+      try {
+        await delay(2000);
+        const fullUrl = link.startsWith('http') ? link : `https://artsonje.org${link}`;
+        const exHtml = await fetchPage(fullUrl);
+        const $ex = cheerio.load(exHtml);
+
+        // Title from OG tag or <title>
+        const title = $ex('meta[property="og:title"]').attr('content')
+          || $ex('title').text().split('|')[0].split('-')[0].trim()
+          || '';
+        if (!title || title.length < 2) continue;
+
+        // Image from OG
+        const ogImage = $ex('meta[property="og:image"]').attr('content') || null;
+
+        // Dates from body text - try Korean dot format first, then other patterns
+        const bodyText = $ex('body').text();
+        let dates = null;
+        const dotDateMatch = bodyText.match(/(\d{4})[./](\d{1,2})[./](\d{1,2})\s*[-–—~]\s*(\d{4})[./](\d{1,2})[./](\d{1,2})/);
+        if (dotDateMatch) {
+          dates = parseDate(dotDateMatch[0]);
+        } else {
+          const enDateMatch = bodyText.match(
+            /(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}\s*[-–—~]\s*(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}/i
+          );
+          if (enDateMatch) dates = parseDate(enDateMatch[0]);
+        }
+
+        const slug = link.replace(/^.*\/exhibition\//, '').replace(/\/$/, '');
+
+        results.push({
+          gallery_slug: 'artsonje',
+          external_id: slug,
+          title: cleanText(title),
+          artist: null,
+          venue_name: '아트선재센터 Art Sonje Center',
+          venue_address: '서울특별시 종로구 율곡로3길 87',
+          start_date: dates?.start || null,
+          end_date: dates?.end || null,
+          description: null,
+          image_url: ogImage,
+          source_url: fullUrl,
+          medium: null,
+          exhibition_type: 'gallery',
+          raw_data: { slug, title, dateText: dotDateMatch?.[0] || '' }
+        });
+        console.log(`  ${cleanText(title).substring(0, 50)} | ${dates?.start || 'no date'}`);
+      } catch (e) {
+        console.log(`  Error scraping ${link}: ${e.message}`);
+      }
+    }
+  } catch (e) {
+    console.log(`  Art Sonje scraper error: ${e.message}`);
+  }
+
+  console.log(`  Art Sonje: ${results.length} exhibitions found`);
+  return results;
+}
+
+// ─── 17. OCI Museum (OCI미술관) ──────────────────────────────────────────
+
+async function scrapeOCI() {
+  console.log('\n--- Scraping OCI Museum ---');
+  const results = [];
+
+  try {
+    for (let id = 180; id <= 200; id++) {
+      try {
+        await delay(2000);
+        const url = `https://ocimuseum.org/exhibition/${id}`;
+        let html;
+        try {
+          html = await fetchPage(url);
+        } catch (e) {
+          if (e.response && e.response.status >= 400) continue;
+          continue;
+        }
+
+        const $ = cheerio.load(html);
+
+        const pageTitle = $('title').text().trim();
+        const title = pageTitle.split('|')[0].split('-')[0].trim();
+        if (!title || title.length < 2 || title.toLowerCase().includes('oci미술관') && title.length < 10) continue;
+
+        // OG image
+        const ogImage = $('meta[property="og:image"]').attr('content') || null;
+
+        // Dates from body text - Korean dot format: "2026.01.28 - 03.28" or "2026.01.28 - 2026.03.28"
+        const bodyText = $('body').text();
+        let dates = null;
+
+        // Full year-month-day range
+        const fullDotMatch = bodyText.match(/(\d{4})[./](\d{1,2})[./](\d{1,2})\s*[-–—~]\s*(\d{4})[./](\d{1,2})[./](\d{1,2})/);
+        if (fullDotMatch) {
+          dates = parseDate(fullDotMatch[0]);
+        } else {
+          // Short format: "2026.01.28 - 03.28" (end date missing year)
+          const shortDotMatch = bodyText.match(/(\d{4})[./](\d{1,2})[./](\d{1,2})\s*[-–—~]\s*(\d{1,2})[./](\d{1,2})/);
+          if (shortDotMatch) {
+            const year = shortDotMatch[1];
+            dates = {
+              start: `${year}-${shortDotMatch[2].padStart(2, '0')}-${shortDotMatch[3].padStart(2, '0')}`,
+              end: `${year}-${shortDotMatch[4].padStart(2, '0')}-${shortDotMatch[5].padStart(2, '0')}`
+            };
+          }
+        }
+
+        results.push({
+          gallery_slug: 'oci',
+          external_id: `${id}`,
+          title: cleanText(title),
+          artist: null,
+          venue_name: 'OCI미술관',
+          venue_address: '서울특별시 종로구 우정국로 45-14',
+          start_date: dates?.start || null,
+          end_date: dates?.end || null,
+          description: null,
+          image_url: ogImage,
+          source_url: url,
+          medium: null,
+          exhibition_type: 'gallery',
+          raw_data: { id, title, dateText: fullDotMatch?.[0] || '' }
+        });
+        console.log(`  [${id}] ${cleanText(title).substring(0, 50)} | ${dates?.start || 'no date'}`);
+      } catch (e) {
+        // Skip failed pages silently
+      }
+    }
+  } catch (e) {
+    console.log(`  OCI scraper error: ${e.message}`);
+  }
+
+  console.log(`  OCI: ${results.length} exhibitions found`);
+  return results;
+}
+
+// ─── 18. Lotte Museum (롯데뮤지엄) ──────────────────────────────────────
+
+async function scrapeLotte() {
+  // Lotte Museum exhibition pages are client-rendered - no SSR exhibition data
+  console.log('\n--- Scraping Lotte Museum ---');
+  console.log('  SKIPPED: Client-rendered SPA, no SSR exhibition data available');
+  return [];
+}
+
+// ─── 19. Leeum Museum (리움미술관) ───────────────────────────────────────
+
+async function scrapeLeeum() {
+  // Leeum website is fully client-rendered (React SPA) - no exhibition data in SSR HTML
+  console.log('\n--- Scraping Leeum Museum ---');
+  console.log('  SKIPPED: Client-rendered SPA, no SSR exhibition data available');
+  return [];
+}
+
+// ─── 20. SOMA Museum (소마미술관) ────────────────────────────────────────
+
+async function scrapeSoma() {
+  console.log('\n--- Scraping SOMA Museum ---');
+  const results = [];
+
+  try {
+    const currentYear = new Date().getFullYear();
+    const listUrl = `https://soma.kspo.or.kr/dspy/display/list?year=${currentYear}`;
+    const html = await fetchPage(listUrl);
+    const $ = cheerio.load(html);
+
+    // SOMA renders exhibitions as list items with text pattern:
+    // "2관 예정 조각이 꿈+틀 2026.04.17 ~ 2026.09.06 바로가기"
+    $('li').each((_, el) => {
+      const $el = $(el);
+      const text = $el.text().replace(/\s+/g, ' ').trim();
+      const img = $el.find('img').first().attr('src');
+
+      // Must contain a date range like "2026.04.17 ~ 2026.09.06"
+      const dateMatch = text.match(/(\d{4})[./](\d{1,2})[./](\d{1,2})\s*[~\-–—]\s*(\d{4})[./](\d{1,2})[./](\d{1,2})/);
+      if (!dateMatch) return;
+
+      // Extract title: remove venue number, status, date, and "바로가기"
+      let title = text
+        .replace(/^\d관\s*/, '')
+        .replace(/^(현재|예정|종료)\s*/, '')
+        .replace(dateMatch[0], '')
+        .replace(/바로가기/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (!title || title.length < 2) return;
+
+      const startDate = `${dateMatch[1]}-${dateMatch[2].padStart(2, '0')}-${dateMatch[3].padStart(2, '0')}`;
+      const endDate = `${dateMatch[4]}-${dateMatch[5].padStart(2, '0')}-${dateMatch[6].padStart(2, '0')}`;
+      const exId = `soma-${startDate}-${title.substring(0, 20).replace(/[^a-zA-Z0-9가-힣]/g, '')}`;
+
+      results.push({
+        gallery_slug: 'soma',
+        external_id: exId,
+        title: cleanText(title),
+        artist: null,
+        venue_name: '소마미술관 SOMA Museum of Art',
+        venue_address: '서울특별시 송파구 올림픽로 424',
+        start_date: startDate,
+        end_date: endDate,
+        description: null,
+        image_url: img ? (img.startsWith('http') ? img : `https://soma.kspo.or.kr${img}`) : null,
+        source_url: listUrl,
+        medium: null,
+        exhibition_type: 'gallery',
+        raw_data: { title, dateText: dateMatch[0] }
+      });
+      console.log(`  ${cleanText(title).substring(0, 50)} | ${startDate}~${endDate}`);
+    });
+  } catch (e) {
+    console.log(`  SOMA scraper error: ${e.message}`);
+  }
+
+  console.log(`  SOMA: ${results.length} exhibitions found`);
+  return results;
+}
+
+// ─── 21. Perigee Gallery (페리지갤러리) ──────────────────────────────────
+
+async function scrapePerigee() {
+  console.log('\n--- Scraping Perigee Gallery ---');
+  const results = [];
+
+  try {
+    const currentYear = new Date().getFullYear();
+    const html = await fetchPage(`https://perigee.co.kr/gallery/exhibitions/lists/${currentYear}`);
+    const $ = cheerio.load(html);
+
+    // Parse exhibition data from listing page: title in span.FB_L, date below, image in sibling <a>
+    const seen = new Set();
+    $('a[href*="/gallery/exhibitions/view/"]').each((_, el) => {
+      const $a = $(el);
+      const href = $a.attr('href');
+      if (!href || seen.has(href)) return;
+
+      // Only process links with span.FB_L (title links, not image links)
+      const titleSpan = $a.find('span.FB_L');
+      if (!titleSpan.length) return;
+      seen.add(href);
+
+      const title = titleSpan.text().replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+      if (!title || title.length < 2) return;
+
+      // Date is in the link text after the span
+      const linkText = $a.text().replace(/\s+/g, ' ').trim();
+      const dateMatch = linkText.match(/(\d{4})[./](\d{1,2})[./](\d{1,2})\s*[~\-–—]\s*(\d{4})[./](\d{1,2})[./](\d{1,2})/);
+      let startDate = null, endDate = null;
+      if (dateMatch) {
+        startDate = `${dateMatch[1]}-${dateMatch[2].padStart(2, '0')}-${dateMatch[3].padStart(2, '0')}`;
+        endDate = `${dateMatch[4]}-${dateMatch[5].padStart(2, '0')}-${dateMatch[6].padStart(2, '0')}`;
+      }
+
+      // Image is in a sibling <a> with the same href
+      const grandparent = $a.parent().parent();
+      const img = grandparent.find('img').first().attr('src') || null;
+
+      const exId = href.match(/\/view\/\d+\/(\d+)/)?.[1] || href.replace(/[^a-zA-Z0-9]/g, '-');
+
+      results.push({
+        gallery_slug: 'perigee',
+        external_id: `perigee-${exId}`,
+        title: cleanText(title),
+        artist: null,
+        venue_name: '페리지갤러리 Perigee Gallery',
+        venue_address: '서울특별시 서초구 반포대로 18',
+        start_date: startDate,
+        end_date: endDate,
+        description: null,
+        image_url: img ? (img.startsWith('http') ? img : `https://perigee.co.kr${img}`) : null,
+        source_url: `https://perigee.co.kr${href}`,
+        medium: null,
+        exhibition_type: 'gallery',
+        raw_data: { id: exId, title, dateText: dateMatch?.[0] || '' }
+      });
+      console.log(`  ${cleanText(title).substring(0, 50)} | ${startDate || 'no date'}`);
+    });
+  } catch (e) {
+    console.log(`  Perigee scraper error: ${e.message}`);
+  }
+
+  console.log(`  Perigee: ${results.length} exhibitions found`);
+  return results;
+}
+
+// ─── 22. Gladstone Gallery (글래드스톤갤러리) ────────────────────────────
+
+async function scrapeGladstone() {
+  console.log('\n--- Scraping Gladstone Gallery ---');
+  const results = [];
+
+  try {
+    const html = await fetchPage('https://www.gladstonegallery.com/exhibitions/');
+    const $ = cheerio.load(html);
+
+    // Gladstone uses /exhibit/ (not /exhibition/)
+    const seen = new Set();
+    $('a[href*="/exhibit/"]').each((_, el) => {
+      const $a = $(el);
+      const href = $a.attr('href');
+      if (!href || seen.has(href) || href === '/exhibitions/') return;
+      seen.add(href);
+
+      const slug = href.replace(/^.*\/exhibit\//, '').replace(/\/$/, '');
+      if (!slug || slug.length < 2) return;
+
+      // Images are in <picture><source> inside the link
+      const imgSrc = $a.find('img').first().attr('src')
+        || $a.find('source').first().attr('srcset')?.split(' ')[0]
+        || null;
+
+      // Title from slug (actual text is in picture/img elements)
+      const title = slug.replace(/-/g, ' ').replace(/\b(gg|bgg|brussel)\d+\b/gi, '').trim();
+      if (!title || title.length < 2) return;
+
+      results.push({
+        gallery_slug: 'gladstone',
+        external_id: slug,
+        title: cleanText(title),
+        artist: null,
+        venue_name: 'Gladstone Gallery',
+        venue_address: null,
+        start_date: null,
+        end_date: null,
+        description: null,
+        image_url: imgSrc,
+        source_url: `https://www.gladstonegallery.com${href}`,
+        medium: null,
+        exhibition_type: 'gallery',
+        raw_data: { slug }
+      });
+      console.log(`  ${cleanText(title).substring(0, 50)}`);
+    });
+  } catch (e) {
+    console.log(`  Gladstone scraper error: ${e.message}`);
+  }
+
+  console.log(`  Gladstone: ${results.length} exhibitions found`);
+  return results;
+}
+
+// ─── 23. Tang Contemporary (탕컨템포러리) ────────────────────────────────
+
+async function scrapeTang() {
+  console.log('\n--- Scraping Tang Contemporary ---');
+  const results = [];
+
+  try {
+    // Try main exhibitions page
+    const html = await fetchPage('https://www.tangcontemporary.com/exhibitions-en');
+    const $ = cheerio.load(html);
+
+    // Wix sites embed data in __INITIAL_DATA__ or similar JSON
+    let wixData = null;
+    $('script').each((_, el) => {
+      const text = $(el).html() || '';
+      if (text.includes('window.__INITIAL_DATA__') || text.includes('warmupData')) {
+        // Try to extract JSON
+        const jsonMatch = text.match(/window\.__INITIAL_DATA__\s*=\s*({[\s\S]*?});?\s*(?:window\.|<\/script>)/);
+        if (jsonMatch) {
+          try { wixData = JSON.parse(jsonMatch[1]); } catch (_) {}
+        }
+        // Also try warmupData pattern
+        const warmupMatch = text.match(/"warmupData"\s*:\s*({[\s\S]*?})\s*[,}]/);
+        if (warmupMatch) {
+          try { wixData = JSON.parse(warmupMatch[1]); } catch (_) {}
+        }
+      }
+    });
+
+    // Parse HTML links as fallback
+    const seen = new Set();
+    $('a[href*="exhibition"]').each((_, el) => {
+      const $a = $(el);
+      const href = $a.attr('href');
+      if (!href || seen.has(href)) return;
+      seen.add(href);
+
+      const fullText = $a.text().replace(/\s+/g, ' ').trim();
+      const imgSrc = $a.find('img').first().attr('src') || null;
+      if (!fullText || fullText.length < 3) return;
+
+      // Check for Seoul/Beijing/Hong Kong/Bangkok
+      const isSeoul = /seoul/i.test(fullText) || /서울/i.test(fullText);
+
+      let title = fullText.replace(/\s+/g, ' ').trim();
+      if (!title || title.length < 2) return;
+
+      const slug = href.replace(/[^a-zA-Z0-9]/g, '-').substring(0, 80);
+
+      results.push({
+        gallery_slug: 'tang',
+        external_id: slug,
+        title: cleanText(title),
+        artist: null,
+        venue_name: isSeoul ? '탕컨템포러리 서울 Tang Contemporary Seoul' : 'Tang Contemporary Art',
+        venue_address: isSeoul ? '서울특별시 용산구 이태원로 240' : null,
+        start_date: null,
+        end_date: null,
+        description: null,
+        image_url: imgSrc,
+        source_url: href.startsWith('http') ? href : `https://www.tangcontemporary.com${href}`,
+        medium: null,
+        exhibition_type: 'gallery',
+        raw_data: { slug, title, isSeoul, hasWixData: !!wixData }
+      });
+      console.log(`  ${cleanText(title).substring(0, 50)} | ${isSeoul ? 'Seoul' : '?'}`);
+    });
+
+    // JS-rendered warning
+    if (results.length === 0) {
+      console.log('  WARNING: Tang Contemporary (Wix) may be JS-rendered. SSR returned no exhibition data.');
+    }
+  } catch (e) {
+    console.log(`  Tang scraper error: ${e.message}`);
+  }
+
+  console.log(`  Tang: ${results.length} exhibitions found`);
+  return results;
+}
+
+// ─── 24. Whitestone Gallery (화이트스톤갤러리) ───────────────────────────
+
+async function scrapeWhitestone() {
+  console.log('\n--- Scraping Whitestone Gallery ---');
+  const results = [];
+
+  try {
+    // Try sitemap first for exhibition URLs
+    let sitemapHtml = '';
+    try {
+      sitemapHtml = await fetchPage('https://whitestone-gallery.com/sitemap.xml');
+    } catch (e) {
+      console.log('  Sitemap not accessible, trying exhibitions page...');
+    }
+
+    const exhibitionUrls = [];
+
+    if (sitemapHtml) {
+      const $sitemap = cheerio.load(sitemapHtml, { xmlMode: true });
+      $sitemap('url loc').each((_, el) => {
+        const loc = $sitemap(el).text();
+        if (/exhibition/i.test(loc)) exhibitionUrls.push(loc);
+      });
+      console.log(`  Sitemap: found ${exhibitionUrls.length} exhibition URLs`);
+    }
+
+    // Also try main exhibitions page
+    try {
+      await delay(2000);
+      const html = await fetchPage('https://whitestone-gallery.com/exhibitions/');
+      const $ = cheerio.load(html);
+
+      $('a[href*="exhibition"]').each((_, el) => {
+        const href = $(el).attr('href');
+        if (href && !exhibitionUrls.includes(href)) {
+          const fullUrl = href.startsWith('http') ? href : `https://whitestone-gallery.com${href}`;
+          if (!exhibitionUrls.includes(fullUrl)) exhibitionUrls.push(fullUrl);
+        }
+      });
+    } catch (e) {
+      console.log(`  Exhibitions page error: ${e.message}`);
+    }
+
+    // Filter for Seoul-related URLs and fetch details
+    for (const url of exhibitionUrls.slice(0, 20)) {
+      try {
+        await delay(2000);
+        const exHtml = await fetchPage(url);
+        const $ex = cheerio.load(exHtml);
+
+        const title = $ex('meta[property="og:title"]').attr('content')
+          || $ex('title').text().split('|')[0].trim()
+          || '';
+        if (!title || title.length < 2) continue;
+
+        const ogImage = $ex('meta[property="og:image"]').attr('content') || null;
+        const bodyText = $ex('body').text();
+
+        // Check if Seoul-related
+        const isSeoul = /seoul|서울|kairos/i.test(bodyText) || /seoul|서울/i.test(url);
+
+        // Dates
+        let dates = null;
+        const dotMatch = bodyText.match(/(\d{4})[./](\d{1,2})[./](\d{1,2})\s*[-–—~]\s*(\d{4})[./](\d{1,2})[./](\d{1,2})/);
+        if (dotMatch) {
+          dates = parseDate(dotMatch[0]);
+        } else {
+          const enDateMatch = bodyText.match(
+            /(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}\s*[-–—~]\s*(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}/i
+          );
+          if (enDateMatch) dates = parseDate(enDateMatch[0]);
+        }
+
+        const slug = url.replace(/^.*\/exhibitions?\//, '').replace(/\/$/, '').replace(/[^a-zA-Z0-9-]/g, '-') || `ws-${results.length}`;
+
+        results.push({
+          gallery_slug: 'whitestone',
+          external_id: slug.substring(0, 100),
+          title: cleanText(title),
+          artist: null,
+          venue_name: isSeoul ? '화이트스톤갤러리 서울 Whitestone Gallery Seoul' : 'Whitestone Gallery',
+          venue_address: isSeoul ? '서울특별시 강남구 학동로 6길 20' : null,
+          start_date: dates?.start || null,
+          end_date: dates?.end || null,
+          description: null,
+          image_url: ogImage,
+          source_url: url,
+          medium: null,
+          exhibition_type: 'gallery',
+          raw_data: { url, title, isSeoul, dateText: dotMatch?.[0] || '' }
+        });
+        console.log(`  ${cleanText(title).substring(0, 50)} | ${isSeoul ? 'Seoul' : '?'} | ${dates?.start || 'no date'}`);
+      } catch (e) {
+        // Skip failed pages
+      }
+    }
+
+    if (results.length === 0) {
+      console.log('  WARNING: Whitestone (Shopify) may be JS-rendered. SSR returned no exhibition data.');
+    }
+  } catch (e) {
+    console.log(`  Whitestone scraper error: ${e.message}`);
+  }
+
+  console.log(`  Whitestone: ${results.length} exhibitions found`);
+  return results;
+}
+
+// ─── 25. Savina Museum (사비나미술관) ────────────────────────────────────
+
+async function scrapeSavina() {
+  // Savina Museum website appears to be down/restructured (all pages return 404)
+  console.log('\n--- Scraping Savina Museum ---');
+  console.log('  SKIPPED: Website appears down or restructured (all exhibition URLs return 404)');
+  return [];
+}
+
 // ─── Main run function ────────────────────────────────────────────────────
 
 async function run() {
@@ -1396,13 +2044,26 @@ CREATE INDEX idx_source_galleries_dates ON source_galleries(start_date, end_date
     { name: 'Ropac', fn: scrapeRopac },
     { name: 'Lehmann Maupin', fn: scrapeLehmann },
     { name: 'Pace', fn: scrapePace },
-    { name: 'ARTMAP', fn: scrapeArtmapKR },
+    // ARTMAP disabled: art-map.co.kr ToS prohibits scraping
+    // { name: 'ARTMAP', fn: scrapeArtmapKR },
     { name: 'Neolook', fn: scrapeNeolook },
     { name: 'Gagosian', fn: scrapeGagosian },
     { name: 'Perrotin', fn: scrapePerrotin },
     { name: 'Lisson', fn: scrapeLisson },
     { name: 'Sprüth Magers', fn: scrapeSpruthMagers },
-    { name: 'Arario', fn: scrapeArario }
+    { name: 'Arario', fn: scrapeArario },
+    { name: 'The Page', fn: scrapeThePage },
+    { name: 'Baton', fn: scrapeBaton },
+    { name: 'Art Sonje', fn: scrapeArtsonje },
+    { name: 'OCI', fn: scrapeOCI },
+    { name: 'Lotte', fn: scrapeLotte },
+    { name: 'Leeum', fn: scrapeLeeum },
+    { name: 'SOMA', fn: scrapeSoma },
+    { name: 'Perigee', fn: scrapePerigee },
+    { name: 'Gladstone', fn: scrapeGladstone },
+    { name: 'Tang', fn: scrapeTang },
+    { name: 'Whitestone', fn: scrapeWhitestone },
+    { name: 'Savina', fn: scrapeSavina }
   ];
 
   for (const scraper of scrapers) {

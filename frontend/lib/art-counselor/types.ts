@@ -1,127 +1,56 @@
-'use client';
+export type SessionStage = 'opening' | 'exploring' | 'connecting' | 'complete';
 
-export type ArtCounselorStage =
-  | 'opening'
-  | 'exploration'
-  | 'connection'
-  | 'complete';
-
-export type ConversationRole = 'user' | 'ai' | 'system';
-
-export interface ConversationMessage {
+export interface ChatMessage {
   id: string;
-  role: ConversationRole;
-  stage?: ArtCounselorStage;
+  role: 'user' | 'assistant';
   content: string;
-  subtitle?: string;
-  emoji?: string;
-  method?: string;
-  createdAt: string;
+  timestamp: string;
 }
 
-export interface CounselorOption {
+export interface ChatOption {
   id: string;
   label: string;
-  description?: string;
-  tone?: 'gentle' | 'curious' | 'grounding' | 'playful';
-  accent?: string;
 }
 
-export interface ArtworkSummary {
+export interface CounselorArtwork {
   id: string;
   title: string;
   artist: string;
   year?: string;
-  imageUrl?: string;
-  medium?: string;
-  moodKeywords?: string[];
+  imageUrl: string;
+  thumbnailUrl: string;
+  sayuType: string;
 }
 
-export interface HybridOpeningData {
+export interface CounselorSession {
+  id: string;
+  userId: string;
   artworkId: string;
   artworkTitle: string;
-  artworkArtist: string;
-  artworkYear?: string;
-  personality: string;
-  emoji?: string;
-  message: string;
-  options?: CounselorOption[];
-  stage: 'opening';
+  artworkArtist: string | null;
+  artworkImageUrl: string | null;
+  artworkThumbnailUrl: string | null;
+  aptType: string;
+  messages: ChatMessage[];
+  summary: string | null;
+  moodTags: string[];
+  status: 'active' | 'completed';
+  startedAt: string;
+  completedAt: string | null;
 }
 
-export interface HybridExplorationData {
-  artworkId: string;
-  personality: string;
-  stage: 'exploration';
-  message: string;
-  method?: string;
-  options?: CounselorOption[];
-  userSelection?: string | null;
-  userInput?: string | null;
-}
+export type SSEEvent =
+  | { type: 'chunk'; content: string }
+  | { type: 'options'; options: ChatOption[] }
+  | { type: 'done' }
+  | { type: 'error'; message: string };
 
-export interface HybridConnectionData {
-  artworkId: string;
-  personality: string;
-  stage: 'connection';
-  message: string;
-  method?: string;
-  userInput?: string;
-}
-
-export interface HybridCompleteData {
-  journalId: string;
-  summary: string;
+export interface TimelineItem {
+  id: string;
   artworkTitle: string;
-  createdAt: string;
-}
-
-export interface HybridApiError {
-  message: string;
-  code?: string;
-  retryable?: boolean;
-}
-
-export interface HybridOpeningResponse {
-  success: true;
-  data: HybridOpeningData;
-}
-
-export interface HybridExplorationResponse {
-  success: true;
-  data: HybridExplorationData;
-}
-
-export interface HybridConnectionResponse {
-  success: true;
-  data: HybridConnectionData;
-}
-
-export interface HybridCompleteResponse {
-  success: true;
-  data: HybridCompleteData;
-}
-
-export type HybridErrorResponse = {
-  success: false;
-  error?: HybridApiError;
-  message?: string;
-};
-
-export type HybridStageResponse =
-  | HybridOpeningResponse
-  | HybridExplorationResponse
-  | HybridConnectionResponse
-  | HybridCompleteResponse
-  | HybridErrorResponse;
-
-export interface CompletePayload {
-  summary: string;
-  journalPrompt: string;
-  emotionalKeywords: string[];
-  recommendedActions: Array<{
-    id: string;
-    label: string;
-    href?: string;
-  }>;
+  artworkArtist: string | null;
+  artworkThumbnailUrl: string | null;
+  summary: string | null;
+  moodTags: string[];
+  completedAt: string;
 }

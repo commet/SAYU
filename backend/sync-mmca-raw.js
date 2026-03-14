@@ -54,7 +54,10 @@ function parseXML(xml) {
 }
 
 function decodeHtml(t) {
-  return (t || '').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#039;/g,"'");
+  return (t || '')
+    .replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')
+    .replace(/&quot;/g,'"').replace(/&#039;/g,"'")
+    .replace(/<[^>]*>/g, '');
 }
 
 function parsePeriod(p) {

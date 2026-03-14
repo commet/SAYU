@@ -1,295 +1,364 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { useArtCounselorStore } from '@/lib/art-counselor/store';
 import { useShallow } from 'zustand/react/shallow';
-import {
-  ArtCounselorStage,
-  HybridOpeningResponse,
-  HybridExplorationResponse,
-  HybridConnectionResponse,
-  HybridCompleteResponse,
-  HybridStageResponse,
-  CompletePayload,
-} from '@/lib/art-counselor/types';
-import { createMessage } from '@/lib/art-counselor/utils';
+import type { ChatMessage, SSEEvent, SessionStage } from '@/lib/art-counselor/types';
 
-interface OpeningParams {
-  artworkId: string;
-  personality: string;
-}
+const EXCLUDE_IDS_KEY = 'sayu_counselor_exclude_ids';
 
-interface ExplorationParams extends OpeningParams {
-  userSelection: string;
-  freeText?: string | null;
-}
-
-interface ConnectionParams extends OpeningParams {
-  reflection: string;
-}
-
-const HYBRID_ENDPOINT = '/api/art-counselor/hybrid';
-
-async function parseResponse<T extends HybridStageResponse>(
-  response: Response
-): Promise<T> {
-  const data = (await response.json()) as T;
-  if (!data.success) {
-    throw new Error(data.error?.message || 'Art counselor request failed');
+function getExcludeIds(): string[] {
+  try {
+    const raw = localStorage.getItem(EXCLUDE_IDS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
   }
-  return data;
+}
+
+function addExcludeId(id: string) {
+  try {
+    const ids = getExcludeIds();
+    if (!ids.includes(id)) {
+      ids.push(id);
+      // Keep only last 50 to avoid blocking all artworks
+      const trimmed = ids.slice(-50);
+      localStorage.setItem(EXCLUDE_IDS_KEY, JSON.stringify(trimmed));
+    }
+  } catch {
+    // localStorage unavailable
+  }
+}
+
+function formatMessagesForAPI(messages: ChatMessage[]) {
+  return messages.map((m) => ({
+    role: m.role as 'user' | 'assistant',
+    content: m.content,
+  }));
 }
 
 export function useArtCounselorSession() {
+  const abortRef = useRef<AbortController | null>(null);
+
   const {
-    setStage,
-    setSessionMeta,
-    setArtwork,
-    setOptions,
-    appendMessage,
-    setLoading,
-    setJournalPayload,
-    setError,
-    reset,
     sessionId,
+    stage,
+    messages,
+    options,
+    isStreaming,
+    streamingContent,
+    artwork,
+    summary,
+    moodTags,
+    error,
+    setSession,
+    setStage,
+    appendMessage,
+    setOptions,
+    startStreaming,
+    appendStreamChunk,
+    finishStreaming,
+    setSummary,
+    setError,
+    reset: storeReset,
   } = useArtCounselorStore(
-    useShallow((state) => ({
-      setStage: state.setStage,
-      setSessionMeta: state.setSessionMeta,
-      setArtwork: state.setArtwork,
-      setOptions: state.setOptions,
-      appendMessage: state.appendMessage,
-      setLoading: state.setLoading,
-      setJournalPayload: state.setJournalPayload,
-      setError: state.setError,
-      reset: state.reset,
-      sessionId: state.sessionId,
+    useShallow((s) => ({
+      sessionId: s.sessionId,
+      stage: s.stage,
+      messages: s.messages,
+      options: s.options,
+      isStreaming: s.isStreaming,
+      streamingContent: s.streamingContent,
+      artwork: s.artwork,
+      summary: s.summary,
+      moodTags: s.moodTags,
+      error: s.error,
+      setSession: s.setSession,
+      setStage: s.setStage,
+      appendMessage: s.appendMessage,
+      setOptions: s.setOptions,
+      startStreaming: s.startStreaming,
+      appendStreamChunk: s.appendStreamChunk,
+      finishStreaming: s.finishStreaming,
+      setSummary: s.setSummary,
+      setError: s.setError,
+      reset: s.reset,
     }))
   );
 
-  const resetSession = useCallback(() => {
-    reset();
-  }, [reset]);
-
-  const finalizeSession = useCallback(
-    async ({ artworkId, personality }: OpeningParams) => {
-      if (!sessionId) {
-        console.warn('[ArtCounselor] finalize called without session');
-        return;
-      }
-
-      try {
-    const response = await fetch(`${HYBRID_ENDPOINT}/complete`, {
-      method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            artworkId,
-            personality,
-            sessionId,
-          }),
-        });
-
-        const data = await parseResponse<HybridCompleteResponse>(response);
-        if (!data.success) return;
-
-        const payload: CompletePayload = {
-          summary: data.data.summary,
-          journalPrompt:
-            '지금 느낀 감정을 짧게 기록해 두면 내일의 나에게 도움이 될 거예요.',
-          emotionalKeywords: [],
-          recommendedActions: [
-            { id: 'journal', label: '저널에 오늘의 감정 기록하기', href: '/art-counselor/journal' },
-            { id: 'journey', label: '아트 여정 지도로 이동', href: '/art-counselor/journey' },
-          ],
-        };
-
-        setJournalPayload(payload);
-        setStage('complete');
-        appendMessage(
-          createMessage('system', payload.summary, {
-            stage: 'complete',
-          })
-        );
-      } catch (error) {
-        console.error('[ArtCounselor] finalize failed', error);
-        setError(
-          error instanceof Error ? error.message : 'Complete request failed'
-        );
-      }
-    },
-    [appendMessage, sessionId, setError, setJournalPayload]
-  );
-
-  const loadOpening = useCallback(
-    async ({ artworkId, personality }: OpeningParams) => {
-      setLoading(true);
+  // ---- internal: stream a chat response ----
+  const streamChat = useCallback(
+    async (
+      allMessages: ChatMessage[],
+      nextStage: SessionStage,
+      aptType: string,
+      artworkTitle: string,
+      artworkArtist: string
+    ) => {
+      startStreaming();
       setError(null);
 
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
       try {
-        const response = await fetch(
-          `${HYBRID_ENDPOINT}/opening/${artworkId}/${personality}`,
-          {
-            method: 'GET',
-            cache: 'no-store',
+        const response = await fetch('/api/art-counselor/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: formatMessagesForAPI(allMessages),
+            aptType,
+            artworkTitle,
+            artworkArtist,
+            stage: nextStage,
+          }),
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text || `Chat request failed (${response.status})`);
+        }
+
+        const reader = response.body!.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let accumulated = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            const data = line.slice(6).trim();
+            if (data === '[DONE]') continue;
+
+            try {
+              const event: SSEEvent = JSON.parse(data);
+              if (event.type === 'chunk') {
+                accumulated += event.content;
+                appendStreamChunk(event.content);
+              }
+              if (event.type === 'options') {
+                setOptions(event.options);
+              }
+              if (event.type === 'error') {
+                setError(event.message);
+              }
+            } catch {
+              // skip malformed SSE chunks
+            }
           }
-        );
+        }
 
-        const data = await parseResponse<HybridOpeningResponse>(response);
-        if (!data.success) return;
+        // Get the final accumulated content from store
+        const finalContent =
+          accumulated || useArtCounselorStore.getState().streamingContent;
+        finishStreaming(finalContent);
+        setStage(nextStage);
 
-        const sessionIdentifier =
-          sessionId ??
-          (typeof crypto !== 'undefined' && 'randomUUID' in crypto
-            ? crypto.randomUUID()
-            : `session-${Date.now()}`);
-
-        setStage('opening');
-        setSessionMeta(sessionIdentifier, personality);
-        setArtwork({
-          id: data.data.artworkId,
-          title: data.data.artworkTitle,
-          artist: data.data.artworkArtist,
-          year: data.data.artworkYear,
-        });
-        setOptions(data.data.options || []);
-        appendMessage(
-          createMessage('ai', data.data.message, {
-            stage: 'opening',
-            emoji: data.data.emoji,
-          })
+        return finalContent;
+      } catch (err) {
+        if ((err as Error).name === 'AbortError') return '';
+        const message =
+          err instanceof Error ? err.message : 'Stream error';
+        setError(message);
+        // Ensure streaming state is cleaned up on error
+        finishStreaming(
+          useArtCounselorStore.getState().streamingContent || ''
         );
-      } catch (error) {
-        console.error('[ArtCounselor] opening failed', error);
-        setError(
-          error instanceof Error ? error.message : 'Opening request failed'
-        );
-      } finally {
-        setLoading(false);
+        return '';
       }
     },
     [
-      appendMessage,
-      setArtwork,
+      startStreaming,
       setError,
-      setLoading,
+      appendStreamChunk,
       setOptions,
-      setStage,
-      setSessionMeta,
-    ]
-  );
-
-  const sendExploration = useCallback(
-    async (params: ExplorationParams) => {
-      const { artworkId, personality, userSelection, freeText = null } = params;
-
-      if (!sessionId) {
-        console.warn('[ArtCounselor] exploration called without session');
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-
-      try {
-        const response = await fetch(`${HYBRID_ENDPOINT}/exploration`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            artworkId,
-            personality,
-            userSelection,
-            freeText,
-            sessionId,
-          }),
-        });
-
-        const data = await parseResponse<HybridExplorationResponse>(response);
-        if (!data.success) return;
-
-        setStage(data.data.stage ?? 'connection');
-        setOptions(data.data.options || []);
-        appendMessage(
-          createMessage('ai', data.data.message, {
-            stage: 'exploration',
-            method: data.data.method,
-          })
-        );
-      } catch (error) {
-        console.error('[ArtCounselor] exploration failed', error);
-        setError(
-          error instanceof Error ? error.message : 'Exploration request failed'
-        );
-      } finally {
-        setLoading(false);
-      }
-    },
-    [appendMessage, sessionId, setError, setLoading, setOptions, setStage]
-  );
-
-  const sendConnection = useCallback(
-    async ({ artworkId, personality, reflection }: ConnectionParams) => {
-      if (!sessionId) {
-        console.warn('[ArtCounselor] connection called without session');
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-
-      try {
-        const response = await fetch(`${HYBRID_ENDPOINT}/connection`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            artworkId,
-            personality,
-            userInput: reflection,
-            sessionId,
-          }),
-        });
-
-        const data = await parseResponse<HybridConnectionResponse>(response);
-        if (!data.success) return;
-
-        appendMessage(
-          createMessage('ai', data.data.message, {
-            stage: 'connection',
-            method: data.data.method,
-          })
-        );
-
-        setStage('connection');
-        await finalizeSession({ artworkId, personality });
-      } catch (error) {
-        console.error('[ArtCounselor] connection failed', error);
-        setError(
-          error instanceof Error ? error.message : 'Connection request failed'
-        );
-      } finally {
-        setLoading(false);
-      }
-    },
-    [
-      appendMessage,
-      finalizeSession,
-      sessionId,
-      setError,
-      setLoading,
+      finishStreaming,
       setStage,
     ]
   );
 
-  const transitionTo = useCallback(
-    (stage: ArtCounselorStage) => setStage(stage),
-    [setStage]
+  // ---- internal: complete session ----
+  const completeSession = useCallback(
+    async (
+      currentSessionId: string,
+      allMessages: ChatMessage[]
+    ) => {
+      // Use last assistant message as summary
+      const lastAssistant = [...allMessages]
+        .reverse()
+        .find((m) => m.role === 'assistant');
+      const summaryText = lastAssistant?.content || '';
+
+      try {
+        await fetch('/api/art-counselor/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'complete',
+            sessionId: currentSessionId,
+            messages: allMessages,
+            summary: summaryText,
+            moodTags: [],
+          }),
+        });
+      } catch {
+        // non-critical, session saved best-effort
+      }
+
+      setSummary(summaryText, []);
+      setStage('complete');
+    },
+    [setSummary, setStage]
   );
+
+  // ---- public: initSession ----
+  const initSession = useCallback(
+    async (aptType: string) => {
+      setError(null);
+
+      try {
+        // 1. Fetch artwork
+        const excludeIds = getExcludeIds();
+        const artworkRes = await fetch('/api/art-counselor/artwork', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ aptType, excludeIds }),
+        });
+
+        if (!artworkRes.ok) {
+          throw new Error('Failed to fetch artwork');
+        }
+
+        const { artwork: fetchedArtwork } = await artworkRes.json();
+        if (!fetchedArtwork) {
+          throw new Error('No artwork available');
+        }
+
+        // 2. Create session
+        const sessionRes = await fetch('/api/art-counselor/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'create',
+            artworkId: fetchedArtwork.id,
+            artworkTitle: fetchedArtwork.title,
+            artworkArtist: fetchedArtwork.artist,
+            artworkImageUrl: fetchedArtwork.imageUrl,
+            artworkThumbnailUrl: fetchedArtwork.thumbnailUrl,
+            aptType,
+          }),
+        });
+
+        if (!sessionRes.ok) {
+          throw new Error('Failed to create session');
+        }
+
+        const { sessionId: newSessionId } = await sessionRes.json();
+
+        // 3. Store in zustand
+        setSession(newSessionId, fetchedArtwork);
+
+        // 4. Save to exclude list
+        addExcludeId(fetchedArtwork.id);
+
+        // 5. Stream opening message
+        await streamChat(
+          [],
+          'opening',
+          aptType,
+          fetchedArtwork.title,
+          fetchedArtwork.artist
+        );
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : 'Session init failed';
+        setError(message);
+      }
+    },
+    [setError, setSession, streamChat]
+  );
+
+  // ---- public: sendMessage ----
+  const sendMessage = useCallback(
+    async (content: string, optionId?: string) => {
+      const state = useArtCounselorStore.getState();
+      const currentArtwork = state.artwork;
+      const currentSessionId = state.sessionId;
+      const currentStage = state.stage;
+
+      if (!currentArtwork || !currentSessionId) return;
+
+      // 1. Create and append user message
+      const userMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: 'user',
+        content,
+        timestamp: new Date().toISOString(),
+      };
+      appendMessage(userMessage);
+
+      const allMessages = [...state.messages, userMessage];
+
+      // 2. Determine next stage
+      let nextStage: SessionStage;
+      if (currentStage === 'opening') {
+        nextStage = 'exploring';
+      } else if (currentStage === 'exploring') {
+        nextStage = 'connecting';
+      } else {
+        // connecting -> trigger completion after AI response
+        nextStage = 'connecting';
+      }
+
+      // 3. Stream AI response
+      const aptType = currentArtwork.sayuType || 'LAEF';
+      await streamChat(
+        allMessages,
+        nextStage,
+        aptType,
+        currentArtwork.title,
+        currentArtwork.artist
+      );
+
+      // 4. If we just finished the connecting stage, complete the session
+      if (currentStage === 'connecting') {
+        const updatedState = useArtCounselorStore.getState();
+        await completeSession(currentSessionId, updatedState.messages);
+      }
+    },
+    [appendMessage, streamChat, completeSession]
+  );
+
+  // ---- public: reset ----
+  const reset = useCallback(() => {
+    abortRef.current?.abort();
+    storeReset();
+  }, [storeReset]);
 
   return {
-    resetSession,
-    loadOpening,
-    sendExploration,
-    sendConnection,
-    finalizeSession,
-    transitionTo,
+    // State
+    stage,
+    messages,
+    options,
+    isStreaming,
+    streamingContent,
+    artwork,
+    summary,
+    moodTags,
+    error,
+
+    // Actions
+    initSession,
+    sendMessage,
+    reset,
   };
 }

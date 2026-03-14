@@ -1,17 +1,17 @@
 'use client';
 
-import { ConversationMessage, ConversationRole } from './types';
+import { ChatMessage } from './types';
 
-export const createMessage = (
-  role: ConversationRole,
-  content: string,
-  extras: Partial<ConversationMessage> = {}
-): ConversationMessage => ({
-  id: typeof crypto !== 'undefined' && 'randomUUID' in crypto
-    ? crypto.randomUUID()
-    : `${role}-${Date.now()}`,
-  role,
-  content,
-  createdAt: new Date().toISOString(),
-  ...extras,
-});
+export function createMessage(
+  role: 'user' | 'assistant',
+  content: string
+): ChatMessage {
+  return {
+    id: typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID()
+      : `${role}-${Date.now()}`,
+    role,
+    content,
+    timestamp: new Date().toISOString(),
+  };
+}

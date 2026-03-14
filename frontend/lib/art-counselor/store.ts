@@ -2,72 +2,84 @@
 
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import {
-  ArtCounselorStage,
-  ArtworkSummary,
-  CompletePayload,
-  ConversationMessage,
-  CounselorOption,
-} from './types';
+import { ChatMessage, ChatOption, CounselorArtwork, SessionStage } from './types';
 
-export interface ArtCounselorState {
-  stage: ArtCounselorStage;
+interface ArtCounselorState {
   sessionId: string | null;
-  personality: string | null;
-  artwork: ArtworkSummary | null;
-  messages: ConversationMessage[];
-  options: CounselorOption[];
-  isLoading: boolean;
-  journalPayload: CompletePayload | null;
+  stage: SessionStage;
+  artwork: CounselorArtwork | null;
+
+  messages: ChatMessage[];
+  options: ChatOption[];
+  isStreaming: boolean;
+  streamingContent: string;
+
+  summary: string | null;
+  moodTags: string[];
+
   error: string | null;
-  setStage: (stage: ArtCounselorStage) => void;
-  setSessionMeta: (sessionId: string, personality: string) => void;
-  setArtwork: (artwork: ArtworkSummary) => void;
-  setOptions: (options: CounselorOption[]) => void;
-  appendMessage: (message: ConversationMessage) => void;
-  setLoading: (loading: boolean) => void;
-  setJournalPayload: (payload: CompletePayload | null) => void;
+
+  setSession: (id: string, artwork: CounselorArtwork) => void;
+  setStage: (stage: SessionStage) => void;
+  appendMessage: (msg: ChatMessage) => void;
+  setOptions: (opts: ChatOption[]) => void;
+  startStreaming: () => void;
+  appendStreamChunk: (chunk: string) => void;
+  finishStreaming: (fullContent: string) => void;
+  setSummary: (summary: string, moodTags: string[]) => void;
   setError: (error: string | null) => void;
   reset: () => void;
 }
 
-const initialState: Pick<
-  ArtCounselorState,
-  | 'stage'
-  | 'sessionId'
-  | 'personality'
-  | 'artwork'
-  | 'messages'
-  | 'options'
-  | 'isLoading'
-  | 'journalPayload'
-  | 'error'
-> = {
-  stage: 'opening',
-  sessionId: null,
-  personality: null,
-  artwork: null,
-  messages: [],
-  options: [],
-  isLoading: false,
-  journalPayload: null,
-  error: null,
+const initialState = {
+  sessionId: null as string | null,
+  stage: 'opening' as SessionStage,
+  artwork: null as CounselorArtwork | null,
+  messages: [] as ChatMessage[],
+  options: [] as ChatOption[],
+  isStreaming: false,
+  streamingContent: '',
+  summary: null as string | null,
+  moodTags: [] as string[],
+  error: null as string | null,
 };
 
 export const useArtCounselorStore = create<ArtCounselorState>()(
   devtools(
     (set, get) => ({
       ...initialState,
+
+      setSession: (id, artwork) => set({ sessionId: id, artwork }),
+
       setStage: (stage) => set({ stage }),
-      setSessionMeta: (sessionId, personality) =>
-        set({ sessionId, personality }),
-      setArtwork: (artwork) => set({ artwork }),
-      setOptions: (options) => set({ options }),
-      appendMessage: (message) =>
-        set({ messages: [...get().messages, message] }),
-      setLoading: (isLoading) => set({ isLoading }),
-      setJournalPayload: (journalPayload) => set({ journalPayload }),
+
+      appendMessage: (msg) => set({ messages: [...get().messages, msg] }),
+
+      setOptions: (opts) => set({ options: opts }),
+
+      startStreaming: () => set({ isStreaming: true, streamingContent: '' }),
+
+      appendStreamChunk: (chunk) =>
+        set({ streamingContent: get().streamingContent + chunk }),
+
+      finishStreaming: (fullContent) => {
+        const msg: ChatMessage = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: fullContent,
+          timestamp: new Date().toISOString(),
+        };
+        set({
+          isStreaming: false,
+          streamingContent: '',
+          messages: [...get().messages, msg],
+        });
+      },
+
+      setSummary: (summary, moodTags) => set({ summary, moodTags }),
+
       setError: (error) => set({ error }),
+
       reset: () => set({ ...initialState }),
     }),
     { name: 'art-counselor-store' }

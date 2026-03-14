@@ -66,10 +66,11 @@ function parseXML(xml) {
 
 function decodeHtml(t) {
   return (t || '')
-    .replace(/<[^>]*>/g, '')
     .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
     .replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&middot;/g, '·')
-    .replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+    .replace(/&nbsp;/g, ' ')
+    .replace(/<[^>]*>/g, '')
+    .replace(/\s+/g, ' ').trim();
 }
 
 function parsePeriod(p) {

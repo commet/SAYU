@@ -46,6 +46,7 @@ interface Exhibition {
   artists?: string[] | null;
   tags?: string[] | null;
   source?: string | null;
+  sourceLabel?: string | null;
   sourceUrl?: string | null;
 }
 
@@ -116,6 +117,7 @@ export default function ExhibitionDetailClient({ id }: { id: string }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [liked, setLiked] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const {
     currentVisit,
@@ -130,6 +132,7 @@ export default function ExhibitionDetailClient({ id }: { id: string }) {
   const isCurrentExhibitionVisit = isRecording && currentVisit?.exhibition_id === id;
 
   useEffect(() => {
+    setImageError(false);
     if (!id) return;
     (async () => {
       try {
@@ -241,7 +244,7 @@ export default function ExhibitionDetailClient({ id }: { id: string }) {
       {/* Hero Image */}
       <div className="max-w-screen-lg mx-auto px-4 sm:px-6 mt-6">
         <div className="relative aspect-[16/9] sm:aspect-[2/1] overflow-hidden bg-neutral-100 border border-neutral-200">
-          {exhibition.image ? (
+          {exhibition.image && !imageError ? (
             <Image
               src={exhibition.image}
               alt={exhibition.title}
@@ -249,6 +252,7 @@ export default function ExhibitionDetailClient({ id }: { id: string }) {
               className="object-cover"
               priority
               sizes="(max-width: 1024px) 100vw, 1024px"
+              onError={() => setImageError(true)}
             />
           ) : (
             <ExhibitionPlaceholder
@@ -332,7 +336,7 @@ export default function ExhibitionDetailClient({ id }: { id: string }) {
                 <h2 className="text-xs uppercase tracking-widest text-neutral-900 font-medium mb-4">{texts.about}</h2>
                 <div className="h-px bg-neutral-200 mb-4" />
                 <p className="text-neutral-600 leading-relaxed text-sm whitespace-pre-line">
-                  {exhibition.description}
+                  {exhibition.description.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim()}
                 </p>
               </section>
             )}
@@ -423,7 +427,7 @@ export default function ExhibitionDetailClient({ id }: { id: string }) {
                 {exhibition.source && (
                   <div>
                     <p className="text-neutral-400 text-xs uppercase tracking-wider mb-1">{texts.source}</p>
-                    <p className="text-neutral-500 text-xs">{exhibition.source}</p>
+                    <p className="text-neutral-500 text-xs">{exhibition.sourceLabel || exhibition.source}</p>
                   </div>
                 )}
               </div>
