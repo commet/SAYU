@@ -4,7 +4,7 @@ export interface NarrativeQuestion {
   id: number;
   act: 'curiosity' | 'exploration' | 'revelation';
   narrative: {
-    setup: string;
+    setup?: string;
     setup_ko?: string;
     transition?: string;
     transition_ko?: string;
