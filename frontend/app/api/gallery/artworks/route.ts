@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
 }
 
 function processArtworks() {
-  const artworks = [];
+  const artworks: any[] = [];
   
   // Cloudinary URLs 처리
   for (const [id, data] of Object.entries(cloudinaryData as any)) {
@@ -297,7 +297,7 @@ function generateCuratorNote(userType: string, artwork: any, artistData: any): s
 }
 
 function extractTags(artwork: any, artistData: any): string[] {
-  const tags = [];
+  const tags: string[] = [];
   
   // 작가 기반 태그
   if (artwork.artwork?.artist) {
