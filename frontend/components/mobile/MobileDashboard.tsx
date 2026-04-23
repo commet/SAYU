@@ -102,14 +102,26 @@ export default function MobileDashboard() {
 
   // User quiz completion status
   const hasCompletedQuiz = false;
-  const personalityType = null;
-  
+  const personalityType: string | undefined = undefined;
+
   // Get random artworks for recommendations
-  const randomArtworks = artworks.length > 0 
+  const randomArtworks = artworks.length > 0
     ? artworks.sort(() => 0.5 - Math.random()).slice(0, 6)
     : [];
-  
-  const todayRecommendations = randomArtworks.map((artwork, index) => ({
+
+  type Recommendation = {
+    type: 'artwork' | 'exhibition';
+    title: string;
+    artist?: string;
+    reason?: string;
+    image: string;
+    objectID?: string;
+    venue?: string;
+    date?: string;
+    distance?: string;
+  };
+
+  const todayRecommendations: Recommendation[] = randomArtworks.map((artwork, index) => ({
     type: 'artwork',
     title: artwork.title || 'Untitled',
     artist: artwork.artist || 'Unknown Artist',
@@ -171,7 +183,7 @@ export default function MobileDashboard() {
               </button>
             </div>
             <p className="text-white font-medium mb-1">
-              {user.username || user.displayName || user.email?.split('@')[0] || '예술 애호가'}님
+              {user?.nickname || user?.auth?.user_metadata?.display_name || user?.auth?.email?.split('@')[0] || '예술 애호가'}님
             </p>
             <p className="text-gray-300 text-sm">
               {hasCompletedQuiz ? '오늘도 새로운 예술을 발견해보세요' : '예술 여정을 시작해보세요'}
@@ -616,7 +628,6 @@ export default function MobileDashboard() {
         variant="primary"
         contextData={{
           page: 'mobile-dashboard',
-          hasCompletedQuiz: hasCompletedQuiz,
           personalityType: personalityType
         }}
       />
