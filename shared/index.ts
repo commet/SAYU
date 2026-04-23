@@ -440,20 +440,33 @@ export interface DailyChallenge {
 
 export interface ChallengeMatch {
   id: string;
-  userId: string;
-  userName: string;
-  userAvatar?: string;
-  emotion: EmotionType;
-  reflection: string;
-  createdAt: Date;
-  similarity?: number;
+  challenge_date: string;
+  user1_id: string;
+  user2_id: string;
+  match_score: number;
+  apt_compatibility?: number;
+  emotion_similarity?: number;
+  match_reasons?: string[];
+  matched_user?: {
+    id: string;
+    username: string;
+    profile_image_url?: string;
+    apt_type?: string;
+  };
+  created_at?: string;
 }
 
 export interface DailyChallengeStats {
-  totalChallenges: number;
-  completedChallenges: number;
-  streak: number;
-  longestStreak: number;
+  total_responses: number;
+  emotion_distribution: Record<string, number>;
+  apt_distribution: Record<string, number>;
+  avg_response_time: number;
+  participation_rate?: number;
+  top_emotions: Array<{
+    emotion: string;
+    count: number;
+    percentage: number;
+  }>;
 }
 
 // Exhibition Companion types

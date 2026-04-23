@@ -98,20 +98,16 @@ export function MatchResults({ challengeDate }: MatchResultsProps) {
         setStats(statsData);
         
         if (silent && matchData.length > matches.length) {
-          toast({
-            title: "새로운 매칭!",
-            description: `${matchData.length - matches.length}개의 새로운 매칭이 발견되었습니다.`,
-          });
+          toast(
+            `새로운 매칭! ${matchData.length - matches.length}개의 새로운 매칭이 발견되었습니다.`,
+            { type: 'success' }
+          );
         }
       }
     } catch (error) {
       console.error('Failed to load match results:', error);
       if (!silent) {
-        toast({
-          title: "오류",
-          description: "매칭 결과를 불러오는데 실패했습니다.",
-          variant: "destructive"
-        });
+        toast('매칭 결과를 불러오는데 실패했습니다.', { type: 'error' });
       }
     } finally {
       setIsLoading(false);
@@ -136,10 +132,12 @@ export function MatchResults({ challengeDate }: MatchResultsProps) {
       return updated;
     });
     
-    toast({
-      title: status === 'accepted' ? "매칭 수락됨" : status === 'rejected' ? "매칭 거절됨" : "매칭 숨김",
-      description: status === 'accepted' ? "상대방에게 알림이 전송되었습니다." : undefined,
-    });
+    const statusMessage = status === 'accepted'
+      ? '매칭 수락됨 — 상대방에게 알림이 전송되었습니다.'
+      : status === 'rejected'
+        ? '매칭 거절됨'
+        : '매칭 숨김';
+    toast(statusMessage, { type: status === 'accepted' ? 'success' : 'default' });
   }, []);
 
   // 필터링된 매치 목록
