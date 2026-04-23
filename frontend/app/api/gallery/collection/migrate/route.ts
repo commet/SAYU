@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Verify user exists and is authenticated
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Migrate saved artworks to user_artworks table
-    const migratedArtworks = [];
+    const migratedArtworks: any[] = [];
     
     if (guestData.savedArtworks && guestData.savedArtworks.length > 0) {
       console.log(`Migrating ${guestData.savedArtworks.length} saved artworks`);
