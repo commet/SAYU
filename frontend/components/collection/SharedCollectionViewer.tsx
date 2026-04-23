@@ -40,7 +40,7 @@ interface CollectionArtwork {
 }
 
 interface SharedCollectionViewerProps {
-  collection: SharedCollection & {
+  collection: Omit<SharedCollection, 'artworks'> & {
     creator: {
       id: string;
       name: string;
