@@ -12,7 +12,6 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { personalityDescriptions } from '@/data/personality-descriptions';
 import { getAnimalByType } from '@/data/personality-animals';
-import { PersonalityAnimalImageRobustRobust } from '@/components/ui/PersonalityAnimalImageRobustRobust';
 import { synergyTable, getSynergyKey } from '@/data/personality-synergy-table';
 import { chemistryData, ChemistryData } from '@/data/personality-chemistry';
 import FeedbackButton from '@/components/feedback/FeedbackButton';
