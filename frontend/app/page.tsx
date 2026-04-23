@@ -207,21 +207,21 @@ const featuredArtworks = [
   {
     id: 1,
     image:
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1200px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg',
     title: '별이 빛나는 밤',
     artist: '빈센트 반 고흐',
   },
   {
     id: 2,
     image:
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Monet_Water_Lilies_1916.jpg/1200px-Monet_Water_Lilies_1916.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Monet_Water_Lilies_1916.jpg/1280px-Monet_Water_Lilies_1916.jpg',
     title: '수련',
     artist: '클로드 모네',
   },
   {
     id: 3,
     image:
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Gustav_Klimt_016.jpg/800px-Gustav_Klimt_016.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Gustav_Klimt_016.jpg/1280px-Gustav_Klimt_016.jpg',
     title: '키스',
     artist: '구스타프 클림트',
   },
@@ -231,28 +231,28 @@ const galleryArtworks = [
   {
     id: 1,
     image:
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/The_Scream.jpg/1200px-The_Scream.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/The_Scream.jpg/1280px-The_Scream.jpg',
     title: '절규',
     artist: '에드바르 뭉크',
   },
   {
     id: 2,
     image:
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/1665_Girl_with_a_Pearl_Earring.jpg/1200px-1665_Girl_with_a_Pearl_Earring.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/1665_Girl_with_a_Pearl_Earring.jpg/1280px-1665_Girl_with_a_Pearl_Earring.jpg',
     title: '진주 귀걸이를 한 소녀',
     artist: '요하네스 페르메이르',
   },
   {
     id: 3,
     image:
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/The_Great_Wave_off_Kanagawa.jpg/1200px-The_Great_Wave_off_Kanagawa.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/The_Great_Wave_off_Kanagawa.jpg/1280px-The_Great_Wave_off_Kanagawa.jpg',
     title: '가나가와 파도 아래',
     artist: '가츠시카 호쿠사이',
   },
   {
     id: 4,
     image:
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Frida_Kahlo%2C_by_Guillermo_Kahlo.jpg/1200px-Frida_Kahlo%2C_by_Guillermo_Kahlo.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Frida_Kahlo%2C_by_Guillermo_Kahlo.jpg/1280px-Frida_Kahlo%2C_by_Guillermo_Kahlo.jpg',
     title: '자화상',
     artist: '프리다 칼로',
   },
@@ -262,21 +262,21 @@ const collectionArtworks = [
   {
     id: 1,
     image:
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/A_Sunday_on_La_Grande_Jatte%2C_Georges_Seurat%2C_1884.jpg/1200px-A_Sunday_on_La_Grande_Jatte%2C_Georges_Seurat%2C_1884.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/A_Sunday_on_La_Grande_Jatte%2C_Georges_Seurat%2C_1884.jpg/1280px-A_Sunday_on_La_Grande_Jatte%2C_Georges_Seurat%2C_1884.jpg',
     title: '그랑드자트 섬의 일요일',
     artist: '조르주 쇠라',
   },
   {
     id: 2,
     image:
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/El_jard%C3%ADn_de_las_Delicias%2C_de_El_Bosco.jpg/1200px-El_jard%C3%ADn_de_las_Delicias%2C_de_El_Bosco.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/El_jard%C3%ADn_de_las_Delicias%2C_de_El_Bosco.jpg/1280px-El_jard%C3%ADn_de_las_Delicias%2C_de_El_Bosco.jpg',
     title: '쾌락의 정원',
     artist: '히에로니무스 보스',
   },
   {
     id: 3,
     image:
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Michelangelo_-_Creation_of_Adam_%28cropped%29.jpg/1200px-Michelangelo_-_Creation_of_Adam_%28cropped%29.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Michelangelo_-_Creation_of_Adam_%28cropped%29.jpg/1280px-Michelangelo_-_Creation_of_Adam_%28cropped%29.jpg',
     title: '아담의 창조',
     artist: '미켈란젤로',
   },
@@ -337,22 +337,22 @@ export default function HomePage() {
 
   // Dynamic data based on language
   const featuredArtworksLocalized = [
-    { id: 1, image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1200px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg', title: texts.starryNight, artist: texts.vanGogh },
-    { id: 2, image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Monet_Water_Lilies_1916.jpg/1200px-Monet_Water_Lilies_1916.jpg', title: texts.waterLilies, artist: texts.monet },
-    { id: 3, image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Gustav_Klimt_016.jpg/800px-Gustav_Klimt_016.jpg', title: texts.theKiss, artist: texts.klimt },
+    { id: 1, image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg', title: texts.starryNight, artist: texts.vanGogh },
+    { id: 2, image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Monet_Water_Lilies_1916.jpg/1280px-Monet_Water_Lilies_1916.jpg', title: texts.waterLilies, artist: texts.monet },
+    { id: 3, image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Gustav_Klimt_016.jpg/1280px-Gustav_Klimt_016.jpg', title: texts.theKiss, artist: texts.klimt },
   ];
 
   const galleryArtworksLocalized = [
-    { id: 1, image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/The_Scream.jpg/1200px-The_Scream.jpg', title: texts.theScream, artist: texts.munch },
-    { id: 2, image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/1665_Girl_with_a_Pearl_Earring.jpg/1200px-1665_Girl_with_a_Pearl_Earring.jpg', title: texts.girlWithPearl, artist: texts.vermeer },
-    { id: 3, image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/The_Great_Wave_off_Kanagawa.jpg/1200px-The_Great_Wave_off_Kanagawa.jpg', title: texts.greatWave, artist: texts.hokusai },
-    { id: 4, image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Frida_Kahlo%2C_by_Guillermo_Kahlo.jpg/1200px-Frida_Kahlo%2C_by_Guillermo_Kahlo.jpg', title: texts.selfPortrait, artist: texts.kahlo },
+    { id: 1, image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/The_Scream.jpg/1280px-The_Scream.jpg', title: texts.theScream, artist: texts.munch },
+    { id: 2, image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/1665_Girl_with_a_Pearl_Earring.jpg/1280px-1665_Girl_with_a_Pearl_Earring.jpg', title: texts.girlWithPearl, artist: texts.vermeer },
+    { id: 3, image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/The_Great_Wave_off_Kanagawa.jpg/1280px-The_Great_Wave_off_Kanagawa.jpg', title: texts.greatWave, artist: texts.hokusai },
+    { id: 4, image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Frida_Kahlo%2C_by_Guillermo_Kahlo.jpg/1280px-Frida_Kahlo%2C_by_Guillermo_Kahlo.jpg', title: texts.selfPortrait, artist: texts.kahlo },
   ];
 
   const collectionArtworksLocalized = [
-    { id: 1, image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/A_Sunday_on_La_Grande_Jatte%2C_Georges_Seurat%2C_1884.jpg/1200px-A_Sunday_on_La_Grande_Jatte%2C_Georges_Seurat%2C_1884.jpg', title: texts.sundayGrandeJatte, artist: texts.seurat },
-    { id: 2, image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/El_jard%C3%ADn_de_las_Delicias%2C_de_El_Bosco.jpg/1200px-El_jard%C3%ADn_de_las_Delicias%2C_de_El_Bosco.jpg', title: texts.gardenDelights, artist: texts.bosch },
-    { id: 3, image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Michelangelo_-_Creation_of_Adam_%28cropped%29.jpg/1200px-Michelangelo_-_Creation_of_Adam_%28cropped%29.jpg', title: texts.creationAdam, artist: texts.michelangelo },
+    { id: 1, image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/A_Sunday_on_La_Grande_Jatte%2C_Georges_Seurat%2C_1884.jpg/1280px-A_Sunday_on_La_Grande_Jatte%2C_Georges_Seurat%2C_1884.jpg', title: texts.sundayGrandeJatte, artist: texts.seurat },
+    { id: 2, image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/El_jard%C3%ADn_de_las_Delicias%2C_de_El_Bosco.jpg/1280px-El_jard%C3%ADn_de_las_Delicias%2C_de_El_Bosco.jpg', title: texts.gardenDelights, artist: texts.bosch },
+    { id: 3, image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Michelangelo_-_Creation_of_Adam_%28cropped%29.jpg/1280px-Michelangelo_-_Creation_of_Adam_%28cropped%29.jpg', title: texts.creationAdam, artist: texts.michelangelo },
   ];
 
   const aptSlidesLocalized = [

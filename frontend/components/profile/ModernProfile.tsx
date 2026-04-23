@@ -281,7 +281,7 @@ export default function ModernProfile() {
                     title: 'Starry Night',
                     artist: 'Vincent van Gogh',
                     year: '1889',
-                    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/800px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg',
+                    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg',
                     tags: ['Post-Impressionism', 'Night', 'Landscape'],
                     likes: 1234,
                     isLiked: true

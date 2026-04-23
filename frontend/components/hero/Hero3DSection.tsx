@@ -36,7 +36,7 @@ const EASE: [number, number, number, number] = [0.25, 1, 0.5, 1];
 const ARTWORKS = [
   {
     id: 1,
-    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/2560px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg',
+    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1920px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg',
     title: 'The Starry Night',
     artist: 'Vincent van Gogh',
     year: '1889',
@@ -44,7 +44,7 @@ const ARTWORKS = [
   },
   {
     id: 2,
-    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Monet_Water_Lilies_1916.jpg/2560px-Monet_Water_Lilies_1916.jpg',
+    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Monet_Water_Lilies_1916.jpg/1920px-Monet_Water_Lilies_1916.jpg',
     title: 'Water Lilies',
     artist: 'Claude Monet',
     year: '1916',
@@ -60,7 +60,7 @@ const ARTWORKS = [
   },
   {
     id: 4,
-    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/The_Great_Wave_off_Kanagawa.jpg/2560px-The_Great_Wave_off_Kanagawa.jpg',
+    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/The_Great_Wave_off_Kanagawa.jpg/1920px-The_Great_Wave_off_Kanagawa.jpg',
     title: 'The Great Wave off Kanagawa',
     artist: 'Katsushika Hokusai',
     year: 'c. 1831',
@@ -68,7 +68,7 @@ const ARTWORKS = [
   },
   {
     id: 5,
-    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg/2560px-Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg',
+    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg/1920px-Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg',
     title: 'The Birth of Venus',
     artist: 'Sandro Botticelli',
     year: 'c. 1485',

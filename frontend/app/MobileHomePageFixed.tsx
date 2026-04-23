@@ -58,7 +58,7 @@ const famousArtworks = [
   },
   {
     id: 3,
-    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Gustav_Klimt_016.jpg/800px-Gustav_Klimt_016.jpg',
+    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Gustav_Klimt_016.jpg/1280px-Gustav_Klimt_016.jpg',
     title: '키스',
     title_en: 'The Kiss',
     artist: '구스타프 클림트',

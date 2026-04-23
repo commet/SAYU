@@ -454,7 +454,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['enigmatic', 'intimate', 'mysterious'],
     complexity: 'complex',
     social_context: 'intimate',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/800px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/1280px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg',
     description: '세계에서 가장 유명한 초상화',
     culturalSignificance: 'icon',
     reasoning: '르네상스 천재의 대표작, 전 세계적 인지도'
@@ -490,7 +490,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['serene', 'mysterious', 'luminous'],
     complexity: 'moderate',
     social_context: 'intimate',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Meisje_met_de_parel.jpg/800px-Meisje_met_de_parel.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Meisje_met_de_parel.jpg/1280px-Meisje_met_de_parel.jpg',
     description: '북유럽의 모나리자',
     culturalSignificance: 'beloved',
     reasoning: '빛의 마술사 베르메르, 영화/소설 소재'
@@ -562,7 +562,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['anxious', 'disturbing', 'cathartic'],
     complexity: 'moderate',
     social_context: 'solitary',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg/800px-Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg/1280px-Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg',
     description: '현대인의 불안을 상징',
     culturalSignificance: 'psychological',
     reasoning: '20세기 정신적 상황 대변, 표현주의 상징'
@@ -598,7 +598,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['stern', 'traditional', 'iconic'],
     complexity: 'simple',
     social_context: 'social',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Grant_Wood_-_American_Gothic_-_Google_Art_Project.jpg/800px-Grant_Wood_-_American_Gothic_-_Google_Art_Project.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Grant_Wood_-_American_Gothic_-_Google_Art_Project.jpg/1280px-Grant_Wood_-_American_Gothic_-_Google_Art_Project.jpg',
     description: '미국적 가치의 상징',
     culturalSignificance: 'american-icon',
     reasoning: '미국 문화 아이콘, 패러디 소재'
@@ -689,7 +689,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['heroic', 'powerful', 'idealized'],
     complexity: 'complex',
     social_context: 'public',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Michelangelo%27s_David_-_63_grijswaarden.jpg/800px-Michelangelo%27s_David_-_63_grijswaarden.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Michelangelo%27s_David_-_63_grijswaarden.jpg/1280px-Michelangelo%27s_David_-_63_grijswaarden.jpg',
     description: '르네상스 조각의 완벽한 인체 표현',
     culturalSignificance: 'sculpture-icon',
     reasoning: '서양 조각사의 최고봉, 인간 이상미의 구현'
@@ -743,7 +743,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['melancholic', 'sublime', 'contemplative'],
     complexity: 'moderate',
     social_context: 'solitary',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Caspar_David_Friedrich_-_Wanderer_above_the_sea_of_fog.jpg/800px-Caspar_David_Friedrich_-_Wanderer_above_the_sea_of_fog.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Caspar_David_Friedrich_-_Wanderer_above_the_sea_of_fog.jpg/1280px-Caspar_David_Friedrich_-_Wanderer_above_the_sea_of_fog.jpg',
     description: '자연 앞에 선 인간의 숭고한 고독',
     culturalSignificance: 'romantic-icon',
     reasoning: '낭만주의 자연관의 완벽한 표현'
@@ -833,7 +833,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['warm', 'inviting', 'atmospheric'],
     complexity: 'moderate',
     social_context: 'social',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Vincent_Willem_van_Gogh_-_Cafe_Terrace_at_Night_%28Yorck%29.jpg/800px-Vincent_Willem_van_Gogh_-_Cafe_Terrace_at_Night_%28Yorck%29.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Vincent_Willem_van_Gogh_-_Cafe_Terrace_at_Night_%28Yorck%29.jpg/1280px-Vincent_Willem_van_Gogh_-_Cafe_Terrace_at_Night_%28Yorck%29.jpg',
     description: '따뜻한 빛이 있는 고독한 밤의 풍경',
     culturalSignificance: 'night-painting',
     reasoning: '밤 풍경화의 새로운 장을 연 작품'
@@ -851,7 +851,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['vibrant', 'energetic', 'hopeful'],
     complexity: 'moderate',
     social_context: 'intimate',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Vincent_Willem_van_Gogh_128.jpg/800px-Vincent_Willem_van_Gogh_128.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Vincent_Willem_van_Gogh_128.jpg/1280px-Vincent_Willem_van_Gogh_128.jpg',
     description: '고흐의 따뜻한 우정과 희망을 담은 해바라기',
     culturalSignificance: 'friendship-symbol',
     reasoning: '예술가의 우정과 희망의 상징'
@@ -869,7 +869,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['passionate', 'romantic', 'golden'],
     complexity: 'complex',
     social_context: 'intimate',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg/800px-The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg/1280px-The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg',
     description: '황금빛 사랑의 감정을 섬세하게 표현',
     culturalSignificance: 'love-icon',
     reasoning: '사랑을 예술로 승화시킨 대표작'
@@ -996,7 +996,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['serene', 'timeless', 'idealized'],
     complexity: 'complex',
     social_context: 'public',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Venus_de_Milo_Louvre_Ma399_n4.jpg/800px-Venus_de_Milo_Louvre_Ma399_n4.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Venus_de_Milo_Louvre_Ma399_n4.jpg/1280px-Venus_de_Milo_Louvre_Ma399_n4.jpg',
     description: '고대 그리스 조각의 완벽한 아름다움',
     culturalSignificance: 'classical-ideal',
     reasoning: '서양 미의 고전적 기준, 루브르 박물관의 상징'
@@ -1014,7 +1014,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['mournful', 'tender', 'sacred'],
     complexity: 'complex',
     social_context: 'public',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Michelangelo%27s_Piet%C3%A0%2C_St_Peter%27s_Basilica_%281498-99%29.jpg/800px-Michelangelo%27s_Piet%C3%A0%2C_St_Peter%27s_Basilica_%281498-99%29.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Michelangelo%27s_Piet%C3%A0%2C_St_Peter%27s_Basilica_%281498-99%29.jpg/1280px-Michelangelo%27s_Piet%C3%A0%2C_St_Peter%27s_Basilica_%281498-99%29.jpg',
     description: '성모의 애절한 사랑을 조각으로 승화',
     culturalSignificance: 'religious-masterpiece',
     reasoning: '기독교 예술의 정점, 모성애의 숭고한 표현'
@@ -1032,7 +1032,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['contemplative', 'powerful', 'introspective'],
     complexity: 'moderate',
     social_context: 'solitary',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/The_Thinker_Musee_Rodin.jpg/800px-The_Thinker_Musee_Rodin.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/The_Thinker_Musee_Rodin.jpg/1280px-The_Thinker_Musee_Rodin.jpg',
     description: '인간의 깊은 사색을 형상화한 현대 조각의 대표작',
     culturalSignificance: 'thinking-symbol',
     reasoning: '철학적 사유의 상징, 지적 활동의 아이콘'
@@ -1050,7 +1050,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['triumphant', 'dynamic', 'powerful'],
     complexity: 'complex',
     social_context: 'public',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Nike_of_Samothrake_Louvre_Ma2369_n4.jpg/800px-Nike_of_Samothrake_Louvre_Ma2369_n4.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Nike_of_Samothrake_Louvre_Ma2369_n4.jpg/1280px-Nike_of_Samothrake_Louvre_Ma2369_n4.jpg',
     description: '승리의 여신이 바람을 가르며 내려오는 역동적 순간',
     culturalSignificance: 'victory-symbol',
     reasoning: '고대 그리스 조각의 역동성과 웅장함의 절정'
@@ -1068,7 +1068,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['passionate', 'tender', 'romantic'],
     complexity: 'complex',
     social_context: 'intimate',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Rodin_-_Le_Baiser_06.jpg/800px-Rodin_-_Le_Baiser_06.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Rodin_-_Le_Baiser_06.jpg/1280px-Rodin_-_Le_Baiser_06.jpg',
     description: '연인들의 열정적 사랑을 대리석으로 새긴 불멸의 작품',
     culturalSignificance: 'love-sculpture',
     reasoning: '사랑의 감정을 조각으로 표현한 대표작'
@@ -1086,7 +1086,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['noble', 'idealized', 'serene'],
     complexity: 'complex',
     social_context: 'public',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Apollo_del_Belvedere.jpg/800px-Apollo_del_Belvedere.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Apollo_del_Belvedere.jpg/1280px-Apollo_del_Belvedere.jpg',
     description: '아폴로 신의 완벽한 남성미를 표현한 고전 조각',
     culturalSignificance: 'classical-ideal',
     reasoning: '서양 남성 미의 고전적 기준점'
@@ -1123,7 +1123,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['dramatic', 'powerful', 'apocalyptic'],
     complexity: 'complex',
     social_context: 'public',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Last_Judgement_%28Michelangelo%29.jpg/800px-Last_Judgement_%28Michelangelo%29.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Last_Judgement_%28Michelangelo%29.jpg/1280px-Last_Judgement_%28Michelangelo%29.jpg',
     description: '최후의 심판을 그린 인간 드라마의 정점',
     culturalSignificance: 'religious-drama',
     reasoning: '기독교 종말론의 시각적 구현'
@@ -1196,7 +1196,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['melancholic', 'contemplative', 'intellectual'],
     complexity: 'complex',
     social_context: 'intimate',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/D%C3%BCrer_Melencolia_I.jpg/800px-D%C3%BCrer_Melencolia_I.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/D%C3%BCrer_Melencolia_I.jpg/1280px-D%C3%BCrer_Melencolia_I.jpg',
     description: '지식인의 우울과 창조적 고뇌를 상징화한 북유럽 르네상스의 걸작',
     culturalSignificance: 'intellectual-melancholy',
     reasoning: '예술가의 내적 갈등과 창조적 과정의 시각화'
@@ -1214,7 +1214,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['dramatic', 'apocalyptic', 'powerful'],
     complexity: 'complex',
     social_context: 'public',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Apocalypse_vasnetsov.jpg/800px-Apocalypse_vasnetsov.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Apocalypse_vasnetsov.jpg/1280px-Apocalypse_vasnetsov.jpg',
     description: '요한계시록의 네 기사를 표현한 묵시록적 걸작',
     culturalSignificance: 'apocalyptic-vision',
     reasoning: '종교적 공포와 경외감을 시각화한 대표작'
@@ -1250,7 +1250,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['poetic', 'seasonal', 'nostalgic'],
     complexity: 'moderate',
     social_context: 'public',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Hiroshige_-_Sudden_Shower_over_Shin-%C5%8Chashi_bridge_and_Atake_%28Ohashi_Atake_no_y%C5%ABdachi%29%2C_from_One_Hundred_Famous_Views_of_Edo.jpg/800px-Hiroshige_-_Sudden_Shower_over_Shin-%C5%8Chashi_bridge_and_Atake_%28Ohashi_Atake_no_y%C5%ABdachi%29%2C_from_One_Hundred_Famous_Views_of_Edo.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Hiroshige_-_Sudden_Shower_over_Shin-%C5%8Chashi_bridge_and_Atake_%28Ohashi_Atake_no_y%C5%ABdachi%29%2C_from_One_Hundred_Famous_Views_of_Edo.jpg/1280px-Hiroshige_-_Sudden_Shower_over_Shin-%C5%8Chashi_bridge_and_Atake_%28Ohashi_Atake_no_y%C5%ABdachi%29%2C_from_One_Hundred_Famous_Views_of_Edo.jpg',
     description: '에도 시대 도쿄의 아름다운 풍경 100선',
     culturalSignificance: 'urban-landscape',
     reasoning: '도시 풍경화의 걸작, 일본 문화의 기록'
@@ -1268,7 +1268,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['curious', 'detailed', 'scientific'],
     complexity: 'moderate',
     social_context: 'public',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/The_Rhinoceros_%28NGA_1964.8.697%29_enhanced.png/800px-The_Rhinoceros_%28NGA_1964.8.697%29_enhanced.png',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/The_Rhinoceros_%28NGA_1964.8.697%29_enhanced.png/1280px-The_Rhinoceros_%28NGA_1964.8.697%29_enhanced.png',
     description: '코뿔소를 직접 보지 않고 그린 상상의 동물화',
     culturalSignificance: 'scientific-art',
     reasoning: '르네상스 시대 과학적 호기심과 예술의 결합'
@@ -1325,7 +1325,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['tender', 'intimate', 'loving'],
     complexity: 'simple',
     social_context: 'intimate',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Mary_Cassatt_-_The_Child%27s_Bath_-_Google_Art_Project.jpg/800px-Mary_Cassatt_-_The_Child%27s_Bath_-_Google_Art_Project.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Mary_Cassatt_-_The_Child%27s_Bath_-_Google_Art_Project.jpg/1280px-Mary_Cassatt_-_The_Child%27s_Bath_-_Google_Art_Project.jpg',
     description: '모성애의 순수하고 자연스러운 표현',
     culturalSignificance: 'maternal-love',
     reasoning: '여성 화가가 그린 모성의 진정한 모습'
@@ -1362,7 +1362,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['sensual', 'youthful', 'provocative'],
     complexity: 'moderate',
     social_context: 'intimate',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Caravaggio_-_Bacco_adolescente_-_Google_Art_Project.jpg/800px-Caravaggio_-_Bacco_adolescente_-_Google_Art_Project.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Caravaggio_-_Bacco_adolescente_-_Google_Art_Project.jpg/1280px-Caravaggio_-_Bacco_adolescente_-_Google_Art_Project.jpg',
     description: '젊은 바쿠스 신의 관능적이고 도발적인 모습',
     culturalSignificance: 'sensual-mythology',
     reasoning: '고전 신화의 현실적이고 인간적인 재해석'
@@ -1398,7 +1398,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['formal', 'symbolic', 'wealthy'],
     complexity: 'complex',
     social_context: 'social',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Van_Eyck_-_Arnolfini_Portrait.jpg/800px-Van_Eyck_-_Arnolfini_Portrait.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Van_Eyck_-_Arnolfini_Portrait.jpg/1280px-Van_Eyck_-_Arnolfini_Portrait.jpg',
     description: '북유럽 유화 기법의 정점을 보여주는 부부 초상화',
     culturalSignificance: 'oil-painting-master',
     reasoning: '유화 기법의 완성, 상징주의 회화의 걸작'
@@ -1544,7 +1544,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['elegant', 'graceful', 'mysterious'],
     complexity: 'moderate',
     social_context: 'intimate',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Hishikawa_Moronobu_-_Beauty_Looking_Back.jpg/600px-Hishikawa_Moronobu_-_Beauty_Looking_Back.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Hishikawa_Moronobu_-_Beauty_Looking_Back.jpg/1280px-Hishikawa_Moronobu_-_Beauty_Looking_Back.jpg',
     description: '우키요에 초기 작품으로 일본 미인화의 원형',
     culturalSignificance: 'japanese-beauty',
     reasoning: '일본 미인화의 고전적 아름다움'
@@ -1617,7 +1617,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['dramatic', 'powerful', 'vengeful'],
     complexity: 'complex',
     social_context: 'public',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Artemisia_Gentileschi_-_Judith_Slaying_Holofernes_-_WGA8563.jpg/800px-Artemisia_Gentileschi_-_Judith_Slaying_Holofernes_-_WGA8563.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Artemisia_Gentileschi_-_Judith_Slaying_Holofernes_-_WGA8563.jpg/1280px-Artemisia_Gentileschi_-_Judith_Slaying_Holofernes_-_WGA8563.jpg',
     description: '여성의 힘과 정의를 극적으로 표현한 바로크 걸작',
     culturalSignificance: 'female-empowerment',
     reasoning: '여성 화가가 그린 여성의 힘과 복수'
@@ -1636,7 +1636,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['heroic', 'solemn', 'dignified'],
     complexity: 'complex',
     social_context: 'public',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Calais_Burghers_Rodin.jpg/800px-Calais_Burghers_Rodin.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Calais_Burghers_Rodin.jpg/1280px-Calais_Burghers_Rodin.jpg',
     description: '칼레 시민들의 숭고한 희생을 기린 기념비적 조각',
     culturalSignificance: 'heroic-sacrifice',
     reasoning: '집단 영웅주의의 조각적 표현'
@@ -1654,7 +1654,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['dramatic', 'tormented', 'powerful'],
     complexity: 'complex',
     social_context: 'public',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Porte_Enfer_Rodin.jpg/600px-Porte_Enfer_Rodin.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Porte_Enfer_Rodin.jpg/1280px-Porte_Enfer_Rodin.jpg',
     description: '단테의 신곡을 조각으로 표현한 로댕의 필생의 역작',
     culturalSignificance: 'literary-sculpture',
     reasoning: '문학과 조각의 결합, 인간 고뇌의 시각화'
@@ -1672,7 +1672,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['athletic', 'dynamic', 'idealized'],
     complexity: 'moderate',
     social_context: 'public',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Discus_Thrower_-_Palazzo_Massimo_-_Rome.jpg/600px-Discus_Thrower_-_Palazzo_Massimo_-_Rome.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Discus_Thrower_-_Palazzo_Massimo_-_Rome.jpg/1280px-Discus_Thrower_-_Palazzo_Massimo_-_Rome.jpg',
     description: '운동하는 인체의 완벽한 순간을 포착한 고전 조각',
     culturalSignificance: 'athletic-ideal',
     reasoning: '고대 그리스 체육 정신과 인체미의 결합'
@@ -1709,7 +1709,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['spiritual', 'uplifting', 'majestic'],
     complexity: 'complex',
     social_context: 'public',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Notre-Dame_de_Paris%2C_France_%282018%29.jpg/800px-Notre-Dame_de_Paris%2C_France_%282018%29.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Notre-Dame_de_Paris%2C_France_%282018%29.jpg/1280px-Notre-Dame_de_Paris%2C_France_%282018%29.jpg',
     description: '고딕 건축의 정점을 보여주는 파리 성모원',
     culturalSignificance: 'gothic-masterpiece',
     reasoning: '중세 기독교 정신과 건축 기술의 완벽한 결합'
@@ -1728,7 +1728,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['concerned', 'dignified', 'documentary'],
     complexity: 'simple',
     social_context: 'social',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Lange-MigrantMother02.jpg/600px-Lange-MigrantMother02.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Lange-MigrantMother02.jpg/1280px-Lange-MigrantMother02.jpg',
     description: '대공황 시대 어머니의 걱정과 존엄성을 담은 기록사진',
     culturalSignificance: 'documentary-icon',
     reasoning: '사진의 사회적 힘과 기록적 가치를 보여준 대표작'
@@ -1765,7 +1765,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['elegant', 'scholarly', 'philosophical'],
     complexity: 'complex',
     social_context: 'intimate',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/LantingXu.jpg/800px-LantingXu.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/LantingXu.jpg/1280px-LantingXu.jpg',
     description: '중국 서예의 성전으로 여겨지는 난정서',
     culturalSignificance: 'calligraphy-masterpiece',
     reasoning: '서예 예술의 최고봉, 문학과 서예의 완벽한 결합'
@@ -1784,7 +1784,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['balanced', 'pure', 'intellectual'],
     complexity: 'simple',
     social_context: 'intimate',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Piet_Mondriaan%2C_1930_-_Mondrian_Composition_II_in_Red%2C_Blue%2C_and_Yellow.jpg/600px-Piet_Mondriaan%2C_1930_-_Mondrian_Composition_II_in_Red%2C_Blue%2C_and_Yellow.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Piet_Mondriaan%2C_1930_-_Mondrian_Composition_II_in_Red%2C_Blue%2C_and_Yellow.jpg/1280px-Piet_Mondriaan%2C_1930_-_Mondrian_Composition_II_in_Red%2C_Blue%2C_and_Yellow.jpg',
     description: '순수 추상의 극한을 추구한 몬드리안의 대표작',
     culturalSignificance: 'pure-abstraction',
     reasoning: '순수 추상 회화의 완성, 현대 디자인에 큰 영향'
@@ -1802,7 +1802,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['revolutionary', 'minimal', 'conceptual'],
     complexity: 'simple',
     social_context: 'public',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Malevich-Black_Square_1915.jpg/600px-Malevich-Black_Square_1915.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Malevich-Black_Square_1915.jpg/1280px-Malevich-Black_Square_1915.jpg',
     description: '회화 예술의 제로 지점을 선언한 혁명적 작품',
     culturalSignificance: 'art-revolution',
     reasoning: '구상 회화의 종료와 순수 추상의 시작을 알린 기념비적 작품'
@@ -1821,7 +1821,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['spiritual', 'mysterious', 'symbolic'],
     complexity: 'moderate',
     social_context: 'solitary',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Vassily_Kandinsky%2C_1903%2C_Der_Blaue_Reiter_%28The_Blue_Rider%29%2C_oil_on_canvas%2C_52.1_x_54.6_cm%2C_Stiftung_Sammlung_E.G._B%C3%BChrle%2C_Zurich.jpg/800px-Vassily_Kandinsky%2C_1903%2C_Der_Blaue_Reiter_%28The_Blue_Rider%29%2C_oil_on_canvas%2C_52.1_x_54.6_cm%2C_Stiftung_Sammlung_E.G._B%C3%BChrle%2C_Zurich.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Vassily_Kandinsky%2C_1903%2C_Der_Blaue_Reiter_%28The_Blue_Rider%29%2C_oil_on_canvas%2C_52.1_x_54.6_cm%2C_Stiftung_Sammlung_E.G._B%C3%BChrle%2C_Zurich.jpg/1280px-Vassily_Kandinsky%2C_1903%2C_Der_Blaue_Reiter_%28The_Blue_Rider%29%2C_oil_on_canvas%2C_52.1_x_54.6_cm%2C_Stiftung_Sammlung_E.G._B%C3%BChrle%2C_Zurich.jpg',
     description: '칸딘스키의 초기 상징주의 작품으로 청기사파의 상징',
     culturalSignificance: 'spiritual-art',
     reasoning: '예술의 정신적 가치를 추구한 표현주의 운동의 상징'
@@ -1839,7 +1839,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['luxurious', 'decorative', 'golden'],
     complexity: 'complex',
     social_context: 'intimate',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Gustav_Klimt_046.jpg/600px-Gustav_Klimt_046.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Gustav_Klimt_046.jpg/1280px-Gustav_Klimt_046.jpg',
     description: '황금시대 빈의 사치와 아름다움을 담은 초상화',
     culturalSignificance: 'golden-portrait',
     reasoning: '아르누보 장식 예술의 정점, 빈 분리파의 대표작'
@@ -1895,7 +1895,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['regal', 'powerful', 'ceremonial'],
     complexity: 'complex',
     social_context: 'public',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Benin_Bronzes.jpg/800px-Benin_Bronzes.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Benin_Bronzes.jpg/1280px-Benin_Bronzes.jpg',
     description: '베냉 왕국의 정교한 청동 궁정 예술',
     culturalSignificance: 'african-masterpiece',
     reasoning: '아프리카 고전 예술의 정교함과 웅장함'
@@ -1914,7 +1914,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['intense', 'spiritual', 'healing'],
     complexity: 'complex',
     social_context: 'public',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Mathis_Gothart_Grunewald_078.jpg/800px-Mathis_Gothart_Grunewald_078.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Mathis_Gothart_Grunewald_078.jpg/1280px-Mathis_Gothart_Grunewald_078.jpg',
     description: '병원 제단화로 제작된 고통과 구원의 종교화',
     culturalSignificance: 'religious-healing',
     reasoning: '질병과 치유를 주제로 한 독특한 종교 예술'
@@ -1933,7 +1933,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['structured', 'analytical', 'revolutionary'],
     complexity: 'moderate',
     social_context: 'intimate',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Paul_C%C3%A9zanne_-_The_Basket_of_Apples_-_1895.jpg/800px-Paul_C%C3%A9zanne_-_The_Basket_of_Apples_-_1895.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Paul_C%C3%A9zanne_-_The_Basket_of_Apples_-_1895.jpg/1280px-Paul_C%C3%A9zanne_-_The_Basket_of_Apples_-_1895.jpg',
     description: '정물화를 통해 현대 회화의 새로운 방향을 제시',
     culturalSignificance: 'modern-still-life',
     reasoning: '정물화의 혁신, 현대 미술의 출발점'
@@ -1951,7 +1951,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['contemplative', 'melancholic', 'philosophical'],
     complexity: 'complex',
     social_context: 'intimate',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Harmen_Steenwyck_-_Vanitas_-_WGA21650.jpg/800px-Harmen_Steenwyck_-_Vanitas_-_WGA21650.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Harmen_Steenwyck_-_Vanitas_-_WGA21650.jpg/1280px-Harmen_Steenwyck_-_Vanitas_-_WGA21650.jpg',
     description: '인생의 무상함을 상징물로 표현한 바니타스 정물화',
     culturalSignificance: 'memento-mori',
     reasoning: '죽음과 시간에 대한 철학적 성찰을 담은 정물화'
@@ -1970,7 +1970,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['elegant', 'aristocratic', 'youthful'],
     complexity: 'moderate',
     social_context: 'social',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Thomas_Gainsborough_-_The_Blue_Boy_%28Jonathan_Buttall%29_-_Google_Art_Project.jpg/600px-Thomas_Gainsborough_-_The_Blue_Boy_%28Jonathan_Buttall%29_-_Google_Art_Project.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Thomas_Gainsborough_-_The_Blue_Boy_%28Jonathan_Buttall%29_-_Google_Art_Project.jpg/1280px-Thomas_Gainsborough_-_The_Blue_Boy_%28Jonathan_Buttall%29_-_Google_Art_Project.jpg',
     description: '영국 초상화의 우아함을 보여주는 18세기 걸작',
     culturalSignificance: 'british-elegance',
     reasoning: '영국 귀족 초상화의 전형, 색채와 우아함의 조화'
@@ -2115,7 +2115,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['provocative', 'conceptual', 'revolutionary'],
     complexity: 'simple',
     social_context: 'public',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Marcel_Duchamp%2C_1917%2C_Fountain%2C_photograph_by_Alfred_Stieglitz.jpg/600px-Marcel_Duchamp%2C_1917%2C_Fountain%2C_photograph_by_Alfred_Stieglitz.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Marcel_Duchamp%2C_1917%2C_Fountain%2C_photograph_by_Alfred_Stieglitz.jpg/1280px-Marcel_Duchamp%2C_1917%2C_Fountain%2C_photograph_by_Alfred_Stieglitz.jpg',
     description: '예술의 정의에 근본적 질문을 던진 개념미술의 출발점',
     culturalSignificance: 'art-revolution',
     reasoning: '20세기 예술사에서 가장 도발적이고 영향력 있는 작품'
@@ -2151,7 +2151,7 @@ export const WIKIMEDIA_MASTERWORKS = [
     mood: ['hypnotic', 'infinite', 'immersive'],
     complexity: 'complex',
     social_context: 'public',
-    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Yayoi_Kusama%27s_Infinity_Room_%2832073706753%29.jpg/800px-Yayoi_Kusama%27s_Infinity_Room_%2832073706753%29.jpg',
+    wikiUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Yayoi_Kusama%27s_Infinity_Room_%2832073706753%29.jpg/1280px-Yayoi_Kusama%27s_Infinity_Room_%2832073706753%29.jpg',
     description: '무한 반복과 몰입을 통한 쿠사마 야요이의 우주적 예술',
     culturalSignificance: 'immersive-art',
     reasoning: '관객 참여형 설치 미술의 대표작, 현대 미술관의 필수 경험'

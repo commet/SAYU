@@ -19,7 +19,7 @@ const sections = [
     id: 1,
     title: "16 Unique Perspectives on Art",
     artwork: {
-      url: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/640px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
+      url: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
       title: "Starry Night",
       artist: "Vincent van Gogh"
     },

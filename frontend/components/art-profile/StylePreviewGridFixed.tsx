@@ -38,14 +38,14 @@ const STYLE_PREVIEWS: Record<string, any> = {
 // Fallback placeholder images
 const PLACEHOLDER_BASE = 'https://images.unsplash.com/photo-1494790108755-2616c96b99c0?w=128&h=128&fit=crop&crop=face';
 const PLACEHOLDER_PREVIEWS: Record<string, string> = {
-  'monet-impressionism': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Claude_Monet%2C_Impression%2C_soleil_levant.jpg/128px-Claude_Monet%2C_Impression%2C_soleil_levant.jpg',
-  'picasso-cubism': 'https://upload.wikimedia.org/wikipedia/en/thumb/1/1c/Pablo_Picasso%2C_1910%2C_Girl_with_a_Mandolin_%28Fanny_Tellier%29%2C_oil_on_canvas%2C_100.3_x_73.6_cm%2C_Museum_of_Modern_Art_New_York..jpg/128px-Pablo_Picasso%2C_1910%2C_Girl_with_a_Mandolin_%28Fanny_Tellier%29%2C_oil_on_canvas%2C_100.3_x_73.6_cm%2C_Museum_of_Modern_Art_New_York..jpg',
-  'vangogh-postimpressionism': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/128px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg',
-  'warhol-popart': 'https://upload.wikimedia.org/wikipedia/en/thumb/5/5f/Marilyndiptych.jpg/128px-Marilyndiptych.jpg',
-  'pixel-art': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Pixel_art_alien_abduction.png/128px-Pixel_art_alien_abduction.png',
-  'korean-minhwa': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Kkachi_horangi.jpg/128px-Kkachi_horangi.jpg',
-  'klimt-artnouveau': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Gustav_Klimt_016.jpg/128px-Gustav_Klimt_016.jpg',
-  'mondrian-neoplasticism': 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Tableau_I%2C_by_Piet_Mondriaan.jpg/128px-Tableau_I%2C_by_Piet_Mondriaan.jpg'
+  'monet-impressionism': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Claude_Monet%2C_Impression%2C_soleil_levant.jpg/1280px-Claude_Monet%2C_Impression%2C_soleil_levant.jpg',
+  'picasso-cubism': 'https://upload.wikimedia.org/wikipedia/en/thumb/1/1c/Pablo_Picasso%2C_1910%2C_Girl_with_a_Mandolin_%28Fanny_Tellier%29%2C_oil_on_canvas%2C_100.3_x_73.6_cm%2C_Museum_of_Modern_Art_New_York..jpg/1280px-Pablo_Picasso%2C_1910%2C_Girl_with_a_Mandolin_%28Fanny_Tellier%29%2C_oil_on_canvas%2C_100.3_x_73.6_cm%2C_Museum_of_Modern_Art_New_York..jpg',
+  'vangogh-postimpressionism': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg',
+  'warhol-popart': 'https://upload.wikimedia.org/wikipedia/en/thumb/5/5f/Marilyndiptych.jpg/1280px-Marilyndiptych.jpg',
+  'pixel-art': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Pixel_art_alien_abduction.png/1280px-Pixel_art_alien_abduction.png',
+  'korean-minhwa': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Kkachi_horangi.jpg/1280px-Kkachi_horangi.jpg',
+  'klimt-artnouveau': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Gustav_Klimt_016.jpg/1280px-Gustav_Klimt_016.jpg',
+  'mondrian-neoplasticism': 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Tableau_I%2C_by_Piet_Mondriaan.jpg/1280px-Tableau_I%2C_by_Piet_Mondriaan.jpg'
 };
 
 export default function StylePreviewGridFixed({ selectedStyle, onStyleSelect, styles }: StylePreviewGridProps) {
