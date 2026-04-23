@@ -1,6 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+interface ArtworkRow {
+  id: string;
+  external_id: string | null;
+  title: string | null;
+  artist: string | null;
+  year_created: string | null;
+  image_url: string | null;
+  medium: string | null;
+  style: string | null;
+  description: string | null;
+  museum: string | null;
+  department: string | null;
+  is_public_domain: boolean | null;
+  license: string | null;
+  emotion_tags: string[] | null;
+  tags: string[] | null;
+}
+
+interface SavedInteraction {
+  id: string;
+  artwork_id: string;
+  created_at: string;
+  artworks: ArtworkRow | null;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -57,7 +82,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Format the response - use external_id if available, otherwise internal id
-    const formattedItems = (savedArtworks || []).map(item => ({
+    const formattedItems = ((savedArtworks as unknown) as SavedInteraction[] || []).map(item => ({
       id: item.artworks?.external_id || item.artwork_id,  // Use external_id for client
       title: item.artworks?.title || 'Untitled',
       artist: item.artworks?.artist || 'Unknown Artist',
