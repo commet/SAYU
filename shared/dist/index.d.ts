@@ -70,11 +70,14 @@ export interface EvolutionActivity {
 export interface FollowUser {
     id: string;
     username: string;
+    nickname: string;
     profileImage?: string;
     personalityType?: string;
+    animalType?: string;
     bio?: string;
     artworkCount?: number;
     followerCount?: number;
+    followingCount?: number;
     isFollowing?: boolean;
     createdAt?: Date;
 }
@@ -82,7 +85,8 @@ export interface FollowListResponse {
     users: FollowUser[];
     total: number;
     page: number;
-    pageSize: number;
+    limit: number;
+    pageSize?: number;
 }
 export interface FollowStats {
     followersCount: number;
