@@ -50,8 +50,8 @@ function RecordPageLoading() {
 function RecordPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const preselectedArtworkId = searchParams.get('artworkId');
-  const tourId = searchParams.get('tourId') ?? searchParams.get('oderId');
+  const preselectedArtworkId = searchParams?.get('artworkId') ?? null;
+  const tourId = searchParams?.get('tourId') ?? searchParams?.get('oderId') ?? null;
 
   const [step, setStep] = useState<'search' | 'record' | 'done'>('search');
   const [searchQuery, setSearchQuery] = useState('');

@@ -81,7 +81,7 @@ export default function TeamPageWrapper() {
 function TeamPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const tourId = searchParams.get('tourId') || searchParams.get('oderId');
+  const tourId = searchParams?.get('tourId') || searchParams?.get('oderId') || null;
 
   const [members, setMembers] = useState<MMCATourMemberStatus[]>(DEMO_MEMBERS);
   const [loading, setLoading] = useState(false);

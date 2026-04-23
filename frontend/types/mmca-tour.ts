@@ -44,7 +44,7 @@ export interface MMCAArtwork {
   year?: string;
   medium?: string; // 재료, 기법
   dimensions?: string;
-  description: string;
+  description?: string;
   artistContext?: string; // 작품이 작가의 생애/시대와 어떻게 연결되는지
   viewingQuestions?: string[]; // 감상할 때 던질 수 있는 질문들
   imageUrl?: string;
