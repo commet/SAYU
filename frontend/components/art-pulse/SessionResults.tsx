@@ -18,7 +18,9 @@ interface SessionResultsProps {
 }
 
 export function SessionResults({ session, results, onClose, className }: SessionResultsProps) {
-  const maxParticipants = Math.max(results.totalParticipants, 1);
+  const maxParticipants = Math.max(results.totalParticipants ?? 0, 1);
+  const sayuDistribution = results.sayuDistribution ?? {};
+  const topReflections = results.topReflections ?? [];
   
   return (
     <motion.div
@@ -121,16 +123,16 @@ export function SessionResults({ session, results, onClose, className }: Session
               
               <div className="text-center p-3 bg-muted/50 rounded-lg">
                 <div className="text-2xl font-bold text-primary">
-                  {results.averageEngagement.toFixed(1)}
+                  {(results.averageEngagement ?? 0).toFixed(1)}
                 </div>
                 <div className="text-muted-foreground">평균 공감도</div>
               </div>
             </div>
             
-            {Object.entries(results.sayuDistribution).length > 0 && (
+            {Object.entries(sayuDistribution).length > 0 && (
               <div className="space-y-2">
                 <h4 className="font-medium text-sm">성격 유형별 참여</h4>
-                {Object.entries(results.sayuDistribution).map(([type, count]) => (
+                {Object.entries(sayuDistribution).map(([type, count]) => (
                   <div key={type} className="flex items-center justify-between text-sm">
                     <span>{type}</span>
                     <span>{count}명</span>
@@ -143,7 +145,7 @@ export function SessionResults({ session, results, onClose, className }: Session
       </div>
 
       {/* Top Reflections */}
-      {results.topReflections.length > 0 && (
+      {topReflections.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -152,7 +154,7 @@ export function SessionResults({ session, results, onClose, className }: Session
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {results.topReflections.map((reflection, index) => (
+            {topReflections.map((reflection, index) => (
               <motion.div
                 key={reflection.id}
                 initial={{ opacity: 0, y: 20 }}
