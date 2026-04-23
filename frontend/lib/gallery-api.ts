@@ -70,18 +70,21 @@ class GalleryApiClient {
     return response.json();
   }
 
+  private buildQueryParams(params: Record<string, unknown>): URLSearchParams {
+    const qp = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        qp.append(key, String(value));
+      }
+    });
+    return qp;
+  }
+
   /**
    * Get user's personal gallery artworks
    */
   async getPersonalGallery(params: ArtworkListParams = {}): Promise<PaginationResponse<Artwork>> {
-    const queryParams = new URLSearchParams();
-    
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        queryParams.append(key, value.toString());
-      }
-    });
-
+    const queryParams = this.buildQueryParams({ ...params });
     const queryString = queryParams.toString();
     const endpoint = `/api/gallery/personal${queryString ? `?${queryString}` : ''}`;
     
@@ -92,11 +95,7 @@ class GalleryApiClient {
    * Get liked artworks
    */
   async getLikedArtworks(params: ArtworkListParams = {}): Promise<PaginationResponse<Artwork>> {
-    const queryParams = new URLSearchParams({
-      ...params,
-      isLiked: 'true'
-    });
-
+    const queryParams = this.buildQueryParams({ ...params, isLiked: 'true' });
     const queryString = queryParams.toString();
     const endpoint = `/api/gallery/liked${queryString ? `?${queryString}` : ''}`;
     
@@ -107,10 +106,7 @@ class GalleryApiClient {
    * Get archived artworks
    */
   async getArchivedArtworks(params: ArtworkListParams = {}): Promise<PaginationResponse<Artwork>> {
-    const queryParams = new URLSearchParams({
-      ...params,
-      isArchived: 'true'
-    });
+    const queryParams = this.buildQueryParams({ ...params, isArchived: 'true' });
 
     const queryString = queryParams.toString();
     const endpoint = `/api/gallery/archived${queryString ? `?${queryString}` : ''}`;
@@ -165,10 +161,7 @@ class GalleryApiClient {
    * Get artworks by specific artist
    */
   async getArtworksByArtist(artistName: string, params: ArtworkListParams = {}): Promise<PaginationResponse<Artwork>> {
-    const queryParams = new URLSearchParams({
-      ...params,
-      artist: artistName
-    });
+    const queryParams = this.buildQueryParams({ ...params, artist: artistName });
 
     const queryString = queryParams.toString();
     const endpoint = `/api/gallery/by-artist${queryString ? `?${queryString}` : ''}`;
@@ -180,11 +173,7 @@ class GalleryApiClient {
    * Search artworks in user's gallery
    */
   async searchArtworks(query: string, filters: ArtworkFilters = {}): Promise<Artwork[]> {
-    const params = new URLSearchParams({
-      search: query,
-      ...filters
-    });
-    
+    const params = this.buildQueryParams({ search: query, ...filters });
     return this.request<Artwork[]>(`/api/gallery/search?${params}`);
   }
 
@@ -249,6 +238,3 @@ class GalleryApiClient {
 
 // Create singleton instance
 export const galleryApi = new GalleryApiClient();
-
-// Export types for convenience
-export type { Artwork, ArtworkFilters, ArtworkListParams, FollowingArtist };
