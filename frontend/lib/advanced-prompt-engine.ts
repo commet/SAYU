@@ -153,7 +153,7 @@ ${interpretation.recommendations.map(rec => `• ${rec}`).join('\n')}
 
   private generateUserDescription(context: PageContextV2): string {
     const { userBehavior } = context;
-    const descriptions = [];
+    const descriptions: string[] = [];
 
     // 참여 수준
     const engagementMap = {
@@ -254,7 +254,7 @@ ${interpretation.recommendations.map(rec => `• ${rec}`).join('\n')}
   }
 
   private generateContextualInstructions(context: PageContextV2): string {
-    const instructions = [];
+    const instructions: string[] = [];
     
     // 페이지별 특별 지침
     const pageInstructions = {
