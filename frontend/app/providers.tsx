@@ -1,7 +1,6 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { SessionProvider } from 'next-auth/react';
 import { AuthProvider } from '@/hooks/useAuth';
 import { ThemeProvider } from '@/hooks/usePersonalizedTheme';
 import { OnboardingProviderV2 } from '@/contexts/OnboardingContextV2';
@@ -46,33 +45,31 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <SessionProvider>
-      <QueryClientProvider client={queryClient}>
-        <PWAProvider>
-          <AuthProvider>
-            <LanguageProvider>
-              <DarkModeProvider>
-                <ThemeProvider>
-                  <OnboardingProviderV2>
-                    <AnimalCursorProvider>
-                      <EasterEggProvider>
-                        <ArtworkViewingProvider>
-                          <ClientLayout>
-                            {children}
-                          </ClientLayout>
-                          <PersonalizedToaster />
-                          <SmartChatbot />
-                        </ArtworkViewingProvider>
-                      </EasterEggProvider>
-                    </AnimalCursorProvider>
-                  </OnboardingProviderV2>
-                </ThemeProvider>
-              </DarkModeProvider>
-            </LanguageProvider>
-          </AuthProvider>
-        </PWAProvider>
-      </QueryClientProvider>
-    </SessionProvider>
+    <QueryClientProvider client={queryClient}>
+      <PWAProvider>
+        <AuthProvider>
+          <LanguageProvider>
+            <DarkModeProvider>
+              <ThemeProvider>
+                <OnboardingProviderV2>
+                  <AnimalCursorProvider>
+                    <EasterEggProvider>
+                      <ArtworkViewingProvider>
+                        <ClientLayout>
+                          {children}
+                        </ClientLayout>
+                        <PersonalizedToaster />
+                        <SmartChatbot />
+                      </ArtworkViewingProvider>
+                    </EasterEggProvider>
+                  </AnimalCursorProvider>
+                </OnboardingProviderV2>
+              </ThemeProvider>
+            </DarkModeProvider>
+          </LanguageProvider>
+        </AuthProvider>
+      </PWAProvider>
+    </QueryClientProvider>
   );
 }
 
