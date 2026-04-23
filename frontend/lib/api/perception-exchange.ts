@@ -1,4 +1,4 @@
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClientComponentClient } from '@/lib/supabase/client-component';
 import type { 
   PerceptionExchangeSession, 
   PerceptionMessage,

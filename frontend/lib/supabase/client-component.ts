@@ -1,15 +1,9 @@
-import { createClientComponentClient as createSupabaseClient } from '@supabase/auth-helpers-nextjs';
+import { createBrowserClient } from '@supabase/ssr';
 
-// Wrapper for createClientComponentClient that handles missing env vars during build
 export function createClientComponentClient() {
-  // During build time, Next.js may not have access to runtime env vars
-  // We need to handle this gracefully to prevent build failures
-  
   if (typeof window === 'undefined') {
-    // Server-side or build time
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       console.warn('Supabase environment variables not set during build. Using placeholder values.');
-      // Return a mock client that won't throw errors during build
       return {
         auth: {
           signInWithPassword: async () => ({ error: new Error('Auth not configured') }),
@@ -27,6 +21,9 @@ export function createClientComponentClient() {
       } as any;
     }
   }
-  
-  return createSupabaseClient();
+
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 }

@@ -28,7 +28,7 @@ import { museumAPIs } from '@/lib/museumAPIs';
 import type { ArtCollection, CollectionItem } from '@/types/collection';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClientComponentClient } from '@/lib/supabase/client-component';
 import { AddArtworkModal } from '@/components/collections/AddArtworkModal';
 
 export default function CollectionDetailPage() {

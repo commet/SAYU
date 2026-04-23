@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 import type { ArtCollection, UserArtActivity } from '@/types/collection';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClientComponentClient } from '@/lib/supabase/client-component';
 
 export default function CollectionsPage() {
   const [myCollections, setMyCollections] = useState<ArtCollection[]>([]);

@@ -16,7 +16,7 @@ import {
   XCircle,
   Eye
 } from 'lucide-react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClientComponentClient } from '@/lib/supabase/client-component';
 import { userActivityApi } from '@/lib/api/collections';
 import { perceptionExchangeApi as exchangeApi } from '@/lib/api/perception-exchange';
 import { ExchangeSessionCard } from '@/components/perception-exchange/ExchangeSessionCard';

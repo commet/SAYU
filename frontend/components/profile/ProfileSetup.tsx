@@ -20,7 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { userProfileApi, ProfileSetupData, UserProfile } from '@/lib/api/user-profile';
-import { useUser } from '@supabase/auth-helpers-react';
+import { useUser } from '@/hooks/use-user';
 import { cn } from '@/lib/utils';
 
 interface ProfileSetupProps {
@@ -37,7 +37,7 @@ interface ProfileSetupProps {
 }
 
 export function ProfileSetup({ onComplete, initialData }: ProfileSetupProps) {
-  const user = useUser();
+  const { user } = useUser();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);

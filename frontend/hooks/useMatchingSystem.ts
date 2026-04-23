@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { matchingAPI } from '@/lib/supabase/matching-api';
-import { useUser } from '@supabase/auth-helpers-react';
+import { useUser } from '@/hooks/use-user';
 import toast from 'react-hot-toast';
 import { ExhibitionMatch, InteractionPrompt, SharedCollection } from '@/types/art-persona-matching';
 
@@ -75,7 +75,7 @@ export function useExhibitionMatches(exhibitionId?: string) {
 export function useArtworkInteractions(artworkId?: string) {
   const [interactions, setInteractions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const user = useUser();
+  const { user } = useUser();
 
   const fetchInteractions = useCallback(async () => {
     if (!user) return;

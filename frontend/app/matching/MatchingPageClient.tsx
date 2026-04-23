@@ -10,7 +10,7 @@ import { APTCompatibilityVisualization } from '@/components/matching/APTCompatib
 import { SharedCollectionCreator } from '@/components/collection/SharedCollectionCreator';
 import { SharedCollectionViewer } from '@/components/collection/SharedCollectionViewer';
 import { ExhibitionCheckIn } from '@/components/safety/ExhibitionCheckIn';
-import { useUser } from '@supabase/auth-helpers-react';
+import { useUser } from '@/hooks/use-user';
 import { useExhibitionMatches, useArtworkInteractions, useSharedCollections, usePrivacyLevel } from '@/hooks/useMatchingSystem';
 import { 
   Heart,
@@ -54,7 +54,7 @@ const artworks = [
 ];
 
 export default function MatchingPageClient() {
-  const user = useUser();
+  const { user } = useUser();
   const [activeTab, setActiveTab] = useState('profile');
   const [selectedArtwork, setSelectedArtwork] = useState(artworks[0]);
   

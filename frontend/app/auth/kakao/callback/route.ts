@@ -1,5 +1,4 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { 
   exchangeKakaoCode, 
@@ -41,7 +40,7 @@ export async function GET(request: Request) {
     console.log('✅ Virtual email generated:', virtualEmail);
     
     // Step 4: Create or sign in user with Supabase
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = await createClient();
     
     // Use a consistent password for all Kakao users based on their ID
     const kakaoPassword = `kakao_${kakaoUser.id}_sayu2024!`;
