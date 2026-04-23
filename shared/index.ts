@@ -427,15 +427,56 @@ export interface DailyQuest {
   completed: boolean;
 }
 
-// Daily Challenge types
+// Daily Challenge types — match daily_challenge_artworks table schema
+export interface DailyChallengeArtworkData {
+  title?: string;
+  artist?: string;
+  date?: string;
+  image_url?: string;
+  [key: string]: any;
+}
+
 export interface DailyChallenge {
   id: string;
   date: string;
-  theme: string;
-  description: string;
-  emotion: EmotionType;
-  artwork?: any;
-  completedBy?: string[];
+  artwork_id: string;
+  museum_source: string;
+  artwork_data: DailyChallengeArtworkData;
+  artwork_vector?: Record<string, any>;
+  theme?: string;
+  curator_note?: string;
+  created_at?: string;
+}
+
+export interface ChallengeResponse {
+  id: string;
+  challenge_date: string;
+  user_id: string;
+  user_apt_type: string;
+  emotion_tags: string[];
+  emotion_selection_time?: number;
+  emotion_changed?: boolean;
+  personal_note?: string;
+  responded_at?: string;
+}
+
+export interface UserTasteProfile {
+  user_id: string;
+  apt_type: string;
+  emotion_profile?: Record<string, number>;
+  updated_at?: string;
+  [key: string]: any;
+}
+
+export interface ChallengeProgressState {
+  hasResponded: boolean;
+  currentStreak: number;
+  longestStreak: number;
+  totalParticipations: number;
+  nextReward?: {
+    type: '7day_streak' | '30day_streak';
+    daysRemaining: number;
+  };
 }
 
 export interface ChallengeMatch {

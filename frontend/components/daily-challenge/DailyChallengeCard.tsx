@@ -48,10 +48,7 @@ export function DailyChallengeCard({ onComplete }: DailyChallengeCardProps) {
       setProgress(userProgress);
     } catch (error) {
       console.error('Failed to load challenge:', error);
-      toast({
-        title: '챌린지를 불러올 수 없습니다',
-        variant: 'destructive'
-      });
+      toast('챌린지를 불러올 수 없습니다', { type: 'error' });
     } finally {
       setIsLoading(false);
     }
@@ -89,7 +86,7 @@ export function DailyChallengeCard({ onComplete }: DailyChallengeCardProps) {
           {challenge.artwork_data.image_url && (
             <OptimizedImage
               src={challenge.artwork_data.image_url}
-              alt={challenge.artwork_data.title}
+              alt={challenge.artwork_data.title ?? '오늘의 작품'}
               fill
               className="object-cover"
               priority placeholder="blur" quality={90}
@@ -197,12 +194,12 @@ export function DailyChallengeCard({ onComplete }: DailyChallengeCardProps) {
               dailyChallengeId={challenge.id}
               artwork={{
                 id: challenge.artwork_id,
-                imageUrl: challenge.artwork_image,
-                title: challenge.artwork_title,
-                artist: challenge.artwork_artist
+                imageUrl: challenge.artwork_data.image_url || '',
+                title: challenge.artwork_data.title || '',
+                artist: challenge.artwork_data.artist || ''
               }}
               userId={user?.id || 'demo-user'}
-              userAptType={user?.apt_type || user?.aptType || 'LAEF'}
+              userAptType={user?.aptType || 'LAEF'}
             />
           )}
         </DialogContent>
