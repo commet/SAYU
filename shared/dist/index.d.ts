@@ -192,14 +192,102 @@ export interface ArtProfileGalleryItem {
 export declare const predefinedStyles: ArtStyle[];
 export interface ArtPulseSession {
     id: string;
-    artworkId: string;
+    artworkId?: string;
     artwork?: any;
-    phase: 'contemplation' | 'sharing' | 'voting';
-    participants: string[];
+    phase?: 'contemplation' | 'sharing' | 'voting';
+    participants?: string[];
     startTime: Date;
     endTime?: Date;
     status: 'active' | 'completed' | 'cancelled';
     results?: SessionResults;
+    dailyChallengeId?: string;
+    participantCount?: number;
+    createdAt?: Date;
+}
+export interface TouchData {
+    x: number;
+    y: number;
+    timestamp: number;
+    duration?: number;
+}
+export interface ResonanceData {
+    type: 'sensory' | 'emotional' | 'cognitive' | null;
+    intensity: number;
+    focusAreas: string[];
+    dwellTime: number;
+}
+export interface ArtPulseParticipation {
+    id: string;
+    sessionId: string;
+    userId: string;
+    aptType: string;
+    joinedAt: Date;
+    leftAt?: Date;
+    touchData: TouchData[];
+    resonanceData: ResonanceData;
+    session?: ArtPulseSession;
+}
+export interface ArtPulseAnalytics {
+    sessionId: string;
+    heatmapData: Array<{
+        x: number;
+        y: number;
+        value: number;
+    }>;
+    resonanceDistribution: Record<string, number>;
+    aptTypeDistribution: Record<string, number>;
+    averageDwellTime: number;
+    peakConcurrentUsers: number;
+    engagementScore: number;
+}
+export interface PerceptionExchangeSession {
+    id: string;
+    initiator_id: string;
+    partner_id: string;
+    artwork_id: string;
+    museum_source?: string;
+    artwork_data?: any;
+    status: 'active' | 'completed' | 'cancelled' | string;
+    current_phase?: number | string;
+    initiated_at?: string;
+    messages?: PerceptionMessage[];
+    partner?: any;
+    initiator?: any;
+    quality_metrics?: any;
+    [key: string]: any;
+}
+export interface PerceptionMessage {
+    id: string;
+    session_id: string;
+    sender_id: string;
+    content: string;
+    emotion_tags?: string[];
+    word_count?: number;
+    sent_at?: string;
+    read_at?: string | null;
+    phase?: number | string;
+    sender?: any;
+    [key: string]: any;
+}
+export interface ExchangePreferences {
+    user_id: string;
+    auto_accept?: boolean;
+    preferred_apt_types?: string[];
+    notification_enabled?: boolean;
+    [key: string]: any;
+}
+export interface CreateExchangeRequest {
+    partner_id: string;
+    artwork_id: string;
+    museum_source?: string;
+    artwork_data?: any;
+    initial_message?: string;
+}
+export interface ExchangeListItem {
+    session: PerceptionExchangeSession;
+    unread_count: number;
+    last_message?: PerceptionMessage;
+    my_role: 'initiator' | 'partner';
 }
 export type EmotionType = 'joy' | 'sadness' | 'anger' | 'fear' | 'love' | 'surprise' | 'calm' | 'excitement' | 'wonder' | 'melancholy' | 'contemplation' | 'nostalgia' | 'awe' | 'serenity' | 'passion' | 'mystery' | 'hope';
 export interface EmotionDistribution {
