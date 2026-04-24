@@ -158,7 +158,7 @@ export default function ProfilePage() {
   }
 
   const userAnimal = userPersonalityType ? getAnimalByType(userPersonalityType as SAYUTypeCode) : null;
-  const bio = (language === 'ko' ? userAnimal?.description_ko : userAnimal?.description) || texts.defaultBio;
+  const bio = (language === 'ko' ? userAnimal?.characteristics_ko?.join(', ') : userAnimal?.characteristics?.join(', ')) || texts.defaultBio;
 
   const stats = [
     { label: texts.artworksViewed, value: gameStats?.total_points || 1250 },
@@ -184,9 +184,9 @@ export default function ProfilePage() {
         <header className="py-12 border-b border-neutral-100">
           <div className="flex flex-col md:flex-row items-start gap-12">
             <div className="relative w-32 h-32 md:w-40 md:h-40 border border-neutral-200 group flex-shrink-0">
-              {user?.avatar ? (
+              {user?.profile?.avatar_url ? (
                 <Image
-                  src={user.avatar}
+                  src={user.profile.avatar_url}
                   alt={user.nickname || 'User'}
                   fill
                   className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
@@ -345,14 +345,11 @@ export default function ProfilePage() {
           <ShareModal
             isOpen={showShareModal}
             onClose={() => setShowShareModal(false)}
-            quizResult={{
-              personalityType: userPersonalityType as SAYUTypeCode,
-              scores: {},
-              responses: [],
-            }}
+            personalityType={userPersonalityType}
+            userName={user?.nickname ?? undefined}
           />
         )}
-        <FeedbackButton pageName="profile" />
+        <FeedbackButton contextData={{ page: 'profile' }} />
       </div>
     </div>
   );

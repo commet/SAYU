@@ -45,7 +45,7 @@ function ResultsContent() {
         const storedResult = localStorage.getItem('quizResult');
         const personalityType = searchParams?.get('type');
 
-        let currentResult = null;
+        let currentResult: PersonalityResult & { isScenarioQuiz?: boolean } | null = null;
 
         if (storedResult) {
           currentResult = JSON.parse(storedResult);
@@ -53,6 +53,10 @@ function ResultsContent() {
           currentResult = { personalityType };
         } else {
           router.push('/quiz');
+          return;
+        }
+
+        if (!currentResult) {
           return;
         }
 
@@ -92,7 +96,7 @@ function ResultsContent() {
                 description: data.description,
                 strengths: data.strengths,
                 artPreferences: data.artPreferences
-              };
+              } as any;
             }
 
             setDetailedData(personalityData);
