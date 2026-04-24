@@ -155,8 +155,10 @@ export class AIArtService {
   ): Promise<string> {
     throw new Error('Stability AI direct access deprecated for security. Use API Route instead.');
 
+    // Unreachable — retained for reference. apiKey stub keeps the TS compiler happy.
+    const apiKey = '';
     onProgress?.(10);
-    
+
     const formData = new FormData();
     formData.append('init_image', imageFile);
     formData.append('text_prompts[0][text]', this.getPromptForStyle(styleId));
@@ -210,6 +212,8 @@ export class AIArtService {
   ): Promise<string> {
     throw new Error('HuggingFace direct access deprecated for security. Use API Route instead.');
 
+    // Unreachable — retained for reference. apiKey stub keeps the TS compiler happy.
+    const apiKey = '';
     onProgress?.(10);
     
     // Convert image to base64
@@ -335,6 +339,9 @@ export class AIArtService {
     onProgress?: (progress: number) => void
   ): Promise<string> {
     throw new Error('Replicate direct access deprecated for security. Use API Route instead.');
+
+    // Unreachable — retained for reference. apiKey stub keeps the TS compiler happy.
+    const apiKey = '';
 
     console.log('Replicate: Processing with style:', styleId);
     onProgress?.(10);

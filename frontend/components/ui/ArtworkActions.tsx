@@ -23,16 +23,12 @@ export default function ArtworkActions({ artwork, className }: ArtworkActionsPro
 
   const handleLike = () => {
     setIsLiked(!isLiked);
-    toast({
-      description: isLiked ? '좋아요를 취소했습니다' : '작품을 좋아요 했습니다',
-    });
+    toast(isLiked ? '좋아요를 취소했습니다' : '작품을 좋아요 했습니다');
   };
 
   const handleArchive = () => {
     setIsArchived(!isArchived);
-    toast({
-      description: isArchived ? '컬렉션에서 제거했습니다' : '내 컬렉션에 추가했습니다',
-    });
+    toast(isArchived ? '컬렉션에서 제거했습니다' : '내 컬렉션에 추가했습니다');
   };
 
   const handleShare = async () => {
@@ -49,16 +45,12 @@ export default function ArtworkActions({ artwork, className }: ArtworkActionsPro
     } else {
       // Fallback to copy to clipboard
       navigator.clipboard.writeText(artwork.url);
-      toast({
-        description: '링크가 클립보드에 복사되었습니다',
-      });
+      toast('링크가 클립보드에 복사되었습니다');
     }
   };
 
   const handleFollowArtist = () => {
-    toast({
-      description: `${artwork.artist}를 팔로우했습니다`,
-    });
+    toast(`${artwork.artist}를 팔로우했습니다`);
   };
 
   return (

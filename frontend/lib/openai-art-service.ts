@@ -54,7 +54,7 @@ export class OpenAIArtService {
 
       onProgress?.(80);
 
-      if (!response.data[0].b64_json) {
+      if (!response.data?.[0]?.b64_json) {
         throw new Error('No image generated');
       }
 
@@ -130,7 +130,7 @@ export class OpenAIArtService {
 
       onProgress?.(90);
 
-      if (!dalleResponse.data[0].b64_json) {
+      if (!dalleResponse.data?.[0]?.b64_json) {
         throw new Error('No image generated');
       }
 

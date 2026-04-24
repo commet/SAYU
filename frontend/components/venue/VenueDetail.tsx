@@ -379,12 +379,7 @@ function VenueContact({ venue }: { venue: Venue }) {
 
 // 위치 컴포넌트
 function VenueLocation({ venue, language }: { venue: Venue; language: 'ko' | 'en' }) {
-  const getLocalizedAddress = () => {
-    if (language === 'ko' && venue.address_ko) {
-      return venue.address_ko;
-    }
-    return venue.address;
-  };
+  const getLocalizedAddress = () => venue.address;
 
   return (
     <div className="bg-white rounded-lg p-6 shadow-sm border">
@@ -421,9 +416,6 @@ function VenueLocation({ venue, language }: { venue: Venue; language: 'ko' | 'en
 // 입장료 컴포넌트
 function VenueAdmission({ venue, language }: { venue: Venue; language: 'ko' | 'en' }) {
   const getAdmissionInfo = () => {
-    if (language === 'ko' && venue.admission_info_ko) {
-      return venue.admission_info_ko;
-    }
     return venue.admission_info;
   };
 
