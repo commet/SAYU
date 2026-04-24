@@ -18,12 +18,14 @@ export interface Achievement {
   id: string;
   name: string;
   name_ko: string;
+  title?: string; // UI display label (falls back to name)
   description: string;
   description_ko: string;
   icon: string;
   points: number;
   unlockedAt?: Date;
   category: 'exploration' | 'social' | 'knowledge' | 'special';
+  rarity?: 'common' | 'rare' | 'epic' | 'legendary';
 }
 
 export interface Mission {
@@ -35,6 +37,7 @@ export interface Mission {
   description_ko: string;
   points: number;
   xpReward: number; // For compatibility with DailyQuest
+  reward?: number | string; // legacy alias surfaced in dashboards
   progress: number;
   target: number;
   completed: boolean;

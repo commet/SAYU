@@ -316,8 +316,8 @@ export async function getAllArtworks(): Promise<ArtworkPool> {
   };
   
   console.log(`🎯 총 ${pool.total}개 작품으로 통합 풀 구성 완료`);
-  console.log(`   ├─ Cloudinary: ${pool.cloudinaryCount}개`);
-  console.log(`   └─ Wikimedia: ${pool.wikimediaCount}개`);
+  console.log(`   ├─ Cloudinary: ${pool.metadata.cloudinaryCount}개`);
+  console.log(`   └─ Wikimedia: ${pool.metadata.wikimediaCount}개`);
   
   return pool;
 }
@@ -2214,8 +2214,8 @@ export async function evaluatePoolQuality(): Promise<any> {
   const stats = {
     total: allWorks.length,
     sources: {
-      cloudinary: pool.cloudinaryCount,
-      wikimedia: pool.wikimediaCount
+      cloudinary: pool.metadata.cloudinaryCount,
+      wikimedia: pool.metadata.wikimediaCount
     },
     
     // 다양성 분석

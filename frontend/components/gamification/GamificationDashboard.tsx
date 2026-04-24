@@ -7,7 +7,8 @@ import { useRouter } from 'next/navigation';
 import ProfileLevel from './ProfileLevel';
 import TitleBadges from './TitleBadges';
 import ExhibitionMode from './ExhibitionMode';
-import { gamificationAPI, type DashboardStats, type Achievement, type Challenge, type FriendActivity } from '@/lib/gamification-api';
+import { gamificationAPI } from '@/lib/gamification-api';
+import type { DashboardStats, Achievement, Mission as Challenge, FriendActivity } from '@/types/gamification';
 
 // Types are now imported from gamification-api
 
@@ -65,22 +66,34 @@ export default function GamificationDashboard() {
         recentAchievements: [
           {
             id: '1',
+            name: 'K-아트 서포터',
+            name_ko: 'K-아트 서포터',
             title: 'K-아트 서포터',
             description: '한국 작가전 10회 달성',
-            earnedAt: new Date(),
+            description_ko: '한국 작가전 10회 달성',
+            icon: '🇰🇷',
+            unlockedAt: new Date(),
             points: 500,
+            category: 'exploration',
             rarity: 'rare'
           }
         ],
         upcomingChallenges: [
           {
             id: '1',
+            type: 'weekly',
             title: '주말 미술관 정복',
+            title_ko: '주말 미술관 정복',
             description: '이번 주말 2개 이상 전시 관람',
+            description_ko: '이번 주말 2개 이상 전시 관람',
+            points: 200,
+            xpReward: 200,
+            reward: 200,
             progress: 1,
             target: 2,
-            reward: 200,
-            expiresAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)
+            completed: false,
+            expiresAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+            category: 'exhibition_visit'
           }
         ],
         leaderboardRank: 127,
@@ -238,7 +251,7 @@ export default function GamificationDashboard() {
         >
           {activeTab === 'overview' && <OverviewTab stats={stats} />}
           {activeTab === 'titles' && <TitleBadges showProgress={true} />}
-          {activeTab === 'challenges' && <ChallengesTab challenges={stats.upcomingChallenges} />}
+          {activeTab === 'challenges' && <ChallengesTab challenges={stats.upcomingChallenges ?? []} />}
           {activeTab === 'social' && <SocialTab friends={stats.friendsActivity} />}
         </motion.div>
       </AnimatePresence>
@@ -320,7 +333,7 @@ function OverviewTab({ stats }: { stats: DashboardStats }) {
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-bold mb-4">🏆 최근 성취</h3>
         <div className="space-y-3">
-          {stats.recentAchievements.map((achievement) => (
+          {(stats.recentAchievements ?? []).map((achievement) => (
             <div key={achievement.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
               <div className={`
                 w-2 h-12 rounded-full
@@ -398,7 +411,7 @@ function ChallengesTab({ challenges }: { challenges: Challenge[] }) {
               />
             </div>
             <div className="text-xs text-gray-500">
-              {Math.ceil((challenge.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24))}일 남음
+              {challenge.expiresAt ? `${Math.ceil((challenge.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24))}일 남음` : '기한 없음'}
             </div>
           </div>
         </motion.div>

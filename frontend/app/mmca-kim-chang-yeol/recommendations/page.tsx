@@ -194,8 +194,8 @@ export default function RecommendationsPage() {
 
   useEffect(() => {
     const loadPersona = async () => {
-      if (user?.personality_type) {
-        setSelectedType(user.personality_type as SAYUTypeCode);
+      if (user?.personalityType) {
+        setSelectedType(user.personalityType as SAYUTypeCode);
         return;
       }
       if (user?.id) {
@@ -376,7 +376,7 @@ const introText = useMemo(() => {
                 {/* Artwork Image */}
                 <div className="relative aspect-[4/3] bg-gray-900 overflow-hidden">
                   <img
-                    src={encodeURI(artwork.imageUrl)}
+                    src={encodeURI(artwork.imageUrl ?? '')}
                     alt={artwork.title}
                     className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
@@ -538,7 +538,7 @@ const introText = useMemo(() => {
               >
                 <div className="relative aspect-[4/3] bg-gray-950">
                   <img
-                    src={encodeURI(selectedArtwork.imageUrl)}
+                    src={encodeURI(selectedArtwork.imageUrl ?? '')}
                     alt={selectedArtwork.title}
                     className="w-full h-full object-contain"
                   />

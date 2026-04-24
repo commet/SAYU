@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 interface ParsedExhibition {
-  exhibition_title: string;
-  venue_name: string;
-  start_date: string;
-  end_date: string;
+  exhibition_title: string | null;
+  venue_name: string | null;
+  start_date: string | null;
+  end_date: string | null;
   ticket_price: string;
-  description?: string;
+  description?: string | null;
   artists?: string[];
   genre?: string;
   exhibition_type?: string;
-  operating_hours?: string;
-  website_url?: string;
-  phone_number?: string;
+  operating_hours?: string | null;
+  website_url?: string | null;
+  phone_number?: string | null;
   confidence_score: number;
   raw_text: string;
 }

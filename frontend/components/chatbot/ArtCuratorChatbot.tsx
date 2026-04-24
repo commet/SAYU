@@ -38,7 +38,7 @@ export const ArtCuratorChatbot = ({
   const [isTyping, setIsTyping] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [companionMood, setCompanionMood] = useState<'idle' | 'happy' | 'thinking' | 'excited'>('idle');
+  const [companionMood, setCompanionMood] = useState<'idle' | 'happy' | 'thinking' | 'sleeping' | 'excited'>('idle');
   const [showFeedback, setShowFeedback] = useState<number | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -46,10 +46,10 @@ export const ArtCuratorChatbot = ({
   const chatContainerRef = useRef<HTMLDivElement>(null);
   
   // personalityType is already available from useUserProfile
-  const animalData = getAnimalByType(personalityType);
-  
+  const animalData = personalityType ? getAnimalByType(personalityType) : null;
+
   // 페이지 컨텍스트 감지
-  const pageContext = detectPageType(pathname);
+  const pageContext = detectPageType(pathname ?? '/');
   
   // Initialize with greeting based on page context
   useEffect(() => {
@@ -186,7 +186,7 @@ export const ArtCuratorChatbot = ({
       
       // Update context tracker with current page and artwork
       if (contextTracker && currentArtwork) {
-        contextTracker.updatePageContext(pathname, { artwork: currentArtwork });
+        contextTracker.updatePageContext(pathname ?? '/', { artwork: currentArtwork });
       }
       
       // Get current context from tracker
@@ -260,7 +260,7 @@ export const ArtCuratorChatbot = ({
         // Show feedback option for the latest message
         setShowFeedback(messages.length + 1);
       } else {
-        throw new Error(response.message);
+        throw new Error((response as any).message ?? 'Unknown error');
       }
     } catch (error) {
       console.error('🔴 Advanced chat error:', error);

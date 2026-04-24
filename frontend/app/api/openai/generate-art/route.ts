@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
         response_format: "b64_json"
       });
 
-      if (!response.data[0].b64_json) {
+      if (!response.data?.[0]?.b64_json) {
         throw new Error('No image generated from DALL-E');
       }
 
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
           response_format: "b64_json"
         });
 
-        if (!dalleResponse.data[0].b64_json) {
+        if (!dalleResponse.data?.[0]?.b64_json) {
           throw new Error('No image generated from DALL-E vision method');
         }
 

@@ -44,8 +44,14 @@ export async function POST(request: NextRequest) {
         error: 'No exhibitions to save'
       }, { status: 400 });
     }
-    const results = [];
-    
+    type SaveResult = {
+      success: boolean;
+      data?: any;
+      error?: string;
+      exhibition_title: string;
+    };
+    const results: SaveResult[] = [];
+
     for (const exhibition of exhibitions) {
       try {
         const result = await saveExhibition(supabase, exhibition);

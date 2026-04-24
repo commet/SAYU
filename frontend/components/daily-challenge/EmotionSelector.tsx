@@ -79,10 +79,7 @@ export function EmotionSelector({
 
   const handleSubmit = async () => {
     if (selectedEmotions.length !== 3) {
-      toast({
-        title: '감정을 3개 선택해주세요',
-        variant: 'destructive'
-      });
+      toast('감정을 3개 선택해주세요', { type: 'error' });
       return;
     }
 
@@ -98,27 +95,17 @@ export function EmotionSelector({
         personalNote.trim() || undefined
       );
 
-      toast({
-        title: '감정이 기록되었습니다',
-        description: '오늘의 매칭 결과를 확인해보세요!'
-      });
+      toast('감정이 기록되었습니다 — 오늘의 매칭 결과를 확인해보세요!', { type: 'success' });
 
       onComplete?.();
       handleClose();
     } catch (error: any) {
       console.error('Failed to submit response:', error);
-      
+
       if (error.code === '23505') {
-        toast({
-          title: '이미 오늘의 챌린지에 참여했습니다',
-          variant: 'destructive'
-        });
+        toast('이미 오늘의 챌린지에 참여했습니다', { type: 'error' });
       } else {
-        toast({
-          title: '제출에 실패했습니다',
-          description: '다시 시도해주세요',
-          variant: 'destructive'
-        });
+        toast('제출에 실패했습니다 — 다시 시도해주세요', { type: 'error' });
       }
     } finally {
       setIsSubmitting(false);
