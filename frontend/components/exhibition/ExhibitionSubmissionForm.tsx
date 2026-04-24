@@ -42,10 +42,10 @@ const exhibitionSchema = z.object({
   venueName: z.string().min(2, '장소명을 입력해주세요'),
   venueAddress: z.string().optional(),
   startDate: z.date({
-    required_error: '시작일을 선택해주세요',
+    error: '시작일을 선택해주세요',
   }),
   endDate: z.date({
-    required_error: '종료일을 선택해주세요',
+    error: '종료일을 선택해주세요',
   }),
   artists: z.string().optional(),
   description: z.string().optional(),
@@ -291,10 +291,9 @@ export default function ExhibitionSubmissionForm() {
                         className="w-full justify-start text-left font-normal"
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {watch('openingDate') ? 
-                          format(watch('openingDate'), 'yyyy년 MM월 dd일', { locale: ko }) : 
-                          '날짜 선택'
-                        }
+                        {watch('openingDate')
+                          ? format(watch('openingDate')!, 'yyyy년 MM월 dd일', { locale: ko })
+                          : '날짜 선택'}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">

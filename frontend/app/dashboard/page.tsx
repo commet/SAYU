@@ -318,7 +318,7 @@ export default function DashboardPage() {
 
   // Get quiz status and personality type
   const hasCompletedQuiz = user?.quizCompleted || !!user?.personalityType;
-  const personalityType = user?.personalityType || user?.aptType;
+  const personalityType = user?.personalityType ?? user?.aptType ?? null;
 
   // Contextual greeting based on time
   const getContextualGreeting = () => {
@@ -467,8 +467,7 @@ export default function DashboardPage() {
           position="fixed"
           variant="primary"
           contextData={{
-            page: 'dashboard',
-            hasCompletedQuiz: false
+            page: 'dashboard'
           }}
         />
       </div>
@@ -744,8 +743,7 @@ export default function DashboardPage() {
         variant="primary"
         contextData={{
           page: 'dashboard',
-          hasCompletedQuiz: hasCompletedQuiz,
-          personalityType: personalityType
+          personalityType: personalityType ?? undefined
         }}
       />
     </div>

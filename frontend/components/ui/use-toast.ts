@@ -8,15 +8,17 @@ type ToastProps = {
 
 type ToastActionElement = React.ReactElement<any>
 
-type Toast = ToastProps & {
+type ToasterToastData = ToastProps & {
   id: string
   action?: ToastActionElement
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 1000000
 
-type ToasterToast = Toast
+type ToasterToast = ToasterToastData
 
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
