@@ -48,7 +48,7 @@ export function usePersonalityArtworks(sayuType: string, limit = 10) {
       return response.data;
     },
     staleTime: 5 * 60 * 1000, // 5분
-    cacheTime: 30 * 60 * 1000, // 30분
+    gcTime: 30 * 60 * 1000, // 30분
     enabled: !!sayuType
   });
 }
@@ -64,7 +64,7 @@ export function useArtwork(artveeId: string) {
       return response.data;
     },
     staleTime: 10 * 60 * 1000, // 10분
-    cacheTime: 60 * 60 * 1000, // 1시간
+    gcTime: 60 * 60 * 1000, // 1시간
     enabled: !!artveeId
   });
 }
@@ -83,7 +83,7 @@ export function useQuizArtworks(personalityType: string) {
       return response.data.data || [];
     },
     staleTime: 10 * 60 * 1000,
-    cacheTime: 60 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
     enabled: !!personalityType
   });
 }
@@ -111,7 +111,7 @@ export function useArtworkSearch(searchParams: {
       return response.data;
     },
     staleTime: 5 * 60 * 1000,
-    cacheTime: 30 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     enabled: !!(searchParams.q || searchParams.artist || searchParams.style || searchParams.period)
   });
 }
@@ -127,7 +127,7 @@ export function usePopularArtworks(period: 'day' | 'week' | 'month' | 'all' = 'w
       return response.data.artworks;
     },
     staleTime: 5 * 60 * 1000,
-    cacheTime: 30 * 60 * 1000
+    gcTime: 30 * 60 * 1000
   });
 }
 

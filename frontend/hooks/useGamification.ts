@@ -1,13 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { gamificationAPI } from '@/lib/gamification-api';
-import type { 
-  UserGamificationStats, 
+import type {
+  UserGamificationStats,
   ExhibitionSession,
-  Title,
-  Challenge,
-  LeaderboardEntry
+  Title
 } from '@/lib/gamification-api';
+import type { Mission as Challenge, LeaderboardEntry, LeaderboardType } from '@/types/gamification';
 import toast from 'react-hot-toast';
 import confetti from 'canvas-confetti';
 
@@ -217,15 +216,16 @@ export function useChallenges(status: 'active' | 'completed' | 'all' = 'active')
 
 // Hook: 리더보드
 export function useLeaderboard(type: 'weekly' | 'monthly' | 'all-time' = 'weekly') {
+  const apiType: LeaderboardType = type === 'all-time' ? 'all' : type;
   const { data, isLoading } = useQuery({
     queryKey: QUERY_KEYS.leaderboard(type),
-    queryFn: () => gamificationAPI.getLeaderboard(type),
+    queryFn: () => gamificationAPI.getLeaderboard(apiType),
     staleTime: 300000 // 5분
   });
 
   return {
-    leaderboard: data?.data?.leaderboard as LeaderboardEntry[],
-    userRank: data?.data?.userRank,
+    leaderboard: (data ?? []) as LeaderboardEntry[],
+    userRank: undefined as number | undefined,
     isLoading
   };
 }
